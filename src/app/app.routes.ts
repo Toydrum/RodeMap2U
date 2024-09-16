@@ -14,7 +14,7 @@ export const routes: Routes = [
   },
   {
     path: 'roadmap',
-    loadChildren: () => import ('./roadMap/roadmap.routes').then((x)=>x.RoadMapRoutes)
+    loadChildren: () => import ('./roadMap/roadMap.routes').then((x)=>x.RoadMapRoutes)
   },
   {
     path: "**",

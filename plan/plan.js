@@ -92,11 +92,11 @@ const plan = {
               done: false,
               stage: "in progress",
             },
-            {
+            /* {
               task: "Create project structure(folders and files) Backend",
               done: false,
               stage: "not started",
-            },
+            }, */
             {
               task: "Create CRUDs(Create Read Update Delete) for data base models",
               done: false,

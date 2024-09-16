@@ -12,4 +12,8 @@ export const RoadMapRoutes: Routes = [
     path: ":id",
     component: RoadMapComponent,
   },
+  {
+    path: "new",
+    component: RoadMapComponent,
+  }
 ];
