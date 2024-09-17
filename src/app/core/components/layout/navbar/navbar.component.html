@@ -1,6 +1,6 @@
-<p>option 1</p>
-<p>option 2</p>
-<p>option 3</p>
-<p>option 4</p>
-<p>option 5</p>
-<p>option 6</p>
+<div class="bef bef-d-flex fleDir-column">
+  @for(optionTitle of optionTitles; track optionTitles){
+    <div class="bef bef-d-flex jusCon-center bef-my-0_5rem bef-w-6rem"><a href={{optionTitle.path}} class="bef bef-textDecoration-none bef-color-black">{{ optionTitle.title }}</a></div><hr class="bef bef-m-0">
+
+  }
+</div>

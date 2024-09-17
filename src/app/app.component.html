@@ -1,10 +1,11 @@
 <app-header></app-header>
-<mat-sidenav-container class="example-container">
-  <mat-sidenav mode="side" opened><app-navbar></app-navbar></mat-sidenav>
-  <mat-sidenav-content>
-    <main>
-      <router-outlet></router-outlet>
-    </main>
+<div class="bef bef-d-flex bef-my-0_5rem"><button (click)="openNavBar()">Side nav</button></div>
+<mat-sidenav-container class=" bef-d-flex fleDir-column">
+  <mat-sidenav mode="side" [(opened)]="opened" (opened)="events.push('open!')" (closed)="events.push('close!')"><app-navbar></app-navbar></mat-sidenav>
+  <mat-sidenav-content class="bef bef-bg-black bef-d-flex fleDir-column bef-h-100vh">
+    <ng-container>
+      <router-outlet/>
+    </ng-container>
   </mat-sidenav-content>
 </mat-sidenav-container>
-<app-footer></app-footer>
+<app-footer class="bef bef-position-relative"></app-footer>

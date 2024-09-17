@@ -5,8 +5,11 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+  styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-
+  public optionTitles: { title: string, path: string }[] = [
+    { title: 'Home', path: '/home' },
+    { title: 'About', path: '/about' },
+  ];
 }
