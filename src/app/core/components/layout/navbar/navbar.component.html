@@ -1,6 +1,11 @@
-<div class="bef bef-d-flex fleDir-column">
-  @for(optionTitle of optionTitles; track optionTitles){
-    <div class="bef bef-d-flex jusCon-center bef-my-0_5rem bef-w-6rem"><a href={{optionTitle.path}} class="bef bef-textDecoration-none bef-color-black">{{ optionTitle.title }}</a></div><hr class="bef bef-m-0">
-
+<nav class="bef bef-d-flex fleDir-column">
+  @for(current of currentList$ | async; track current.id  ){
+    <app-generic-button
+      [buttonClass]="current.buttonClass"
+      [buttonContainerClass]="current.buttonContainerClass"
+      [labelClass]="current.labelClass"
+      [label]="current.label? current.label : 'label'"
+    ></app-generic-button>
   }
-</div>
+
+</nav>

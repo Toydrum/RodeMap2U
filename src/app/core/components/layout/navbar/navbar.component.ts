@@ -1,15 +1,26 @@
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { CoreService } from '../../../services/core.service';
+import { AsyncPipe } from '@angular/common';
+import { GenericButtonComponent } from '../../../../shared/components/generic-button/generic-button.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [],
+  imports: [RouterModule,GenericButtonComponent ,AsyncPipe],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  public optionTitles: { title: string, path: string }[] = [
-    { title: 'Home', path: '/home' },
-    { title: 'About', path: '/about' },
-  ];
+
+  currentList$ = this.coreService.setList();
+  constructor(private coreService: CoreService) {
+    this.currentList$.subscribe({
+      next: (list) => {
+        console.log(list);
+      }
+    });
+  }
+
+
 }

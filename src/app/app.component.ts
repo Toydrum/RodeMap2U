@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
+import { RouterModule, RouterOutlet } from "@angular/router";
 /* Components */
 import { HeaderComponent } from "./core/components/layout/header/header.component";
 import { FooterComponent } from "./core/components/layout/footer/footer.component";
@@ -13,6 +13,7 @@ import { NgxBootstrapExpandedFeaturesService } from "ngx-bootstrap-expanded-feat
   selector: "app-root",
   standalone: true,
   imports: [
+    RouterModule,
     RouterOutlet,
     HeaderComponent,
     FooterComponent,
@@ -24,14 +25,15 @@ import { NgxBootstrapExpandedFeaturesService } from "ngx-bootstrap-expanded-feat
   styleUrl: "./app.component.scss",
 })
 export class AppComponent {
-  public events: string[] = [];
-  public opened: boolean = false;
+
 
   public colors: { [key: string]: string } = {
     black: "#303336",
-    green: "#157F1F",
-    honey: "#cbd4c2",
-    lave: "#A3320B"
+    gray: "#A2A0A7",
+    silver: "#D5D5D8",
+    green: "#2BA84A",
+    red: "#BF211E",
+
   };
   public abreviationsValues: { [key: string]: string } = {
     fleStart: 'flex-start',
@@ -66,8 +68,5 @@ export class AppComponent {
     this._bef.cssCreate();
   }
 
-  openNavBar() {
-    this.opened = !this.opened;
-  }
 
 }

@@ -1,44 +1,21 @@
-<header class="bef bef-bg-honey">
-  <div class="bef bef-d-flex fleDir-row bef-p-0_5rem aliIte-center">
-    <h4 class="bef bef-m-0">Road Map 2 U</h4>
-    <div class="bef bef-w-80px"></div>
-    <div class="bef bef-w-650px bef-d-flex fleDir-row jusCon-around">
-      <button class={{buttonClasses}} (click)="renderOptions('current')">Current</button>
-      <button class={{buttonClasses}} (click)="renderOptions('future')">Future</button>
-      <button class={{buttonClasses}} (click)="renderOptions('completed')">Completed</button>
-      <button class={{buttonClasses}} (click)="renderOptions('clock')">Clock</button>
-      <button class={{buttonClasses}} (click)="renderOptions('paused')">Paused</button>
+<header class="bef bef-d-flex fleDir-row bef-h-4rem">
+  <div class="bef bef-d-flex aliIte-center bef-py-5px bef-px-2rem">
+    <div class="bef bef-bg-silver bef-py-0_2rem bef-px-1rem bef-bw-1px bef-bs-solid bef-r-8px bef-bc-black">
+      <h3 class="bef bef-m-0 bef-fontWeight-700">Road Map 2 U</h3>
+    </div>
+    <div class="bef bef-h-100per bef-w-auto bef-d-flex fleDir-row">
+      @for(button of buttons; track button.label){
+        <div class="bef bef-h-100per bef-mx-8px bef-w-54px bef-d-flex aliIte-center jusCon-center">
+          <app-generic-button
+            #actionButton
+            class="bef bef-h-100per bef-w-100per bef-d-flex fleDir-column aliIte-center jusCon-center"
+            [buttonClass]="buttonClass"
+            [buttonContainerClass]="buttonContainerClass"
+            [labelClass]="labelClass"
+            [label]="button.label? button.label : 'label'"
+            [attr.data-id]="button.id"
+          ></app-generic-button>
+        </div>}
     </div>
   </div>
 </header>
-
-<ng-template #currentTemplate>
-  <div class="bef bef-d-flex fleDir-row bef-p-0_5rem aliIte-center jusCon-around">
-    <button class={{dropButtonClasses}}>Iniciar Trabajo</button>
-    <button class={{dropButtonClasses}}>Finalizar Trabajo</button>
-    <button class={{dropButtonClasses}}>Editar Trabajo</button>
-
-
-  </div>
-</ng-template>
-
-<ng-template #futureTemplate>
-  <div>Future Content</div>
-</ng-template>
-
-<ng-template #completedTemplate>
-  <div>Completed Content</div>
-</ng-template>
-
-<ng-template #clockTemplate>
-  <div>Clock Content</div>
-</ng-template>
-
-<ng-template #pausedTemplate>
-  <div>Paused Content</div>
-</ng-template>
-
-@if(currentTemplateRef) {
-  <ng-container *ngTemplateOutlet="currentTemplateRef"></ng-container>
-}
-
