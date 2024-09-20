@@ -15,11 +15,7 @@ export class NavbarComponent {
 
   currentList$ = this.coreService.setList();
   constructor(private coreService: CoreService) {
-    this.currentList$.subscribe({
-      next: (list) => {
-        console.log(list);
-      }
-    });
+
   }
 
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+
 /* Modules */
 import { CoreService } from '../../../services/core.service';
 /* Components */
@@ -10,7 +10,7 @@ import { from, fromEvent, map } from 'rxjs';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [BsDropdownModule, CommonModule, GenericButtonComponent],
+  imports: [CommonModule, GenericButtonComponent],
   providers: [CoreService],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
