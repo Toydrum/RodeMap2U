@@ -1,11 +1,20 @@
-<nav class="bef bef-d-flex fleDir-column">
-  @for(current of currentList$ | async; track current.id  ){
-    <app-generic-button
-      [buttonClass]="current.buttonClass"
-      [buttonContainerClass]="current.buttonContainerClass"
-      [labelClass]="current.labelClass"
-      [label]="current.label? current.label : 'label'"
-    ></app-generic-button>
-  }
+<nav class="bef bef-d-flex fleDir-column bef-w-100per bef-m-5px">
+  <div class="bef bef-bs-solid bef-bc-black bef-d-flex fleDir-column" [ngClass]="{'bef-bwy-1px': !isVisible, 'bef-bw-3px': isVisible}">
+    <div class="bef bef-bg-white" [ngClass]="{'bef-display-none': !isVisible}">
+      <ul
+        class="bef bef-d-flex fleDir-column bef-p-0 bef-m-0 jusCon-center aliIte-center"
+      >
+      @for(menu of menus; track menu.label){
+        <a [routerLink]="" class="bef bef-textDecoration-none bef-color-black bef-bcb-black bef-bsb-solid bef-bwb-1px texAli-center bef-w-100per">{{menu.label}}</a>
+      }
+      </ul>
+    </div>
+  </div>
+  <div>
+    <svg  viewBox="0 0 22 6" preserveAspectRatio="xMidYMid meet" (click)="toggleOptions()">
+      <!-- center the triangle -->
+      <polygon points="8,0 11,3 14,0" />
+    </svg>
+  </div>
 
 </nav>

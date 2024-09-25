@@ -6,8 +6,10 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
+
 export const appConfig: ApplicationConfig = {
   providers: [
+
     provideRouter(routes),
     provideAnimationsAsync(),
     provideStore(),
