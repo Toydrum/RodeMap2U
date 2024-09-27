@@ -4,6 +4,17 @@ export const config: TConfig = {
 
   deckButtons: [
     {
+      label: 'Maps',
+      light: false,
+      isActive: false,
+      get isUnactive(){
+        return !this.isActive;
+      },
+      hasLabel: true,
+      route: '/roadmap/all',
+      id: 'maps',
+    },
+    {
       label: 'Add',
       light: false,
       isActive: false,

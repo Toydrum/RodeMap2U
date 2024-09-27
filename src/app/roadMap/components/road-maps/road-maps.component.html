@@ -1,1 +1,12 @@
-<p>road-maps works!</p>
+<section class="bef bef-h-100per">
+  @if(!!roadMaps()){
+  <ul class="bef bef-p-0 bef-m-0">
+    @for(roadMap of roadMaps(); track roadMap.title; let last = $last){
+      <div [appExists]="last" (appExists)="cssCreate()" class="bef bef-d-flex jusCon-around bef-bg-gray bef-bsb-solid bef-bwb-1px bef-p-1rem fleDir-row aliIte-center">
+        <h4 class="bef bef-m-0">{{roadMap.title}}</h4>
+        <h5 class="bef bef-m-0">{{roadMap.owner}}</h5>
+        <p class="bef bef-m-0">Goals:{{roadMap.goals.length}}</p>
+      </div>
+    }
+  </ul>}
+</section>
