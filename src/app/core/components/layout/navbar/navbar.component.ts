@@ -1,11 +1,21 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { CoreService } from '../../../services/core.service';
-import { AfterViewInit, Component, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  effect,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Signal,
+  SimpleChange,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { GenericButtonComponent } from '../../../../shared/components/generic-button/generic-button.component';
 import { Observable } from 'rxjs';
-
-
+import { TConfig } from '../../../types/config.type';
+import { TMenuOptions } from '../../../types/menuOptions.type';
 
 @Component({
   selector: 'app-navbar',
@@ -15,62 +25,14 @@ import { Observable } from 'rxjs';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
-  isVisible: boolean = false;
-  optionSelected: string = '';
-  menus: {label: string}[] = []
-
+  menuOptions: Signal<TMenuOptions[]>;
+  isVisible: Signal<boolean>;
   constructor(private _coreService: CoreService) {
-    this._coreService.selection$.subscribe({
-      next: (value) => {
-        this.optionSelected = value;
-        this.displayMenu();
-
-    }});
+    this.menuOptions = computed(() => this._coreService.config$().menuOptions);
+    this.isVisible = computed(() => {
+      return this._coreService.config$().menuOptions.some(option => option.label !== '');
+    });
   }
 
-
-
-  displayMenu(){
-    switch (this.optionSelected) {
-      case 'add':
-        this.menus= [
-          {label: 'New map'},
-          {label: 'New action'},
-        ]
-
-        break;
-      case 'edit':
-        this.menus= [
-          {label: 'Edit map'},
-          {label: 'Edit action'},
-        ]
-
-        break;
-      case 'remove':
-        this.menus= [
-          {label: 'Remove map'},
-          {label: 'Remove action'},
-        ]
-
-        break;
-      case 'about':
-        this.menus= [
-          {label: 'About'},
-        ]
-
-        break;
-    }
-
-  }
-
-  toggleOptions() {
-    this.isVisible = !this.isVisible;
-
-
-  }
-
-
-
-
+  toggleMenuOption() {}
 }
-

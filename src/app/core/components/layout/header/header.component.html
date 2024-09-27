@@ -4,20 +4,25 @@
       <h3 class="bef bef-m-0 bef-fontWeight-700">Road Map 2 U</h3>
     </div>
     <div class="bef bef-h-100per bef-w-auto bef-d-flex fleDir-row">
-      @for(button of buttons; track button.label){
-        <div class="bef bef-h-100per bef-mx-8px bef-w-54px bef-d-flex aliIte-center jusCon-center">
-          <app-generic-button
-            #actionButton
-            class="bef bef-h-100per bef-w-100per bef-d-flex fleDir-column aliIte-center jusCon-center"
-            [buttonClass]="buttonClass"
-            [buttonContainerClass]="buttonContainerClass"
-            [labelClass]="labelClass"
-            [label]="button.label? button.label : 'label'"
-            [attr.data-id]="button.id"
-            (click)="buttonClick(button.id)"
-            [routerLink]="button.route"
-          ></app-generic-button>
-        </div>}
+      <ng-container  >
+
+        @for(button of buttons(); track button.label){
+          <div class="bef bef-h-100per bef-mx-8px bef-w-54px bef-d-flex aliIte-center jusCon-center">
+            <app-generic-button
+              #actionButton
+              class="bef bef-h-100per bef-w-100per bef-d-flex fleDir-column aliIte-center jusCon-center"
+              [buttonClass]="buttonClass"
+              [buttonContainerClass]="buttonContainerClass"
+              [labelClass]="labelClass"
+              [label]="button.label? button.label : 'label'"
+              [attr.data-id]="button.id"
+              [routerLink]="button.route"
+              (click)="optionSelected(button.id)"
+            ></app-generic-button>
+          </div>}
+
+
+      </ng-container>
     </div>
   </div>
 </header>
