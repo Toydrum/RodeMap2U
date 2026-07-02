@@ -1,26 +1,160 @@
-.scene-page {
+.meadow-page {
   position: relative;
   min-height: calc(100svh - 72px);
+  display: flex;
+  flex-direction: column;
+  /* one continuous sky→meadow gradient — no more dirty bands */
+  --rm-bark: #6f5640;
+  --rm-twig: #7f9a63;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--accent-sky) 14%, var(--bg)) 0%,
-    var(--bg) 42%
+    color-mix(in srgb, var(--accent-sky) 22%, var(--bg)) 0%,
+    color-mix(in srgb, var(--accent-sky) 10%, var(--bg)) 34%,
+    var(--bg) 62%,
+    color-mix(in srgb, var(--primary) 10%, var(--bg)) 100%
   );
   overflow: hidden;
 }
 
-/* Living backdrop pinned to the bottom */
+[data-theme='terminal'] .meadow-page {
+  --rm-bark: #1f4a1f;
+  --rm-twig: #48c342;
+}
+
+/* --------------------------------------------------------------- sky */
+
+.sky {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 300px;
+  pointer-events: none;
+}
+
+.sun {
+  position: absolute;
+  top: 34px;
+  right: 9%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-sand) 80%, white) 0%,
+    color-mix(in srgb, var(--accent-sand) 35%, transparent) 55%,
+    transparent 72%
+  );
+}
+
+[data-theme='terminal'] .sun {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--primary) 55%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+.cloud {
+  position: absolute;
+  height: 22px;
+  width: 88px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  opacity: 0.85;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -11px;
+    left: 22px;
+    width: 40px;
+    height: 26px;
+    border-radius: 999px;
+    background: inherit;
+  }
+
+  &.c1 {
+    top: 52px;
+    left: -100px;
+    animation: drift 90s linear infinite;
+  }
+  &.c2 {
+    top: 116px;
+    left: -160px;
+    transform: scale(0.72);
+    animation: drift 130s linear infinite;
+    animation-delay: -40s;
+    opacity: 0.6;
+  }
+  &.c3 {
+    top: 30px;
+    left: -220px;
+    transform: scale(1.2);
+    animation: drift 160s linear infinite;
+    animation-delay: -90s;
+    opacity: 0.45;
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translateX(calc(100vw + 320px));
+  }
+}
+
+/* Reduced motion: clouds park at pleasant fixed spots */
+.reduce-motion .cloud,
+:host-context(.reduce-motion) .cloud {
+  animation: none !important;
+
+  &.c1 {
+    left: 16%;
+  }
+  &.c2 {
+    left: 55%;
+  }
+  &.c3 {
+    left: 78%;
+  }
+}
+
+/* ------------------------------------------------------------ header */
+
+.head {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+/* ------------------------------------------------------------ meadow */
+
+.meadow {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 1.2rem;
+}
+
 .scene {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: min(300px, 42vh);
+  height: min(430px, 56vh);
   pointer-events: none;
 }
 
 .hill {
-  fill: color-mix(in srgb, var(--primary) 14%, var(--surface-2));
+  fill: color-mix(in srgb, var(--primary) 15%, var(--surface-2));
 
   &.far {
     fill: color-mix(in srgb, var(--primary) 9%, var(--surface-2));
@@ -29,28 +163,27 @@
 
 .stream {
   .water {
-    fill: color-mix(in srgb, var(--accent-sky) 42%, var(--surface));
-    opacity: 0.85;
+    fill: color-mix(in srgb, var(--accent-sky) 46%, var(--surface));
+    opacity: 0.9;
   }
 
   .ripple {
-    fill: none;
-    stroke: color-mix(in srgb, var(--accent-sky) 30%, white);
-    stroke-width: 2;
+    stroke: color-mix(in srgb, var(--accent-sky) 34%, white);
+    stroke-width: 1.8;
     stroke-linecap: round;
-    stroke-dasharray: 0.05 0.06;
-    animation: flow 9s linear infinite;
+    stroke-dasharray: 0.03 0.05;
+    animation: flow 11s linear infinite;
 
     &.r2 {
-      animation-duration: 13s;
+      animation-duration: 17s;
       animation-direction: reverse;
-      opacity: 0.6;
+      opacity: 0.55;
     }
   }
 }
 
 [data-theme='terminal'] .stream .ripple {
-  stroke: color-mix(in srgb, var(--accent-sky) 65%, transparent);
+  stroke: color-mix(in srgb, var(--accent-sky) 70%, transparent);
 }
 
 @keyframes flow {
@@ -66,7 +199,7 @@
   }
 
   .petal {
-    opacity: 0.9;
+    opacity: 0.92;
   }
 
   .center {
@@ -74,42 +207,143 @@
   }
 }
 
-.tuft {
+.tuft path {
   fill: none;
-  stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+  stroke: color-mix(in srgb, var(--primary) 58%, transparent);
   stroke-width: 2;
   stroke-linecap: round;
 }
 
-/* Content sits above the scene */
-.page {
+/* ------------------------------------------------------------- plots */
+
+.plots {
   position: relative;
-  z-index: 1;
-  padding: 1.6rem 0 2rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.4rem 1.6rem;
+  padding-bottom: 2.2rem;
 }
 
-.head {
+.plot {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  flex: 0 0 auto; /* never shrink — wrap to the next meadow row instead */
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
+  width: clamp(128px, 20vw, 168px);
+  padding: 0.4rem 0.2rem 0.6rem;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: var(--radius);
+  transition: transform 0.25s ease;
 
-  h1 {
-    margin: 0;
+  app-mini-tree {
+    width: 86%;
+    transition: transform 0.3s ease;
+    transform-origin: 50% 95%;
+  }
+
+  &:hover app-mini-tree {
+    transform: rotate(-1.6deg) scale(1.04);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .ground-shadow {
+    position: absolute;
+    bottom: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--rm-bark) 28%, transparent) 0%, transparent 70%);
+  }
+
+  .plot-grass {
+    margin-top: -13px;
+
+    path {
+      fill: none;
+      stroke: color-mix(in srgb, var(--primary) 62%, transparent);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+  }
+
+  .sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    margin-top: 0.35rem;
+    padding: 0.4rem 0.9rem 0.45rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--rm-bark) 14%, var(--surface));
+    border: 1.5px solid color-mix(in srgb, var(--rm-bark) 34%, var(--border));
+    border-bottom-width: 3px;
+    box-shadow: var(--shadow);
+    max-width: 100%;
+
+    &::after {
+      /* little post pinning the sign to the ground */
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      width: 6px;
+      height: 9px;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--rm-bark) 55%, var(--surface-2));
+      z-index: -1;
+    }
+
+    .name {
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 140px;
+      color: color-mix(in srgb, var(--plot-accent, var(--primary)) 55%, var(--text));
+    }
+
+    .caption {
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+  }
+
+  &:hover .sign {
+    border-color: var(--plot-accent, var(--primary));
   }
 }
 
-.empty {
+[data-theme='terminal'] .plot .sign {
+  background: var(--surface);
+}
+
+/* ---------------------------------------------------------- clearing */
+
+.clearing {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 0.4rem;
-  padding: 2.6rem 1.6rem;
+  padding: 2rem 1.6rem 3.4rem;
 
   .sprout {
-    font-size: 2.6rem;
+    font-size: 2.8rem;
   }
 
   p {
@@ -118,14 +352,38 @@
   }
 }
 
-.new-tree {
-  padding: 1.4rem;
-  margin-bottom: 1.4rem;
+/* ------------------------------------------------------- plant sheet */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(20, 26, 18, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  width: min(560px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 1.4rem 1.4rem calc(1.4rem + env(safe-area-inset-bottom));
+  animation: sheet-up 0.28s ease both;
 
   .row {
     display: flex;
     justify-content: flex-end;
     gap: 0.7rem;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
   }
 }
 
@@ -146,37 +404,5 @@
   &.selected {
     border-color: var(--text);
     transform: scale(1.12);
-  }
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
-}
-
-.tree-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 1.4rem 1rem;
-  text-decoration: none;
-  color: var(--text);
-  backdrop-filter: blur(2px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-3px);
-  }
-
-  .name {
-    font-weight: 800;
-    text-align: center;
-  }
-
-  .count {
-    font-size: 0.82rem;
-    color: var(--text-faint);
   }
 }

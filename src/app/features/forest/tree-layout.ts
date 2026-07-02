@@ -104,13 +104,15 @@ export interface EdgeGeometry {
 /**
  * Organic cubic bezier from parent to child (child sits above the parent).
  * Thick limbs bow more; twigs stay tighter — the vecteezy-silhouette look.
+ * `bowScale` lets miniature renders damp the curvature (absolute bow values
+ * over compressed coordinates read as seaweed otherwise).
  */
-export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint): EdgeGeometry {
+export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint, bowScale = 1): EdgeGeometry {
   const dy = child.y - parent.y; // negative (upward)
   const h = hash(child.node.id);
   const hand = h % 2 === 0 ? 1 : -1;
   const bowBase = 14 + (h % 18);
-  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18);
+  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18) * bowScale;
   const c1x = parent.x + bow * 0.5;
   const c1y = parent.y + dy * 0.45;
   const c2x = child.x - bow * 0.7;

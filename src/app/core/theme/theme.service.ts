@@ -7,10 +7,17 @@ import { ThemeName, TextSize } from '../db/schema';
 export class ThemeService {
   private readonly settings = inject(SettingsService);
 
+  /** `?theme=` session override — demos and headless screenshots; never persisted. */
+  private readonly queryOverride = new URLSearchParams(location.search).get('theme');
+
   constructor() {
     effect(() => {
       const root = document.documentElement;
-      root.setAttribute('data-theme', this.settings.theme());
+      const theme =
+        this.queryOverride === 'terminal' || this.queryOverride === 'organic'
+          ? this.queryOverride
+          : this.settings.theme();
+      root.setAttribute('data-theme', theme);
       root.setAttribute('data-text', this.settings.textSize());
       root.classList.toggle('font-dyslexia', this.settings.dyslexiaFont());
     });

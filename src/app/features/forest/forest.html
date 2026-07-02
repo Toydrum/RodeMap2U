@@ -1,50 +1,86 @@
-<div class="scene-page">
-  <!-- Living meadow backdrop: hills always, stream at 3+ trees, a flower per bloom -->
-  <svg class="scene" viewBox="0 0 1000 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <ellipse cx="240" cy="300" rx="560" ry="130" class="hill far" />
-    <ellipse cx="820" cy="320" rx="620" ry="150" class="hill near" />
+<div class="meadow-page">
+  <!-- Sky -->
+  <div class="sky" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
 
-    @if (hasStream()) {
-      <g class="stream">
-        <path d="M 1010 150 C 840 170, 760 130, 620 160 C 480 190, 380 170, 280 210 C 200 240, 120 240, -10 225 L -10 262 L 1010 262 Z" class="water" />
-        <path d="M 1000 158 C 845 175, 765 140, 628 167 C 490 194, 388 178, 288 214" class="ripple r1" pathLength="1" />
-        <path d="M 995 172 C 850 186, 770 155, 640 180 C 505 204, 400 192, 300 226" class="ripple r2" pathLength="1" />
-      </g>
+  <!-- Header floats over the sky -->
+  <header class="head container">
+    <h1>{{ i18n.t().forest.title }}</h1>
+    @if (trees.active().length) {
+      <button type="button" class="btn btn-primary" (click)="creating.set(true)">
+        + {{ i18n.t().forest.newTree }}
+      </button>
     }
+  </header>
 
-    @for (flower of flowers(); track $index) {
-      <g class="meadow-flower" [attr.transform]="'translate(' + flower.x + ' ' + flower.y + ') rotate(' + flower.sway + ')'">
-        <line x1="0" y1="0" x2="0" [attr.y2]="flower.size * 1.6" class="stem" />
-        @for (angle of [0, 72, 144, 216, 288]; track angle) {
-          <ellipse
-            [attr.rx]="flower.size * 0.42" [attr.ry]="flower.size * 0.72" [attr.cy]="-flower.size * 0.62"
-            [attr.transform]="'rotate(' + angle + ')'"
-            [style.fill]="'var(--accent-' + flower.accent + ')'"
-            class="petal"
-          />
-        }
-        <circle [attr.r]="flower.size * 0.34" class="center" />
-      </g>
-    }
+  <!-- The meadow: backdrop + planted trees share the same band -->
+  <div class="meadow">
+    <svg class="scene" viewBox="0 0 1000 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <ellipse cx="200" cy="290" rx="580" ry="140" class="hill far" />
+      <ellipse cx="830" cy="310" rx="640" ry="160" class="hill near" />
 
-    <!-- Grass tufts -->
-    @for (x of [60, 180, 330, 470, 610, 750, 890]; track x) {
-      <path [attr.d]="'M ' + x + ' 258 q 4 -16 9 -19 M ' + (x + 8) + ' 258 q -2 -13 -7 -16'" class="tuft" />
-    }
-  </svg>
-
-  <div class="container page">
-    <header class="head">
-      <h1>{{ i18n.t().forest.title }}</h1>
-      @if (trees.active().length) {
-        <button type="button" class="btn btn-primary" (click)="creating.set(true)">
-          + {{ i18n.t().forest.newTree }}
-        </button>
+      @if (hasStream()) {
+        <g class="stream">
+          <path [attr.d]="streamPath" class="water" />
+          <path [attr.d]="ripple1" class="ripple r1" pathLength="1" fill="none" />
+          <path [attr.d]="ripple2" class="ripple r2" pathLength="1" fill="none" />
+        </g>
       }
-    </header>
 
-    @if (!trees.active().length && !creating()) {
-      <div class="empty card">
+      @for (flower of flowers(); track $index) {
+        <g class="meadow-flower" [attr.transform]="'translate(' + flower.x + ' ' + flower.y + ') rotate(' + flower.sway + ')'">
+          <line x1="0" y1="0" x2="0" [attr.y2]="flower.size * 1.6" class="stem" />
+          @for (angle of [0, 72, 144, 216, 288]; track angle) {
+            <ellipse
+              [attr.rx]="flower.size * 0.42" [attr.ry]="flower.size * 0.72" [attr.cy]="-flower.size * 0.62"
+              [attr.transform]="'rotate(' + angle + ')'"
+              [style.fill]="'var(--accent-' + flower.accent + ')'"
+              class="petal"
+            />
+          }
+          <circle [attr.r]="flower.size * 0.34" class="center" />
+        </g>
+      }
+
+      @for (cluster of grass; track $index) {
+        <g class="tuft" [attr.transform]="'translate(' + cluster.x + ' ' + cluster.y + ')' + (cluster.flip ? ' scale(-1 1)' : '')">
+          <path d="M 0 0 q -3 -12 -6 -15" />
+          <path d="M 2 0 q 0 -14 1 -17" />
+          <path d="M 4 0 q 4 -11 7 -13" />
+        </g>
+      }
+    </svg>
+
+    <!-- Planted trees -->
+    @if (trees.active().length) {
+      <div class="plots container">
+        @for (tree of trees.active(); track tree.id) {
+          <a class="plot" [routerLink]="['/tree', tree.id]" [style.--plot-accent]="'var(--accent-' + tree.accent + ')'">
+            <app-mini-tree [tree]="tree" />
+            <span class="ground-shadow" aria-hidden="true"></span>
+            <span class="plot-grass" aria-hidden="true">
+              <svg viewBox="0 0 60 14" width="60" height="14">
+                <path d="M 6 13 q -2 -9 -5 -11 M 12 13 q 1 -10 0 -12 M 18 13 q 3 -8 6 -10 M 40 13 q -2 -8 -4 -10 M 48 13 q 2 -9 4 -11" />
+              </svg>
+            </span>
+            <span class="sign">
+              <span class="name">{{ tree.name }}</span>
+              <span class="caption">
+                {{ countFor(tree.id) }} {{ i18n.t().forest.nodeCount }}
+                @if (bloomsFor(tree.id)) {
+                  · {{ bloomsFor(tree.id) }} 🌸
+                }
+              </span>
+            </span>
+          </a>
+        }
+      </div>
+    } @else if (!creating()) {
+      <div class="clearing container">
         <span class="sprout" aria-hidden="true">🌱</span>
         <h2>{{ i18n.t().forest.empty }}</h2>
         <p>{{ i18n.t().forest.emptyHint }}</p>
@@ -53,11 +89,15 @@
         </button>
       </div>
     }
+  </div>
 
-    @if (creating()) {
-      <form class="new-tree card" (submit)="$event.preventDefault(); create()">
+  <!-- Plant-a-tree sheet -->
+  @if (creating()) {
+    <div class="sheet-backdrop" (click)="creating.set(false)">
+      <form class="sheet card" (click)="$event.stopPropagation()" (submit)="$event.preventDefault(); create()">
+        <h2>{{ i18n.t().forest.newTree }}</h2>
         <div class="field">
-          <label for="tree-name">{{ i18n.t().forest.newTree }}</label>
+          <label for="tree-name">{{ i18n.t().forest.treeNamePlaceholder }}</label>
           <input
             id="tree-name"
             type="text"
@@ -94,38 +134,6 @@
           </button>
         </div>
       </form>
-    }
-
-    <div class="grid">
-      @for (tree of trees.active(); track tree.id) {
-        <a class="tree-card card" [routerLink]="['/tree', tree.id]">
-          <span class="mini-tree" aria-hidden="true" [style.color]="'var(--accent-' + tree.accent + ')'">
-            <svg viewBox="0 0 48 52" width="56" height="60" fill="none" stroke="currentColor" stroke-linecap="round">
-              <path d="M24 48V30" stroke-width="4.5"/>
-              <path d="M24 30 L14 20 M24 30 L33 21 M24 30 L24 14 M14 20 L9 14 M14 20 L16 11 M33 21 L39 15 M33 21 L31 12 M24 14 L20 7 M24 14 L29 6" stroke-width="2.6"/>
-              @if (bloomsFor(tree.id) > 0) {
-                <circle cx="9" cy="13" r="3.4" fill="var(--status-achieved)" stroke="none"/>
-              }
-              @if (bloomsFor(tree.id) > 1) {
-                <circle cx="39" cy="14" r="3.4" fill="var(--status-achieved)" stroke="none"/>
-              }
-              @if (bloomsFor(tree.id) > 2) {
-                <circle cx="29" cy="5" r="3.4" fill="var(--status-achieved)" stroke="none"/>
-              }
-              <circle cx="16" cy="10" r="2.4" fill="currentColor" stroke="none"/>
-              <circle cx="20" cy="6" r="2.4" fill="currentColor" stroke="none"/>
-              <circle cx="31" cy="11" r="2.4" fill="currentColor" stroke="none"/>
-            </svg>
-          </span>
-          <span class="name">{{ tree.name }}</span>
-          <span class="count">
-            {{ countFor(tree.id) }} {{ i18n.t().forest.nodeCount }}
-            @if (bloomsFor(tree.id)) {
-              · {{ bloomsFor(tree.id) }} 🌸
-            }
-          </span>
-        </a>
-      }
     </div>
-  </div>
+  }
 </div>

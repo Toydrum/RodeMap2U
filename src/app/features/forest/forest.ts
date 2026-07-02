@@ -4,7 +4,8 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { AccentToken } from '../../core/db/schema';
-import { hash } from './tree-layout';
+import { hash, taperedRibbon } from './tree-layout';
+import { MiniTree } from './mini-tree';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
 
@@ -16,14 +17,20 @@ interface SceneFlower {
   sway: number;
 }
 
+interface GrassCluster {
+  x: number;
+  y: number;
+  flip: boolean;
+}
+
 /**
- * The forest home. The scene grows with the user: a stream appears once
- * three trees stand together, and a flower blooms on the meadow for every
- * achieved goal.
+ * "El Prado" — the forest home as a living scene. Every tree is a real
+ * miniature of its data, standing on the meadow; a stream winds through
+ * once three trees grow together, and a flower blooms per achieved goal.
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink],
+  imports: [RouterLink, MiniTree],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
 })
@@ -37,23 +44,33 @@ export class ForestPage {
   protected readonly newName = signal('');
   protected readonly newAccent = signal<AccentToken>('moss');
 
-  /** The stream flows once the forest has three trees. */
+  /** The stream flows once the forest has three trees (winding ribbon + ripples). */
   protected readonly hasStream = computed(() => this.trees.active().length >= 3);
+
+  protected readonly streamPath = taperedRibbon(1060, 96, 700, 168, 400, 76, -60, 208, 22, 46);
+  protected readonly ripple1 = 'M 1040 104 C 720 170, 430 92, -40 202';
+  protected readonly ripple2 = 'M 1045 118 C 735 185, 445 110, -45 218';
 
   /** One meadow flower per achieved goal (capped so it stays a meadow). */
   protected readonly flowers = computed<SceneFlower[]>(() => {
     const achieved = this.nodes.visible().filter((n) => n.status === 'achieved');
     const palette = ['rose', 'lavender', 'sand', 'sky', 'clay'];
-    return achieved.slice(0, 22).map((node) => {
+    return achieved.slice(0, 26).map((node) => {
       const h = hash(node.id + ':meadow');
       return {
         x: 30 + (h % 940),
-        y: 178 + ((h >> 8) % 62),
+        y: 196 + ((h >> 8) % 52),
         size: 5 + ((h >> 4) % 4),
         accent: palette[h % palette.length],
         sway: -8 + (h % 17),
       };
     });
+  });
+
+  /** Clustered grass (3 blades each), deterministic positions. */
+  protected readonly grass: GrassCluster[] = Array.from({ length: 14 }, (_, i) => {
+    const h = hash('grass:' + i);
+    return { x: 20 + (h % 960), y: 214 + ((h >> 6) % 40), flip: h % 2 === 0 };
   });
 
   protected countFor(treeId: string): number {
