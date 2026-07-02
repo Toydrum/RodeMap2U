@@ -5,6 +5,15 @@
     <p class="sub">{{ i18n.t().branchFlow.subtitle }}</p>
     <p class="origin">「 {{ node().title }} 」</p>
 
+    <p class="suggest-label">{{ i18n.t().branchFlow.suggestionsLabel }}</p>
+    <div class="suggestions" role="group" [attr.aria-label]="i18n.t().branchFlow.suggestionsLabel">
+      @for (key of suggestionKeys; track key) {
+        <button type="button" class="chip suggestion" (click)="applySuggestion(key)">
+          {{ suggestionLabel(key) }}
+        </button>
+      }
+    </div>
+
     @for (alt of alternatives(); track $index) {
       <div class="field">
         <input

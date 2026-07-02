@@ -26,6 +26,36 @@ export class BranchFlow {
 
   protected readonly alternatives = signal<string[]>(['']);
 
+  /** The five honest ways a goal gets stuck — each prefills an editable path. */
+  protected readonly suggestionKeys = ['smaller', 'otherTime', 'otherWay', 'together', 'rest'] as const;
+
+  protected suggestionLabel(key: (typeof this.suggestionKeys)[number]): string {
+    return this.i18n.t().branchFlow.suggestions[key];
+  }
+
+  /** Tap a chip → fill the first empty slot (or add one) with an editable template. */
+  protected applySuggestion(key: (typeof this.suggestionKeys)[number]): void {
+    const s = this.i18n.t().branchFlow.suggestions;
+    const templates = {
+      smaller: s.smallerTemplate,
+      otherTime: s.otherTimeTemplate,
+      otherWay: s.otherWayTemplate,
+      together: s.togetherTemplate,
+      rest: s.restTemplate,
+    };
+    const template = templates[key];
+    const title = this.node().title;
+    const shortTitle = title.length > 34 ? title.slice(0, 33) + '…' : title;
+    const text = this.i18n.fill(template, { title: shortTitle });
+
+    this.alternatives.update((alts) => {
+      const emptyIdx = alts.findIndex((a) => !a.trim());
+      if (emptyIdx !== -1) return alts.map((a, i) => (i === emptyIdx ? text : a));
+      if (alts.length < 3) return [...alts, text];
+      return alts;
+    });
+  }
+
   protected setAlt(index: number, value: string): void {
     this.alternatives.update((alts) => alts.map((a, i) => (i === index ? value : a)));
   }
