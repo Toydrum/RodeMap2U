@@ -27,13 +27,13 @@ export interface TreeLayout {
   minY: number;
 }
 
-const SLOT_W = 88;
-const LEVEL_H = 104;
-const JITTER_X = 8;
-const JITTER_Y = 6;
+const SLOT_W = 96;
+const LEVEL_H = 110;
+const JITTER_X = 10;
+const JITTER_Y = 8;
 
 /** Small deterministic string hash (FNV-1a flavored). */
-function hash(text: string): number {
+export function hash(text: string): number {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -93,18 +93,53 @@ export function layoutTree(
   };
 }
 
-/** Organic cubic bezier from parent to child (child sits above the parent). */
-export function edgePath(parent: LayoutPoint, child: LayoutPoint): string {
-  const dy = child.y - parent.y; // negative (upward)
-  const bow = ((hash(child.node.id) % 2 === 0 ? 1 : -1) * (8 + (hash(child.node.id) % 12)));
-  const c1x = parent.x + bow * 0.4;
-  const c1y = parent.y + dy * 0.42;
-  const c2x = child.x - bow * 0.6;
-  const c2y = child.y - dy * 0.38;
-  return `M ${parent.x} ${parent.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${child.x} ${child.y}`;
+export interface EdgeGeometry {
+  d: string;
+  c1x: number;
+  c1y: number;
+  c2x: number;
+  c2y: number;
 }
 
-/** Thick trunk, thin twigs. */
+/**
+ * Organic cubic bezier from parent to child (child sits above the parent).
+ * Thick limbs bow more; twigs stay tighter — the vecteezy-silhouette look.
+ */
+export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint): EdgeGeometry {
+  const dy = child.y - parent.y; // negative (upward)
+  const h = hash(child.node.id);
+  const hand = h % 2 === 0 ? 1 : -1;
+  const bowBase = 14 + (h % 18);
+  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18);
+  const c1x = parent.x + bow * 0.5;
+  const c1y = parent.y + dy * 0.45;
+  const c2x = child.x - bow * 0.7;
+  const c2y = child.y - dy * 0.35;
+  return {
+    d: `M ${parent.x} ${parent.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${child.x} ${child.y}`,
+    c1x,
+    c1y,
+    c2x,
+    c2y,
+  };
+}
+
+/** Point at parameter t along the edge's cubic bezier (for leaf placement). */
+export function edgePointAt(
+  parent: LayoutPoint,
+  child: LayoutPoint,
+  geometry: EdgeGeometry,
+  t: number,
+): { x: number; y: number } {
+  const u = 1 - t;
+  const x =
+    u * u * u * parent.x + 3 * u * u * t * geometry.c1x + 3 * u * t * t * geometry.c2x + t * t * t * child.x;
+  const y =
+    u * u * u * parent.y + 3 * u * u * t * geometry.c1y + 3 * u * t * t * geometry.c2y + t * t * t * child.y;
+  return { x, y };
+}
+
+/** Thick trunk, thin twigs — real-tree taper. */
 export function edgeWidth(depth: number): number {
-  return Math.max(2.2, 9 - depth * 1.4);
+  return Math.max(3, 19 - depth * 4.5);
 }

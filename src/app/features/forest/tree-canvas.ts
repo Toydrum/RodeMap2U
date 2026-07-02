@@ -13,12 +13,38 @@ import { Tree, TreeNode } from '../../core/db/schema';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
-import { LayoutPoint, edgePath, edgeWidth, layoutTree } from './tree-layout';
+import {
+  LayoutPoint,
+  edgeGeometry,
+  edgePointAt,
+  edgeWidth,
+  hash,
+  layoutTree,
+} from './tree-layout';
+
+interface LeafDecoration {
+  x: number;
+  y: number;
+  angle: number;
+  size: number;
+  kind: 'leaf' | 'blossom';
+}
+
+interface EdgeView {
+  id: string;
+  d: string;
+  width: number;
+  isBranchChild: boolean;
+  isNew: boolean;
+  leaves: LeafDecoration[];
+}
 
 /**
- * The living map: SVG tree with organic edges, pointer pan/zoom (1 finger pan,
- * 2 finger pinch, ctrl-wheel zoom), roving-tabindex keyboard navigation and a
- * one-time "grow" animation for nodes born this session.
+ * The living map: an SVG tree that actually looks like one — thick tapering
+ * limbs, procedural leaves, flowers on achieved goals, ground under the roots.
+ * Pointer pan/zoom (1 finger pan, 2 finger pinch, ctrl-wheel zoom), roving
+ * tabindex keyboard navigation, a one-time "grow" animation for newborn
+ * branches, and a floating "+" bud on the focused node to plant right there.
  */
 @Component({
   selector: 'app-tree-canvas',
@@ -28,10 +54,12 @@ import { LayoutPoint, edgePath, edgeWidth, layoutTree } from './tree-layout';
 export class TreeCanvas {
   readonly tree = input.required<Tree>();
   readonly nodeOpened = output<TreeNode>();
+  readonly plantRequested = output<TreeNode>();
 
   protected readonly nodes = inject(NodesRepo);
   protected readonly i18n = inject(I18nService);
   protected readonly motion = inject(MotionService);
+  protected readonly Math = Math;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly svgRef = viewChild.required<ElementRef<SVGSVGElement>>('svg');
 
@@ -40,7 +68,7 @@ export class TreeCanvas {
   protected readonly ty = signal(0);
   protected readonly k = signal(1);
 
-  /** Roving tabindex focus. */
+  /** Roving tabindex focus (also drives the "+" bud). */
   protected readonly focusedId = signal<string | null>(null);
 
   /** Nodes created this session get the grow animation exactly once. */
@@ -53,21 +81,58 @@ export class TreeCanvas {
     return layoutTree(roots, (n) => this.nodes.childrenOf(n));
   });
 
-  protected readonly edges = computed(() =>
+  protected readonly roots = computed(() => this.layout().points.filter((p) => p.parent === null));
+
+  /** Ground line sits a bit under the deepest root. */
+  protected readonly groundY = computed(() => {
+    const roots = this.roots();
+    if (!roots.length) return 80;
+    return Math.max(...roots.map((r) => r.y)) + 64;
+  });
+
+  protected readonly edges = computed<EdgeView[]>(() =>
     this.layout()
       .points.filter((p) => p.parent !== null)
-      .map((p) => ({
-        id: p.node.id,
-        d: edgePath(p.parent!, p),
-        width: edgeWidth(p.depth),
-        isBranchChild: p.node.origin === 'branch',
-        isNew: this.bornThisSession.has(p.node.id),
-      })),
+      .map((p) => {
+        const geometry = edgeGeometry(p.parent!, p);
+        return {
+          id: p.node.id,
+          d: geometry.d,
+          width: edgeWidth(p.depth),
+          isBranchChild: p.node.origin === 'branch',
+          isNew: this.bornThisSession.has(p.node.id),
+          leaves: this.leavesFor(p, geometry),
+        };
+      }),
   );
+
+  /** Deterministic little leaves sprinkled along live branches. */
+  private leavesFor(point: LayoutPoint, geometry: ReturnType<typeof edgeGeometry>): LeafDecoration[] {
+    const status = point.node.status;
+    if (status === 'resting') return [];
+    const h = hash(point.node.id + ':leaves');
+    const count = status === 'achieved' ? 3 : status === 'growing' ? 2 + (h % 2) : 1 + (h % 2);
+    const leaves: LeafDecoration[] = [];
+    for (let i = 0; i < count; i++) {
+      const hi = hash(point.node.id + ':leaf:' + i);
+      const t = 0.35 + ((hi % 50) / 100); // 0.35–0.85 along the branch
+      const at = edgePointAt(point.parent!, point, geometry, t);
+      const side = hi % 2 === 0 ? 1 : -1;
+      leaves.push({
+        x: at.x + side * (4 + (hi % 6)),
+        y: at.y,
+        angle: side * (30 + (hi % 50)),
+        size: 5.5 + ((hi >> 4) % 4),
+        kind: status === 'achieved' && i === 0 ? 'blossom' : 'leaf',
+      });
+    }
+    return leaves;
+  }
 
   private readonly pointers = new Map<number, { x: number; y: number }>();
   private pinchStart: { dist: number; k: number; midX: number; midY: number; tx: number; ty: number } | null = null;
   private panStart: { x: number; y: number; tx: number; ty: number } | null = null;
+  private movedSinceDown = false;
 
   constructor() {
     // Track newborn nodes for the grow animation.
@@ -101,7 +166,23 @@ export class TreeCanvas {
   }
 
   protected hitRadius(): number {
-    return Math.min(40, Math.max(16, 24 / this.k()));
+    return Math.min(44, Math.max(18, 26 / this.k()));
+  }
+
+  protected showLabel(point: LayoutPoint): boolean {
+    if (this.focusedId() === point.node.id) return true;
+    if (this.tree().currentNodeId === point.node.id) return true;
+    return this.k() >= 0.55;
+  }
+
+  protected labelText(point: LayoutPoint): string {
+    const title = point.node.title;
+    return title.length > 20 ? title.slice(0, 19) + '…' : title;
+  }
+
+  /** Alternate label offsets so close siblings don't collide. */
+  protected labelY(point: LayoutPoint): number {
+    return hash(point.node.id + ':label') % 2 === 0 ? 27 : 40;
   }
 
   protected nodeLabel(point: LayoutPoint): string {
@@ -122,8 +203,7 @@ export class TreeCanvas {
     const rect = svg.getBoundingClientRect();
     if (!rect.width) return;
 
-    // Fit whole tree, capped zoom.
-    const pad = 90;
+    const pad = 100;
     const fitK = Math.min(
       1.15,
       rect.width / (layout.width + pad * 2),
@@ -136,7 +216,7 @@ export class TreeCanvas {
 
     this.k.set(k);
     this.tx.set(rect.width / 2 - target.x * k);
-    this.ty.set(rect.height * 0.62 - target.y * k);
+    this.ty.set(rect.height * 0.6 - target.y * k);
     if (!this.focusedId()) this.focusedId.set(target.node.id);
   }
 
@@ -147,6 +227,7 @@ export class TreeCanvas {
   protected onPointerDown(ev: PointerEvent): void {
     (ev.target as Element).setPointerCapture?.(ev.pointerId);
     this.pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    this.movedSinceDown = false;
     if (this.pointers.size === 1) {
       this.panStart = { x: ev.clientX, y: ev.clientY, tx: this.tx(), ty: this.ty() };
       this.pinchStart = null;
@@ -169,9 +250,13 @@ export class TreeCanvas {
     this.pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
 
     if (this.pointers.size === 1 && this.panStart) {
-      this.tx.set(this.panStart.tx + ev.clientX - this.panStart.x);
-      this.ty.set(this.panStart.ty + ev.clientY - this.panStart.y);
+      const dx = ev.clientX - this.panStart.x;
+      const dy = ev.clientY - this.panStart.y;
+      if (Math.abs(dx) + Math.abs(dy) > 6) this.movedSinceDown = true;
+      this.tx.set(this.panStart.tx + dx);
+      this.ty.set(this.panStart.ty + dy);
     } else if (this.pointers.size === 2 && this.pinchStart) {
+      this.movedSinceDown = true;
       const [a, b] = [...this.pointers.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       const scale = dist / this.pinchStart.dist;
@@ -193,6 +278,16 @@ export class TreeCanvas {
     if (this.pointers.size === 1) {
       const [p] = [...this.pointers.values()];
       this.panStart = { x: p.x, y: p.y, tx: this.tx(), ty: this.ty() };
+    }
+  }
+
+  /** A drag should never count as a tap on a node. */
+  protected onNodeClick(point: LayoutPoint): void {
+    if (this.movedSinceDown) return;
+    if (this.focusedId() === point.node.id) {
+      this.nodeOpened.emit(point.node);
+    } else {
+      this.focusNode(point.node.id);
     }
   }
 
@@ -249,6 +344,11 @@ export class TreeCanvas {
         if (currentId) move(this.layout().byId.get(currentId));
         break;
       }
+      case '+':
+      case 'p':
+        ev.preventDefault();
+        this.plantRequested.emit(point.node);
+        break;
       case 'Enter':
       case ' ':
         ev.preventDefault();
@@ -272,7 +372,7 @@ export class TreeCanvas {
     const rect = this.svgRef().nativeElement.getBoundingClientRect();
     const sx = point.x * this.k() + this.tx();
     const sy = point.y * this.k() + this.ty();
-    const margin = 70;
+    const margin = 80;
     let dx = 0;
     let dy = 0;
     if (sx < margin) dx = margin - sx;

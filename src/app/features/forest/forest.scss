@@ -1,4 +1,90 @@
+.scene-page {
+  position: relative;
+  min-height: calc(100svh - 72px);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-sky) 14%, var(--bg)) 0%,
+    var(--bg) 42%
+  );
+  overflow: hidden;
+}
+
+/* Living backdrop pinned to the bottom */
+.scene {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: min(300px, 42vh);
+  pointer-events: none;
+}
+
+.hill {
+  fill: color-mix(in srgb, var(--primary) 14%, var(--surface-2));
+
+  &.far {
+    fill: color-mix(in srgb, var(--primary) 9%, var(--surface-2));
+  }
+}
+
+.stream {
+  .water {
+    fill: color-mix(in srgb, var(--accent-sky) 42%, var(--surface));
+    opacity: 0.85;
+  }
+
+  .ripple {
+    fill: none;
+    stroke: color-mix(in srgb, var(--accent-sky) 30%, white);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 0.05 0.06;
+    animation: flow 9s linear infinite;
+
+    &.r2 {
+      animation-duration: 13s;
+      animation-direction: reverse;
+      opacity: 0.6;
+    }
+  }
+}
+
+[data-theme='terminal'] .stream .ripple {
+  stroke: color-mix(in srgb, var(--accent-sky) 65%, transparent);
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+.meadow-flower {
+  .stem {
+    stroke: color-mix(in srgb, var(--primary) 70%, transparent);
+    stroke-width: 1.6;
+  }
+
+  .petal {
+    opacity: 0.9;
+  }
+
+  .center {
+    fill: var(--status-branched);
+  }
+}
+
+.tuft {
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Content sits above the scene */
 .page {
+  position: relative;
+  z-index: 1;
   padding: 1.6rem 0 2rem;
 }
 
@@ -77,6 +163,7 @@
   padding: 1.4rem 1rem;
   text-decoration: none;
   color: var(--text);
+  backdrop-filter: blur(2px);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {

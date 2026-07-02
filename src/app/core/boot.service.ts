@@ -35,5 +35,19 @@ export class BootService {
         : null;
       void repo?.refreshFromDisk(ids);
     });
+
+    await this.maybeSeedDemo();
+  }
+
+  /** `?seed=demo` on an EMPTY store loads a small showcase forest. */
+  private async maybeSeedDemo(): Promise<void> {
+    if (!location.search.includes('seed=demo')) return;
+    if (this.trees.all().length) return;
+    const demo = await import('./demo-seed');
+    await this.trees.saveMany(demo.DEMO_TREES);
+    await this.nodes.saveMany(demo.DEMO_NODES);
+    await this.checkins.saveMany(demo.DEMO_CHECKINS);
+    await this.sessions.saveMany(demo.DEMO_SESSIONS);
+    await this.settings.patch(demo.DEMO_SETTINGS_PATCH);
   }
 }

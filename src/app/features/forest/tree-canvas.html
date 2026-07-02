@@ -10,17 +10,68 @@
   (wheel)="onWheel($event)"
 >
   <g [attr.transform]="transform()">
-    <!-- Edges -->
+    <!-- Ground under the roots -->
+    @if (roots().length) {
+      <g class="ground" aria-hidden="true">
+        <ellipse
+          [attr.cx]="(layout().minX + layout().width / 2)"
+          [attr.cy]="groundY()"
+          [attr.rx]="Math.max(160, layout().width / 2 + 130)"
+          ry="34"
+          class="hill"
+        />
+        @for (root of roots(); track root.node.id) {
+          <!-- Trunk: from ground to the root node -->
+          <path
+            class="trunk"
+            [attr.d]="'M ' + (root.x - 11) + ' ' + (groundY() - 6) +
+                      ' C ' + (root.x - 9) + ' ' + (groundY() - 30) + ', ' + (root.x - 6) + ' ' + (root.y + 22) + ', ' + root.x + ' ' + root.y +
+                      ' C ' + (root.x + 6) + ' ' + (root.y + 22) + ', ' + (root.x + 9) + ' ' + (groundY() - 30) + ', ' + (root.x + 11) + ' ' + (groundY() - 6) +
+                      ' Z'"
+          />
+          <!-- Grass tufts at the base -->
+          @for (i of [0, 1, 2, 3]; track i) {
+            <path
+              class="grass"
+              [attr.d]="'M ' + (root.x - 26 + i * 17) + ' ' + (groundY() - 4) + ' q 3 -13 7 -15'"
+            />
+          }
+        }
+      </g>
+    }
+
+    <!-- Branches -->
     @for (edge of edges(); track edge.id) {
-      <path
-        class="edge"
-        [class.branch-child]="edge.isBranchChild"
-        [class.is-new]="edge.isNew"
-        [attr.d]="edge.d"
-        [attr.stroke-width]="edge.width"
-        pathLength="1"
-        fill="none"
-      />
+      <g>
+        <path
+          class="edge"
+          [class.branch-child]="edge.isBranchChild"
+          [class.is-new]="edge.isNew"
+          [attr.d]="edge.d"
+          [attr.stroke-width]="edge.width"
+          pathLength="1"
+          fill="none"
+        />
+        <!-- Little leaves along the branch -->
+        @for (leaf of edge.leaves; track $index) {
+          <g
+            class="leaf"
+            [class.blossom]="leaf.kind === 'blossom'"
+            [class.is-new]="edge.isNew"
+            [attr.transform]="'translate(' + leaf.x + ' ' + leaf.y + ') rotate(' + leaf.angle + ')'"
+            aria-hidden="true"
+          >
+            @if (leaf.kind === 'leaf') {
+              <path [attr.d]="'M 0 0 Q ' + leaf.size + ' ' + (-leaf.size) + ' 0 ' + (-2 * leaf.size) + ' Q ' + (-leaf.size) + ' ' + (-leaf.size) + ' 0 0 Z'" />
+            } @else {
+              <circle r="3.4" class="blossom-heart" />
+              @for (angle of [0, 72, 144, 216, 288]; track angle) {
+                <ellipse rx="2.6" ry="4.4" cy="-5" [attr.transform]="'rotate(' + angle + ')'" class="blossom-petal" />
+              }
+            }
+          </g>
+        }
+      </g>
     }
 
     <!-- Nodes -->
@@ -34,63 +85,85 @@
         [attr.aria-label]="nodeLabel(point)"
         [attr.tabindex]="focusedId() === point.node.id ? 0 : -1"
         (keydown)="onNodeKeydown($event, point)"
-        (click)="focusNode(point.node.id); nodeOpened.emit(point.node)"
+        (click)="onNodeClick(point)"
       >
         <!-- Invisible hit area, counter-scaled to stay ≥44px on screen -->
         <circle class="hit" [attr.r]="hitRadius()" fill="transparent" />
 
         <!-- Focus ring (drawn — SVG has no native outline) -->
         @if (focusedId() === point.node.id) {
-          <circle class="focus-ring" r="20" fill="none" />
+          <circle class="focus-ring" r="24" fill="none" />
         }
 
         <!-- "You are here" halo -->
         @if (tree().currentNodeId === point.node.id) {
-          <circle class="here-halo" r="16" fill="none" />
+          <circle class="here-halo" r="19" fill="none" />
         }
 
         <!-- Status glyph -->
         @switch (point.node.status) {
           @case ('achieved') {
-            <g class="glyph bloom" [style.color]="statusColor(point.node)">
-              <circle r="5" fill="currentColor" />
+            <g class="glyph flower" [style.color]="statusColor(point.node)">
               @for (angle of [0, 60, 120, 180, 240, 300]; track angle) {
                 <ellipse
-                  rx="4.6" ry="7.4" cy="-8"
-                  fill="currentColor" opacity="0.55"
+                  rx="5.2" ry="9" cy="-8.6"
+                  class="petal"
                   [attr.transform]="'rotate(' + angle + ')'"
                 />
               }
+              <circle r="5" class="heart" />
             </g>
           }
           @case ('branched') {
-            <g class="glyph" [style.color]="statusColor(point.node)">
-              <circle r="7.5" fill="var(--surface)" stroke="currentColor" stroke-width="3" />
-              <circle r="2.6" fill="currentColor" />
+            <g class="glyph knot" [style.color]="statusColor(point.node)">
+              <circle r="9" class="knot-ring" />
+              <circle r="3.2" fill="currentColor" />
             </g>
           }
           @case ('resting') {
             <g class="glyph" [style.color]="statusColor(point.node)">
-              <circle r="6.5" fill="currentColor" opacity="0.45" />
-              <path d="M -4 1.5 Q 0 -6.5 4.5 -1.5 Q 1 4.5 -4 1.5 Z" fill="currentColor" />
+              <circle r="7" fill="currentColor" opacity="0.35" />
+              <path d="M -5 2 Q 0 -8 5.5 -2 Q 1 5.5 -5 2 Z" fill="currentColor" />
+              <path d="M -5 2 Q 0.5 -2.5 5.5 -2" fill="none" stroke="var(--surface)" stroke-width="0.9" opacity="0.7" />
             </g>
           }
           @case ('growing') {
-            <g class="glyph" [style.color]="statusColor(point.node)">
-              <circle r="6.5" fill="currentColor" />
-              <path d="M -1 -5 Q -6 -10 -3 -14 Q 1 -11 -1 -5 Z" fill="currentColor" opacity="0.8" />
-              <path d="M 1.5 -5 Q 6.5 -9 4.5 -13.5 Q 0.5 -11 1.5 -5 Z" fill="currentColor" opacity="0.6" />
+            <g class="glyph bud" [style.color]="statusColor(point.node)">
+              <ellipse rx="6" ry="7.5" cy="-1" fill="currentColor" />
+              <path d="M -1.5 -6 Q -9 -12 -6 -19 Q 1 -15 -1.5 -6 Z" fill="currentColor" opacity="0.85" />
+              <path d="M 2 -6 Q 9.5 -10 8 -17.5 Q 1.5 -14 2 -6 Z" fill="currentColor" opacity="0.65" />
             </g>
           }
           @default {
-            <circle class="glyph" r="5" [attr.fill]="statusColor(point.node)" opacity="0.85" />
+            <g class="glyph seed" [style.color]="statusColor(point.node)">
+              <circle r="5.5" fill="currentColor" />
+              <path d="M 0 -5 Q 1.5 -10 5 -11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </g>
           }
         }
 
-        <!-- Title -->
-        <text class="title" [attr.y]="point.node.status === 'growing' ? 24 : 22" text-anchor="middle">
-          {{ point.node.title.length > 22 ? point.node.title.slice(0, 21) + '…' : point.node.title }}
-        </text>
+        <!-- Title tag -->
+        @if (showLabel(point)) {
+          <g class="tag" aria-hidden="true">
+            <text class="title" [attr.y]="labelY(point)" text-anchor="middle">{{ labelText(point) }}</text>
+          </g>
+        }
+
+        <!-- "+" bud: plant a branch right here (focused node only) -->
+        @if (focusedId() === point.node.id) {
+          <g
+            class="plant-bud"
+            role="button"
+            [attr.aria-label]="i18n.t().node.plantChild"
+            transform="translate(0 -40)"
+            (click)="$event.stopPropagation(); plantRequested.emit(point.node)"
+            (keydown.enter)="$event.stopPropagation(); plantRequested.emit(point.node)"
+            tabindex="-1"
+          >
+            <circle r="14" class="bud-bg" />
+            <path d="M -5.5 0 H 5.5 M 0 -5.5 V 5.5" class="bud-plus" />
+          </g>
+        }
       </g>
     }
   </g>

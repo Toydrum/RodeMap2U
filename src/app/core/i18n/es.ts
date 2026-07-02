@@ -78,6 +78,8 @@ export const ES = {
   },
   node: {
     newTitle: 'Plantar una rama',
+    plantUnder: 'Plantar una rama en «{title}»',
+    plantChild: 'Plantar una rama aquí',
     editTitle: 'Editar rama',
     titleLabel: '¿Qué quieres que crezca aquí?',
     titlePlaceholder: 'p. ej. "Tocar mi primera canción"',

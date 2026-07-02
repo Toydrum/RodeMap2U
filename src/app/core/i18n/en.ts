@@ -76,6 +76,8 @@ export const EN: Dict = {
   },
   node: {
     newTitle: 'Plant a branch',
+    plantUnder: 'Plant a branch on “{title}”',
+    plantChild: 'Plant a branch here',
     editTitle: 'Edit branch',
     titleLabel: 'What do you want to grow here?',
     titlePlaceholder: 'e.g. "Play my first song"',

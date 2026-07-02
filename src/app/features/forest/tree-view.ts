@@ -26,7 +26,8 @@ export class TreeViewPage {
   protected readonly tree = computed(() => this.trees.byId().get(this.id()) ?? null);
 
   protected readonly openNode = signal<TreeNode | null>(null);
-  protected readonly planting = signal(false);
+  /** null = closed; { parent: null } = plant a root; { parent: node } = plant under it. */
+  protected readonly planting = signal<{ parent: TreeNode | null } | null>(null);
   protected readonly reviewing = signal(false);
   protected readonly newTitle = signal('');
 
@@ -46,14 +47,23 @@ export class TreeViewPage {
     return (this.nodes.byId().get(open.id) as TreeNode | undefined) ?? null;
   });
 
-  protected async plantRoot(): Promise<void> {
+  protected plantSheetTitle(): string {
+    const target = this.planting();
+    if (target?.parent) {
+      return this.i18n.fill(this.i18n.t().node.plantUnder, { title: target.parent.title });
+    }
+    return this.i18n.t().node.newTitle;
+  }
+
+  protected async plant(): Promise<void> {
     const tree = this.tree();
+    const target = this.planting();
     const title = this.newTitle().trim();
-    if (!tree || !title) return;
-    const node = await this.nodes.plant(tree.id, null, { title });
+    if (!tree || !target || !title) return;
+    const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, { title });
     if (!tree.currentNodeId) await this.trees.setCurrentNode(tree, node.id);
     this.newTitle.set('');
-    this.planting.set(false);
+    this.planting.set(null);
   }
 
   protected notFoundGoHome(): void {
