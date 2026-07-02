@@ -10,6 +10,9 @@
   display: block;
   touch-action: none; /* scoped here only — page scroll lives outside */
   cursor: grab;
+  /* wood palette: bark near the trunk, mossy green toward the twigs */
+  --rm-bark: #6f5640;
+  --rm-twig: #7f9a63;
   background:
     radial-gradient(1300px 560px at 50% 118%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 72%),
     linear-gradient(180deg, color-mix(in srgb, var(--accent-sky) 10%, var(--bg)) 0%, var(--bg) 45%);
@@ -19,6 +22,11 @@
   }
 }
 
+[data-theme='terminal'] .canvas {
+  --rm-bark: #1f4a1f;
+  --rm-twig: #48c342;
+}
+
 /* Ground */
 .hill {
   fill: color-mix(in srgb, var(--primary) 16%, var(--surface-2));
@@ -26,11 +34,11 @@
 }
 
 .trunk {
-  fill: color-mix(in srgb, var(--text-dim) 72%, var(--accent-clay));
-}
+  fill: var(--rm-bark);
 
-[data-theme='terminal'] .trunk {
-  fill: color-mix(in srgb, var(--text-dim) 80%, transparent);
+  &.flare {
+    opacity: 0.85;
+  }
 }
 
 .grass {
@@ -40,32 +48,19 @@
   stroke-linecap: round;
 }
 
-/* Branches — thick limbs to thin twigs, silhouette style */
-.edge {
-  stroke: color-mix(in srgb, var(--text-dim) 78%, var(--accent-clay));
-  stroke-linecap: round;
-
-  &.branch-child {
-    stroke: color-mix(in srgb, var(--status-branched) 72%, var(--text-dim));
-  }
-
+/* Branches — filled tapered timber, no strokes */
+.branch {
   &.is-new {
-    animation: edge-grow 0.7s ease-out both;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: branch-grow 0.55s cubic-bezier(0.34, 1.3, 0.64, 1) both;
   }
 }
 
-[data-theme='terminal'] .edge {
-  stroke: color-mix(in srgb, var(--text-dim) 85%, transparent);
-}
-
-@keyframes edge-grow {
+@keyframes branch-grow {
   from {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
+    transform: scale(0.15);
+    opacity: 0;
   }
 }
 
@@ -96,7 +91,7 @@
 }
 
 /* Reduced motion: growth becomes a soft fade */
-:host-context(.reduce-motion) .edge.is-new,
+:host-context(.reduce-motion) .branch.is-new,
 :host-context(.reduce-motion) .leaf.is-new {
   animation: soft-appear 0.2s ease both;
 }

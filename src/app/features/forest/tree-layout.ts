@@ -139,7 +139,70 @@ export function edgePointAt(
   return { x, y };
 }
 
-/** Thick trunk, thin twigs — real-tree taper. */
-export function edgeWidth(depth: number): number {
-  return Math.max(3, 19 - depth * 4.5);
+/** Wood width by depth — exponential taper like a real tree. */
+export function widthAtDepth(depth: number): number {
+  return Math.max(2.6, 18 * Math.pow(0.6, depth));
+}
+
+/**
+ * A branch as a FILLED tapered ribbon (not a uniform stroke): the cubic
+ * centerline is sampled, offset perpendicular by a half-width that eases
+ * from the parent's wood width to the child's — smooth joints, no sausage
+ * caps, real timber.
+ */
+export function taperedRibbon(
+  x0: number,
+  y0: number,
+  c1x: number,
+  c1y: number,
+  c2x: number,
+  c2y: number,
+  x1: number,
+  y1: number,
+  w0: number,
+  w1: number,
+): string {
+  const N = 14;
+  const left: string[] = [];
+  const right: string[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const u = 1 - t;
+    const x = u * u * u * x0 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x1;
+    const y = u * u * u * y0 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y1;
+    const dx = 3 * u * u * (c1x - x0) + 6 * u * t * (c2x - c1x) + 3 * t * t * (x1 - c2x);
+    const dy = 3 * u * u * (c1y - y0) + 6 * u * t * (c2y - c1y) + 3 * t * t * (y1 - c2y);
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len;
+    const ny = dx / len;
+    // ease the taper so limbs stay sturdy near the joint and slim at the tip
+    const eased = t * t * (3 - 2 * t);
+    const hw = (w0 + (w1 - w0) * eased) / 2;
+    left.push(`${(x + nx * hw).toFixed(1)} ${(y + ny * hw).toFixed(1)}`);
+    right.push(`${(x - nx * hw).toFixed(1)} ${(y - ny * hw).toFixed(1)}`);
+  }
+  return `M ${left[0]} L ${left.slice(1).join(' L ')} L ${right.reverse().join(' L ')} Z`;
+}
+
+/** Ribbon for a parent→child edge, widths derived from tree depth. */
+export function branchRibbon(
+  parent: LayoutPoint,
+  child: LayoutPoint,
+  geometry: EdgeGeometry,
+  childIsLeaf: boolean,
+): string {
+  const w0 = widthAtDepth(parent.depth) * 0.82;
+  const w1 = widthAtDepth(child.depth) * (childIsLeaf ? 0.45 : 0.82);
+  return taperedRibbon(
+    parent.x,
+    parent.y,
+    geometry.c1x,
+    geometry.c1y,
+    geometry.c2x,
+    geometry.c2y,
+    child.x,
+    child.y,
+    w0,
+    w1,
+  );
 }

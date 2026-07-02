@@ -15,11 +15,13 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import {
   LayoutPoint,
+  branchRibbon,
   edgeGeometry,
   edgePointAt,
-  edgeWidth,
   hash,
   layoutTree,
+  taperedRibbon,
+  widthAtDepth,
 } from './tree-layout';
 
 interface LeafDecoration {
@@ -33,8 +35,7 @@ interface LeafDecoration {
 interface EdgeView {
   id: string;
   d: string;
-  width: number;
-  isBranchChild: boolean;
+  fill: string;
   isNew: boolean;
   leaves: LeafDecoration[];
 }
@@ -95,16 +96,43 @@ export class TreeCanvas {
       .points.filter((p) => p.parent !== null)
       .map((p) => {
         const geometry = edgeGeometry(p.parent!, p);
+        const isLeaf = this.nodes.childrenOf(p.node).length === 0;
         return {
           id: p.node.id,
-          d: geometry.d,
-          width: edgeWidth(p.depth),
-          isBranchChild: p.node.origin === 'branch',
+          d: branchRibbon(p.parent!, p, geometry, isLeaf),
+          fill: this.woodFill(p),
           isNew: this.bornThisSession.has(p.node.id),
           leaves: this.leavesFor(p, geometry),
         };
       }),
   );
+
+  /** Bark near the trunk, greener toward the twigs; branch-children lean golden. */
+  private woodFill(point: LayoutPoint): string {
+    const barkPct = Math.max(30, 92 - point.depth * 16);
+    const base = `color-mix(in srgb, var(--rm-bark) ${barkPct}%, var(--rm-twig))`;
+    return point.node.origin === 'branch'
+      ? `color-mix(in srgb, ${base} 72%, var(--status-branched))`
+      : base;
+  }
+
+  /** Trunk ribbon: ground → root, with a gentle sway. */
+  protected trunkPath(root: LayoutPoint): string {
+    const gy = this.groundY();
+    const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6;
+    return taperedRibbon(
+      root.x + sway,
+      gy - 2,
+      root.x + sway * 0.4,
+      gy - (gy - root.y) * 0.4,
+      root.x - sway * 0.3,
+      root.y + (gy - root.y) * 0.35,
+      root.x,
+      root.y,
+      26,
+      widthAtDepth(0) * 0.9,
+    );
+  }
 
   /** Deterministic little leaves sprinkled along live branches. */
   private leavesFor(point: LayoutPoint, geometry: ReturnType<typeof edgeGeometry>): LeafDecoration[] {
