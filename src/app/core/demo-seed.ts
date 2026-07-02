@@ -9,6 +9,14 @@ import { CheckIn, Settings, TimerSession, Tree, TreeNode } from './db/schema';
 const now = Date.now();
 const day = 86_400_000;
 
+function dateOnly(ts: number): string {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Yesterday — so demos showcase the gentle date-review conversation. */
+const yesterday = dateOnly(now - day);
+
 function base(id: string, offsetDays: number) {
   return {
     id,
@@ -64,7 +72,7 @@ export const DEMO_NODES: TreeNode[] = [
 
   // Health tree — gentler, smaller
   node('demo-h-root', 'demo-health', null, 'Sentirme mejor', 'growing', 10),
-  node('demo-h-walk', 'demo-health', 'demo-h-root', 'Caminar 3 veces por semana', 'growing', 10),
+  node('demo-h-walk', 'demo-health', 'demo-h-root', 'Caminar 3 veces por semana', 'growing', 10, { targetDate: yesterday }),
   node('demo-h-sleep', 'demo-health', 'demo-h-root', 'Dormir antes de las 12', 'resting', 20),
   node('demo-h-water', 'demo-health', 'demo-h-walk', 'Llevar botella de agua', 'achieved', 10),
 

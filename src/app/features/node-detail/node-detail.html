@@ -48,7 +48,7 @@
 
     @if (datePassed()) {
       <button type="button" class="date-passed" (click)="branching.set(true)">
-        🍂 {{ i18n.t().dateReview.title }} <strong>{{ i18n.t().dateReview.branch }} →</strong>
+        🍂 {{ i18n.t().node.datePassedNudge }} <strong>→</strong>
       </button>
     }
 
@@ -98,10 +98,13 @@
       @if (!isCurrent()) {
         <button type="button" class="btn btn-soft" (click)="setHere()">📍 {{ i18n.t().node.setCurrent }}</button>
       }
+      @if (node().status !== 'branched') {
+        <button type="button" class="btn btn-soft" (click)="branching.set(true)">🌿 {{ i18n.t().node.branchHere }}</button>
+      }
       <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
       <button type="button" class="btn btn-ghost" (click)="archive()">🗃 {{ i18n.t().node.archive }}</button>
     </div>
-    <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>
+    <p class="hint archive-hint">{{ i18n.t().node.branchHereHint }} · {{ i18n.t().node.archiveHint }}</p>
   </section>
 </div>
 
