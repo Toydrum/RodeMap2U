@@ -1,0 +1,77 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(20, 26, 18, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.modal {
+  width: min(480px, 100%);
+  padding: 1.6rem;
+  text-align: center;
+  animation: pop-in 0.25s ease both;
+
+  .leaf {
+    font-size: 2rem;
+  }
+
+  .sub {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+  }
+
+  .which {
+    font-weight: 700;
+    color: var(--status-branched);
+    margin-bottom: 1.1rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 0.6rem;
+  }
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  cursor: pointer;
+  border-width: 1.5px;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  strong {
+    font-size: 0.98rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,110 @@
+<div class="sheet-backdrop" (click)="closed.emit()">
+  <section class="sheet card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="node().title">
+    <div class="grabber" aria-hidden="true"></div>
+
+    <!-- Status + here -->
+    <div class="top-row">
+      <span class="chip status-chip">
+        <span class="status-dot" [class]="'status-dot ' + node().status"></span>
+        {{ i18n.t().status[node().status] }}
+      </span>
+      @if (isCurrent()) {
+        <span class="chip here">📍 {{ i18n.t().tree.youAreHere }}</span>
+      }
+      <button type="button" class="btn btn-ghost close" (click)="closed.emit()" [attr.aria-label]="i18n.t().common.close">✕</button>
+    </div>
+
+    <!-- Title -->
+    <div class="field">
+      <label for="nd-title">{{ i18n.t().node.titleLabel }}</label>
+      <input id="nd-title" type="text" [value]="node().title" (change)="setTitle($any($event.target).value)" maxlength="80">
+    </div>
+
+    <p class="hint-line">{{ i18n.t().statusHint[node().status] }}</p>
+
+    <!-- Status picker (branched is earned, not picked) -->
+    @if (node().status !== 'branched') {
+      <div class="status-row" role="group">
+        @for (status of statuses; track status) {
+          <button
+            type="button"
+            class="chip pick"
+            [class.selected]="node().status === status"
+            (click)="setStatus(status)"
+          >
+            <span class="status-dot" [class]="'status-dot ' + status"></span>
+            {{ i18n.t().status[status] }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Gentle date -->
+    <div class="field">
+      <label for="nd-date">{{ i18n.t().node.dateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+      <input id="nd-date" type="date" [value]="node().targetDate ?? ''" (change)="setDate($any($event.target).value)">
+      <span class="hint">{{ i18n.t().node.dateHint }}</span>
+    </div>
+
+    @if (datePassed()) {
+      <button type="button" class="date-passed" (click)="branching.set(true)">
+        🍂 {{ i18n.t().dateReview.title }} <strong>{{ i18n.t().dateReview.branch }} →</strong>
+      </button>
+    }
+
+    <!-- Note -->
+    <div class="field">
+      <label for="nd-note">{{ i18n.t().node.noteLabel }}</label>
+      <textarea id="nd-note" [value]="node().note" (change)="setNote($any($event.target).value)" [placeholder]="i18n.t().node.notePlaceholder"></textarea>
+    </div>
+
+    <!-- Steps -->
+    <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
+    @if (children().length) {
+      <ul class="steps">
+        @for (child of children(); track child.id) {
+          <li>
+            <span class="status-dot" [class]="'status-dot ' + child.status"></span>
+            <span class="step-name" [class.done]="child.status === 'achieved'">{{ child.title }}</span>
+            @if (child.status !== 'achieved') {
+              <button type="button" class="btn btn-ghost tiny" (click)="nodes.setStatus(child, 'achieved')" [attr.aria-label]="i18n.t().status.achieved + ': ' + child.title">🌸</button>
+            }
+          </li>
+        }
+      </ul>
+    }
+    <form class="add-step" (submit)="$event.preventDefault(); addStep()">
+      <input
+        type="text"
+        [value]="stepTitle()"
+        (input)="stepTitle.set($any($event.target).value)"
+        [placeholder]="i18n.t().node.stepPlaceholder"
+        maxlength="80"
+        [attr.aria-label]="i18n.t().node.addStep"
+      >
+      <button type="submit" class="btn btn-soft" [disabled]="!stepTitle().trim()">+</button>
+    </form>
+
+    <!-- Meta -->
+    <p class="meta">
+      {{ i18n.t().node.plantedOn }} {{ plantedOn() }}
+      @if (focusMinutes()) {
+        · {{ focusMinutes() }} {{ i18n.t().node.minutesHere }}
+      }
+    </p>
+
+    <!-- Actions -->
+    <div class="actions">
+      @if (!isCurrent()) {
+        <button type="button" class="btn btn-soft" (click)="setHere()">📍 {{ i18n.t().node.setCurrent }}</button>
+      }
+      <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
+      <button type="button" class="btn btn-ghost" (click)="archive()">🗃 {{ i18n.t().node.archive }}</button>
+    </div>
+    <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>
+  </section>
+</div>
+
+@if (branching()) {
+  <app-branch-flow [node]="node()" (closed)="branching.set(false); closed.emit()" />
+}

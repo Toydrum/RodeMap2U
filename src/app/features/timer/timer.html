@@ -1,0 +1,67 @@
+<div class="container page">
+  <h1>{{ i18n.t().timer.title }}</h1>
+  <p class="sub">{{ i18n.t().timer.subtitle }}</p>
+
+  @if (linkedNode(); as node) {
+    <p class="linked chip">🌿 {{ i18n.t().timer.linkedTo }}: <strong>{{ node.title }}</strong></p>
+  } @else {
+    <p class="linked chip">{{ i18n.t().timer.noNode }}</p>
+  }
+
+  <div class="ring-wrap">
+    <svg viewBox="0 0 220 220" class="ring" aria-hidden="true">
+      <circle cx="110" cy="110" r="96" class="track" />
+      <circle
+        cx="110" cy="110" r="96"
+        class="fill"
+        [class.breathing]="session() && !paused()"
+        pathLength="1"
+        [style.stroke-dashoffset]="1 - progress()"
+      />
+    </svg>
+    <div class="middle">
+      @if (session()) {
+        <span class="time" role="timer">{{ display() }}</span>
+        <span class="of">/ {{ session()!.plannedMinutes }} {{ i18n.t().settings.minutes }}</span>
+      } @else {
+        <span class="time idle">{{ minutes() }}</span>
+        <span class="of">{{ i18n.t().settings.minutes }}</span>
+      }
+    </div>
+  </div>
+
+  @if (!session()) {
+    <div class="presets" role="group" [attr.aria-label]="i18n.t().timer.presets">
+      @for (preset of presets; track preset) {
+        <button
+          type="button"
+          class="chip preset"
+          [class.selected]="minutes() === preset"
+          (click)="setPreset(preset)"
+        >{{ preset }} {{ i18n.t().settings.minutes }}</button>
+      }
+      <label class="chip preset custom">
+        {{ i18n.t().timer.custom }}
+        <input
+          type="number" min="1" max="180"
+          [value]="minutes()"
+          (change)="setPreset(+$any($event.target).value || 10)"
+          [attr.aria-label]="i18n.t().timer.custom"
+        >
+      </label>
+    </div>
+
+    <button type="button" class="btn btn-primary big" (click)="start()">
+      ▶ {{ i18n.t().timer.start }}
+    </button>
+  } @else {
+    <div class="controls">
+      <button type="button" class="btn btn-soft" (click)="pauseResume()">
+        @if (paused()) { ▶ {{ i18n.t().timer.resume }} } @else { ⏸ {{ i18n.t().timer.pause }} }
+      </button>
+      <button type="button" class="btn btn-primary" (click)="finish()">
+        🌱 {{ i18n.t().timer.finish }}
+      </button>
+    </div>
+  }
+</div>

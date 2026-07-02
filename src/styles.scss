@@ -1,10 +1,361 @@
-/* You can add global styles to this file, and also import other style files */
-@font-face {
-  font-family: 'Open Sans';
-  src: url('./assets/fonts/OpenSans-VariableFont_wdth,wght.ttf') format("truetype-variations");
-  font-weight: 100 900;
+/* ==========================================================================
+   RodeMap2U design system — two personalities, one token set.
+   Default: "organic" (warm, light, calm). Opt-in: "terminal" (retro phosphor).
+   ========================================================================== */
 
+:root,
+[data-theme='organic'] {
+  /* Surfaces — warm paper, low contrast jumps */
+  --bg: #f5f2e8;
+  --surface: #fdfbf3;
+  --surface-2: #ece7d8;
+  --border: #d8d2bf;
+  --border-strong: #a9a289;
+
+  /* Text — deep green-grays, never pure black */
+  --text: #2e3b32;
+  --text-dim: #55645a;
+  --text-faint: #75836f;
+
+  /* Action + focus */
+  --primary: #4e7d4a;
+  --primary-ink: #ffffff;
+  --focus: #3f7a3a;
+
+  /* Tree accents (fixed palette, AccentToken order) */
+  --accent-moss: #5c8a58;
+  --accent-sage: #7fa07f;
+  --accent-sky: #5f92bc;
+  --accent-clay: #b97f55;
+  --accent-lavender: #8f7ac2;
+  --accent-sand: #a8935a;
+  --accent-rose: #b57e93;
+  --accent-pine: #47756a;
+
+  /* Node status colors */
+  --status-seed: #96a48e;
+  --status-growing: #4e7d4a;
+  --status-resting: #8f7ac2;
+  --status-achieved: #b5688a;
+  --status-branched: #a8935a;
+
+  --shadow: 0 6px 24px rgba(70, 80, 60, 0.12);
+  --radius: 18px;
+  --radius-sm: 10px;
+
+  --font-body: 'Nunito Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', Consolas, monospace;
+
+  color-scheme: light;
 }
 
-html, body { height: 100%; }
-* {transition: 100ms; margin: 0; font-family: 'Open Sans', sans-serif; font-weight: 400; font-stretch: condensed; }
+[data-theme='terminal'] {
+  --bg: #0a0f0a;
+  --surface: #101a10;
+  --surface-2: #182818;
+  --border: #234023;
+  --border-strong: #356035;
+
+  --text: #a9e5a2;
+  --text-dim: #79b273;
+  --text-faint: #5d8a58;
+
+  --primary: #48c342;
+  --primary-ink: #04150a;
+  --focus: #7ef575;
+
+  --accent-moss: #48c342;
+  --accent-sage: #7ed07a;
+  --accent-sky: #52b8c9;
+  --accent-clay: #d0a05a;
+  --accent-lavender: #a689e0;
+  --accent-sand: #c9c052;
+  --accent-rose: #d089a8;
+  --accent-pine: #3fae92;
+
+  --status-seed: #5d8a58;
+  --status-growing: #48c342;
+  --status-resting: #a689e0;
+  --status-achieved: #d089a8;
+  --status-branched: #c9c052;
+
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+
+  --font-body: 'JetBrains Mono Variable', Consolas, monospace;
+
+  color-scheme: dark;
+}
+
+/* Text size preference (Settings) */
+:root,
+[data-text='md'] {
+  font-size: 16px;
+}
+[data-text='lg'] {
+  font-size: 17.5px;
+}
+[data-text='xl'] {
+  font-size: 19px;
+}
+
+/* Dyslexia-friendly font override — beats theme fonts */
+.font-dyslexia {
+  --font-body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Terminal theme: subtle scanlines, opt-in personality */
+[data-theme='terminal'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.08) 0px,
+    rgba(0, 0, 0, 0.08) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.4em;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.55rem;
+}
+h2 {
+  font-size: 1.2rem;
+}
+
+p {
+  margin: 0 0 0.9em;
+}
+
+a {
+  color: var(--primary);
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.skip-link {
+  position: fixed;
+  top: -80px;
+  left: 1rem;
+  z-index: 3000;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 2px solid var(--focus);
+  color: var(--text);
+  text-decoration: none;
+  transition: top 0.2s ease;
+
+  &:focus-visible {
+    top: 1rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Shared patterns
+   -------------------------------------------------------------------------- */
+
+.container {
+  width: min(880px, 100% - 2.4rem);
+  margin-inline: auto;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 48px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+
+  &:hover {
+    box-shadow: var(--shadow);
+  }
+}
+
+.btn-soft {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+
+  &:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+
+  label {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+  }
+
+  input,
+  textarea {
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    min-height: 48px;
+
+    &:focus-visible {
+      outline-offset: 0;
+      border-color: var(--focus);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 72px;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  color: var(--text-dim);
+}
+
+/* Status dot used across lists */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+
+  &.seed {
+    background: var(--status-seed);
+  }
+  &.growing {
+    background: var(--status-growing);
+  }
+  &.resting {
+    background: var(--status-resting);
+  }
+  &.achieved {
+    background: var(--status-achieved);
+  }
+  &.branched {
+    background: var(--status-branched);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Motion — .reduce-motion is the global backstop (MotionService sets it)
+   -------------------------------------------------------------------------- */
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

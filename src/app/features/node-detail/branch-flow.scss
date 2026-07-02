@@ -1,0 +1,53 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(20, 26, 18, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.modal {
+  width: min(480px, 100%);
+  padding: 1.6rem;
+  text-align: center;
+  animation: pop-in 0.25s ease both;
+
+  .knot {
+    font-size: 2rem;
+  }
+
+  h2 {
+    margin-top: 0.3rem;
+  }
+
+  .sub {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+  }
+
+  .origin {
+    font-weight: 700;
+    color: var(--status-branched);
+    margin-bottom: 1.1rem;
+  }
+
+  .field {
+    margin-bottom: 0.7rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 1.1rem;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}

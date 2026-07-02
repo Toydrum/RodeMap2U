@@ -1,0 +1,74 @@
+@if (tree(); as t) {
+  <div class="view">
+    <header class="bar">
+      <a routerLink="/forest" class="btn btn-ghost back">← {{ i18n.t().common.back }}</a>
+      <h1 [style.color]="'var(--accent-' + t.accent + ')'">{{ t.name }}</h1>
+      <button type="button" class="btn btn-primary plant" (click)="planting.set(true)">
+        + {{ i18n.t().tree.plant }}
+      </button>
+    </header>
+
+    @if (pendingReviews().length && !reviewing()) {
+      <button type="button" class="review-banner" (click)="reviewing.set(true)">
+        🍂 {{ i18n.t().tree.dateReviewBanner }} — <strong>{{ i18n.t().tree.reviewNow }}</strong>
+      </button>
+    }
+
+    <div class="canvas-wrap">
+      @if (nodes.rootsOf(t.id).length) {
+        <app-tree-canvas [tree]="t" (nodeOpened)="onNodeOpened($event)" />
+      } @else {
+        <div class="empty-tree">
+          <span aria-hidden="true">🌱</span>
+          <p>{{ i18n.t().node.titleLabel }}</p>
+          <button type="button" class="btn btn-primary" (click)="planting.set(true)">
+            {{ i18n.t().tree.plant }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (planting()) {
+      <div class="sheet-backdrop" (click)="planting.set(false)">
+        <form class="sheet card" (click)="$event.stopPropagation()" (submit)="$event.preventDefault(); plantRoot()">
+          <h2>{{ i18n.t().node.newTitle }}</h2>
+          <div class="field">
+            <label for="root-title">{{ i18n.t().node.titleLabel }}</label>
+            <input
+              id="root-title"
+              type="text"
+              [value]="newTitle()"
+              (input)="newTitle.set($any($event.target).value)"
+              [placeholder]="i18n.t().node.titlePlaceholder"
+              maxlength="80"
+              autofocus
+            >
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn-ghost" (click)="planting.set(false)">
+              {{ i18n.t().common.cancel }}
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="!newTitle().trim()">
+              {{ i18n.t().tree.plant }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    @if (liveOpenNode(); as node) {
+      <app-node-detail [node]="node" [tree]="t" (closed)="openNode.set(null)" />
+    }
+
+    @if (reviewing()) {
+      <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+    }
+  </div>
+} @else {
+  <div class="container page">
+    <p>{{ i18n.t().common.loading }}</p>
+    <button type="button" class="btn btn-soft" (click)="notFoundGoHome()">
+      {{ i18n.t().common.back }}
+    </button>
+  </div>
+}

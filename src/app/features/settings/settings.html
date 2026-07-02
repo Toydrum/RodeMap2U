@@ -1,0 +1,122 @@
+<div class="container page">
+  <h1>{{ i18n.t().settings.title }}</h1>
+
+  <!-- Appearance -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.appearance }}</h2>
+
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.theme }}</span>
+      <div class="opts" role="group">
+        <button type="button" class="chip opt" [class.selected]="settings.theme() === 'organic'" (click)="setTheme('organic')">
+          🌿 {{ i18n.t().settings.themeOrganic }}
+        </button>
+        <button type="button" class="chip opt" [class.selected]="settings.theme() === 'terminal'" (click)="setTheme('terminal')">
+          👾 {{ i18n.t().settings.themeTerminal }}
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.language }}</span>
+      <div class="opts" role="group">
+        <button type="button" class="chip opt" [class.selected]="i18n.lang() === 'es'" (click)="setLang('es')">Español</button>
+        <button type="button" class="chip opt" [class.selected]="i18n.lang() === 'en'" (click)="setLang('en')">English</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.motion }}</span>
+      <div class="opts" role="group">
+        <button type="button" class="chip opt" [class.selected]="settings.settings().reduceMotion === 'system'" (click)="setMotion('system')">
+          {{ i18n.t().settings.motionSystem }}
+        </button>
+        <button type="button" class="chip opt" [class.selected]="settings.settings().reduceMotion === 'on'" (click)="setMotion('on')">
+          {{ i18n.t().settings.motionOn }}
+        </button>
+        <button type="button" class="chip opt" [class.selected]="settings.settings().reduceMotion === 'off'" (click)="setMotion('off')">
+          {{ i18n.t().settings.motionOff }}
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.textSize }}</span>
+      <div class="opts" role="group">
+        <button type="button" class="chip opt" [class.selected]="settings.textSize() === 'md'" (click)="setTextSize('md')">A</button>
+        <button type="button" class="chip opt bigger" [class.selected]="settings.textSize() === 'lg'" (click)="setTextSize('lg')">A</button>
+        <button type="button" class="chip opt biggest" [class.selected]="settings.textSize() === 'xl'" (click)="setTextSize('xl')">A</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="label" for="dys-toggle">{{ i18n.t().settings.dyslexiaFont }}</label>
+      <button
+        id="dys-toggle"
+        type="button"
+        class="switch"
+        role="switch"
+        [attr.aria-checked]="settings.dyslexiaFont()"
+        (click)="toggleDyslexia()"
+      >
+        <span class="knob" [class.on]="settings.dyslexiaFont()"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Focus -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.focus }}</h2>
+    <div class="row">
+      <label class="label" for="timer-default">{{ i18n.t().settings.timerDefault }}</label>
+      <div class="opts">
+        <input
+          id="timer-default"
+          class="num"
+          type="number" min="1" max="180"
+          [value]="settings.settings().timerDefaultMinutes"
+          (change)="setTimerDefault(+$any($event.target).value)"
+        >
+        <span class="unit">{{ i18n.t().settings.minutes }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.data }}</h2>
+    <p class="hint">{{ i18n.t().settings.dataHint }}</p>
+    <div class="data-actions">
+      <button type="button" class="btn btn-soft" (click)="exportData()">
+        ⬇ {{ i18n.t().settings.export }}
+      </button>
+      <label class="btn btn-soft import">
+        ⬆ {{ i18n.t().settings.import }}
+        <input type="file" accept="application/json" (change)="onImportFile($event)" [disabled]="importing()">
+      </label>
+    </div>
+    <p class="hint">{{ i18n.t().settings.importWarning }}</p>
+  </section>
+
+  <!-- Archive -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.archive }}</h2>
+    @if (trees.archived().length) {
+      <ul class="archive">
+        @for (tree of trees.archived(); track tree.id) {
+          <li>
+            <span class="dot" [style.background]="'var(--accent-' + tree.accent + ')'"></span>
+            <span class="name">{{ tree.name }}</span>
+            <button type="button" class="btn btn-ghost" (click)="trees.restore(tree)">
+              {{ i18n.t().settings.restore }}
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="hint">{{ i18n.t().settings.archiveEmpty }}</p>
+    }
+  </section>
+
+  <p class="about">{{ i18n.t().settings.aboutText }}</p>
+</div>

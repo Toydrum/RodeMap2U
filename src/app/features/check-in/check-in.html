@@ -1,0 +1,80 @@
+<div class="ritual">
+  @switch (step()) {
+    @case ('feeling') {
+      <section class="stage" aria-live="polite">
+        <h1>{{ i18n.t().checkIn.title }}</h1>
+        <p class="sub">{{ i18n.t().checkIn.subtitle }}</p>
+
+        <div class="weather" role="group" [attr.aria-label]="i18n.t().a11y.feelingGroup">
+          @for (f of feelings; track f.key) {
+            <button
+              type="button"
+              class="feeling card"
+              [class.selected]="feeling() === f.key"
+              (click)="pickFeeling(f.key)"
+            >
+              <span class="emoji" aria-hidden="true">{{ f.emoji }}</span>
+              <span class="name">{{ i18n.t().checkIn.feelings[f.key] }}</span>
+            </button>
+          }
+        </div>
+
+        <button type="button" class="btn btn-ghost skip" (click)="skip()">
+          {{ i18n.t().checkIn.skipAll }}
+        </button>
+      </section>
+    }
+
+    @case ('where') {
+      <section class="stage" aria-live="polite">
+        <h1>{{ i18n.t().checkIn.whereTitle }}</h1>
+        <p class="sub">{{ i18n.t().checkIn.whereSubtitle }}</p>
+
+        <div class="where-grid">
+          @for (candidate of candidates(); track candidate.node.id) {
+            <button
+              type="button"
+              class="where card"
+              [style.border-left-color]="'var(--accent-' + candidate.accent + ')'"
+              (click)="pickWhere(candidate.node)"
+            >
+              <span class="tree-name">{{ candidate.treeName }}</span>
+              <span class="node-name">{{ candidate.node.title }}</span>
+            </button>
+          }
+        </div>
+
+        <button type="button" class="btn btn-soft" (click)="pickWhere(null)">
+          👀 {{ i18n.t().checkIn.justLooking }}
+        </button>
+      </section>
+    }
+
+    @case ('note') {
+      <section class="stage" aria-live="polite">
+        <h1>{{ i18n.t().checkIn.noteLabel }}</h1>
+        <p class="sub">({{ i18n.t().common.optional }})</p>
+
+        <textarea
+          class="note"
+          [value]="note()"
+          (input)="note.set($any($event.target).value)"
+          [placeholder]="i18n.t().checkIn.notePlaceholder"
+          maxlength="240"
+          rows="3"
+        ></textarea>
+
+        <button type="button" class="btn btn-primary big" (click)="finish()">
+          🌱 {{ i18n.t().checkIn.done }}
+        </button>
+        <button type="button" class="btn btn-ghost skip" (click)="finish()">
+          {{ i18n.t().common.skip }}
+        </button>
+      </section>
+    }
+
+    @case ('review') {
+      <app-date-review [nodesToReview]="pendingReviews()" (closed)="leave()" />
+    }
+  }
+</div>

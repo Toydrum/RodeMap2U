@@ -1,0 +1,149 @@
+.page {
+  padding: 1.8rem 0 2.4rem;
+}
+
+.block {
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.1rem;
+
+  h2 {
+    font-size: 1.02rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.45rem 0;
+  flex-wrap: wrap;
+
+  .label {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+}
+
+.opts {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.opt {
+  cursor: pointer;
+  min-height: 44px;
+
+  &.selected {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    color: var(--text);
+  }
+
+  &.bigger {
+    font-size: 1.05rem;
+  }
+
+  &.biggest {
+    font-size: 1.25rem;
+  }
+}
+
+.switch {
+  width: 56px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-2);
+  position: relative;
+  cursor: pointer;
+
+  .knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    &.on {
+      transform: translateX(24px);
+      background: var(--primary);
+    }
+  }
+}
+
+.num {
+  width: 84px;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  min-height: 44px;
+}
+
+.unit {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+.data-actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+
+.import {
+  position: relative;
+  overflow: hidden;
+
+  input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.hint {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+
+.archive {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .name {
+      flex: 1;
+    }
+  }
+}
+
+.about {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  margin-top: 1.6rem;
+}

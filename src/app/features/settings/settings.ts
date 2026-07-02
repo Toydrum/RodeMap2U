@@ -1,0 +1,68 @@
+import { Component, inject, signal } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { SettingsService } from '../../core/repos/settings.service';
+import { ThemeService } from '../../core/theme/theme.service';
+import { TreesRepo } from '../../core/repos/trees.repo';
+import { BackupService } from '../../core/repos/backup.service';
+import { ToastService } from '../../shared/ui/toast.service';
+import { Lang, MotionPref, TextSize, ThemeName } from '../../core/db/schema';
+
+@Component({
+  selector: 'app-settings',
+  templateUrl: './settings.html',
+  styleUrl: './settings.scss',
+})
+export class SettingsPage {
+  protected readonly i18n = inject(I18nService);
+  protected readonly settings = inject(SettingsService);
+  protected readonly theme = inject(ThemeService);
+  protected readonly trees = inject(TreesRepo);
+  private readonly backup = inject(BackupService);
+  private readonly toast = inject(ToastService);
+
+  protected readonly importing = signal(false);
+
+  protected setTheme(theme: ThemeName): void {
+    void this.theme.setTheme(theme);
+  }
+
+  protected setLang(lang: Lang): void {
+    void this.i18n.set(lang);
+  }
+
+  protected setMotion(pref: MotionPref): void {
+    void this.settings.patch({ reduceMotion: pref });
+  }
+
+  protected setTextSize(size: TextSize): void {
+    void this.theme.setTextSize(size);
+  }
+
+  protected toggleDyslexia(): void {
+    void this.settings.patch({ dyslexiaFont: !this.settings.settings().dyslexiaFont });
+  }
+
+  protected setTimerDefault(value: number): void {
+    if (value >= 1 && value <= 180) void this.settings.patch({ timerDefaultMinutes: value });
+  }
+
+  protected exportData(): void {
+    void this.backup.download();
+  }
+
+  protected async onImportFile(event: Event): Promise<void> {
+    const inputEl = event.target as HTMLInputElement;
+    const file = inputEl.files?.[0];
+    inputEl.value = '';
+    if (!file) return;
+    this.importing.set(true);
+    try {
+      await this.backup.importReplace(await file.text());
+      this.toast.show({ message: this.i18n.t().settings.importOk });
+    } catch {
+      this.toast.show({ message: this.i18n.t().settings.importError });
+    } finally {
+      this.importing.set(false);
+    }
+  }
+}

@@ -1,0 +1,109 @@
+<svg
+  #svg
+  class="canvas"
+  role="tree"
+  [attr.aria-label]="i18n.t().a11y.treeCanvas"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointercancel)="onPointerUp($event)"
+  (wheel)="onWheel($event)"
+>
+  <g [attr.transform]="transform()">
+    <!-- Edges -->
+    @for (edge of edges(); track edge.id) {
+      <path
+        class="edge"
+        [class.branch-child]="edge.isBranchChild"
+        [class.is-new]="edge.isNew"
+        [attr.d]="edge.d"
+        [attr.stroke-width]="edge.width"
+        pathLength="1"
+        fill="none"
+      />
+    }
+
+    <!-- Nodes -->
+    @for (point of layout().points; track point.node.id) {
+      <g
+        class="node"
+        role="treeitem"
+        [attr.data-node-id]="point.node.id"
+        [attr.transform]="'translate(' + point.x + ' ' + point.y + ')'"
+        [attr.aria-level]="point.depth + 1"
+        [attr.aria-label]="nodeLabel(point)"
+        [attr.tabindex]="focusedId() === point.node.id ? 0 : -1"
+        (keydown)="onNodeKeydown($event, point)"
+        (click)="focusNode(point.node.id); nodeOpened.emit(point.node)"
+      >
+        <!-- Invisible hit area, counter-scaled to stay ≥44px on screen -->
+        <circle class="hit" [attr.r]="hitRadius()" fill="transparent" />
+
+        <!-- Focus ring (drawn — SVG has no native outline) -->
+        @if (focusedId() === point.node.id) {
+          <circle class="focus-ring" r="20" fill="none" />
+        }
+
+        <!-- "You are here" halo -->
+        @if (tree().currentNodeId === point.node.id) {
+          <circle class="here-halo" r="16" fill="none" />
+        }
+
+        <!-- Status glyph -->
+        @switch (point.node.status) {
+          @case ('achieved') {
+            <g class="glyph bloom" [style.color]="statusColor(point.node)">
+              <circle r="5" fill="currentColor" />
+              @for (angle of [0, 60, 120, 180, 240, 300]; track angle) {
+                <ellipse
+                  rx="4.6" ry="7.4" cy="-8"
+                  fill="currentColor" opacity="0.55"
+                  [attr.transform]="'rotate(' + angle + ')'"
+                />
+              }
+            </g>
+          }
+          @case ('branched') {
+            <g class="glyph" [style.color]="statusColor(point.node)">
+              <circle r="7.5" fill="var(--surface)" stroke="currentColor" stroke-width="3" />
+              <circle r="2.6" fill="currentColor" />
+            </g>
+          }
+          @case ('resting') {
+            <g class="glyph" [style.color]="statusColor(point.node)">
+              <circle r="6.5" fill="currentColor" opacity="0.45" />
+              <path d="M -4 1.5 Q 0 -6.5 4.5 -1.5 Q 1 4.5 -4 1.5 Z" fill="currentColor" />
+            </g>
+          }
+          @case ('growing') {
+            <g class="glyph" [style.color]="statusColor(point.node)">
+              <circle r="6.5" fill="currentColor" />
+              <path d="M -1 -5 Q -6 -10 -3 -14 Q 1 -11 -1 -5 Z" fill="currentColor" opacity="0.8" />
+              <path d="M 1.5 -5 Q 6.5 -9 4.5 -13.5 Q 0.5 -11 1.5 -5 Z" fill="currentColor" opacity="0.6" />
+            </g>
+          }
+          @default {
+            <circle class="glyph" r="5" [attr.fill]="statusColor(point.node)" opacity="0.85" />
+          }
+        }
+
+        <!-- Title -->
+        <text class="title" [attr.y]="point.node.status === 'growing' ? 24 : 22" text-anchor="middle">
+          {{ point.node.title.length > 22 ? point.node.title.slice(0, 21) + '…' : point.node.title }}
+        </text>
+      </g>
+    }
+  </g>
+</svg>
+
+<button type="button" class="btn btn-soft center-btn" (click)="centerOnCurrent()">
+  ⌖ {{ i18n.t().tree.center }}
+</button>
+
+<div class="sr-live" aria-live="polite">
+  @if (focusedId(); as id) {
+    @if (layout().byId.get(id); as point) {
+      {{ nodeLabel(point) }}
+    }
+  }
+</div>

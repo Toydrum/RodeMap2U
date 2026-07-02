@@ -1,0 +1,95 @@
+.page {
+  padding: 1.6rem 0 2rem;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 2.6rem 1.6rem;
+
+  .sprout {
+    font-size: 2.6rem;
+  }
+
+  p {
+    color: var(--text-dim);
+    max-width: 34ch;
+  }
+}
+
+.new-tree {
+  padding: 1.4rem;
+  margin-bottom: 1.4rem;
+
+  .row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.7rem;
+  }
+}
+
+.accent-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.accent {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &.selected {
+    border-color: var(--text);
+    transform: scale(1.12);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.tree-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.4rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  .name {
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .count {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+}

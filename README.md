@@ -1,27 +1,39 @@
-# RodeMap2U
+# RodeMap2U 🌱
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.1.
+**A goal map that grows like a tree — built for neurodivergent minds.**
 
-## Development server
+Goals are branches. Achieved ones bloom. Missed deadlines are never failures: they become **branch points** where new alternative paths grow. Every session opens with one gentle question: **"¿Dónde sientes que estás?"** (*Where do you feel you are?*) — and the journey continues from wherever you actually are.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+**Live:** https://toydrum.github.io/RodeMap2U/
 
-## Code scaffolding
+## Principles
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- **No shame mechanics.** No streaks, no "overdue", no red alarms. A passed date offers three kind exits: keep going, move the date, or open a new branch.
+- **Local-first & private.** Everything lives in your device (IndexedDB). Nothing leaves without you. JSON export/import for backups. The data model is sync-ready for an optional cloud future.
+- **Low cognitive load.** One question per screen, everything skippable, predictable layout (the tree never reshuffles).
+- **Accessible by design.** Full keyboard navigation on the tree (roving tabindex + arrow keys), adjustable text size, optional dyslexia-friendly font (Atkinson Hyperlegible), `prefers-reduced-motion` respected everywhere, ≥44px touch targets.
+- **Two personalities.** Calm "garden" theme by default; opt-in retro **terminal** theme (the original 2024 pip-boy idea lives!).
 
-## Build
+## Tech
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Angular 22 PWA — standalone components, signals, zoneless change detection. Zero UI libraries; the tree is hand-rolled SVG (pure layout function with deterministic organic jitter, bezier tapered edges, pointer pan/zoom + pinch). Hand-rolled ~100-line IndexedDB wrapper with signal-based repositories, atomic branch transactions, cross-tab sync via BroadcastChannel, and a two-layer migration system. Installable + offline via `@angular/service-worker`.
 
-## Running unit tests
+```bash
+npm install
+npm start          # dev server (SW disabled in dev)
+npm run build      # production build into dist/
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+# Test the real PWA (service worker needs the subpath):
+mkdir -p /tmp/pwa/RodeMap2U && cp -r dist/rodemap2u/browser/* /tmp/pwa/RodeMap2U/
+npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RodeMap2U/
+```
 
-## Running end-to-end tests
+## Structure
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+- `src/app/core/db/` — schema (sync-ready records with rev/tombstones), IDB wrapper, cross-tab broadcast
+- `src/app/core/repos/` — signal repositories (write-through), backup/export
+- `src/app/core/i18n/` — ES (source of truth) + EN dictionaries, typed parity
+- `src/app/features/` — check-in ritual, forest, tree canvas, node detail, branch flow, timer, settings
+- `plan/` — the original 2024 design notes this project grew from 🌳
 
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Deploys automatically to GitHub Pages on every push to `main`.

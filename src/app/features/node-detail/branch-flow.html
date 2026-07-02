@@ -1,0 +1,36 @@
+<div class="backdrop" (click)="closed.emit()">
+  <section class="modal card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().branchFlow.title">
+    <span class="knot" aria-hidden="true">🌿</span>
+    <h2>{{ i18n.t().branchFlow.title }}</h2>
+    <p class="sub">{{ i18n.t().branchFlow.subtitle }}</p>
+    <p class="origin">「 {{ node().title }} 」</p>
+
+    @for (alt of alternatives(); track $index) {
+      <div class="field">
+        <input
+          type="text"
+          [value]="alt"
+          (input)="setAlt($index, $any($event.target).value)"
+          [placeholder]="i18n.t().branchFlow.altPlaceholder"
+          maxlength="80"
+          [attr.aria-label]="i18n.t().branchFlow.altPlaceholder + ' ' + ($index + 1)"
+        >
+      </div>
+    }
+
+    @if (alternatives().length < 3) {
+      <button type="button" class="btn btn-ghost" (click)="addAlt()">
+        + {{ i18n.t().branchFlow.addAlt }}
+      </button>
+    }
+
+    <div class="row">
+      <button type="button" class="btn btn-ghost" (click)="closed.emit()">
+        {{ i18n.t().common.cancel }}
+      </button>
+      <button type="button" class="btn btn-primary" [disabled]="!valid()" (click)="confirm()">
+        🌱 {{ i18n.t().branchFlow.confirm }}
+      </button>
+    </div>
+  </section>
+</div>

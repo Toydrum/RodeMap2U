@@ -1,0 +1,48 @@
+@if (current(); as node) {
+  @if (!branching()) {
+    <div class="backdrop">
+      <section class="modal card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().dateReview.title">
+        <span class="leaf" aria-hidden="true">🍂</span>
+        <h2>{{ i18n.t().dateReview.title }}</h2>
+        <p class="sub">{{ i18n.t().dateReview.subtitle }}</p>
+        <p class="which">「 {{ node.title }} 」</p>
+
+        @if (!movingDate()) {
+          <div class="options">
+            <button type="button" class="option card" (click)="keepGoing()">
+              <strong>🌿 {{ i18n.t().dateReview.keepGoing }}</strong>
+              <span>{{ i18n.t().dateReview.keepGoingHint }}</span>
+            </button>
+            <button type="button" class="option card" (click)="movingDate.set(true)">
+              <strong>🗓 {{ i18n.t().dateReview.moveDate }}</strong>
+              <span>{{ i18n.t().dateReview.moveDateHint }}</span>
+            </button>
+            <button type="button" class="option card" (click)="branching.set(true)">
+              <strong>🌱 {{ i18n.t().dateReview.branch }}</strong>
+              <span>{{ i18n.t().dateReview.branchHint }}</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-ghost" (click)="later()">
+            {{ i18n.t().dateReview.later }}
+          </button>
+        } @else {
+          <div class="field">
+            <label for="dr-date">{{ i18n.t().node.dateLabel }}</label>
+            <input id="dr-date" type="date" #newDate autofocus>
+            <span class="hint">{{ i18n.t().node.dateHint }}</span>
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn-ghost" (click)="movingDate.set(false)">
+              {{ i18n.t().common.back }}
+            </button>
+            <button type="button" class="btn btn-primary" (click)="moveDate(newDate.value)" [disabled]="!newDate.value">
+              {{ i18n.t().common.save }}
+            </button>
+          </div>
+        }
+      </section>
+    </div>
+  } @else {
+    <app-branch-flow [node]="node" (closed)="onBranched()" />
+  }
+}

@@ -1,0 +1,48 @@
+<a class="skip-link" href="#main">{{ i18n.t().a11y.skipToContent }}</a>
+
+<main id="main" [class.with-tabs]="showTabs()">
+  <router-outlet />
+</main>
+
+@if (showTabs()) {
+  <nav class="tabbar" [attr.aria-label]="i18n.t().nav.forest">
+    <a routerLink="/forest" routerLinkActive="active" class="tab">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21v-6M12 15l-4.5-4.5M12 15l4-4M12 3c-3 3.5-5 5.5-5 8a5 5 0 0 0 10 0c0-2.5-2-4.5-5-8Z"/>
+        </svg>
+      </span>
+      <span class="label">{{ i18n.t().nav.forest }}</span>
+    </a>
+    <a routerLink="/timer" routerLinkActive="active" class="tab">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="13" r="8"/>
+          <path d="M12 9v4l2.5 2.5M9 2.5h6"/>
+        </svg>
+      </span>
+      <span class="label">{{ i18n.t().nav.timer }}</span>
+    </a>
+    <a routerLink="/settings" routerLinkActive="active" class="tab">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/>
+        </svg>
+      </span>
+      <span class="label">{{ i18n.t().nav.settings }}</span>
+    </a>
+  </nav>
+}
+
+@if (toast.current(); as t) {
+  <div class="toast card" role="status">
+    <span class="msg">{{ t.message }}</span>
+    @if (t.actionLabel) {
+      <button type="button" class="btn btn-primary small" (click)="t.action?.(); toast.dismiss()">
+        {{ t.actionLabel }}
+      </button>
+    }
+    <button type="button" class="btn btn-ghost small" (click)="toast.dismiss()" aria-label="OK">✕</button>
+  </div>
+}
