@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -98,6 +98,15 @@ export class ForestPage {
       const params = { ...this.route.snapshot.queryParams, plant: null };
       void this.router.navigate([], { queryParams: params, replaceUrl: true });
     }
+
+    // Chromium treats document touchmove listeners as passive by default;
+    // dragging needs a REAL preventDefault or the browser steals the gesture
+    // for scrolling and fires pointercancel mid-drag.
+    const lockTouch = (ev: TouchEvent) => {
+      if (this.draggingId()) ev.preventDefault();
+    };
+    document.addEventListener('touchmove', lockTouch, { passive: false });
+    inject(DestroyRef).onDestroy(() => document.removeEventListener('touchmove', lockTouch));
   }
 
   /** `?mood=` dev/demo override, else the latest check-in's feeling. */
@@ -204,14 +213,61 @@ export class ForestPage {
     return preview.map((id) => byId.get(id)).filter((t): t is Tree => !!t);
   });
 
+  /** Press pending on a plot: becomes a drag on movement (mouse) or after a
+   *  long-press (touch); otherwise the tap navigates as always. */
+  private pendingDrag: { tree: Tree; x: number; y: number; timer: ReturnType<typeof setTimeout> | null } | null = null;
+  private suppressClick = false;
+
   protected startMove(ev: PointerEvent, tree: Tree): void {
     ev.preventDefault();
     ev.stopPropagation();
+    this.beginDrag(tree);
+  }
+
+  protected plotDown(ev: PointerEvent, tree: Tree): void {
+    this.suppressClick = false;
+    if ((ev.target as Element).closest('.plot-move, .plot-archive')) return;
+    const pending = { tree, x: ev.clientX, y: ev.clientY, timer: null as ReturnType<typeof setTimeout> | null };
+    if (ev.pointerType !== 'mouse') {
+      pending.timer = setTimeout(() => {
+        if (this.pendingDrag === pending) this.beginDrag(tree);
+      }, 350);
+    }
+    this.pendingDrag = pending;
+  }
+
+  private beginDrag(tree: Tree): void {
+    this.clearPending();
     this.draggingId.set(tree.id);
     this.dragPreview.set(this.trees.active().map((t) => t.id));
+    this.suppressClick = true;
+  }
+
+  private clearPending(): void {
+    if (this.pendingDrag?.timer) clearTimeout(this.pendingDrag.timer);
+    this.pendingDrag = null;
+  }
+
+  /** Swallow the click that follows a drag so the plot doesn't navigate. */
+  protected plotClick(ev: MouseEvent): void {
+    if (this.suppressClick) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      this.suppressClick = false;
+    }
   }
 
   protected moveOver(ev: PointerEvent): void {
+    const pending = this.pendingDrag;
+    if (pending && !this.draggingId()) {
+      const dist = Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y);
+      if (ev.pointerType === 'mouse') {
+        if (dist > 8) this.beginDrag(pending.tree);
+      } else if (dist > 14) {
+        // Finger slid before the long-press: that's a scroll, not a drag.
+        this.clearPending();
+      }
+    }
     const dragId = this.draggingId();
     const preview = this.dragPreview();
     if (!dragId || !preview) return;
@@ -231,6 +287,7 @@ export class ForestPage {
   }
 
   protected async endMove(): Promise<void> {
+    this.clearPending();
     if (!this.draggingId()) return;
     const preview = this.dragPreview();
     this.draggingId.set(null);
