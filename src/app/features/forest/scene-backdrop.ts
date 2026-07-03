@@ -47,6 +47,8 @@ import { Feeling } from '../../core/db/schema';
 
     @if (mood() === 'foggy') {
       <div class="fog" aria-hidden="true"></div>
+      <!-- Rides the mountains' base so their hard bottom edge dissolves in milk -->
+      <div class="fog-seam" [style.bottom]="seamBottom()" aria-hidden="true"></div>
       <div class="mist far" aria-hidden="true"></div>
       <div class="mist mid" aria-hidden="true"></div>
       <div class="mist near" aria-hidden="true"></div>
@@ -83,6 +85,9 @@ export class SceneBackdrop {
   readonly mood = input<Feeling | null>(null);
 
   protected readonly isGloomy = computed(() => this.mood() === 'heavy' || this.mood() === 'stormy');
+
+  /** The seam band straddles the mountains' bottom edge, wherever it rests. */
+  protected readonly seamBottom = computed(() => `calc(${this.mountainsBottom()} - 130px)`);
 
   protected readonly treelineXs = [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960];
 }

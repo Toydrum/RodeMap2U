@@ -32,7 +32,26 @@
 
 /* Fog eats the distance: the ranges nearly dissolve, birds fade into it. */
 :host(.mood-foggy) .mountains {
-  opacity: 0.32;
+  opacity: 0.4;
+}
+
+/* A milk band riding the mountains' base — hides their hard bottom edge. */
+.fog-seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 280px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(205, 211, 205, 0.5) 32%,
+    rgba(205, 211, 205, 0.46) 64%,
+    transparent
+  );
+}
+
+[data-theme='terminal'] .fog-seam {
+  opacity: 0.3;
 }
 
 :host(.mood-foggy) .bird {
@@ -220,7 +239,7 @@
   &.far {
     bottom: 34%;
     background-size: 520px 190px;
-    opacity: 0.8;
+    opacity: 0.65;
     animation: mist-drift 150s linear infinite;
   }
 
@@ -228,7 +247,7 @@
     bottom: 47%;
     background-size: 590px 200px;
     height: 200px;
-    opacity: 0.65;
+    opacity: 0.5;
     animation: mist-drift-back 180s linear infinite;
     animation-delay: -70s;
   }
@@ -237,7 +256,7 @@
     bottom: 3%;
     background-size: 660px 230px;
     height: 230px;
-    opacity: 0.85;
+    opacity: 0.6;
     animation: mist-drift-back 100s linear infinite;
   }
 }
