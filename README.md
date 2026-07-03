@@ -18,6 +18,8 @@ Goals are branches. Achieved ones bloom. Missed deadlines are never failures: th
 
 Angular 22 PWA — standalone components, signals, zoneless change detection. Zero UI libraries; the tree is hand-rolled SVG (pure layout function with deterministic organic jitter, bezier tapered edges, pointer pan/zoom + pinch). Hand-rolled ~100-line IndexedDB wrapper with signal-based repositories, atomic branch transactions, cross-tab sync via BroadcastChannel, and a two-layer migration system. Installable + offline via `@angular/service-worker`.
 
+**Requirements:** Node.js ≥ 24.15 (26.x recommended) and npm 11+.
+
 ```bash
 npm install
 npm start          # dev server (SW disabled in dev)
