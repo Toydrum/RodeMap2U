@@ -23,6 +23,8 @@ import {
   taperedRibbon,
   widthAtDepth,
 } from './tree-layout';
+import { FlowerSpec, flowerFor } from './flora';
+import { FlowerGlyph } from './flower';
 
 interface LeafDecoration {
   x: number;
@@ -49,6 +51,7 @@ interface EdgeView {
  */
 @Component({
   selector: 'app-tree-canvas',
+  imports: [FlowerGlyph],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
 })
@@ -82,6 +85,9 @@ export class TreeCanvas {
     return layoutTree(roots, (n) => this.nodes.childrenOf(n));
   });
 
+  /** This tree's flower species (shape + colors from its accent). */
+  protected readonly species = computed<FlowerSpec>(() => flowerFor(this.tree().accent));
+
   protected readonly roots = computed(() => this.layout().points.filter((p) => p.parent === null));
 
   /** Ground line sits a bit under the deepest root. */
@@ -111,12 +117,10 @@ export class TreeCanvas {
 
     const flowers = Array.from({ length: 3 }, (_, i) => {
       const h = hash(tree.id + ':f' + i);
-      const palette = ['rose', 'lavender', 'sand'];
       return {
         x: centerX - spread * 0.9 + ((h % 1000) / 1000) * spread * 1.8,
         y: gy - 4 + ((h >> 6) % 10),
-        size: 4.5 + ((h >> 4) % 3),
-        accent: palette[h % palette.length],
+        scale: 0.32 + ((h >> 4) % 14) / 100,
         sway: -10 + (h % 21),
       };
     });

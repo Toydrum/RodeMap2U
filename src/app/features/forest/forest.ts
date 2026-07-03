@@ -7,14 +7,16 @@ import { AccentToken } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
+import { FlowerSpec, flowerFor } from './flora';
+import { FlowerGlyph } from './flower';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
 
 interface SceneFlower {
   x: number;
   y: number;
-  size: number;
-  accent: string;
+  scale: number;
+  spec: FlowerSpec;
   sway: number;
 }
 
@@ -31,7 +33,7 @@ interface GrassCluster {
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop],
+  imports: [RouterLink, MiniTree, SceneBackdrop, FlowerGlyph],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
 })
@@ -52,17 +54,17 @@ export class ForestPage {
   protected readonly ripple1 = 'M 1040 104 C 720 170, 430 92, -40 202';
   protected readonly ripple2 = 'M 1045 118 C 735 185, 445 110, -45 218';
 
-  /** One meadow flower per achieved goal (capped so it stays a meadow). */
+  /** One meadow flower per achieved goal — each in ITS tree's species. */
   protected readonly flowers = computed<SceneFlower[]>(() => {
     const achieved = this.nodes.visible().filter((n) => n.status === 'achieved');
-    const palette = ['rose', 'lavender', 'sand', 'sky', 'clay'];
     return achieved.slice(0, 26).map((node) => {
       const h = hash(node.id + ':meadow');
+      const tree = this.trees.byId().get(node.treeId);
       return {
         x: 30 + (h % 940),
         y: 196 + ((h >> 8) % 52),
-        size: 5 + ((h >> 4) % 4),
-        accent: palette[h % palette.length],
+        scale: 0.42 + ((h >> 4) % 20) / 100,
+        spec: flowerFor(tree?.accent ?? 'rose'),
         sway: -8 + (h % 17),
       };
     });

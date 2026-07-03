@@ -31,6 +31,7 @@ export const DEMO_TREES: Tree[] = [
   { ...base('demo-guitar', 40), name: 'Aprender guitarra', accent: 'moss', order: 10, currentNodeId: 'demo-g-first-song', archivedAt: null },
   { ...base('demo-health', 30), name: 'Cuidarme', accent: 'rose', order: 20, currentNodeId: null, archivedAt: null },
   { ...base('demo-work', 20), name: 'Proyecto personal', accent: 'sky', order: 30, currentNodeId: null, archivedAt: null },
+  { ...base('demo-seedling', 10), name: 'Idea nueva', accent: 'clay', order: 40, currentNodeId: null, archivedAt: null },
 ];
 
 function node(
@@ -79,6 +80,9 @@ export const DEMO_NODES: TreeNode[] = [
   // Work tree — young
   node('demo-w-root', 'demo-work', null, 'Lanzar mi proyecto', 'seed', 10),
   node('demo-w-idea', 'demo-work', 'demo-w-root', 'Aterrizar la idea en una página', 'growing', 10),
+
+  // Single-branch baby tree (sapling rendering check)
+  node('demo-s-root', 'demo-seedling', null, 'Explorar esta idea', 'seed', 10),
 ];
 
 export const DEMO_CHECKINS: CheckIn[] = [

@@ -31,16 +31,8 @@
 
       @for (flower of flowers(); track $index) {
         <g class="meadow-flower" [attr.transform]="'translate(' + flower.x + ' ' + flower.y + ') rotate(' + flower.sway + ')'">
-          <line x1="0" y1="0" x2="0" [attr.y2]="flower.size * 1.6" class="stem" />
-          @for (angle of [0, 72, 144, 216, 288]; track angle) {
-            <ellipse
-              [attr.rx]="flower.size * 0.42" [attr.ry]="flower.size * 0.72" [attr.cy]="-flower.size * 0.62"
-              [attr.transform]="'rotate(' + angle + ')'"
-              [style.fill]="'var(--accent-' + flower.accent + ')'"
-              class="petal"
-            />
-          }
-          <circle [attr.r]="flower.size * 0.34" class="center" />
+          <line x1="0" y1="0" x2="0" [attr.y2]="flower.scale * 18" class="stem" />
+          <g appFlower [flower]="flower.spec" [scale]="flower.scale" />
         </g>
       }
 

@@ -38,16 +38,8 @@
         }
         @for (f of groundDecor().flowers; track $index) {
           <g class="base-flower" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.sway + ')'">
-            <line x1="0" y1="0" x2="0" [attr.y2]="f.size * 1.5" class="stem" />
-            @for (angle of [0, 72, 144, 216, 288]; track angle) {
-              <ellipse
-                [attr.rx]="f.size * 0.4" [attr.ry]="f.size * 0.68" [attr.cy]="-f.size * 0.58"
-                [attr.transform]="'rotate(' + angle + ')'"
-                [style.fill]="'var(--accent-' + f.accent + ')'"
-                class="petal"
-              />
-            }
-            <circle [attr.r]="f.size * 0.32" class="center" />
+            <line x1="0" y1="0" x2="0" [attr.y2]="f.scale * 18" class="stem" />
+            <g appFlower [flower]="species()" [scale]="f.scale" />
           </g>
         }
         @for (root of roots(); track root.node.id) {
@@ -84,7 +76,6 @@
         @for (leaf of edge.leaves; track $index) {
           <g
             class="leaf"
-            [class.blossom]="leaf.kind === 'blossom'"
             [class.is-new]="edge.isNew"
             [attr.transform]="'translate(' + leaf.x + ' ' + leaf.y + ') rotate(' + leaf.angle + ')'"
             aria-hidden="true"
@@ -92,10 +83,7 @@
             @if (leaf.kind === 'leaf') {
               <path [attr.d]="'M 0 0 Q ' + leaf.size + ' ' + (-leaf.size) + ' 0 ' + (-2 * leaf.size) + ' Q ' + (-leaf.size) + ' ' + (-leaf.size) + ' 0 0 Z'" />
             } @else {
-              <circle r="3.4" class="blossom-heart" />
-              @for (angle of [0, 72, 144, 216, 288]; track angle) {
-                <ellipse rx="2.6" ry="4.4" cy="-5" [attr.transform]="'rotate(' + angle + ')'" class="blossom-petal" />
-              }
+              <g appFlower [flower]="species()" [scale]="0.42" />
             }
           </g>
         }
@@ -131,15 +119,8 @@
         <!-- Status glyph -->
         @switch (point.node.status) {
           @case ('achieved') {
-            <g class="glyph flower" [style.color]="statusColor(point.node)">
-              @for (angle of [0, 60, 120, 180, 240, 300]; track angle) {
-                <ellipse
-                  rx="5.2" ry="9" cy="-8.6"
-                  class="petal"
-                  [attr.transform]="'rotate(' + angle + ')'"
-                />
-              }
-              <circle r="5" class="heart" />
+            <g class="glyph flower">
+              <g appFlower [flower]="species()" [scale]="1.05" />
             </g>
           }
           @case ('branched') {

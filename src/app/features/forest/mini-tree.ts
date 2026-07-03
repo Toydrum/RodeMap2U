@@ -1,6 +1,8 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { Tree } from '../../core/db/schema';
 import { NodesRepo } from '../../core/repos/nodes.repo';
+import { FlowerSpec, flowerFor } from './flora';
+import { FlowerGlyph } from './flower';
 import {
   LayoutPoint,
   edgeGeometry,
@@ -42,6 +44,7 @@ const PAD = 12;
  */
 @Component({
   selector: 'app-mini-tree',
+  imports: [FlowerGlyph],
   template: `
     <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" aria-hidden="true" class="mini">
       @if (view(); as v) {
@@ -52,10 +55,7 @@ const PAD = 12;
         @for (dot of v.dots; track $index) {
           @if (dot.kind === 'bloom') {
             <g [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ')'">
-              @for (angle of [0, 72, 144, 216, 288]; track angle) {
-                <ellipse rx="2.8" ry="4.5" cy="-3.9" [attr.transform]="'rotate(' + angle + ')'" class="petal" />
-              }
-              <circle r="2.3" class="heart" />
+              <g appFlower [flower]="species()" [scale]="0.52" />
             </g>
           } @else if (dot.kind === 'bud') {
             <circle [attr.cx]="dot.x" [attr.cy]="dot.y" r="2.1" class="bud" />
@@ -135,6 +135,8 @@ const PAD = 12;
 export class MiniTree {
   readonly tree = input.required<Tree>();
 
+  protected readonly species = computed<FlowerSpec>(() => flowerFor(this.tree().accent));
+
   protected readonly W = W;
   protected readonly H = H;
   protected readonly GROUND = GROUND;
@@ -150,7 +152,8 @@ export class MiniTree {
     // Fit the real layout into the viewBox, root row anchored to the ground.
     const spanW = Math.max(layout.width, 50);
     const spanH = Math.max(layout.height, 70);
-    const trunkRoom = 26;
+    // Baby trees get a taller stem so they read as saplings, never as blocks.
+    const trunkRoom = layout.points.length <= 2 ? 46 : 26;
     const s = Math.min(0.68, (W - PAD * 2) / spanW, (H - PAD * 2 - trunkRoom) / (spanH + trunkRoom));
     // Wood reads too wispy at miniature scale — thicken beyond linear.
     const wBoost = 1.6;
@@ -178,17 +181,23 @@ export class MiniTree {
       const sp = scaled.get(p.node.id)!;
 
       if (!sp.parent) {
+        // Width follows trunk LENGTH — a short young stem stays slender,
+        // never a square block (Hector's "más 3" screenshot).
+        const len = Math.max(14, GROUND - sp.y);
+        const w0 = Math.min(22, Math.max(4.5, len * 0.3));
+        const w1 = Math.max(2.4, Math.min(w0 * 0.55, widthAtDepth(0) * 0.85 * s * wBoost));
+        const sway = (((hashAngle(p.node.id + ':sway') % 11) - 5) * len) / 70;
         trunk = taperedRibbon(
-          sp.x,
+          sp.x + sway,
           GROUND,
-          sp.x,
-          GROUND - trunkRoom * s * 2,
-          sp.x,
-          sp.y + 8,
+          sp.x + sway * 0.5,
+          GROUND - len * 0.4,
+          sp.x - sway * 0.3,
+          sp.y + len * 0.35,
           sp.x,
           sp.y,
-          Math.max(7, 24 * s * wBoost),
-          Math.max(3.4, widthAtDepth(0) * 0.85 * s * wBoost),
+          w0,
+          w1,
         );
       } else {
         const geometry = edgeGeometry(sp.parent, sp, s * 0.9);
