@@ -10,16 +10,46 @@
   (wheel)="onWheel($event)"
 >
   <g [attr.transform]="transform()">
-    <!-- Ground under the roots -->
+    <!-- Ground under the roots: wide soft knoll, faded edges -->
     @if (roots().length) {
       <g class="ground" aria-hidden="true">
         <ellipse
           [attr.cx]="(layout().minX + layout().width / 2)"
-          [attr.cy]="groundY()"
-          [attr.rx]="Math.max(160, layout().width / 2 + 130)"
-          ry="34"
+          [attr.cy]="groundY() + 10"
+          [attr.rx]="Math.max(320, layout().width + 200)"
+          ry="46"
+          class="hill outer"
+        />
+        <ellipse
+          [attr.cx]="(layout().minX + layout().width / 2)"
+          [attr.cy]="groundY() + 2"
+          [attr.rx]="Math.max(190, layout().width / 2 + 140)"
+          ry="30"
           class="hill"
         />
+
+        <!-- Meadow life around the base -->
+        @for (g of groundDecor().grass; track $index) {
+          <g class="tuft" [attr.transform]="'translate(' + g.x + ' ' + g.y + ')' + (g.flip ? ' scale(-1 1)' : '')">
+            <path d="M 0 0 q -3 -12 -6 -15" />
+            <path d="M 2 0 q 0 -14 1 -17" />
+            <path d="M 4 0 q 4 -11 7 -13" />
+          </g>
+        }
+        @for (f of groundDecor().flowers; track $index) {
+          <g class="base-flower" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.sway + ')'">
+            <line x1="0" y1="0" x2="0" [attr.y2]="f.size * 1.5" class="stem" />
+            @for (angle of [0, 72, 144, 216, 288]; track angle) {
+              <ellipse
+                [attr.rx]="f.size * 0.4" [attr.ry]="f.size * 0.68" [attr.cy]="-f.size * 0.58"
+                [attr.transform]="'rotate(' + angle + ')'"
+                [style.fill]="'var(--accent-' + f.accent + ')'"
+                class="petal"
+              />
+            }
+            <circle [attr.r]="f.size * 0.32" class="center" />
+          </g>
+        }
         @for (root of roots(); track root.node.id) {
           <!-- Trunk: tapered ribbon from ground to the root node -->
           <path class="trunk" [attr.d]="trunkPath(root)" />
@@ -143,7 +173,7 @@
         <!-- Title tag -->
         @if (showLabel(point)) {
           <g class="tag" aria-hidden="true">
-            <text class="title" [attr.y]="labelY(point)" text-anchor="middle">{{ labelText(point) }}</text>
+            <text class="title" [attr.x]="labelX(point)" [attr.y]="labelY(point)" text-anchor="middle">{{ labelText(point) }}</text>
           </g>
         }
 
@@ -153,7 +183,7 @@
             class="plant-bud"
             role="button"
             [attr.aria-label]="i18n.t().node.plantChild"
-            transform="translate(0 -40)"
+            transform="translate(0 -46)"
             (click)="$event.stopPropagation(); plantRequested.emit(point.node)"
             (keydown.enter)="$event.stopPropagation(); plantRequested.emit(point.node)"
             tabindex="-1"

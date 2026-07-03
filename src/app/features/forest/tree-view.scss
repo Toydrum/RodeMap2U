@@ -9,14 +9,31 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.7rem 1rem;
+  position: relative;
+  z-index: 3;
+
+  .title-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
 
   h1 {
-    flex: 1;
     margin: 0;
+    max-width: 100%;
     font-size: 1.15rem;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tree-stats {
+    font-size: 0.74rem;
+    color: var(--text-faint);
     white-space: nowrap;
   }
 
@@ -44,6 +61,23 @@
 .canvas-wrap {
   flex: 1;
   min-height: 0;
+  position: relative;
+  /* same world as the forest: sky above, meadow greens below */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-sky) 24%, var(--bg)) 0%,
+    color-mix(in srgb, var(--accent-sky) 12%, var(--bg)) 30%,
+    color-mix(in srgb, var(--primary) 7%, var(--bg)) 48%,
+    color-mix(in srgb, var(--primary) 12%, var(--bg)) 74%,
+    color-mix(in srgb, var(--primary) 16%, var(--bg)) 100%
+  );
+  overflow: hidden;
+
+  app-tree-canvas {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+  }
 }
 
 .empty-tree {

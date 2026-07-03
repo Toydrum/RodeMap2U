@@ -1,26 +1,6 @@
 <div class="meadow-page">
-  <!-- Sky -->
-  <div class="sky" aria-hidden="true">
-    <div class="sun"></div>
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-    <svg class="bird b1" viewBox="0 0 18 6"><path d="M1 5 Q5 1 9 5 M9 5 Q13 1 17 5"/></svg>
-    <svg class="bird b2" viewBox="0 0 18 6"><path d="M1 5 Q5 1 9 5 M9 5 Q13 1 17 5"/></svg>
-    <svg class="bird b3" viewBox="0 0 18 6"><path d="M1 5 Q5 1 9 5 M9 5 Q13 1 17 5"/></svg>
-  </div>
+  <app-scene-backdrop mountainsBottom="min(430px, 54vh)" />
 
-  <!-- Distant mountains + far tree line -->
-  <svg class="mountains" viewBox="0 0 1000 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <path class="range far-range" d="M -20 150 L 90 66 L 175 118 L 290 38 L 400 122 L 520 58 L 640 128 L 760 48 L 880 116 L 1020 70 L 1020 150 Z" />
-    <path class="range near-range" d="M -20 150 L 60 96 L 170 140 L 310 84 L 430 142 L 585 92 L 720 146 L 850 96 L 1020 138 L 1020 150 Z" />
-    <g class="treeline">
-      @for (x of [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960]; track x) {
-        <path [attr.d]="'M ' + x + ' 150 l 7 -16 l 7 16 Z'" />
-        <path [attr.d]="'M ' + (x + 16) + ' 150 l 5 -11 l 5 11 Z'" />
-      }
-    </g>
-  </svg>
 
   <!-- Header floats over the sky -->
   <header class="head container">
@@ -74,10 +54,14 @@
     @if (trees.active().length) {
       <div class="plots container">
         @for (tree of trees.active(); track tree.id) {
-          <a class="plot" [routerLink]="['/tree', tree.id]" [style.--plot-accent]="'var(--accent-' + tree.accent + ')'">
+          <a
+            class="plot"
+            [routerLink]="['/tree', tree.id]"
+            [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
+            [style.transform]="'translateY(' + staggerFor(tree.id) + 'px)'"
+          >
             <span class="mound" aria-hidden="true"></span>
             <app-mini-tree [tree]="tree" />
-            <span class="ground-shadow" aria-hidden="true"></span>
             <span class="plot-grass" aria-hidden="true">
               <svg viewBox="0 0 60 14" width="60" height="14">
                 <path d="M 6 13 q -2 -9 -5 -11 M 12 13 q 1 -10 0 -12 M 18 13 q 3 -8 6 -10 M 40 13 q -2 -8 -4 -10 M 48 13 q 2 -9 4 -11" />

@@ -2,7 +2,15 @@
   <div class="view">
     <header class="bar">
       <a routerLink="/forest" class="btn btn-ghost back">← {{ i18n.t().common.back }}</a>
-      <h1 [style.color]="'var(--accent-' + t.accent + ')'">{{ t.name }}</h1>
+      <div class="title-wrap">
+        <h1 [style.color]="'var(--accent-' + t.accent + ')'">{{ t.name }}</h1>
+        <span class="tree-stats">
+          {{ branchCount() }} {{ i18n.t().forest.nodeCount }}
+          @if (bloomCount()) {
+            · {{ bloomCount() }} 🌸
+          }
+        </span>
+      </div>
       <button type="button" class="btn btn-primary plant" (click)="planting.set({ parent: null })">
         + {{ i18n.t().tree.plant }}
       </button>
@@ -15,6 +23,7 @@
     }
 
     <div class="canvas-wrap">
+      <app-scene-backdrop mountainsBottom="12%" />
       @if (nodes.rootsOf(t.id).length) {
         <app-tree-canvas
           [tree]="t"

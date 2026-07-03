@@ -13,9 +13,7 @@
   /* wood palette: bark near the trunk, mossy green toward the twigs */
   --rm-bark: #6f5640;
   --rm-twig: #7f9a63;
-  background:
-    radial-gradient(1300px 560px at 50% 118%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 72%),
-    linear-gradient(180deg, color-mix(in srgb, var(--accent-sky) 10%, var(--bg)) 0%, var(--bg) 45%);
+  background: transparent; /* the world lives in .canvas-wrap + SceneBackdrop */
 
   &:active {
     cursor: grabbing;
@@ -29,8 +27,35 @@
 
 /* Ground */
 .hill {
-  fill: color-mix(in srgb, var(--primary) 16%, var(--surface-2));
-  opacity: 0.85;
+  fill: color-mix(in srgb, var(--primary) 17%, var(--surface-2));
+  opacity: 0.8;
+
+  &.outer {
+    fill: color-mix(in srgb, var(--primary) 10%, transparent);
+    opacity: 0.7;
+  }
+}
+
+.tuft path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary) 58%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.base-flower {
+  .stem {
+    stroke: color-mix(in srgb, var(--primary) 70%, transparent);
+    stroke-width: 1.5;
+  }
+
+  .petal {
+    opacity: 0.92;
+  }
+
+  .center {
+    fill: var(--status-branched);
+  }
 }
 
 .trunk {

@@ -6,6 +6,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { AccentToken } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
+import { SceneBackdrop } from './scene-backdrop';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
 
@@ -30,7 +31,7 @@ interface GrassCluster {
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree],
+  imports: [RouterLink, MiniTree, SceneBackdrop],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
 })
@@ -72,6 +73,11 @@ export class ForestPage {
     const h = hash('grass:' + i);
     return { x: 20 + (h % 960), y: 214 + ((h >> 6) % 40), flip: h % 2 === 0 };
   });
+
+  /** Deterministic per-plot vertical offset — rows stop being ruler-straight. */
+  protected staggerFor(treeId: string): number {
+    return hash(treeId + ':stagger') % 22;
+  }
 
   protected countFor(treeId: string): number {
     return (this.nodes.byTree().get(treeId) ?? []).length;

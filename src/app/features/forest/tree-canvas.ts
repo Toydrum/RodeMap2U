@@ -91,6 +91,39 @@ export class TreeCanvas {
     return Math.max(...roots.map((r) => r.y)) + 64;
   });
 
+  /** World-space life around the base: grass clusters + a few flowers. */
+  protected readonly groundDecor = computed(() => {
+    const layout = this.layout();
+    const tree = this.tree();
+    if (!layout.points.length) return { grass: [], flowers: [] };
+    const centerX = layout.minX + layout.width / 2;
+    const spread = Math.max(240, layout.width * 0.9);
+    const gy = this.groundY();
+
+    const grass = Array.from({ length: 7 }, (_, i) => {
+      const h = hash(tree.id + ':g' + i);
+      return {
+        x: centerX - spread + ((h % 1000) / 1000) * spread * 2,
+        y: gy - 8 + ((h >> 8) % 14),
+        flip: h % 2 === 0,
+      };
+    });
+
+    const flowers = Array.from({ length: 3 }, (_, i) => {
+      const h = hash(tree.id + ':f' + i);
+      const palette = ['rose', 'lavender', 'sand'];
+      return {
+        x: centerX - spread * 0.9 + ((h % 1000) / 1000) * spread * 1.8,
+        y: gy - 4 + ((h >> 6) % 10),
+        size: 4.5 + ((h >> 4) % 3),
+        accent: palette[h % palette.length],
+        sway: -10 + (h % 21),
+      };
+    });
+
+    return { grass, flowers };
+  });
+
   protected readonly edges = computed<EdgeView[]>(() =>
     this.layout()
       .points.filter((p) => p.parent !== null)
@@ -198,9 +231,16 @@ export class TreeCanvas {
   }
 
   protected showLabel(point: LayoutPoint): boolean {
-    if (this.focusedId() === point.node.id) return true;
+    // The focused node shows the "+" bud instead — its sheet carries the name.
+    if (this.focusedId() === point.node.id) return false;
     if (this.tree().currentNodeId === point.node.id) return true;
     return this.k() >= 0.55;
+  }
+
+  /** Deterministic horizontal nudge so sibling labels stop stacking. */
+  protected labelX(point: LayoutPoint): number {
+    if (point.depth === 0) return 0;
+    return (hash(point.node.id + ':lx') % 21) - 10;
   }
 
   protected labelText(point: LayoutPoint): string {
@@ -233,18 +273,22 @@ export class TreeCanvas {
 
     const pad = 100;
     const fitK = Math.min(
-      1.15,
       rect.width / (layout.width + pad * 2),
       rect.height / (layout.height + pad * 2),
     );
-    const k = Math.max(0.4, fitK);
+    // Young trees should still fill the view instead of drowning in it.
+    const fillK = (rect.height * 0.42) / Math.max(layout.height + 60, 180);
+    const k = Math.min(1.6, Math.max(0.4, Math.min(fitK, Math.max(1.15, fillK))));
 
     const currentId = this.tree().currentNodeId;
     const target = (currentId && layout.byId.get(currentId)) || layout.points[layout.points.length - 1];
 
     this.k.set(k);
     this.tx.set(rect.width / 2 - target.x * k);
-    this.ty.set(rect.height * 0.6 - target.y * k);
+    let ty = rect.height * 0.6 - target.y * k;
+    // The ground must stay in frame — a tree without its soil floats.
+    ty = Math.min(ty, rect.height - 46 - this.groundY() * k);
+    this.ty.set(ty);
     if (!this.focusedId()) this.focusedId.set(target.node.id);
   }
 

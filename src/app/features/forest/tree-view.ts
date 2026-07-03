@@ -5,12 +5,13 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
+import { SceneBackdrop } from './scene-backdrop';
 import { NodeDetail } from '../node-detail/node-detail';
 import { DateReview } from '../check-in/date-review';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, NodeDetail, DateReview],
+  imports: [RouterLink, TreeCanvas, SceneBackdrop, NodeDetail, DateReview],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
@@ -34,6 +35,11 @@ export class TreeViewPage {
   /** Dates on THIS tree wanting a word. */
   protected readonly pendingReviews = computed(() =>
     this.nodes.needsDateReview().filter((n) => n.treeId === this.id()),
+  );
+
+  protected readonly branchCount = computed(() => (this.nodes.byTree().get(this.id()) ?? []).length);
+  protected readonly bloomCount = computed(
+    () => (this.nodes.byTree().get(this.id()) ?? []).filter((n) => n.status === 'achieved').length,
   );
 
   protected onNodeOpened(node: TreeNode): void {
