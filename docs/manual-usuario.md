@@ -1,0 +1,270 @@
+---
+title: "RodeMap2U — Manual de uso"
+subtitle: "Tu ruta crece contigo 🌱"
+author: "Héctor Coronado"
+date: "Julio 2026"
+lang: es
+toc-title: "Contenido"
+---
+
+# Bienvenida y bienvenido a tu bosque
+
+**RodeMap2U** es un mapa de metas que crece como un árbol. No es una lista de tareas: es un lugar donde tus objetivos se plantan, crecen, florecen — y cuando algo no sale como lo planeaste, **no se marca como fracaso**: se convierte en un punto desde donde brotan caminos nuevos.
+
+Está pensada especialmente para mentes neurodivergentes (TDAH, autismo, y cualquier cerebro que crezca en espiral y no en línea recta). Por eso:
+
+- **Nunca te regaña.** No hay rachas, no hay "atrasado", no hay rojos de alarma.
+- **Las preguntas son de brújula, no de examen.** La app primero te ubica ("estás aquí"), te calma, y solo después te muestra caminos.
+- **Nada se borra jamás.** Lo que ya no quieres ver se guarda en el archivo, recuperable siempre.
+- **Todo es tuyo.** Tus datos viven únicamente en tu dispositivo. Nada sale de ahí sin ti.
+
+**Dirección de la app:** `https://toydrum.github.io/RodeMap2U/`
+
+---
+
+# 1. Instalar la app (opcional pero recomendado)
+
+RodeMap2U es una *PWA* (aplicación web instalable): funciona en el navegador, pero puedes instalarla como una app normal y usarla **sin internet**.
+
+## En Android (Chrome o Edge)
+
+1. Abre la dirección de la app en el navegador.
+2. Toca el menú (⋮) y elige **"Agregar a pantalla de inicio"** o **"Instalar aplicación"**.
+3. Confirma. El icono aparecerá junto a tus demás apps.
+
+## En iPhone / iPad (Safari)
+
+1. Abre la dirección en Safari.
+2. Toca el botón **Compartir** (el cuadrito con flecha).
+3. Elige **"Agregar a pantalla de inicio"**.
+
+## En computadora (Chrome o Edge)
+
+1. Abre la dirección.
+2. En la barra de direcciones aparece un icono de instalación (un monitor con flecha). Tócalo y confirma.
+
+> 💡 Una vez instalada, la app abre y funciona aunque no tengas conexión. Cuando haya una versión nueva, verás un aviso suave: *"Hay una versión nueva · Actualizar cuando quieras"*. Tú decides cuándo — nunca se recarga sola.
+
+---
+
+# 2. El check-in: "¿Dónde sientes que estás?"
+
+Cada vez que entras (si ha pasado un rato desde la última vez), la app abre con una pregunta:
+
+> **¿Dónde sientes que estás?**
+> *No hay respuestas correctas. Solo tú, hoy.*
+
+El check-in tiene tres pasos, y **todos se pueden saltar** sin consecuencia alguna:
+
+1. **Tu clima interno.** Eliges cómo te sientes con cinco climas: ☀️ Radiante · 🌤 En calma · 🌫 Con niebla · 🌧 Pesado · ⛈ En tormenta. No son calificaciones — son clima, y el clima simplemente es.
+2. **¿En qué rama estás hoy?** La app te muestra tus metas activas como tarjetitas. Tocas donde sientas que estás, y el mapa te llevará ahí. Siempre existe la opción **"Solo quiero mirar"**.
+3. **Una notita (opcional).** Un mensaje corto para tu yo del futuro.
+
+Si ese día no quieres responder nada, toca **"Hoy no quiero responder"** — la app te lleva a tu bosque sin más.
+
+> 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
+
+---
+
+# 3. Tu bosque
+
+El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un proyecto, un hábito, un sueño ("Aprender guitarra", "Cuidarme", "Mi negocio"…).
+
+## Plantar un árbol
+
+1. Toca **"+ Plantar un árbol"** (arriba a la derecha).
+2. Escríbele un nombre y elige su color.
+3. Guarda. Tu árbol aparece plantado en la pradera.
+
+## Leer tu bosque de un vistazo
+
+- **Cada árbol se dibuja con su forma real**: un árbol con muchas ramas y logros se ve frondoso y con flores; uno recién plantado es un brotecito. El crecimiento se *ve*.
+- Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
+- **Cuando juntas tres árboles o más, aparece un arroyo** cruzando tu pradera.
+- **Cada meta que floreces hace brotar una flor** en el prado. Tu bosque se llena de vida con tu historia.
+
+Toca cualquier árbol para entrar a su mapa.
+
+---
+
+# 4. Dentro de un árbol
+
+Al entrar ves tu árbol dibujado como un árbol de verdad: tronco, ramas de madera que se afinan, hojitas, y tus metas viviendo en las puntas.
+
+## Moverte por el mapa
+
+| Gesto | Acción |
+|---|---|
+| Arrastrar con un dedo (o el mouse) | Moverte por el árbol |
+| Pellizcar con dos dedos (o Ctrl + rueda) | Acercar / alejar |
+| Botón **"⌖ Centrarme"** | Volver a encuadrar el árbol y tu posición |
+| Un toque sobre una rama | Seleccionarla (aparece el botón **+** para plantar ahí) |
+| Segundo toque sobre la misma rama | Abrir su hoja de detalle |
+
+**Con teclado:** las flechas te mueven entre ramas (↓ al tronco, ↑ hacia las puntas, ←/→ entre hermanas), `Inicio` te lleva a donde estás, `Enter` abre el detalle y `+` o `p` plantan una rama ahí.
+
+## Los estados de una rama
+
+| Estado | Se ve como | Significa |
+|---|---|---|
+| **Semilla** | Un puntito con brote | Una idea esperando su momento |
+| **Creciendo** | Brote con hojas | En movimiento |
+| **Descansando** | Hoja recostada | Pausa a propósito — descansar también es parte |
+| **Florecida** | Flor rosa 🌸 | ¡Floreció! |
+| **Ramificada** | Nudo dorado | De aquí nacieron caminos nuevos |
+
+> 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia.
+
+## Plantar ramas
+
+Hay tres formas, todas equivalentes:
+
+- **Botón "+" flotante**: toca una rama y aparece un botón verde **+** encima. Tócalo y planta una rama hija justo ahí.
+- **"+ Plantar aquí"** (arriba a la derecha): planta una rama nueva desde la raíz del árbol.
+- **Pasitos** (dentro del detalle de una rama): la vía rápida para varios seguidos.
+
+Cada rama nueva crece con una pequeña animación — el árbol está vivo.
+
+---
+
+# 5. La hoja de detalle de una rama
+
+Se abre con un segundo toque sobre la rama. Aquí vive todo lo suyo:
+
+- **Título** — qué quieres que crezca ahí.
+- **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
+- **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
+- **Notas** — lo que quieras recordar.
+- **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
+- **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
+- **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
+- **⏳ Sesión de enfoque aquí** — abre el temporizador vinculado a esta rama.
+- **🗃 Guardar en el archivo** — la rama (y sus hijas) se guardan fuera de la vista. *Nada se borra.*
+
+---
+
+# 6. Cuando una fecha ya pasó
+
+Esto es el corazón de RodeMap2U. Si le pusiste fecha amable a una rama y ese día llegó y pasó, **no pasa nada malo**. La app te lo cuenta así:
+
+> 🍂 **Esta fecha ya pasó — y tú sigues aquí.**
+> *Respira. Las fechas son brújulas, no jueces. Partamos de donde estás.*
+
+Te lo encontrarás sin alarmas, en tres lugares: al terminar tu check-in, como un aviso suave dentro del árbol (*"Hay fechas que quieren platicar contigo"*), y en el detalle de esa rama.
+
+## Tus salidas (todas dignas)
+
+1. **"Sigo aquí, a mi ritmo"** — la meta sigue viva y la fecha se suelta. Sin fecha, sin presión.
+2. **"Busco otro momento"** — eliges una nueva fecha que se sienta posible desde donde estás hoy.
+3. **"Broto ramitas nuevas"** — la transformación (ver abajo).
+4. **"Lo veo después"** — cierras la conversación sin tocar nada. Volverá a aparecer con la misma calma en tu próximo check-in. Nadie cuenta cuántas veces la pospones.
+
+## Brotar ramitas nuevas 🌱
+
+Si eliges transformar, se abre **"Un buen lugar para brotar"**: *estás aquí, y aquí puede crecer algo nuevo*. Para que no enfrentes una página en blanco, la app te ofrece ideas con **"¿Y si probamos…?"**:
+
+- 🌱 **Más pequeño** — una versión mini de la misma meta.
+- 🕐 **En otro momento** — mismo objetivo, otro momento del día.
+- 🔄 **De otra manera** — otra forma de llegar a lo mismo.
+- 🤝 **Con alguien** — acompañarte de alguien.
+- 😴 **Descansar un tiempo** — retomarla cuando respires.
+
+Tocas una idea y se escribe sola (editable); puedes abrir hasta tres caminos — **con uno basta**. Al confirmar **"Que crezcan"**:
+
+- Tu meta original se convierte en un **nudo dorado** del árbol: no se borra, no se tacha. Queda como el lugar donde tu ruta se abrió.
+- Los caminos nuevos brotan de ese nudo como ramitas doradas.
+- Tu "estás aquí" se muda al primer camino nuevo.
+
+---
+
+# 7. Sesiones de enfoque
+
+En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*):
+
+1. Elige una duración: 10, 25, 45 minutos, u otra.
+2. Toca **"Empezar"**. Un anillo respira suavemente mientras estás en ello.
+3. Puedes **pausar** y **seguir** cuando quieras.
+4. Al tocar **"Terminar"**, la app celebra lo que haya sido: *"Estuviste aquí 12 minutos 🌱"*.
+
+No hay fracaso posible: **estar un ratito es suficiente**. Los minutos nunca se juzgan, solo se agradecen. Si alguna vez cierras la app con una sesión abierta, la próxima vez se cierra sola *"con cariño"*.
+
+Las sesiones vinculadas a una rama se van sumando: en su detalle verás sus *"minutos de enfoque aquí"*.
+
+---
+
+# 8. Ajustes
+
+En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad:
+
+## Apariencia
+
+- **Tema**: 🌿 *Jardín* (claro y cálido, el predeterminado) o 👾 *Retro terminal* (oscuro, verde fósforo, con scanlines — para quien disfruta esa vibra).
+- **Idioma**: Español o English.
+- **Movimiento**: *Como mi sistema* (respeta tu configuración de accesibilidad), *Reducido* (casi sin animaciones) o *Completo*.
+- **Tamaño de letra**: tres tamaños.
+- **Fuente amigable para dislexia**: activa la tipografía Atkinson Hyperlegible en toda la app.
+
+## Enfoque
+
+- **Duración predeterminada** del temporizador.
+
+## Tus datos
+
+- **Exportar mi copia**: descarga un archivo con todo tu bosque (árboles, ramas, check-ins, sesiones y ajustes). Hazlo seguido — es tu respaldo.
+- **Importar una copia**: restaura un archivo exportado. *Ojo:* reemplaza lo que haya en ese momento — pero antes de reemplazar, la app **descarga automáticamente un respaldo** de lo actual, así que siempre puedes volver atrás.
+
+## Archivo
+
+Aquí viven los árboles que guardaste fuera de la vista. **"Devolver al bosque"** los restaura completos.
+
+---
+
+# 9. Tu privacidad
+
+- **Todo vive en tu dispositivo.** RodeMap2U no tiene servidor, ni cuentas, ni nube. Nadie —ni siquiera quien hizo la app— puede ver tus metas, tus climas ni tus notas.
+- Por lo mismo, **tus datos no viajan solos entre dispositivos**: si quieres pasar tu bosque del teléfono a la computadora, usa *Exportar* en uno e *Importar* en el otro.
+- Consejo de cuidado: **exporta tu copia de vez en cuando**, especialmente en iPhone/iPad (el sistema puede limpiar datos de sitios poco visitados si la app no está instalada).
+
+---
+
+# 10. Preguntas frecuentes
+
+**¿Qué pasa si no entro en semanas?**
+Nada. La app no cuenta días, no rompe rachas (no existen) y no te reclama. Cuando vuelvas, te preguntará dónde sientes que estás — y partirán de ahí.
+
+**¿"Fallé" una meta?**
+En RodeMap2U ninguna meta falla: las fechas que pasan se transforman en conversaciones, y las metas que ya no van pueden brotar en caminos nuevos o descansar en el archivo. El árbol solo sabe crecer.
+
+**¿Puedo borrar algo definitivamente?**
+No hay botón de borrar, a propósito. El archivo guarda lo que no quieres ver, recuperable siempre.
+
+**¿La fecha amable me va a mandar notificaciones?**
+No. RodeMap2U nunca envía notificaciones. Las fechas solo abren una conversación suave cuando tú entras a la app.
+
+**¿Funciona sin internet?**
+Sí — instalada como app, funciona completa sin conexión.
+
+**¿Puedo tener varias áreas de vida?**
+Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bosque. 🌊
+
+---
+
+# Glosario del bosque
+
+| Término | Qué es |
+|---|---|
+| **Bosque** | Tu pantalla principal; el conjunto de tus áreas de vida |
+| **Árbol** | Un área de tu vida (proyecto, hábito, sueño) |
+| **Rama** | Una meta o intención dentro de un árbol |
+| **Pasito** | Una rama hija chiquita: el siguiente paso concreto |
+| **Fecha amable** | Una brújula temporal opcional — nunca un contrato |
+| **Florecer** | Lograr una meta (aparece su flor 🌸) |
+| **Ramificar / Brotar** | Transformar una meta en caminos nuevos |
+| **Nudo** | El punto dorado donde una meta se transformó — parte de tu historia |
+| **Check-in** | La pregunta de apertura: *¿Dónde sientes que estás?* |
+| **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
+| **Archivo** | Donde descansa lo que no quieres ver — nada se borra |
+
+---
+
+*Hecho con cariño para mentes que crecen en espiral, no en línea recta.* 🌱
