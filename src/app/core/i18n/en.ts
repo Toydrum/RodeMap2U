@@ -212,6 +212,13 @@ export const EN: Dict = {
     deletedToast: '“{name}” went with the wind. Your backup was downloaded. 🍃',
     about: 'About',
     aboutText: 'Made with care for minds that grow in spirals, not straight lines.',
+    updatesTitle: 'Updates',
+    checkNow: 'Check for updates now',
+    checking: 'Checking…',
+    upToDate: 'You already have the latest version 🌿',
+    updateFailed: 'Could not check — try again when online.',
+    repair: 'Deep repair',
+    repairHint: 'Reinstalls the app and its cache from scratch. Your trees, notes and settings are NOT touched.',
   },
   guide: {
     title: 'How to use the app',

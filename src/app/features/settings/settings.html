@@ -139,6 +139,25 @@
     }
   </section>
 
+  <!-- Updates: never wonder which version you're on again -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.updatesTitle }}</h2>
+    <div class="row">
+      <span class="label">{{ version }}</span>
+      <div class="opts">
+        <button type="button" class="btn btn-soft" (click)="checkNow()" [disabled]="checkingUpdate()">
+          🔄 {{ checkingUpdate() ? i18n.t().settings.checking : i18n.t().settings.checkNow }}
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.repairHint }}</span>
+      <div class="opts">
+        <button type="button" class="btn btn-ghost" (click)="repair()">🩹 {{ i18n.t().settings.repair }}</button>
+      </div>
+    </div>
+  </section>
+
   <p class="about">{{ i18n.t().settings.aboutText }}</p>
   <p class="version">{{ version }}</p>
 

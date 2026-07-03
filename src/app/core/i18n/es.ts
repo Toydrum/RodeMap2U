@@ -214,6 +214,13 @@ export const ES = {
     deletedToast: '«{name}» se fue con el viento. Tu respaldo quedó descargado. 🍃',
     about: 'Acerca de',
     aboutText: 'Hecho con cariño para mentes que crecen en espiral, no en línea recta.',
+    updatesTitle: 'Actualizaciones',
+    checkNow: 'Buscar actualización ahora',
+    checking: 'Buscando…',
+    upToDate: 'Ya tienes la última versión 🌿',
+    updateFailed: 'No se pudo revisar — intenta cuando haya conexión.',
+    repair: 'Reparación profunda',
+    repairHint: 'Reinstala la app y su caché desde cero. Tus árboles, notitas y ajustes NO se tocan.',
   },
   guide: {
     title: 'Cómo usar la app',

@@ -7,6 +7,7 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { BackupService } from '../../core/repos/backup.service';
 import { ToastService } from '../../shared/ui/toast.service';
+import { SwUpdate } from '@angular/service-worker';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 import { APP_VERSION } from '../../core/version';
 
@@ -18,7 +19,41 @@ import { APP_VERSION } from '../../core/version';
 })
 export class SettingsPage {
   protected readonly version = APP_VERSION;
+  protected readonly checkingUpdate = signal(false);
+  private readonly swUpdate = inject(SwUpdate);
   protected readonly i18n = inject(I18nService);
+
+  /** One tap: check, and if something new exists, activate + reload. */
+  protected async checkNow(): Promise<void> {
+    if (this.checkingUpdate()) return;
+    this.checkingUpdate.set(true);
+    try {
+      if (this.swUpdate.isEnabled && (await this.swUpdate.checkForUpdate())) {
+        await this.swUpdate.activateUpdate().catch(() => {});
+        location.reload();
+        return;
+      }
+      this.toast.show({ message: this.i18n.t().settings.upToDate });
+    } catch {
+      this.toast.show({ message: this.i18n.t().settings.updateFailed });
+    } finally {
+      this.checkingUpdate.set(false);
+    }
+  }
+
+  /** Nuclear but safe: unregister the SW + drop its caches, then reload.
+   *  IndexedDB (trees, notes, settings) is untouched. */
+  protected async repair(): Promise<void> {
+    try {
+      const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
+      for (const reg of regs) await reg.unregister();
+      if ('caches' in window) {
+        for (const key of await caches.keys()) await caches.delete(key);
+      }
+    } finally {
+      location.reload();
+    }
+  }
   protected readonly settings = inject(SettingsService);
   protected readonly theme = inject(ThemeService);
   protected readonly trees = inject(TreesRepo);
