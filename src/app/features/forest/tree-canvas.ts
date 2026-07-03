@@ -159,25 +159,41 @@ export class TreeCanvas {
     this.layout()
       .points.filter((p) => p.parent !== null)
       .map((p) => {
-        const geometry = edgeGeometry(p.parent!, p);
+        const wood = this.wood();
+        const geometry = edgeGeometry(p.parent!, p, wood.bow);
         const isLeaf = this.nodes.childrenOf(p.node).length === 0;
         return {
           id: p.node.id,
-          d: branchRibbon(p.parent!, p, geometry, isLeaf),
+          d: branchRibbon(p.parent!, p, geometry, isLeaf, wood.girth),
           fill: this.woodFill(p),
           isNew: this.bornThisSession.has(p.node.id),
           leaves: this.leavesFor(p, geometry, isLeaf),
           grain: geometry.d,
-          grainWidth: Math.max(1.1, widthAtDepth(p.depth) * 0.28),
+          grainWidth: Math.max(1.1, widthAtDepth(p.depth, wood.girth) * 0.28),
           grainOffset: hash(p.node.id + ':grain') % 16,
         };
       }),
   );
 
+  /** Each tree grows its own wood: sinuosity, girth and bark family. */
+  protected readonly wood = computed(() => {
+    const h = hash(this.tree().id + ':wood');
+    return {
+      bow: 0.85 + (h % 46) / 100,
+      girth: 0.88 + ((h >> 5) % 28) / 100,
+      barkBase: [
+        'var(--rm-bark)',
+        'color-mix(in srgb, var(--rm-bark) 68%, #4a3826)',
+        'color-mix(in srgb, var(--rm-bark) 72%, #94815f)',
+      ][h % 3],
+    };
+  });
+
   /** Bark near the trunk, greener toward the twigs; branch-children lean golden. */
   private woodFill(point: LayoutPoint): string {
-    const barkPct = Math.max(30, 92 - point.depth * 16);
-    const base = `color-mix(in srgb, var(--rm-bark) ${barkPct}%, var(--rm-twig))`;
+    const jitter = (hash(point.node.id + ':barkjit') % 9) - 4;
+    const barkPct = Math.min(94, Math.max(28, 92 - point.depth * 16 + jitter));
+    const base = `color-mix(in srgb, ${this.wood().barkBase} ${barkPct}%, var(--rm-twig))`;
     return point.node.origin === 'branch'
       ? `color-mix(in srgb, ${base} 72%, var(--status-branched))`
       : base;
@@ -186,7 +202,8 @@ export class TreeCanvas {
   /** Trunk ribbon: ground → root, with a gentle sway. */
   protected trunkPath(root: LayoutPoint): string {
     const gy = this.groundY();
-    const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6;
+    const wood = this.wood();
+    const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6 * wood.bow;
     return taperedRibbon(
       root.x + sway,
       gy - 2,
@@ -196,8 +213,8 @@ export class TreeCanvas {
       root.y + (gy - root.y) * 0.35,
       root.x,
       root.y,
-      26,
-      widthAtDepth(0) * 0.9,
+      26 * wood.girth,
+      widthAtDepth(0, wood.girth) * 0.9,
     );
   }
 

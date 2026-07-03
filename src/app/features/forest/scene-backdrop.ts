@@ -211,11 +211,14 @@ export class SceneBackdrop {
         }
         h = h >>> 0;
         const y = 58 + ((h >> 6) % 78);
+        // Trees sit farther than undergrowth — cap their scale so the size
+        // gradient toward the foreground stays believable.
+        const cap = kind === 'tree' || kind === 'pine' ? 0.85 : 1;
         out.push({
           kind,
           x: 12 + (h % 976),
           y,
-          s: (0.55 + ((h >> 3) % 50) / 100) * (0.6 + ((y - 58) / 78) * 0.5),
+          s: (0.55 + ((h >> 3) % 50) / 100) * (0.6 + ((y - 58) / 78) * 0.5) * cap,
           flip: h % 2 === 0,
         });
       }

@@ -184,7 +184,7 @@
             class="plot"
             [routerLink]="['/tree', tree.id]"
             [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
-            [style.transform]="'translateY(' + staggerFor(tree.id) + 'px)'"
+            [style.transform]="'translateY(' + staggerFor(tree.id) + 'px) scale(' + (0.96 + staggerFor(tree.id) * 0.004) + ')'"
           >
             <button
               type="button"

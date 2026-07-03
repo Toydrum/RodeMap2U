@@ -141,9 +141,10 @@ export function edgePointAt(
   return { x, y };
 }
 
-/** Wood width by depth — exponential taper like a real tree. */
-export function widthAtDepth(depth: number): number {
-  return Math.max(2.6, 18 * Math.pow(0.6, depth));
+/** Wood width by depth — exponential taper like a real tree.
+ *  `girth` is the tree's personal thickness (chunky oaks vs slim birches). */
+export function widthAtDepth(depth: number, girth = 1): number {
+  return Math.max(2.6, 18 * girth * Math.pow(0.6, depth));
 }
 
 /**
@@ -192,9 +193,10 @@ export function branchRibbon(
   child: LayoutPoint,
   geometry: EdgeGeometry,
   childIsLeaf: boolean,
+  girth = 1,
 ): string {
-  const w0 = widthAtDepth(parent.depth) * 0.82;
-  const w1 = widthAtDepth(child.depth) * (childIsLeaf ? 0.45 : 0.82);
+  const w0 = widthAtDepth(parent.depth, girth) * 0.82;
+  const w1 = widthAtDepth(child.depth, girth) * (childIsLeaf ? 0.45 : 0.82);
   return taperedRibbon(
     parent.x,
     parent.y,
