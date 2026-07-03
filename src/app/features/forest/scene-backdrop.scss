@@ -576,6 +576,76 @@
   opacity: 0.35;
 }
 
+/* Middle distance: wild trees and undergrowth, aerial-muted. */
+.mid-meadow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  transition: opacity 1.2s ease;
+
+  .mtrunk {
+    fill: color-mix(in srgb, var(--rm-bark, #6f5640) 60%, var(--surface-2));
+  }
+
+  .mcanopy {
+    fill: color-mix(in srgb, var(--rm-twig, #7f9a63) 62%, var(--surface-2));
+  }
+
+  .mlight {
+    fill: color-mix(in srgb, #f6f3dd 50%, transparent);
+    opacity: 0.5;
+  }
+
+  .mpine path {
+    fill: color-mix(in srgb, var(--accent-pine) 42%, var(--surface-2));
+  }
+
+  .mbush ellipse {
+    fill: color-mix(in srgb, var(--rm-twig, #7f9a63) 44%, var(--surface-2));
+  }
+
+  .mgrass path {
+    fill: none;
+    stroke: color-mix(in srgb, var(--rm-twig, #7f9a63) 55%, var(--surface-2));
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .mpetals {
+    fill: color-mix(in srgb, #fffdf2 82%, var(--surface-2));
+  }
+
+  .mheart {
+    fill: #e3b345;
+    opacity: 0.85;
+  }
+}
+
+:host(.mood-foggy) .mid-meadow {
+  opacity: 0.4;
+}
+
+[data-theme='terminal'] .mid-meadow {
+  .mtrunk {
+    fill: color-mix(in srgb, var(--primary) 22%, var(--bg));
+  }
+
+  .mcanopy,
+  .mbush ellipse,
+  .mpine path {
+    fill: color-mix(in srgb, var(--primary) 16%, var(--bg));
+  }
+
+  .mgrass path {
+    stroke: color-mix(in srgb, var(--primary) 30%, var(--bg));
+  }
+
+  .mpetals {
+    fill: color-mix(in srgb, var(--primary) 45%, var(--bg));
+  }
+}
+
 [data-theme='terminal'] .far-meadow {
   .band,
   .grove ellipse {

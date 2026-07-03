@@ -95,6 +95,57 @@ import { Feeling } from '../../core/db/schema';
       </g>
     </svg>
 
+    <!-- Mid meadow: wild trees, shrubs and grass filling the middle distance -->
+    <svg
+      class="mid-meadow"
+      [style.bottom]="midMeadowBottom()"
+      viewBox="0 0 1000 140"
+      preserveAspectRatio="xMidYMax slice"
+      aria-hidden="true"
+    >
+      @for (item of midFlora; track $index) {
+        <g [attr.transform]="'translate(' + item.x + ' ' + item.y + ') scale(' + (item.flip ? -item.s : item.s) + ' ' + item.s + ')'">
+          @switch (item.kind) {
+            @case ('tree') {
+              <g class="mtree">
+                <rect x="-1.6" y="-9" width="3.2" height="10" rx="1.2" class="mtrunk" />
+                <ellipse cx="0" cy="-14" rx="9" ry="7.5" class="mcanopy" />
+                <ellipse cx="-6" cy="-10.5" rx="5.5" ry="4.5" class="mcanopy" />
+                <ellipse cx="6" cy="-11" rx="5" ry="4" class="mcanopy" />
+                <ellipse cx="-1" cy="-17.5" rx="4.5" ry="3" class="mlight" />
+              </g>
+            }
+            @case ('pine') {
+              <g class="mpine">
+                <rect x="-1.2" y="-4" width="2.4" height="5" rx="1" class="mtrunk" />
+                <path d="M 0 -22 L 6.5 -11 L 3 -11 L 8 -3 L -8 -3 L -3 -11 L -6.5 -11 Z" />
+              </g>
+            }
+            @case ('bush') {
+              <g class="mbush">
+                <ellipse cx="-4.5" cy="-2" rx="7" ry="4.5" />
+                <ellipse cx="4.5" cy="-1.8" rx="6.5" ry="4.2" />
+                <ellipse cx="0" cy="-4.5" rx="6.5" ry="4.5" />
+              </g>
+            }
+            @case ('grass') {
+              <g class="mgrass">
+                <path d="M 0 0 q -2 -8 -4 -10" />
+                <path d="M 2 0 q 0 -9 1 -11" />
+                <path d="M 4 0 q 3 -7 5 -9" />
+              </g>
+            }
+            @case ('daisy') {
+              <g class="mdaisy">
+                <circle r="1.9" class="mpetals" />
+                <circle r="0.8" class="mheart" />
+              </g>
+            }
+          }
+        </g>
+      }
+    </svg>
+
     <!-- Distant meadow: rolling far hills + tiny groves before the peaks -->
     <svg
       class="far-meadow"
@@ -136,6 +187,41 @@ export class SceneBackdrop {
     const h = (i * 2654435761) >>> 0;
     return { x: 30 + (h % 940), y: 34 + ((h >> 6) % 22), s: 0.5 + ((h >> 3) % 55) / 100 };
   });
+
+  /** The middle distance sits between the far hills and the foreground. */
+  protected readonly midMeadowBottom = computed(() => `calc(${this.mountainsBottom()} - 178px)`);
+
+  /** Wild mid-distance flora (fixed-seed): trees, pines, shrubs, grass, daisies. */
+  protected readonly midFlora = (() => {
+    const kinds: [string, number][] = [
+      ['tree', 8],
+      ['pine', 5],
+      ['bush', 9],
+      ['grass', 18],
+      ['daisy', 10],
+    ];
+    const out: { kind: string; x: number; y: number; s: number; flip: boolean }[] = [];
+    for (const [kind, count] of kinds) {
+      for (let i = 0; i < count; i++) {
+        let h = 2166136261;
+        const key = kind + ':' + i;
+        for (let c = 0; c < key.length; c++) {
+          h ^= key.charCodeAt(c);
+          h = Math.imul(h, 16777619);
+        }
+        h = h >>> 0;
+        const y = 58 + ((h >> 6) % 78);
+        out.push({
+          kind,
+          x: 12 + (h % 976),
+          y,
+          s: (0.55 + ((h >> 3) % 50) / 100) * (0.6 + ((y - 58) / 78) * 0.5),
+          flip: h % 2 === 0,
+        });
+      }
+    }
+    return out.sort((a, b) => a.y - b.y);
+  })();
 
   protected readonly treelineXs = [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960];
 

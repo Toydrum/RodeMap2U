@@ -119,19 +119,19 @@ export class ForestPage {
   });
 
   /** Clustered grass (3 blades each), deterministic positions. */
-  protected readonly grass: GrassCluster[] = Array.from({ length: 30 }, (_, i) => {
+  protected readonly grass: GrassCluster[] = Array.from({ length: 42 }, (_, i) => {
     const h = hash('grass:' + i);
-    return { x: 15 + (h % 970), y: 208 + ((h >> 6) % 48), flip: h % 2 === 0 };
+    return { x: 15 + (h % 970), y: 206 + ((h >> 6) % 50), flip: h % 2 === 0 };
   });
 
   /* Meadow texture — all fixed-seed, never reshuffles (references: tall
      silhouette tufts + seed-head spikes, shrubs, daisies, dappled light). */
   protected readonly sunPatches = scatter('sunpatch', 4, 80, 820, 158, 66);
-  protected readonly bushes = scatter('bush', 7, 160, 800, 198, 42);
-  protected readonly richTufts = scatter('rich', 18, 10, 960, 198, 56);
-  protected readonly spikes = scatter('spike', 14, 20, 950, 198, 56);
-  protected readonly daisies = scatter('daisy', 9, 170, 790, 200, 52);
-  protected readonly clovers = scatter('clover', 12, 175, 790, 206, 48);
+  protected readonly bushes = scatter('bush', 9, 160, 800, 198, 42);
+  protected readonly richTufts = scatter('rich', 26, 10, 960, 198, 56);
+  protected readonly spikes = scatter('spike', 20, 20, 950, 198, 56);
+  protected readonly daisies = scatter('daisy', 14, 170, 790, 200, 52);
+  protected readonly clovers = scatter('clover', 18, 175, 790, 206, 48);
   /** Hand-placed by the stream banks (only shown once the stream flows). */
   protected readonly cattails: MeadowDecor[] = [
     { x: 655, y: 152, s: 1, flip: false },
