@@ -8,11 +8,19 @@
       <img src="icons/logo.svg" alt="" width="34" height="34">
       <h1>{{ i18n.t().forest.title }}</h1>
     </span>
-    @if (trees.active().length) {
-      <button type="button" class="btn btn-primary" (click)="creating.set(true)">
-        + {{ i18n.t().forest.newTree }}
-      </button>
-    }
+    <span class="head-actions">
+      <a
+        routerLink="/check-in"
+        class="btn btn-ghost checkin-btn"
+        [attr.aria-label]="i18n.t().nav.checkIn"
+        [title]="i18n.t().checkIn.title"
+      >🧭</a>
+      @if (trees.active().length) {
+        <button type="button" class="btn btn-primary" (click)="creating.set(true)">
+          + {{ i18n.t().forest.newTree }}
+        </button>
+      }
+    </span>
   </header>
 
   <!-- The meadow: backdrop + planted trees share the same band -->

@@ -47,6 +47,25 @@
   h1 {
     margin: 0;
   }
+
+  .head-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .checkin-btn {
+    min-width: 46px;
+    min-height: 46px;
+    padding: 0.4rem;
+    font-size: 1.15rem;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    border-radius: 50%;
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
 }
 
 .first-time {
