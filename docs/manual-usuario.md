@@ -215,7 +215,7 @@ En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad:
 
 ## Archivo
 
-Aquí viven los árboles que guardaste fuera de la vista. **"Devolver al bosque"** los restaura completos.
+Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en la cabecera de cada árbol). **"Devolver al bosque"** los restaura completos. **"Borrar para siempre"** es la única acción irreversible de la app: pide confirmación y descarga un respaldo automático antes de ejecutarse.
 
 ---
 
@@ -236,7 +236,7 @@ Nada. La app no cuenta días, no rompe rachas (no existen) y no te reclama. Cuan
 En RodeMap2U ninguna meta falla: las fechas que pasan se transforman en conversaciones, y las metas que ya no van pueden brotar en caminos nuevos o descansar en el archivo. El árbol solo sabe crecer.
 
 **¿Puedo borrar algo definitivamente?**
-No hay botón de borrar, a propósito. El archivo guarda lo que no quieres ver, recuperable siempre.
+Casi nunca hace falta: ramas y árboles se guardan en el archivo (🗃 en la cabecera de cada árbol), recuperables siempre desde Ajustes. Si de verdad quieres borrar un árbol para siempre, esa opción existe **solo dentro del archivo** — y antes de hacerlo la app descarga automáticamente un respaldo completo de tu bosque, por si algún día lo extrañas.
 
 **¿La fecha amable me va a mandar notificaciones?**
 No. RodeMap2U nunca envía notificaciones. Las fechas solo abren una conversación suave cuando tú entras a la app.

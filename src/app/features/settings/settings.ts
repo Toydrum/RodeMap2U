@@ -4,9 +4,10 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
+import { NodesRepo } from '../../core/repos/nodes.repo';
 import { BackupService } from '../../core/repos/backup.service';
 import { ToastService } from '../../shared/ui/toast.service';
-import { Lang, MotionPref, TextSize, ThemeName } from '../../core/db/schema';
+import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 
 @Component({
   selector: 'app-settings',
@@ -23,6 +24,9 @@ export class SettingsPage {
   private readonly toast = inject(ToastService);
 
   protected readonly importing = signal(false);
+  /** Tree pending permanent deletion (confirm sheet open). */
+  protected readonly deleting = signal<Tree | null>(null);
+  private readonly nodes = inject(NodesRepo);
 
   protected setTheme(theme: ThemeName): void {
     void this.theme.setTheme(theme);
@@ -50,6 +54,24 @@ export class SettingsPage {
 
   protected exportData(): void {
     void this.backup.download();
+  }
+
+  protected branchCountOf(tree: Tree): number {
+    return this.nodes.all().filter((n) => n.treeId === tree.id).length;
+  }
+
+  /** The ONLY irreversible action in the app — backup first, always. */
+  protected async deleteForever(): Promise<void> {
+    const tree = this.deleting();
+    if (!tree) return;
+    await this.backup.download('rodemap2u-pre-delete');
+    const treeNodes = this.nodes.all().filter((n) => n.treeId === tree.id);
+    await this.nodes.tombstoneMany(treeNodes);
+    await this.trees.tombstone(tree);
+    this.deleting.set(null);
+    this.toast.show({
+      message: this.i18n.fill(this.i18n.t().settings.deletedToast, { name: tree.name }),
+    });
   }
 
   protected async onImportFile(event: Event): Promise<void> {

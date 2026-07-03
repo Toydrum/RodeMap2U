@@ -11,6 +11,13 @@
           }
         </span>
       </div>
+      <button
+        type="button"
+        class="btn btn-ghost tree-archive"
+        (click)="archiving.set(true)"
+        [attr.aria-label]="i18n.t().tree.archiveAction"
+        [title]="i18n.t().tree.archiveAction"
+      >🗃</button>
       <button type="button" class="btn btn-primary plant" (click)="planting.set({ parent: null })">
         + {{ i18n.t().tree.plant }}
       </button>
@@ -76,6 +83,24 @@
 
     @if (reviewing()) {
       <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+    }
+
+    @if (archiving()) {
+      <div class="sheet-backdrop" (click)="archiving.set(false)">
+        <div class="sheet card confirm" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+          <span class="confirm-icon" aria-hidden="true">🗃</span>
+          <h2>{{ i18n.fill(i18n.t().tree.archiveTitle, { name: t.name }) }}</h2>
+          <p class="confirm-body">{{ i18n.t().tree.archiveBody }}</p>
+          <div class="row">
+            <button type="button" class="btn btn-ghost" (click)="archiving.set(false)">
+              {{ i18n.t().common.cancel }}
+            </button>
+            <button type="button" class="btn btn-primary" (click)="archiveTree()">
+              {{ i18n.t().tree.archiveCta }}
+            </button>
+          </div>
+        </div>
+      </div>
     }
   </div>
 } @else {

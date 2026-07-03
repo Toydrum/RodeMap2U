@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
+import { ToastService } from '../../shared/ui/toast.service';
 import { TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
 import { SceneBackdrop } from './scene-backdrop';
@@ -30,7 +31,9 @@ export class TreeViewPage {
   /** null = closed; { parent: null } = plant a root; { parent: node } = plant under it. */
   protected readonly planting = signal<{ parent: TreeNode | null } | null>(null);
   protected readonly reviewing = signal(false);
+  protected readonly archiving = signal(false);
   protected readonly newTitle = signal('');
+  private readonly toast = inject(ToastService);
 
   /** Dates on THIS tree wanting a word. */
   protected readonly pendingReviews = computed(() =>
@@ -73,6 +76,18 @@ export class TreeViewPage {
   }
 
   protected notFoundGoHome(): void {
+    void this.router.navigate(['/forest']);
+  }
+
+  /** "Delete" the compass way: the tree rests in the archive, recoverable. */
+  protected async archiveTree(): Promise<void> {
+    const tree = this.tree();
+    if (!tree) return;
+    await this.trees.archive(tree);
+    this.archiving.set(false);
+    this.toast.show({
+      message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
+    });
     void this.router.navigate(['/forest']);
   }
 }

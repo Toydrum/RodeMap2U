@@ -59,7 +59,11 @@ export class CheckInPage {
     return result.slice(0, 12);
   });
 
-  protected readonly pendingReviews = computed(() => this.nodes.needsDateReview());
+  /** Only dates from trees still standing in the forest — archived ones rest in peace. */
+  protected readonly pendingReviews = computed(() => {
+    const activeIds = new Set(this.trees.active().map((t) => t.id));
+    return this.nodes.needsDateReview().filter((n) => activeIds.has(n.treeId));
+  });
 
   protected pickFeeling(feeling: Feeling): void {
     this.feeling.set(feeling);

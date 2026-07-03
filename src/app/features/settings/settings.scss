@@ -178,3 +178,44 @@
   font-size: 0.85rem;
   margin-top: 1.6rem;
 }
+
+.danger {
+  color: color-mix(in srgb, var(--status-achieved) 70%, var(--text-dim));
+
+  &:hover {
+    color: var(--status-achieved);
+    background: color-mix(in srgb, var(--status-achieved) 10%, transparent);
+  }
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(20, 26, 18, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.confirm {
+  width: min(460px, 100%);
+  padding: 1.6rem;
+  text-align: center;
+
+  .confirm-icon {
+    font-size: 2rem;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+}

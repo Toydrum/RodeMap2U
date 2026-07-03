@@ -104,6 +104,12 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     await this.saveMany(toArchive);
   }
 
+  /** Permanent removal (sync tombstones) for a whole tree's nodes — atomic. */
+  async tombstoneMany(records: TreeNode[]): Promise<void> {
+    const now = Date.now();
+    await this.saveMany(records.map((n) => stamp({ ...n, deletedAt: now }, now)));
+  }
+
   /**
    * The heart: a passed date becomes a branch point. Atomic — parent flips to
    * 'branched' (original targetDate preserved as history) and the alternatives

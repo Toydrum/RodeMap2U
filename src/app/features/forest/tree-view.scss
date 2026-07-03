@@ -44,6 +44,31 @@
     font-size: 0.9rem;
     white-space: nowrap;
   }
+
+  .tree-archive {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.4rem 0.5rem;
+    font-size: 1.05rem;
+  }
+}
+
+.confirm {
+  text-align: center;
+
+  .confirm-icon {
+    font-size: 2rem;
+    display: block;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    justify-content: center !important;
+  }
 }
 
 .review-banner {

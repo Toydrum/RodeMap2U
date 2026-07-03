@@ -1,0 +1,17 @@
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch({ channel: 'msedge', headless: true });
+const page = await browser.newPage({ viewport: { width: 900, height: 800 } });
+const out = process.argv[2];
+await page.goto('http://localhost:8795/tree/demo-seedling?seed=demo', { waitUntil: 'networkidle' });
+await page.click('.tree-archive');
+await page.waitForSelector('.confirm');
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${out}/archive-confirm.png` });
+await page.click('button:has-text("Que descanse")');
+await page.waitForURL('**/forest**', { timeout: 5000 });
+await page.waitForTimeout(600);
+console.log('archived OK — landed on forest, toast:', await page.locator('.toast').textContent().catch(() => 'n/a'));
+await page.goto('http://localhost:8795/settings?seed=demo', { waitUntil: 'networkidle' });
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${out}/settings-archive.png` });
+await browser.close();
