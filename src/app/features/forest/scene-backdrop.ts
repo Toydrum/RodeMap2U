@@ -38,6 +38,10 @@ import { Feeling } from '../../core/db/schema';
       <div class="fog" aria-hidden="true"></div>
     }
 
+    @if (mood() === 'stormy') {
+      <div class="rain" aria-hidden="true"></div>
+    }
+
     <svg
       class="mountains"
       [style.bottom]="mountainsBottom()"

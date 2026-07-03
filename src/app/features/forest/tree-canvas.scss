@@ -157,10 +157,14 @@
   fill: color-mix(in srgb, currentColor 55%, transparent);
 }
 
+.knot-halo {
+  fill: color-mix(in srgb, currentColor 22%, transparent);
+}
+
 .knot-ring {
   fill: var(--surface);
   stroke: currentColor;
-  stroke-width: 3.4;
+  stroke-width: 3.8;
 }
 
 .focus-ring {

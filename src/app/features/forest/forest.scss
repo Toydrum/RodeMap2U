@@ -191,17 +191,17 @@
   /* Quiet archive affordance — visible (no hidden gestures), never loud */
   .plot-archive {
     position: absolute;
-    top: 0;
-    right: 2px;
+    bottom: 66px;
+    right: -4px;
     z-index: 3;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: none;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--surface) 75%, transparent);
-    font-size: 0.95rem;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    font-size: 0.85rem;
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.3;
     transition: opacity 0.2s ease, background 0.2s ease;
   }
 

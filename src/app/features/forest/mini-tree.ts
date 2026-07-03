@@ -21,7 +21,7 @@ interface MiniBranch {
 interface MiniDot {
   x: number;
   y: number;
-  kind: 'bloom' | 'bud' | 'foliage' | 'leaf';
+  kind: 'bloom' | 'bud' | 'foliage' | 'leaf' | 'knot';
   angle?: number;
   size?: number;
 }
@@ -56,6 +56,11 @@ const PAD = 12;
           @if (dot.kind === 'bloom') {
             <g [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ')'">
               <g appFlower [flower]="species()" [scale]="0.52" />
+            </g>
+          } @else if (dot.kind === 'knot') {
+            <g [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ')'">
+              <circle r="4.4" class="knot-ring" />
+              <circle r="1.7" class="knot-core" />
             </g>
           } @else if (dot.kind === 'bud') {
             <circle [attr.cx]="dot.x" [attr.cy]="dot.y" r="2.1" class="bud" />
@@ -108,6 +113,14 @@ const PAD = 12;
     .branch-leaf {
       fill: color-mix(in srgb, var(--status-growing) 78%, var(--surface, #fdfbf3));
       opacity: 0.9;
+    }
+    .knot-ring {
+      fill: var(--surface, #fdfbf3);
+      stroke: var(--status-branched);
+      stroke-width: 2;
+    }
+    .knot-core {
+      fill: var(--status-branched);
     }
     .foliage ellipse {
       fill: color-mix(in srgb, var(--rm-twig, #7f9a63) 85%, var(--status-growing));
@@ -234,6 +247,8 @@ export class MiniTree {
 
       if (p.node.status === 'achieved') {
         dots.push({ x: sp.x, y: sp.y, kind: 'bloom' });
+      } else if (p.node.status === 'branched') {
+        dots.push({ x: sp.x, y: sp.y, kind: 'knot' });
       } else if (p.node.status === 'growing') {
         dots.push({ x: sp.x, y: sp.y, kind: 'bud' });
       } else if (this.nodes.childrenOf(p.node).length === 0) {
