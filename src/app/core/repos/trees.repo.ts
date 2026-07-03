@@ -15,6 +15,18 @@ export class TreesRepo extends RecordsRepo<Tree> {
 
   readonly archived = computed(() => this.all().filter((t) => t.archivedAt));
 
+  /** Persist a user-arranged order (gap-numbered so future inserts stay easy). */
+  async setOrder(ids: string[]): Promise<void> {
+    const byId = this.byId();
+    const updates: Tree[] = [];
+    ids.forEach((id, index) => {
+      const tree = byId.get(id);
+      const order = (index + 1) * 10;
+      if (tree && tree.order !== order) updates.push({ ...tree, order });
+    });
+    if (updates.length) await this.saveMany(updates);
+  }
+
   async create(name: string, accent: AccentToken): Promise<Tree> {
     const maxOrder = Math.max(0, ...this.active().map((t) => t.order));
     const tree: Tree = {

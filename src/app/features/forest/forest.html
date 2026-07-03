@@ -179,13 +179,25 @@
     <!-- Planted trees -->
     @if (trees.active().length) {
       <div class="plots container">
-        @for (tree of trees.active(); track tree.id) {
+        @for (tree of displayTrees(); track tree.id) {
           <a
             class="plot"
             [routerLink]="['/tree', tree.id]"
+            [attr.data-tree-id]="tree.id"
+            [class.dragging]="draggingId() === tree.id"
+            (dragstart)="$event.preventDefault()"
             [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
             [style.transform]="'translateY(' + staggerFor(tree.id) + 'px) scale(' + (0.96 + staggerFor(tree.id) * 0.004) + ')'"
           >
+            <button
+              type="button"
+              class="plot-move"
+              (pointerdown)="startMove($event, tree)"
+              (keydown)="nudge($event, tree)"
+              (click)="$event.preventDefault(); $event.stopPropagation()"
+              [attr.aria-label]="i18n.fill(i18n.t().forest.moveTree, { name: tree.name })"
+              [title]="i18n.t().forest.moveTreeHint"
+            >⠿</button>
             <button
               type="button"
               class="plot-archive"

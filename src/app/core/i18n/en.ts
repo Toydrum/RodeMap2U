@@ -76,6 +76,8 @@ export const EN: Dict = {
     accentLabel: 'Color',
     archivedSection: 'Archived trees',
     checkinCta: 'Find myself in this enchanted forest',
+    moveTree: 'Arrange "{name}"',
+    moveTreeHint: 'Drag to arrange your forest (or use the arrow keys)',
   },
   status: {
     seed: 'Seed',
@@ -226,7 +228,7 @@ export const EN: Dict = {
       {
         icon: '🌳',
         title: 'Your forest',
-        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: a breathing sun with motes of light, slow drifting fog, soft drizzle or a storm with slow lightning — and your trees always standing.',
+        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: a breathing sun with motes of light, slow drifting fog, soft drizzle or a storm with slow lightning — and your trees always standing. Want a different arrangement? Drag any tree\'s ⠿ handle, or move it with the arrow keys.',
       },
       {
         icon: '🌿',

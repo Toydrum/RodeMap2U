@@ -390,10 +390,48 @@
     transition: opacity 0.2s ease, background 0.2s ease;
   }
 
+  /* Grab handle: arrange your forest your way (drag or arrow keys). */
+  .plot-move {
+    position: absolute;
+    bottom: 66px;
+    left: -4px;
+    z-index: 3;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    cursor: grab;
+    touch-action: none;
+    opacity: 0.3;
+    transition: opacity 0.2s ease, background 0.2s ease;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
   &:hover .plot-archive,
-  .plot-archive:focus-visible {
+  .plot-archive:focus-visible,
+  &:hover .plot-move,
+  .plot-move:focus-visible {
     opacity: 1;
     background: var(--surface);
+  }
+
+  &.dragging {
+    z-index: 6;
+
+    app-mini-tree {
+      transform: scale(1.08) rotate(1.5deg);
+    }
+
+    .plot-move {
+      opacity: 1;
+      background: var(--surface);
+    }
   }
 
   /* Every tree brings its own ground — a soft knoll, not a saucer */

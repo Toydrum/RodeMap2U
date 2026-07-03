@@ -66,6 +66,13 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
   imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
+  // Drag listeners live on the document: live reordering moves the grip in
+  // the DOM, which breaks pointer capture mid-drag.
+  host: {
+    '(document:pointermove)': 'moveOver($event)',
+    '(document:pointerup)': 'endMove()',
+    '(document:pointercancel)': 'endMove()',
+  },
 })
 export class ForestPage {
   protected readonly i18n = inject(I18nService);
@@ -181,6 +188,73 @@ export class ForestPage {
   ];
 
   protected readonly petalAngles = [0, 72, 144, 216, 288];
+
+  /* -------------------------------------------- arrange your own forest */
+
+  /** Live order while dragging (ids); null when at rest. */
+  protected readonly dragPreview = signal<string[] | null>(null);
+  protected readonly draggingId = signal<string | null>(null);
+
+  /** What the meadow renders: the drag preview if one is in flight. */
+  protected readonly displayTrees = computed(() => {
+    const base = this.trees.active();
+    const preview = this.dragPreview();
+    if (!preview) return base;
+    const byId = new Map(base.map((t) => [t.id, t]));
+    return preview.map((id) => byId.get(id)).filter((t): t is Tree => !!t);
+  });
+
+  protected startMove(ev: PointerEvent, tree: Tree): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.draggingId.set(tree.id);
+    this.dragPreview.set(this.trees.active().map((t) => t.id));
+  }
+
+  protected moveOver(ev: PointerEvent): void {
+    const dragId = this.draggingId();
+    const preview = this.dragPreview();
+    if (!dragId || !preview) return;
+    for (const el of document.elementsFromPoint(ev.clientX, ev.clientY)) {
+      const host = (el as Element).closest?.('[data-tree-id]') as HTMLElement | null;
+      const overId = host?.dataset['treeId'];
+      if (!overId || overId === dragId) continue;
+      const from = preview.indexOf(dragId);
+      const to = preview.indexOf(overId);
+      if (from === -1 || to === -1 || from === to) return;
+      const next = [...preview];
+      next.splice(from, 1);
+      next.splice(to, 0, dragId);
+      this.dragPreview.set(next);
+      return;
+    }
+  }
+
+  protected async endMove(): Promise<void> {
+    if (!this.draggingId()) return;
+    const preview = this.dragPreview();
+    this.draggingId.set(null);
+    this.dragPreview.set(null);
+    if (preview) await this.trees.setOrder(preview);
+  }
+
+  /** Keyboard rearranging: arrows swap the tree with its neighbor. */
+  protected async nudge(ev: KeyboardEvent, tree: Tree): Promise<void> {
+    const dir =
+      ev.key === 'ArrowLeft' || ev.key === 'ArrowUp'
+        ? -1
+        : ev.key === 'ArrowRight' || ev.key === 'ArrowDown'
+          ? 1
+          : 0;
+    if (!dir) return;
+    ev.preventDefault();
+    const ids = this.trees.active().map((t) => t.id);
+    const i = ids.indexOf(tree.id);
+    const j = i + dir;
+    if (i === -1 || j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    await this.trees.setOrder(ids);
+  }
 
   /** Deterministic per-plot vertical offset — rows stop being ruler-straight. */
   protected staggerFor(treeId: string): number {

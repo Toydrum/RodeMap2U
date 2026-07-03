@@ -78,6 +78,8 @@ export const ES = {
     accentLabel: 'Color',
     archivedSection: 'Árboles en el archivo',
     checkinCta: 'Buscarme en este bosque encantado',
+    moveTree: 'Acomodar «{name}»',
+    moveTreeHint: 'Arrastra para acomodar tu bosque (o usa las flechas del teclado)',
   },
   status: {
     seed: 'Semilla',
@@ -228,7 +230,7 @@ export const ES = {
       {
         icon: '🌳',
         title: 'Tu bosque',
-        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol que respira con motitas de luz, niebla que deriva lenta, llovizna suave o tormenta con relámpagos lentos — y tus árboles siempre en pie.',
+        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol que respira con motitas de luz, niebla que deriva lenta, llovizna suave o tormenta con relámpagos lentos — y tus árboles siempre en pie. ¿Quieres otro acomodo? Arrastra el asidero ⠿ de cualquier árbol, o muévelo con las flechas del teclado.',
       },
       {
         icon: '🌿',

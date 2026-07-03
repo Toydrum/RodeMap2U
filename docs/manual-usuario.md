@@ -88,6 +88,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 - Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
 - **Cuando juntas tres árboles o más, aparece un arroyo** cruzando tu pradera.
 - **Cada meta que floreces hace brotar una flor** en el prado. Tu bosque se llena de vida con tu historia.
+- **Acomoda tu bosque a tu gusto**: al pasar el cursor por un árbol aparece el asidero **⠿** (a la izquierda) — arrástralo para mover el árbol a donde quieras en las filas, o con el asidero enfocado usa las **flechas del teclado**. El orden se guarda.
 - **El cielo siente contigo.** Según tu último check-in: el sol respira y levanta motitas de luz (☀️), la niebla deriva despacio entre tus árboles (🌫), cae una llovizna suave (🌧) o llega la tormenta con lluvia y relámpagos lentos (⛈) — y tus árboles siempre en pie. Todo el movimiento es lento y amable, y se detiene por completo si activas movimiento reducido.
 
 Toca cualquier árbol para entrar a su mapa.
