@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -53,6 +53,17 @@ export class ForestPage {
   private readonly toast = inject(ToastService);
 
   private readonly checkins = inject(CheckinsRepo);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  constructor() {
+    // Check-in's empty-forest exit lands here ready to plant.
+    if (this.route.snapshot.queryParamMap.has('plant')) {
+      this.creating.set(true);
+      const params = { ...this.route.snapshot.queryParams, plant: null };
+      void this.router.navigate([], { queryParams: params, replaceUrl: true });
+    }
+  }
 
   /** `?mood=` dev/demo override, else the latest check-in's feeling. */
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;

@@ -103,6 +103,8 @@ export class CheckInPage {
   /**
    * "Aquí estoy" earns a moment: if you already chose a branch, we go there;
    * otherwise your trees gather in a circle and you pick where to enter.
+   * With an empty forest the button reads "plant my first tree" instead,
+   * and lands with the planting sheet already open.
    */
   protected leave(): void {
     const where = this.whereNode();
@@ -111,7 +113,7 @@ export class CheckInPage {
     } else if (this.trees.active().length) {
       this.step.set('choose');
     } else {
-      void this.router.navigate(['/forest']);
+      void this.router.navigate(['/forest'], { queryParams: { plant: 1 } });
     }
   }
 

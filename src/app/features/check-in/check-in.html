@@ -65,7 +65,7 @@
         ></textarea>
 
         <button type="button" class="btn btn-primary big" (click)="finish()">
-          🌱 {{ i18n.t().checkIn.done }}
+          🌱 {{ trees.active().length ? i18n.t().checkIn.done : i18n.t().forest.plantFirst }}
         </button>
         <button type="button" class="btn btn-ghost skip" (click)="finish()">
           {{ i18n.t().common.skip }}

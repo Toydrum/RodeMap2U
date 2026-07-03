@@ -62,7 +62,7 @@ El check-in tiene tres pasos, y **todos se pueden saltar** sin consecuencia algu
 
 Si ese día no quieres responder nada, toca **"Hoy no quiero responder"** — la app te lleva a tu bosque sin más.
 
-Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles se reúnen en un círculo a tu alrededor — *"Tu bosque te rodea"* — y eliges a cuál entrar hoy (o **"Solo mirar el bosque"**, que también es una forma de estar).
+Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles se reúnen en un círculo a tu alrededor — *"Tu bosque te rodea"* — y eliges a cuál entrar hoy (o **"Solo mirar el bosque"**, que también es una forma de estar). Y si tu bosque todavía está vacío, el botón se transforma: dice **"Plantar mi primer árbol"** y te deja en el prado con la palita lista.
 
 ¿Y si más tarde quieres que la app te pregunte de nuevo? En tu bosque vive una **rosa de los vientos** con la invitación **"Buscarme en este bosque encantado"**. Tócala y el ritual vuelve a empezar, con la misma calma de siempre.
 
