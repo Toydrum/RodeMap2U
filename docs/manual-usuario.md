@@ -66,7 +66,7 @@ Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles 
 
 ¿Y si más tarde quieres que la app te pregunte de nuevo? En tu bosque vive una **rosa de los vientos** con la invitación **"Buscarme en este bosque encantado"**. Tócala y el ritual vuelve a empezar, con la misma calma de siempre.
 
-Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica.
+Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica. Y si alguna huella ya no quieres cargarla, cada tarjeta tiene una **✕** para dejarla ir, con una pequeña confirmación — sin dramas.
 
 > 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
 

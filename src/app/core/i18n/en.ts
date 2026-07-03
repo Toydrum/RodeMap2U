@@ -57,6 +57,13 @@ export const EN: Dict = {
     checkinsSection: 'Your check-ins',
     wordsSection: 'Your little notes on branches',
     wordsEmpty: 'When you write a little note inside a branch, you can reread it here.',
+    letGoAria: 'Let go',
+    confirmCheckin: 'Let this footprint go?',
+    confirmNote: 'Release this little note from "{title}"?',
+    keep: 'Keep it',
+    letGo: 'Let it go',
+    goneCheckin: 'The footprint drifted away with the wind 🍃',
+    goneNote: 'The little note slipped off its branch 🍃',
   },
   forest: {
     title: 'My forest',

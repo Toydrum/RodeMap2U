@@ -45,22 +45,73 @@
   gap: 0.7rem;
 }
 
-.word {
-  width: 100%;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
+.word-card {
   transition: border-color 0.2s ease, transform 0.15s ease;
 
   &:hover {
     border-color: var(--primary);
     transform: translateY(-1px);
   }
+}
+
+.word-open {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 
   .arrow {
     color: var(--text-faint);
     margin-top: 0.15rem;
+  }
+}
+
+/* Every card can be let go — quietly, with a small confirmation. */
+.x {
+  flex: 0 0 auto;
+  min-width: 38px;
+  min-height: 38px;
+  margin: -0.3rem -0.45rem 0 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: var(--text-faint);
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--text-faint) 12%, transparent);
+  }
+}
+
+.letgo {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+
+  .letgo-q {
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  .letgo-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
   }
 }
 

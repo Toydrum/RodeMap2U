@@ -14,17 +14,37 @@
       <ol class="steps">
         @for (fp of footprints(); track fp.checkIn.id) {
           <li class="card footprint">
-            <span class="mark" aria-hidden="true">{{ fp.emoji }}</span>
-            <div class="body">
-              <div class="meta">
-                <strong>{{ fp.feelingName }}</strong>
-                <span class="when">{{ fp.when }}</span>
+            @if (confirming() === fp.checkIn.id) {
+              <div class="letgo">
+                <span class="letgo-q">{{ i18n.t().trail.confirmCheckin }}</span>
+                <div class="letgo-row">
+                  <button type="button" class="btn btn-ghost" (click)="confirming.set(null)">
+                    {{ i18n.t().trail.keep }}
+                  </button>
+                  <button type="button" class="btn btn-soft" (click)="letGoCheckin(fp)">
+                    {{ i18n.t().trail.letGo }}
+                  </button>
+                </div>
               </div>
-              <div class="place">{{ fp.place ?? i18n.t().trail.somewhere }}</div>
-              @if (fp.note) {
-                <p class="note">«{{ fp.note }}»</p>
-              }
-            </div>
+            } @else {
+              <span class="mark" aria-hidden="true">{{ fp.emoji }}</span>
+              <div class="body">
+                <div class="meta">
+                  <strong>{{ fp.feelingName }}</strong>
+                  <span class="when">{{ fp.when }}</span>
+                </div>
+                <div class="place">{{ fp.place ?? i18n.t().trail.somewhere }}</div>
+                @if (fp.note) {
+                  <p class="note">«{{ fp.note }}»</p>
+                }
+              </div>
+              <button
+                type="button"
+                class="x"
+                [attr.aria-label]="i18n.t().trail.letGoAria"
+                (click)="confirming.set(fp.checkIn.id)"
+              >✕</button>
+            }
           </li>
         }
       </ol>
@@ -38,19 +58,39 @@
     @if (branchNotes().length) {
       <ol class="steps">
         @for (entry of branchNotes(); track entry.node.id) {
-          <li>
-            <button type="button" class="card footprint word" (click)="openBranch(entry)">
-              <span class="mark" aria-hidden="true">🍃</span>
-              <div class="body">
-                <div class="meta">
-                  <strong>{{ entry.node.title }}</strong>
-                  <span class="when">{{ entry.when }}</span>
+          <li class="card footprint word-card">
+            @if (confirming() === entry.node.id) {
+              <div class="letgo">
+                <span class="letgo-q">{{ i18n.fill(i18n.t().trail.confirmNote, { title: entry.node.title }) }}</span>
+                <div class="letgo-row">
+                  <button type="button" class="btn btn-ghost" (click)="confirming.set(null)">
+                    {{ i18n.t().trail.keep }}
+                  </button>
+                  <button type="button" class="btn btn-soft" (click)="releaseNote(entry)">
+                    {{ i18n.t().trail.letGo }}
+                  </button>
                 </div>
-                <div class="place">{{ entry.treeName }}</div>
-                <p class="note">«{{ entry.note }}»</p>
               </div>
-              <span class="arrow" aria-hidden="true">→</span>
-            </button>
+            } @else {
+              <button type="button" class="word-open" (click)="openBranch(entry)">
+                <span class="mark" aria-hidden="true">🍃</span>
+                <div class="body">
+                  <div class="meta">
+                    <strong>{{ entry.node.title }}</strong>
+                    <span class="when">{{ entry.when }}</span>
+                  </div>
+                  <div class="place">{{ entry.treeName }}</div>
+                  <p class="note">«{{ entry.note }}»</p>
+                </div>
+                <span class="arrow" aria-hidden="true">→</span>
+              </button>
+              <button
+                type="button"
+                class="x"
+                [attr.aria-label]="i18n.t().trail.letGoAria"
+                (click)="confirming.set(entry.node.id)"
+              >✕</button>
+            }
           </li>
         }
       </ol>

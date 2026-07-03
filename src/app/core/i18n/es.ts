@@ -59,6 +59,13 @@ export const ES = {
     checkinsSection: 'Tus check-ins',
     wordsSection: 'Tus notitas en las ramas',
     wordsEmpty: 'Cuando escribas una notita dentro de una rama, aquí podrás releerla.',
+    letGoAria: 'Dejar ir',
+    confirmCheckin: '¿Dejar ir esta huella?',
+    confirmNote: '¿Soltar esta notita de «{title}»?',
+    keep: 'Conservarla',
+    letGo: 'Dejarla ir',
+    goneCheckin: 'La huella se fue con el viento 🍃',
+    goneNote: 'La notita se soltó de su rama 🍃',
   },
   forest: {
     title: 'Mi bosque',

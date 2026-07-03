@@ -1,10 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
+import { ToastService } from '../../shared/ui/toast.service';
 import { CheckIn, Feeling, TreeNode } from '../../core/db/schema';
 
 const FEELING_EMOJI: Record<Feeling, string> = {
@@ -44,6 +45,10 @@ export class TrailPage {
   private readonly nodes = inject(NodesRepo);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
+
+  /** Card asking "let it go?" right now — checkIn id or node id, one at a time. */
+  protected readonly confirming = signal<string | null>(null);
 
   protected readonly footprints = computed<Footprint[]>(() => {
     const dict = this.i18n.t();
@@ -94,6 +99,20 @@ export class TrailPage {
     void this.router.navigate(['/tree', entry.node.treeId], {
       queryParams: { node: entry.node.id },
     });
+  }
+
+  /** Let a footprint go — a soft tombstone, never a physical erase. */
+  protected async letGoCheckin(fp: Footprint): Promise<void> {
+    await this.checkins.tombstone(fp.checkIn);
+    this.confirming.set(null);
+    this.toast.show({ message: this.i18n.t().trail.goneCheckin });
+  }
+
+  /** Release a little note: it leaves the trail AND its branch's paper leaf. */
+  protected async releaseNote(entry: BranchNote): Promise<void> {
+    await this.nodes.update(entry.node, { note: '' });
+    this.confirming.set(null);
+    this.toast.show({ message: this.i18n.t().trail.goneNote });
   }
 
   protected goBack(): void {
