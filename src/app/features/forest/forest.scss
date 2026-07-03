@@ -169,6 +169,29 @@
     transform-origin: 50% 95%;
   }
 
+  /* Quiet archive affordance — visible (no hidden gestures), never loud */
+  .plot-archive {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    z-index: 3;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--surface) 75%, transparent);
+    font-size: 0.95rem;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  &:hover .plot-archive,
+  .plot-archive:focus-visible {
+    opacity: 1;
+    background: var(--surface);
+  }
+
   /* Every tree brings its own ground — a soft knoll, not a saucer */
   .mound {
     position: absolute;
@@ -314,6 +337,24 @@
   from {
     transform: translateY(40px);
     opacity: 0;
+  }
+}
+
+.confirm {
+  text-align: center;
+
+  .confirm-icon {
+    font-size: 2rem;
+    display: block;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    justify-content: center !important;
   }
 }
 

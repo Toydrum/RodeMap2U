@@ -4,7 +4,8 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
-import { AccentToken, Feeling } from '../../core/db/schema';
+import { ToastService } from '../../shared/ui/toast.service';
+import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
@@ -47,6 +48,9 @@ export class ForestPage {
   protected readonly creating = signal(false);
   protected readonly newName = signal('');
   protected readonly newAccent = signal<AccentToken>('moss');
+  /** Tree pending archive (confirm sheet open). */
+  protected readonly archiving = signal<Tree | null>(null);
+  private readonly toast = inject(ToastService);
 
   private readonly checkins = inject(CheckinsRepo);
 
@@ -96,6 +100,23 @@ export class ForestPage {
 
   protected bloomsFor(treeId: string): number {
     return (this.nodes.byTree().get(treeId) ?? []).filter((n) => n.status === 'achieved').length;
+  }
+
+  protected askArchive(event: Event, tree: Tree): void {
+    // The button lives inside the plot link — don't navigate.
+    event.preventDefault();
+    event.stopPropagation();
+    this.archiving.set(tree);
+  }
+
+  protected async archiveTree(): Promise<void> {
+    const tree = this.archiving();
+    if (!tree) return;
+    await this.trees.archive(tree);
+    this.archiving.set(null);
+    this.toast.show({
+      message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
+    });
   }
 
   protected async create(): Promise<void> {

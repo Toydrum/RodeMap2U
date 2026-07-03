@@ -1,0 +1,17 @@
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch({ channel: 'msedge', headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const out = process.argv[2];
+await page.goto('http://localhost:8797/forest?seed=demo', { waitUntil: 'networkidle' });
+await page.hover('.plot:has-text("Idea nueva")');
+await page.waitForTimeout(300);
+await page.click('.plot:has-text("Idea nueva") .plot-archive');
+await page.waitForSelector('.confirm');
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${out}/forest-archive-confirm.png` });
+await page.click('button:has-text("Que descanse")');
+await page.waitForTimeout(800);
+const plots = await page.locator('.plot').count();
+const toast = await page.locator('.toast').textContent().catch(() => 'n/a');
+console.log(`after archive: ${plots} plots remain (was 4), toast: ${toast}`);
+await browser.close();

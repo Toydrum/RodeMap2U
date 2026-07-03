@@ -55,6 +55,13 @@
             [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
             [style.transform]="'translateY(' + staggerFor(tree.id) + 'px)'"
           >
+            <button
+              type="button"
+              class="plot-archive"
+              (click)="askArchive($event, tree)"
+              [attr.aria-label]="i18n.t().tree.archiveAction + ': ' + tree.name"
+              [title]="i18n.t().tree.archiveAction"
+            >🗃</button>
             <span class="mound" aria-hidden="true"></span>
             <app-mini-tree [tree]="tree" />
             <span class="plot-grass" aria-hidden="true">
@@ -86,6 +93,25 @@
       </div>
     }
   </div>
+
+  <!-- Archive-tree confirm -->
+  @if (archiving(); as tree) {
+    <div class="sheet-backdrop" (click)="archiving.set(null)">
+      <div class="sheet card confirm" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <span class="confirm-icon" aria-hidden="true">🗃</span>
+        <h2>{{ i18n.fill(i18n.t().tree.archiveTitle, { name: tree.name }) }}</h2>
+        <p class="confirm-body">{{ i18n.t().tree.archiveBody }}</p>
+        <div class="row">
+          <button type="button" class="btn btn-ghost" (click)="archiving.set(null)">
+            {{ i18n.t().common.cancel }}
+          </button>
+          <button type="button" class="btn btn-primary" (click)="archiveTree()">
+            {{ i18n.t().tree.archiveCta }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Plant-a-tree sheet -->
   @if (creating()) {
