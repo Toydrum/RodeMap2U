@@ -79,6 +79,22 @@
     z-index: 1;
     height: 100%;
   }
+
+  /* The meadow the tree stands ON — same coordinate system as the ground
+     pin (percentages of this very box), so they can never drift apart. */
+  .meadow-band {
+    position: absolute;
+    left: -4%;
+    right: -4%;
+    bottom: 0;
+    height: 26%;
+    border-radius: 100% 100% 0 0 / 64px 64px 0 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 15%, var(--surface-2)) 0%,
+      color-mix(in srgb, var(--primary) 12%, var(--bg)) 100%
+    );
+  }
 }
 
 .empty-tree {

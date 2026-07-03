@@ -23,7 +23,8 @@
     }
 
     <div class="canvas-wrap">
-      <app-scene-backdrop mountainsBottom="38%" />
+      <div class="meadow-band" aria-hidden="true"></div>
+      <app-scene-backdrop mountainsBottom="25.5%" />
       @if (nodes.rootsOf(t.id).length) {
         <app-tree-canvas
           [tree]="t"

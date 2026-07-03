@@ -1,7 +1,15 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { Tree } from '../../core/db/schema';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { LayoutPoint, edgeGeometry, hash as hashAngle, layoutTree, taperedRibbon, widthAtDepth } from './tree-layout';
+import {
+  LayoutPoint,
+  edgeGeometry,
+  edgePointAt,
+  hash as hashAngle,
+  layoutTree,
+  taperedRibbon,
+  widthAtDepth,
+} from './tree-layout';
 
 interface MiniBranch {
   d: string;
@@ -11,8 +19,9 @@ interface MiniBranch {
 interface MiniDot {
   x: number;
   y: number;
-  kind: 'bloom' | 'bud' | 'foliage';
+  kind: 'bloom' | 'bud' | 'foliage' | 'leaf';
   angle?: number;
+  size?: number;
 }
 
 interface MiniView {
@@ -44,12 +53,18 @@ const PAD = 12;
           @if (dot.kind === 'bloom') {
             <g [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ')'">
               @for (angle of [0, 72, 144, 216, 288]; track angle) {
-                <ellipse rx="2.2" ry="3.6" cy="-3.2" [attr.transform]="'rotate(' + angle + ')'" class="petal" />
+                <ellipse rx="2.8" ry="4.5" cy="-3.9" [attr.transform]="'rotate(' + angle + ')'" class="petal" />
               }
-              <circle r="1.9" class="heart" />
+              <circle r="2.3" class="heart" />
             </g>
           } @else if (dot.kind === 'bud') {
             <circle [attr.cx]="dot.x" [attr.cy]="dot.y" r="2.1" class="bud" />
+          } @else if (dot.kind === 'leaf') {
+            <path
+              class="branch-leaf"
+              [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ') rotate(' + (dot.angle ?? 0) + ')'"
+              [attr.d]="'M 0 0 Q ' + dot.size + ' ' + (-dot.size!) + ' 0 ' + (-2 * dot.size!) + ' Q ' + (-dot.size!) + ' ' + (-dot.size!) + ' 0 0 Z'"
+            />
           } @else {
             <g [attr.transform]="'translate(' + dot.x + ' ' + dot.y + ') rotate(' + (dot.angle ?? 0) + ')'" class="foliage">
               <ellipse rx="3.2" ry="5.2" cy="-4.4" transform="rotate(-24)" />
@@ -89,6 +104,10 @@ const PAD = 12;
     }
     .bud {
       fill: var(--status-growing);
+    }
+    .branch-leaf {
+      fill: color-mix(in srgb, var(--status-growing) 78%, var(--surface, #fdfbf3));
+      opacity: 0.9;
     }
     .foliage ellipse {
       fill: color-mix(in srgb, var(--rm-twig, #7f9a63) 85%, var(--status-growing));
@@ -180,6 +199,25 @@ export class MiniTree {
           d: taperedRibbon(sp.parent.x, sp.parent.y, geometry.c1x, geometry.c1y, geometry.c2x, geometry.c2y, sp.x, sp.y, w0, w1),
           fill: this.woodFill(sp),
         });
+
+        // Little leaves along live branches — the big tree's charm, miniaturized.
+        if (p.node.status !== 'resting') {
+          const h = hashAngle(p.node.id + ':mleaf');
+          const count = p.node.status === 'achieved' || p.node.status === 'growing' ? 2 : 1;
+          for (let i = 0; i < count; i++) {
+            const hi = hashAngle(p.node.id + ':mleaf:' + i);
+            const t = 0.4 + ((hi % 45) / 100);
+            const at = edgePointAt(sp.parent, sp, geometry, t);
+            const side = (h + i) % 2 === 0 ? 1 : -1;
+            dots.push({
+              x: at.x + side * 2.5,
+              y: at.y,
+              kind: 'leaf',
+              angle: side * (35 + (hi % 40)),
+              size: 3 + ((hi >> 4) % 2),
+            });
+          }
+        }
       }
 
       if (p.node.status === 'achieved') {
