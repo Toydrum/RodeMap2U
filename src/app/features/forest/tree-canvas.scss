@@ -171,6 +171,20 @@
   fill: color-mix(in srgb, currentColor 55%, transparent);
 }
 
+/* The growing sapling: a real tiny tree, not a bigger seed. */
+.sapling {
+  .sap-trunk {
+    fill: color-mix(in srgb, var(--rm-bark) 76%, var(--rm-twig));
+  }
+
+  .sap-stem {
+    fill: none;
+    stroke: color-mix(in srgb, var(--rm-bark) 40%, currentColor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+}
+
 .knot-halo {
   fill: color-mix(in srgb, currentColor 22%, transparent);
 }
