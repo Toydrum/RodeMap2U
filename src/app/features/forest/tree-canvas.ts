@@ -14,8 +14,8 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import {
+  LEVEL_H,
   LayoutPoint,
-  SLOT_W,
   branchRibbon,
   edgeGeometry,
   edgePointAt,
@@ -335,15 +335,64 @@ export class TreeCanvas {
   }
 
   protected labelText(point: LayoutPoint): string {
-    const title = point.node.title;
-    return title.length > 20 ? title.slice(0, 19) + '…' : title;
+    return this.labelShelf().get(point.node.id)?.text ?? this.truncate(point.node.title, 20);
   }
 
   /** Alternate label offsets so close siblings don't collide. */
+  /** Collision-aware labels: sweep each depth left→right and drop every
+   *  name onto the first of three shelves where it fits without crashing
+   *  its neighbor — long names stack instead of overlapping. */
+  private readonly labelShelf = computed(() => {
+    const placed = new Map<string, { shelf: number; text: string }>();
+    const byDepth = new Map<number, LayoutPoint[]>();
+    for (const p of this.layout().points) {
+      const group = byDepth.get(p.depth) ?? [];
+      group.push(p);
+      byDepth.set(p.depth, group);
+    }
+    const GAP = 16;
+    for (const group of byDepth.values()) {
+      const sorted = [...group].sort(
+        (a, b) => a.x + this.labelX(a) - (b.x + this.labelX(b)),
+      );
+      const lastEnd = [-Infinity, -Infinity, -Infinity];
+      for (const p of sorted) {
+        const cx = p.x + this.labelX(p);
+        let text = this.truncate(p.node.title, 20);
+        let width = text.length * 8.1 + 14;
+        let shelf = lastEnd.findIndex((end) => cx - width / 2 > end + GAP);
+        if (shelf === -1) {
+          // Crowded stretch: shrink this one name until it fits somewhere.
+          text = this.truncate(p.node.title, 9);
+          width = text.length * 8.1 + 14;
+          shelf = lastEnd.findIndex((end) => cx - width / 2 > end + GAP);
+        }
+        if (shelf === -1) {
+          // Truly saturated: better a quiet node (name lives in its sheet)
+          // than label soup — except your current place, which always speaks.
+          if (this.tree().currentNodeId === p.node.id) {
+            shelf = lastEnd.indexOf(Math.min(...lastEnd));
+          } else {
+            placed.set(p.node.id, { shelf: 0, text: '' });
+            continue;
+          }
+        }
+        lastEnd[shelf] = cx + width / 2;
+        placed.set(p.node.id, { shelf, text });
+      }
+    }
+    return placed;
+  });
+
+  private truncate(title: string, max: number): string {
+    return title.length > max ? title.slice(0, max - 1).trimEnd() + '…' : title;
+  }
+
   protected labelY(point: LayoutPoint): number {
-    // Alternate label rows by horizontal slot — neighbors never share a row.
-    const slotParity = ((Math.round(point.x / SLOT_W) % 2) + 2) % 2;
-    return slotParity === 0 ? 27 : 46;
+    // Anchor labels to the level's NOMINAL line (cancel the node's organic
+    // y-jitter) so shelf rows are exact and can never brush each other.
+    const jitter = point.y - -point.depth * LEVEL_H;
+    return 27 + (this.labelShelf().get(point.node.id)?.shelf ?? 0) * 21 - jitter;
   }
 
   protected nodeLabel(point: LayoutPoint): string {

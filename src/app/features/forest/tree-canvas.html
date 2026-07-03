@@ -212,7 +212,7 @@
         }
 
         <!-- Title tag -->
-        @if (showLabel(point)) {
+        @if (showLabel(point) && labelText(point)) {
           <g class="tag" aria-hidden="true">
             <text class="title" [attr.x]="labelX(point)" [attr.y]="labelY(point)" text-anchor="middle">{{ labelText(point) }}</text>
           </g>
