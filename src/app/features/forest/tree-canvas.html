@@ -45,6 +45,17 @@
         @for (root of roots(); track root.node.id) {
           <!-- Trunk: tapered ribbon from ground to the root node -->
           <path class="trunk" [attr.d]="trunkPath(root)" />
+          <!-- Trunk grain -->
+          <path
+            class="bark-grain"
+            [attr.d]="'M ' + (root.x - 3) + ' ' + (groundY() - 4) + ' L ' + (root.x - 2) + ' ' + (root.y + 8)"
+            style="stroke-width: 2.6"
+          />
+          <path
+            class="bark-grain"
+            [attr.d]="'M ' + (root.x + 4) + ' ' + (groundY() - 6) + ' L ' + (root.x + 3) + ' ' + (root.y + 14)"
+            style="stroke-width: 1.8; stroke-dashoffset: 9"
+          />
           <!-- Root flare -->
           <path
             class="trunk flare"
@@ -72,6 +83,13 @@
           [attr.d]="edge.d"
           [style.fill]="edge.fill"
         />
+        <!-- Bark grain riding the limb's center line -->
+        <path
+          class="bark-grain"
+          [attr.d]="edge.grain"
+          [style.stroke-width]="edge.grainWidth"
+          [style.stroke-dashoffset]="edge.grainOffset"
+        />
         <!-- Little leaves along the branch -->
         @for (leaf of edge.leaves; track $index) {
           <g
@@ -82,6 +100,10 @@
           >
             @if (leaf.kind === 'leaf') {
               <path [attr.d]="'M 0 0 Q ' + leaf.size + ' ' + (-leaf.size) + ' 0 ' + (-2 * leaf.size) + ' Q ' + (-leaf.size) + ' ' + (-leaf.size) + ' 0 0 Z'" />
+              <path
+                class="lit"
+                [attr.d]="'M 0 0 Q ' + leaf.size + ' ' + (-leaf.size) + ' 0 ' + (-2 * leaf.size) + ' Q ' + (leaf.size * 0.34) + ' ' + (-leaf.size) + ' 0 0 Z'"
+              />
             } @else {
               <g appFlower [flower]="species()" [scale]="0.42" />
             }

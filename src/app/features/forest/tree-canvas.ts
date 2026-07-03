@@ -41,6 +41,10 @@ interface EdgeView {
   fill: string;
   isNew: boolean;
   leaves: LeafDecoration[];
+  /** Bark grain: the limb's center line, stroked dashed and faint. */
+  grain: string;
+  grainWidth: number;
+  grainOffset: number;
 }
 
 /**
@@ -159,6 +163,9 @@ export class TreeCanvas {
           fill: this.woodFill(p),
           isNew: this.bornThisSession.has(p.node.id),
           leaves: this.leavesFor(p, geometry, isLeaf),
+          grain: geometry.d,
+          grainWidth: Math.max(1.1, widthAtDepth(p.depth) * 0.28),
+          grainOffset: hash(p.node.id + ':grain') % 16,
         };
       }),
   );

@@ -89,11 +89,16 @@
   }
 }
 
-/* Little leaves along branches */
+/* Little leaves along branches — two-tone: body + a sunlit crescent */
 .leaf {
   path {
     fill: color-mix(in srgb, var(--status-growing) 78%, var(--surface));
     opacity: 0.9;
+  }
+
+  path.lit {
+    fill: color-mix(in srgb, #ffffff 34%, transparent);
+    opacity: 1;
   }
 
   &.blossom .blossom-petal {
@@ -165,6 +170,20 @@
   fill: var(--surface);
   stroke: currentColor;
   stroke-width: 3.8;
+}
+
+/* Bark grain: faint dashed strokes along every limb and the trunk. */
+.bark-grain {
+  fill: none;
+  stroke: color-mix(in srgb, #3a2a1b 60%, transparent);
+  opacity: 0.15;
+  stroke-linecap: round;
+  stroke-dasharray: 7 11;
+}
+
+[data-theme='terminal'] .bark-grain {
+  stroke: color-mix(in srgb, var(--primary) 45%, transparent);
+  opacity: 0.2;
 }
 
 .note-letter {

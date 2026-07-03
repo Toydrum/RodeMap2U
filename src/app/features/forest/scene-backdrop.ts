@@ -87,6 +87,25 @@ import { Feeling } from '../../core/db/schema';
         }
       </g>
     </svg>
+
+    <!-- Distant meadow: rolling far hills + tiny groves before the peaks -->
+    <svg
+      class="far-meadow"
+      [style.bottom]="farMeadowBottom()"
+      viewBox="0 0 1000 72"
+      preserveAspectRatio="xMidYMax slice"
+      aria-hidden="true"
+    >
+      <path class="band a" d="M 0 72 L 0 34 Q 130 22 260 32 T 520 28 T 760 34 T 1000 26 L 1000 72 Z" />
+      <path class="band b" d="M 0 72 L 0 54 Q 160 42 320 52 T 640 48 T 1000 52 L 1000 72 Z" />
+      @for (grove of farFlora; track $index) {
+        <g class="grove" [attr.transform]="'translate(' + grove.x + ' ' + grove.y + ') scale(' + grove.s + ')'">
+          <ellipse rx="9" ry="5" />
+          <ellipse cx="8" cy="1.5" rx="6" ry="3.5" />
+          <ellipse cx="-8" cy="1" rx="5" ry="3" />
+        </g>
+      }
+    </svg>
   `,
   styleUrl: './scene-backdrop.scss',
 })
@@ -101,6 +120,15 @@ export class SceneBackdrop {
 
   /** The seam band straddles the mountains' bottom edge, wherever it rests. */
   protected readonly seamBottom = computed(() => `calc(${this.mountainsBottom()} - 130px)`);
+
+  /** The far meadow hugs the mountains' base, spilling a little below it. */
+  protected readonly farMeadowBottom = computed(() => `calc(${this.mountainsBottom()} - 46px)`);
+
+  /** Tiny distant groves dotting the far hills (fixed-seed). */
+  protected readonly farFlora = Array.from({ length: 9 }, (_, i) => {
+    const h = (i * 2654435761) >>> 0;
+    return { x: 30 + (h % 940), y: 34 + ((h >> 6) % 22), s: 0.5 + ((h >> 3) % 55) / 100 };
+  });
 
   protected readonly treelineXs = [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960];
 

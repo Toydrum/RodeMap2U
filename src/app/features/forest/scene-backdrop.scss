@@ -14,8 +14,19 @@
   transition: background 1.2s ease;
 }
 
+/* Sunny days deserve a BLUE sky — warm yellow over the sage base read green. */
 :host(.mood-sunny) .mood-tint {
-  background: linear-gradient(180deg, rgba(240, 217, 140, 0.14), transparent 55%);
+  background: linear-gradient(
+    180deg,
+    rgba(121, 177, 232, 0.3),
+    rgba(121, 177, 232, 0.12) 46%,
+    rgba(240, 217, 140, 0.08) 76%,
+    transparent
+  );
+}
+
+:host-context([data-theme='terminal']):host(.mood-sunny) .mood-tint {
+  background: linear-gradient(180deg, rgba(110, 255, 140, 0.06), transparent 60%);
 }
 
 :host(.mood-heavy) .mood-tint {
@@ -456,7 +467,8 @@
   position: absolute;
   left: 0;
   width: 100%;
-  height: 150px;
+  /* Scale with the viewport so wide screens never decapitate the peaks. */
+  height: max(150px, 15vw);
   transition: opacity 1.2s ease;
 
   .range {
@@ -503,6 +515,41 @@
   .caps path {
     fill: color-mix(in srgb, var(--primary) 40%, var(--bg));
     opacity: 0.6;
+  }
+}
+
+/* The rolling distance between meadow and peaks. */
+.far-meadow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  transition: opacity 1.2s ease;
+
+  .band {
+    fill: color-mix(in srgb, var(--accent-pine) 15%, var(--surface-2));
+    opacity: 0.5;
+
+    &.b {
+      fill: color-mix(in srgb, var(--accent-pine) 21%, var(--surface-2));
+      opacity: 0.55;
+    }
+  }
+
+  .grove ellipse {
+    fill: color-mix(in srgb, var(--accent-pine) 32%, var(--surface-2));
+    opacity: 0.55;
+  }
+}
+
+:host(.mood-foggy) .far-meadow {
+  opacity: 0.35;
+}
+
+[data-theme='terminal'] .far-meadow {
+  .band,
+  .grove ellipse {
+    fill: color-mix(in srgb, var(--primary) 14%, var(--bg));
   }
 }
 
