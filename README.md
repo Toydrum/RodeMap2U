@@ -39,3 +39,7 @@ npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RodeMap2U/
 - `plan/` — the original 2024 design notes this project grew from 🌳
 
 Deploys automatically to GitHub Pages on every push to `main`.
+
+## For AI agents & new contributors
+
+Read **[`AGENTS.md`](AGENTS.md)** first — it documents the non-negotiable product rules (compass language, no shame mechanics, determinism, motion care), the data-model semantics, the rendering system, the verification tooling and the deploy playbook. `CLAUDE.md` points there too.
