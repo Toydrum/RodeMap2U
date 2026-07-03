@@ -95,6 +95,8 @@ export const ES = {
   },
   tree: {
     center: 'Centrarme',
+    zoomIn: 'Acercar',
+    zoomOut: 'Alejar',
     plant: 'Plantar aquí',
     youAreHere: 'Estás aquí',
     dateReviewBanner: 'Hay fechas que quieren platicar contigo',

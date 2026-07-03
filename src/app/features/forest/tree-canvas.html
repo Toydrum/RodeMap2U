@@ -197,6 +197,11 @@
   </g>
 </svg>
 
+<div class="zoom-actions">
+  <button type="button" class="btn btn-soft zoom-btn" (click)="zoomBy(1.3)" [attr.aria-label]="i18n.t().tree.zoomIn">+</button>
+  <button type="button" class="btn btn-soft zoom-btn" (click)="zoomBy(1 / 1.3)" [attr.aria-label]="i18n.t().tree.zoomOut">−</button>
+</div>
+
 <button type="button" class="btn btn-soft center-btn" (click)="centerOnCurrent()">
   ⌖ {{ i18n.t().tree.center }}
 </button>

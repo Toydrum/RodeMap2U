@@ -345,9 +345,29 @@ export class TreeCanvas {
     const target = (currentId && layout.byId.get(currentId)) || layout.points[layout.points.length - 1];
 
     this.k.set(k);
+    this.restingK = k;
     this.tx.set(rect.width / 2 - target.x * k);
     this.ty.set(groundScreen - this.groundY() * k);
     if (!this.focusedId()) this.focusedId.set(target.node.id);
+  }
+
+  /** The fitted zoom — at rest the tree stands still; panning unlocks when zoomed in. */
+  private restingK = 0;
+
+  private panUnlocked(): boolean {
+    return this.k() > this.restingK * 1.04;
+  }
+
+  /** Zoom around the viewport center (the +/− buttons). */
+  zoomBy(factor: number): void {
+    const rect = this.svgRef().nativeElement.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const k = Math.min(2.5, Math.max(0.4, this.k() * factor));
+    const ratio = k / this.k();
+    this.tx.set(mx - ratio * (mx - this.tx()));
+    this.ty.set(my - ratio * (my - this.ty()));
+    this.k.set(k);
   }
 
   /* ------------------------------------------------------------------ */
@@ -383,8 +403,11 @@ export class TreeCanvas {
       const dx = ev.clientX - this.panStart.x;
       const dy = ev.clientY - this.panStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 6) this.movedSinceDown = true;
-      this.tx.set(this.panStart.tx + dx);
-      this.ty.set(this.panStart.ty + dy);
+      // At resting zoom the tree stands still — dragging only pans once zoomed in.
+      if (this.panUnlocked()) {
+        this.tx.set(this.panStart.tx + dx);
+        this.ty.set(this.panStart.ty + dy);
+      }
     } else if (this.pointers.size === 2 && this.pinchStart) {
       this.movedSinceDown = true;
       const [a, b] = [...this.pointers.values()];

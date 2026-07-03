@@ -93,6 +93,8 @@ export const EN: Dict = {
   },
   tree: {
     center: 'Center me',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
     plant: 'Plant here',
     youAreHere: 'You are here',
     dateReviewBanner: 'Some dates would like a word with you',

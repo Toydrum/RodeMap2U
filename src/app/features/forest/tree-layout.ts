@@ -28,7 +28,7 @@ export interface TreeLayout {
 }
 
 export const SLOT_W = 78;
-const LEVEL_H = 116;
+const LEVEL_H = 100;
 const JITTER_X = 8;
 const JITTER_Y = 8;
 
