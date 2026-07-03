@@ -29,13 +29,17 @@ export class UpdateService {
 
     const check = () => {
       const now = Date.now();
-      if (now - this.lastCheck < 3_600_000) return; // 1/hour
+      if (now - this.lastCheck < 600_000) return; // at most every 10 min
       this.lastCheck = now;
       void this.swUpdate.checkForUpdate();
     };
     check();
+    // Long-lived windows still hear about new versions: on return, on
+    // reconnect, and on a gentle 15-minute heartbeat.
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) check();
     });
+    window.addEventListener('online', check);
+    setInterval(check, 900_000);
   }
 }
