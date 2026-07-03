@@ -174,6 +174,55 @@ export const EN: Dict = {
     about: 'About',
     aboutText: 'Made with care for minds that grow in spirals, not straight lines.',
   },
+  guide: {
+    title: 'How to use the app',
+    intro: 'A short walk through your forest. No rush — nothing runs here.',
+    settingsLink: 'How to use the app',
+    settingsHint: 'A short walk through everything you can do here',
+    firstTime: 'First time here? See how it works →',
+    sections: [
+      {
+        icon: '🧭',
+        title: 'The check-in',
+        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence.',
+      },
+      {
+        icon: '🌳',
+        title: 'Your forest',
+        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow.',
+      },
+      {
+        icon: '🌿',
+        title: 'Branches and their states',
+        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow.',
+      },
+      {
+        icon: '🌱',
+        title: 'Planting',
+        body: 'Tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap.',
+      },
+      {
+        icon: '🗓',
+        title: 'The gentle date',
+        body: 'It is optional and it is a compass, not a contract: it only marks the moment you would like to look at that branch again. Change it or let it go anytime. It never creates notifications or alarms.',
+      },
+      {
+        icon: '🍂',
+        title: 'When a date passes',
+        body: 'Nothing bad happens. The app tells you: "This date has passed — and you are still here. Breathe." And it shows you paths: keep going without a date, find another moment, or sprout new branches — with ready-made ideas so you never face a blank page (smaller, another time, a different way, with someone, rest). Your original goal becomes a golden knot: part of your story, never a strike-through.',
+      },
+      {
+        icon: '⏳',
+        title: 'Focus sessions',
+        body: 'From the Focus tab or from any branch. Pick a duration, the ring breathes with you, pause whenever you need — and when you finish, the app celebrates whatever it was: being here a little while is enough. Minutes are never judged.',
+      },
+      {
+        icon: '🔒',
+        title: 'Your data',
+        body: 'Everything lives only on your device: no accounts, no cloud, nobody watching. In Settings you can export your copy (do it often — it is your backup) and import it on another device. And nothing is ever deleted: what you no longer want to see rests in the archive, always recoverable.',
+      },
+    ],
+  },
   update: {
     ready: 'A new version is available',
     action: 'Update whenever you like',

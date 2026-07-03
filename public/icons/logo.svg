@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <!-- RodeMap2U — a small tree telling the whole story:
+       a leaf (growing), a bloom (achieved), a golden knot (branched) -->
+  <defs>
+    <linearGradient id="skybg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaf0e3"/>
+      <stop offset="1" stop-color="#dde7d2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Badge -->
+  <circle cx="48" cy="48" r="46" fill="url(#skybg)"/>
+  <circle cx="48" cy="48" r="46" fill="none" stroke="#5c8a58" stroke-width="3"/>
+
+  <!-- Sun -->
+  <circle cx="67" cy="27" r="7" fill="#e5c983" opacity="0.85"/>
+
+  <!-- Ground -->
+  <path d="M 14 70 Q 48 60 82 70 L 82 78 Q 48 70 14 78 Z" fill="#9db27e" opacity="0.85"/>
+
+  <!-- Trunk (tapered) -->
+  <path d="M 44.5 72 C 45.5 62 46 54 47.2 46 L 50.8 46 C 52 54 52.5 62 53.5 72 Z" fill="#6f5640"/>
+
+  <!-- Left branch → leaf pair (growing) -->
+  <path d="M 47.6 50 C 42 44 36.5 40 31.5 37.5 L 33.5 34.5 C 39 37.5 44.5 42 48.8 47.5 Z" fill="#6f5640"/>
+  <path d="M 31.5 36 Q 22.5 34.5 20 26.5 Q 29 27 33.5 33.5 Z" fill="#5c8a58"/>
+  <path d="M 33 30.5 Q 30 22.5 35 16.5 Q 39.5 24 36.5 30.5 Z" fill="#7fa07f"/>
+
+  <!-- Middle branch → bud -->
+  <path d="M 48.2 46.5 C 48 39 47.6 33 46.8 27.5 L 50.4 27 C 50.8 33 50.6 39 50 46.5 Z" fill="#6f5640"/>
+  <ellipse cx="48.6" cy="24.5" rx="4.2" ry="5.4" fill="#5c8a58"/>
+
+  <!-- Right branch → golden knot → bloom (the story of branching) -->
+  <path d="M 50.4 49 C 55.5 44 60 40.5 65 37.5 L 66.8 40.5 C 62 43.5 57.5 47 53 51.5 Z" fill="#6f5640"/>
+  <circle cx="66" cy="39" r="4.6" fill="#eaf0e3" stroke="#a8935a" stroke-width="2.6"/>
+  <path d="M 68.5 36.5 C 71 33.5 73 31 75.5 28.8 L 77.3 31 C 75 33.2 72.8 35.6 70.6 38.6 Z" fill="#a8935a"/>
+
+  <!-- Bloom -->
+  <g transform="translate(78 27.5)">
+    <ellipse rx="2.9" ry="4.6" cy="-3.9" fill="#d8a4b8" transform="rotate(0)"/>
+    <ellipse rx="2.9" ry="4.6" cy="-3.9" fill="#d8a4b8" transform="rotate(72)"/>
+    <ellipse rx="2.9" ry="4.6" cy="-3.9" fill="#d8a4b8" transform="rotate(144)"/>
+    <ellipse rx="2.9" ry="4.6" cy="-3.9" fill="#d8a4b8" transform="rotate(216)"/>
+    <ellipse rx="2.9" ry="4.6" cy="-3.9" fill="#d8a4b8" transform="rotate(288)"/>
+    <circle r="2.5" fill="#a8935a"/>
+  </g>
+
+  <!-- Grass -->
+  <path d="M 26 71.5 q -2 -6 -4.5 -7.5 M 30 71 q 1 -6.5 0 -8 M 68 70.5 q 2 -6 4.5 -7 M 63 71 q -1 -6 0 -7.5"
+        fill="none" stroke="#5c8a58" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

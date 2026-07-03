@@ -1,6 +1,15 @@
 <div class="container page">
   <h1>{{ i18n.t().settings.title }}</h1>
 
+  <a class="card block guide-link" routerLink="/guide">
+    <img src="icons/logo.svg" alt="" width="44" height="44">
+    <span class="guide-text">
+      <strong>{{ i18n.t().guide.settingsLink }}</strong>
+      <span class="hint">{{ i18n.t().guide.settingsHint }}</span>
+    </span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </a>
+
   <!-- Appearance -->
   <section class="card block">
     <h2>{{ i18n.t().settings.appearance }}</h2>

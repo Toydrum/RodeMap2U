@@ -34,9 +34,24 @@
   gap: 1rem;
   padding-top: 1.5rem;
 
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    img {
+      display: block;
+    }
+  }
+
   h1 {
     margin: 0;
   }
+}
+
+.first-time {
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
 }
 
 /* ------------------------------------------------------------ meadow */

@@ -4,7 +4,10 @@
 
   <!-- Header floats over the sky -->
   <header class="head container">
-    <h1>{{ i18n.t().forest.title }}</h1>
+    <span class="brand">
+      <img src="icons/logo.svg" alt="" width="34" height="34">
+      <h1>{{ i18n.t().forest.title }}</h1>
+    </span>
     @if (trees.active().length) {
       <button type="button" class="btn btn-primary" (click)="creating.set(true)">
         + {{ i18n.t().forest.newTree }}
@@ -87,6 +90,7 @@
         <button type="button" class="btn btn-primary" (click)="creating.set(true)">
           {{ i18n.t().forest.plantFirst }}
         </button>
+        <a routerLink="/guide" class="first-time">{{ i18n.t().guide.firstTime }}</a>
       </div>
     }
   </div>

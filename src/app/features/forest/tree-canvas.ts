@@ -271,10 +271,12 @@ export class TreeCanvas {
     const rect = svg.getBoundingClientRect();
     if (!rect.width) return;
 
+    // The tree STANDS on the scenery's meadow line — never floats.
+    const groundScreen = rect.height * 0.8;
     const pad = 100;
     const fitK = Math.min(
       rect.width / (layout.width + pad * 2),
-      rect.height / (layout.height + pad * 2),
+      (groundScreen - 70) / (layout.height + 90),
     );
     // Young trees should still fill the view instead of drowning in it.
     const fillK = (rect.height * 0.42) / Math.max(layout.height + 60, 180);
@@ -285,10 +287,7 @@ export class TreeCanvas {
 
     this.k.set(k);
     this.tx.set(rect.width / 2 - target.x * k);
-    let ty = rect.height * 0.6 - target.y * k;
-    // The ground must stay in frame — a tree without its soil floats.
-    ty = Math.min(ty, rect.height - 46 - this.groundY() * k);
-    this.ty.set(ty);
+    this.ty.set(groundScreen - this.groundY() * k);
     if (!this.focusedId()) this.focusedId.set(target.node.id);
   }
 

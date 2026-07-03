@@ -42,5 +42,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/settings/settings').then((m) => m.SettingsPage),
     title: 'RodeMap2U — Ajustes',
   },
+  {
+    path: 'guide',
+    loadComponent: () => import('./features/guide/guide').then((m) => m.GuidePage),
+    title: 'RodeMap2U — Guía',
+  },
   { path: '**', redirectTo: 'forest' },
 ];

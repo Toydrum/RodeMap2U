@@ -1,0 +1,22 @@
+<div class="container page">
+  <header class="head">
+    <button type="button" class="btn btn-ghost" (click)="goBack()">← {{ i18n.t().common.back }}</button>
+  </header>
+
+  <div class="hero">
+    <img src="icons/logo.svg" alt="" class="logo" width="72" height="72">
+    <h1>{{ i18n.t().guide.title }}</h1>
+    <p class="intro">{{ i18n.t().guide.intro }}</p>
+  </div>
+
+  <div class="sections">
+    @for (section of i18n.t().guide.sections; track section.title) {
+      <section class="card block">
+        <h2><span class="icon" aria-hidden="true">{{ section.icon }}</span> {{ section.title }}</h2>
+        <p>{{ section.body }}</p>
+      </section>
+    }
+  </div>
+
+  <p class="closing">{{ i18n.t().settings.aboutText }}</p>
+</div>

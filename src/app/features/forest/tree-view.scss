@@ -63,13 +63,14 @@
   min-height: 0;
   position: relative;
   /* same world as the forest: sky above, meadow greens below */
+  /* sky down to the mountain line (~62%), meadow greens below it */
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--accent-sky) 24%, var(--bg)) 0%,
-    color-mix(in srgb, var(--accent-sky) 12%, var(--bg)) 30%,
-    color-mix(in srgb, var(--primary) 7%, var(--bg)) 48%,
-    color-mix(in srgb, var(--primary) 12%, var(--bg)) 74%,
-    color-mix(in srgb, var(--primary) 16%, var(--bg)) 100%
+    color-mix(in srgb, var(--accent-sky) 12%, var(--bg)) 42%,
+    color-mix(in srgb, var(--primary) 8%, var(--bg)) 62%,
+    color-mix(in srgb, var(--primary) 13%, var(--bg)) 82%,
+    color-mix(in srgb, var(--primary) 17%, var(--bg)) 100%
   );
   overflow: hidden;
 

@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ThemeService } from '../../core/theme/theme.service';
@@ -9,6 +10,7 @@ import { Lang, MotionPref, TextSize, ThemeName } from '../../core/db/schema';
 
 @Component({
   selector: 'app-settings',
+  imports: [RouterLink],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

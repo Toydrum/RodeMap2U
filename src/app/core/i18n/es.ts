@@ -176,6 +176,55 @@ export const ES = {
     about: 'Acerca de',
     aboutText: 'Hecho con cariño para mentes que crecen en espiral, no en línea recta.',
   },
+  guide: {
+    title: 'Cómo usar la app',
+    intro: 'Un paseo corto por tu bosque. Sin prisa — aquí nada corre.',
+    settingsLink: 'Cómo usar la app',
+    settingsHint: 'Un paseo corto por todo lo que puedes hacer aquí',
+    firstTime: '¿Primera vez por aquí? Mira cómo funciona →',
+    sections: [
+      {
+        icon: '🧭',
+        title: 'El check-in',
+        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna.',
+      },
+      {
+        icon: '🌳',
+        title: 'Tu bosque',
+        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado.',
+      },
+      {
+        icon: '🌿',
+        title: 'Las ramas y sus estados',
+        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer.',
+      },
+      {
+        icon: '🌱',
+        title: 'Plantar',
+        body: 'Toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque.',
+      },
+      {
+        icon: '🗓',
+        title: 'La fecha amable',
+        body: 'Es opcional y es una brújula, no un contrato: solo marca el momento en que te gustaría volver a mirar esa rama. Puedes cambiarla o soltarla cuando quieras. Nunca genera notificaciones ni alarmas.',
+      },
+      {
+        icon: '🍂',
+        title: 'Cuando una fecha pasa',
+        body: 'No pasa nada malo. La app te dice: "Esta fecha ya pasó — y tú sigues aquí. Respira." Y te muestra caminos: seguir sin fecha, buscar otro momento, o brotar ramitas nuevas — con ideas listas para no enfrentar la página en blanco (más pequeño, en otro momento, de otra manera, con alguien, descansar). Tu meta original se vuelve un nudo dorado: parte de tu historia, jamás un tache.',
+      },
+      {
+        icon: '⏳',
+        title: 'Sesiones de enfoque',
+        body: 'Desde la pestaña Enfoque o desde cualquier rama. Eliges duración, el anillo respira contigo, puedes pausar cuando quieras — y al terminar la app celebra lo que haya sido: estar un ratito es suficiente. Los minutos nunca se juzgan.',
+      },
+      {
+        icon: '🔒',
+        title: 'Tus datos',
+        body: 'Todo vive únicamente en tu dispositivo: no hay cuentas, ni nube, ni nadie mirando. En Ajustes puedes exportar tu copia (hazlo seguido — es tu respaldo) e importarla en otro dispositivo. Y nada se borra jamás: lo que no quieres ver descansa en el archivo, recuperable siempre.',
+      },
+    ],
+  },
   update: {
     ready: 'Hay una versión nueva',
     action: 'Actualizar cuando quieras',
