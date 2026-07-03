@@ -1,0 +1,36 @@
+<div class="container page">
+  <header class="head">
+    <button type="button" class="btn btn-ghost" (click)="goBack()">← {{ i18n.t().common.back }}</button>
+  </header>
+
+  <div class="hero">
+    <h1>{{ i18n.t().trail.title }}</h1>
+    <p class="intro">{{ i18n.t().trail.subtitle }}</p>
+  </div>
+
+  @if (footprints().length) {
+    <ol class="steps">
+      @for (fp of footprints(); track fp.checkIn.id) {
+        <li class="card footprint">
+          <span class="mark" aria-hidden="true">{{ fp.emoji }}</span>
+          <div class="body">
+            <div class="meta">
+              <strong>{{ fp.feelingName }}</strong>
+              <span class="when">{{ fp.when }}</span>
+            </div>
+            <div class="place">{{ fp.place ?? i18n.t().trail.somewhere }}</div>
+            @if (fp.note) {
+              <p class="note">«{{ fp.note }}»</p>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  } @else {
+    <div class="empty">
+      <span class="paw" aria-hidden="true">🐾</span>
+      <h2>{{ i18n.t().trail.empty }}</h2>
+      <p>{{ i18n.t().trail.emptyHint }}</p>
+    </div>
+  }
+</div>

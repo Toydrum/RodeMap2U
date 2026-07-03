@@ -33,6 +33,32 @@
   }
 }
 
+.past-note {
+  width: min(440px, 100%);
+  margin: -0.5rem 0 1.5rem;
+  padding: 0.85rem 1.05rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 35%, transparent);
+  text-align: left;
+  font-size: 0.9rem;
+
+  .from {
+    display: block;
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .words {
+    margin: 0;
+    font-style: italic;
+    color: var(--text-dim);
+    overflow-wrap: anywhere;
+  }
+}
+
 .weather {
   display: flex;
   flex-wrap: wrap;

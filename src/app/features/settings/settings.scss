@@ -10,6 +10,13 @@
   color: var(--text);
   transition: border-color 0.2s ease, transform 0.15s ease;
 
+  .trail-mark {
+    width: 44px;
+    font-size: 1.8rem;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+
   &:hover {
     border-color: var(--primary);
     transform: translateY(-1px);

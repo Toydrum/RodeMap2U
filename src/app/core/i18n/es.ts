@@ -40,12 +40,22 @@ export const ES = {
     justLooking: 'Solo quiero mirar',
     noteLabel: '¿Quieres dejarte una notita?',
     notePlaceholder: 'Para ti, del futuro…',
+    pastNote: 'Tu yo del pasado te dejó esto',
     done: 'Aquí estoy',
     skipAll: 'Hoy no quiero responder',
     thanks: 'Gracias por pasar. Tu bosque te espera.',
     chooseTitle: 'Tu bosque te rodea',
     chooseSubtitle: '¿A cuál árbol quieres entrar hoy?',
     justForest: 'Solo mirar el bosque',
+  },
+  trail: {
+    title: 'Tus huellas',
+    subtitle: 'El camino que has ido dejando, contado por ti. Solo para mirar — aquí nada se califica.',
+    empty: 'Aún no hay huellas por aquí.',
+    emptyHint: 'Cada check-in dejará una: tu clima, dónde estabas y tu notita.',
+    settingsLink: 'Tus huellas',
+    settingsHint: 'Tus check-ins de otros días: climas, lugares y notitas',
+    somewhere: 'En algún lugar del bosque',
   },
   forest: {
     title: 'Mi bosque',
@@ -200,7 +210,7 @@ export const ES = {
       {
         icon: '🧭',
         title: 'El check-in',
-        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. ¿Quieres que te lo pregunte de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado».',
+        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. ¿Quieres que te lo pregunte de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas», dentro de Ajustes.',
       },
       {
         icon: '🌳',

@@ -5,6 +5,13 @@
         <h1>{{ i18n.t().checkIn.title }}</h1>
         <p class="sub">{{ i18n.t().checkIn.subtitle }}</p>
 
+        @if (lastNote(); as letter) {
+          <div class="past-note">
+            <span class="from">🍂 {{ i18n.t().checkIn.pastNote }} — {{ lastNoteDate() }}</span>
+            <p class="words">«{{ letter.note }}»</p>
+          </div>
+        }
+
         <div class="weather" role="group" [attr.aria-label]="i18n.t().a11y.feelingGroup">
           @for (f of feelings; track f.key) {
             <button

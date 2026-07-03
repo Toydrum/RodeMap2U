@@ -66,6 +66,21 @@ export class CheckInPage {
     return this.nodes.needsDateReview().filter((n) => activeIds.has(n.treeId));
   });
 
+  /** The freshest little note — a letter your past self left for today. */
+  protected readonly lastNote = computed(
+    () =>
+      [...this.checkins.all()]
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .find((c) => c.note.trim().length > 0) ?? null,
+  );
+
+  protected lastNoteDate(): string {
+    const letter = this.lastNote();
+    if (!letter) return '';
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    return new Date(letter.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+  }
+
   protected pickFeeling(feeling: Feeling): void {
     this.feeling.set(feeling);
     this.step.set(this.candidates().length ? 'where' : 'note');

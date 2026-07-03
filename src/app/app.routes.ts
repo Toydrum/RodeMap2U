@@ -47,5 +47,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/guide/guide').then((m) => m.GuidePage),
     title: 'RodeMap2U — Guía',
   },
+  {
+    path: 'trail',
+    loadComponent: () => import('./features/trail/trail').then((m) => m.TrailPage),
+    title: 'RodeMap2U — Huellas',
+  },
   { path: '**', redirectTo: 'forest' },
 ];

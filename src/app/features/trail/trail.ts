@@ -1,0 +1,73 @@
+import { Component, computed, inject } from '@angular/core';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { TreesRepo } from '../../core/repos/trees.repo';
+import { NodesRepo } from '../../core/repos/nodes.repo';
+import { CheckIn, Feeling } from '../../core/db/schema';
+
+const FEELING_EMOJI: Record<Feeling, string> = {
+  sunny: '☀️',
+  calm: '🌤',
+  foggy: '🌫',
+  heavy: '🌧',
+  stormy: '⛈',
+};
+
+interface Footprint {
+  checkIn: CheckIn;
+  emoji: string;
+  feelingName: string;
+  when: string;
+  place: string | null;
+  note: string;
+}
+
+/** "Tus huellas" — the quiet trail of past check-ins. Just for looking. */
+@Component({
+  selector: 'app-trail',
+  templateUrl: './trail.html',
+  styleUrl: './trail.scss',
+})
+export class TrailPage {
+  protected readonly i18n = inject(I18nService);
+  private readonly checkins = inject(CheckinsRepo);
+  private readonly trees = inject(TreesRepo);
+  private readonly nodes = inject(NodesRepo);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+
+  protected readonly footprints = computed<Footprint[]>(() => {
+    const dict = this.i18n.t();
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    return [...this.checkins.all()]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((c) => {
+        const tree = c.treeId ? this.trees.byId().get(c.treeId) : undefined;
+        const node = c.nodeId ? this.nodes.byId().get(c.nodeId) : undefined;
+        const place = tree ? (node ? `${tree.name} · ${node.title}` : tree.name) : null;
+        const at = new Date(c.createdAt);
+        const when =
+          at.toLocaleDateString(locale, { day: 'numeric', month: 'short' }) +
+          ' · ' +
+          at.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        return {
+          checkIn: c,
+          emoji: FEELING_EMOJI[c.feeling],
+          feelingName: dict.checkIn.feelings[c.feeling],
+          when,
+          place,
+          note: c.note.trim(),
+        };
+      });
+  });
+
+  protected goBack(): void {
+    if (history.length > 1) {
+      this.location.back();
+    } else {
+      void this.router.navigate(['/settings']);
+    }
+  }
+}

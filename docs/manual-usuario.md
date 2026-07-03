@@ -66,6 +66,8 @@ Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles 
 
 ¿Y si más tarde quieres que la app te pregunte de nuevo? En tu bosque vive una **rosa de los vientos** con la invitación **"Buscarme en este bosque encantado"**. Tócala y el ritual vuelve a empezar, con la misma calma de siempre.
 
+Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"**, dentro de Ajustes. Solo para mirar — ahí nada se califica.
+
 > 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
 
 ---
@@ -198,7 +200,7 @@ Las sesiones vinculadas a una rama se van sumando: en su detalle verás sus *"mi
 
 # 8. Ajustes
 
-En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad:
+En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba encontrarás dos tarjetas: la **guía de la app** y **"Tus huellas"** 🐾 — el sendero de tus check-ins pasados, con el clima, el lugar y la notita de cada visita.
 
 ## Apariencia
 

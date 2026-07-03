@@ -38,12 +38,22 @@ export const EN: Dict = {
     justLooking: 'Just looking',
     noteLabel: 'Want to leave yourself a little note?',
     notePlaceholder: 'For future you…',
+    pastNote: 'Your past self left you this',
     done: "Here I am",
     skipAll: "I don't want to answer today",
     thanks: 'Thanks for stopping by. Your forest is waiting.',
     chooseTitle: 'Your forest surrounds you',
     chooseSubtitle: 'Which tree would you like to enter today?',
     justForest: 'Just look at the forest',
+  },
+  trail: {
+    title: 'Your footprints',
+    subtitle: 'The path you have been leaving, told by you. Just for looking — nothing is graded here.',
+    empty: 'No footprints here yet.',
+    emptyHint: 'Each check-in will leave one: your weather, where you were, and your little note.',
+    settingsLink: 'Your footprints',
+    settingsHint: 'Your check-ins from other days: weathers, places and little notes',
+    somewhere: 'Somewhere in the forest',
   },
   forest: {
     title: 'My forest',
@@ -198,7 +208,7 @@ export const EN: Dict = {
       {
         icon: '🧭',
         title: 'The check-in',
-        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. Want to be asked again? A wind rose lives in your forest: "Find myself in this enchanted forest".',
+        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. Want to be asked again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints", inside Settings.',
       },
       {
         icon: '🌳',

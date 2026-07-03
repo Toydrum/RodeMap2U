@@ -87,6 +87,7 @@ export const DEMO_NODES: TreeNode[] = [
 
 export const DEMO_CHECKINS: CheckIn[] = [
   { ...base('demo-checkin-1', 1), feeling: 'calm', note: 'Un día tranquilo', treeId: 'demo-guitar', nodeId: 'demo-g-first-song' },
+  { ...base('demo-checkin-2', 3), feeling: 'foggy', note: 'La niebla también pasa', treeId: null, nodeId: null },
 ];
 
 export const DEMO_SESSIONS: TimerSession[] = [
