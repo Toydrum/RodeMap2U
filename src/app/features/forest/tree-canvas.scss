@@ -101,6 +101,15 @@
     opacity: 1;
   }
 
+  /* Shade families — mixed shapes and greens read as living foliage. */
+  &.sh1 path:not(.lit) {
+    fill: color-mix(in srgb, var(--status-growing) 66%, #38562f);
+  }
+
+  &.sh2 path:not(.lit) {
+    fill: color-mix(in srgb, var(--status-growing) 58%, #b3c178);
+  }
+
   &.blossom .blossom-petal {
     fill: color-mix(in srgb, var(--status-achieved) 72%, white);
   }

@@ -33,6 +33,10 @@ interface LeafDecoration {
   angle: number;
   size: number;
   kind: 'leaf' | 'blossom';
+  /** Shape family (almond / willow / round / asymmetric). */
+  variant: number;
+  /** Green shade (base / deep / warm) — overlap reads as real foliage. */
+  shade: number;
 }
 
 interface EdgeView {
@@ -223,6 +227,8 @@ export class TreeCanvas {
         angle: side * (26 + (hi % 55)),
         size: 5 + ((hi >> 4) % 4),
         kind: status === 'achieved' && i === 0 ? 'blossom' : 'leaf',
+        variant: hi % 4,
+        shade: (hi >> 5) % 3,
       });
       // Some slots sprout an opposite twin — pairs read as real foliage.
       if (hi % 5 < 2 && status !== 'resting') {
@@ -232,6 +238,8 @@ export class TreeCanvas {
           angle: -side * (30 + ((hi >> 5) % 45)),
           size: 4.5 + ((hi >> 7) % 3),
           kind: 'leaf',
+          variant: (hi >> 8) % 4,
+          shade: (hi >> 11) % 3,
         });
       }
     }
@@ -248,6 +256,8 @@ export class TreeCanvas {
           angle: side * (14 + (hi % 46)),
           size: 4.5 + (hi % 4),
           kind: 'leaf',
+          variant: (hi >> 4) % 4,
+          shade: (hi >> 9) % 3,
         });
       }
     }
