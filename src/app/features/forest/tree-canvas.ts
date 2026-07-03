@@ -189,7 +189,8 @@ export class TreeCanvas {
     );
   }
 
-  /** Deterministic little leaves sprinkled along live branches. */
+  /** Deterministic foliage: leaf slots scale with limb length, some sprout
+   *  opposite twins (leaf pairs), and twig tips gather a tuft. */
   private leavesFor(
     point: LayoutPoint,
     geometry: ReturnType<typeof edgeGeometry>,
@@ -197,36 +198,47 @@ export class TreeCanvas {
   ): LeafDecoration[] {
     const status = point.node.status;
     const h = hash(point.node.id + ':leaves');
-    // Every living branch wears foliage; resting keeps just a quiet pair.
-    const base = status === 'achieved' ? 5 : status === 'growing' ? 4 : status === 'resting' ? 1 : 3;
-    const count = base + (h % 2);
+    const parent = point.parent!;
+    const length = Math.hypot(point.x - parent.x, point.y - parent.y);
+    // One leaf slot every ~10-14px of limb; resting stays deliberately sparse.
+    const spacing = status === 'achieved' ? 10 : status === 'growing' ? 11 : status === 'resting' ? 30 : 14;
+    const slots = Math.max(status === 'resting' ? 2 : 4, Math.min(14, Math.round(length / spacing)));
     const leaves: LeafDecoration[] = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < slots; i++) {
       const hi = hash(point.node.id + ':leaf:' + i);
-      // Spread along the whole limb, evenly seeded + jittered, alternating sides.
-      const t = Math.min(0.92, 0.22 + (i / count) * 0.62 + ((hi % 12) / 100));
-      const at = edgePointAt(point.parent!, point, geometry, t);
+      const t = Math.min(0.93, 0.16 + (i / slots) * 0.72 + ((hi % 10) / 100));
+      const at = edgePointAt(parent, point, geometry, t);
       const side = (i + (h % 2)) % 2 === 0 ? 1 : -1;
       leaves.push({
-        x: at.x + side * (3.5 + (hi % 6)),
+        x: at.x + side * (3 + (hi % 6)),
         y: at.y,
-        angle: side * (28 + (hi % 52)),
+        angle: side * (26 + (hi % 55)),
         size: 5 + ((hi >> 4) % 4),
         kind: status === 'achieved' && i === 0 ? 'blossom' : 'leaf',
       });
+      // Some slots sprout an opposite twin — pairs read as real foliage.
+      if (hi % 5 < 2 && status !== 'resting') {
+        leaves.push({
+          x: at.x - side * (3 + ((hi >> 3) % 5)),
+          y: at.y + 1,
+          angle: -side * (30 + ((hi >> 5) % 45)),
+          size: 4.5 + ((hi >> 7) % 3),
+          kind: 'leaf',
+        });
+      }
     }
-    // Foliage gathers where the branch ends: twig tips grow a little tuft.
+    // Foliage gathers where the branch ends: twig tips grow a real tuft.
     if (isTip && status !== 'achieved' && status !== 'branched') {
-      const tuftCount = status === 'resting' ? 1 : 2 + (h % 2);
+      const tuftCount = status === 'resting' ? 2 : 4 + (h % 2);
       for (let i = 0; i < tuftCount; i++) {
         const hi = hash(point.node.id + ':tuft:' + i);
-        const at = edgePointAt(point.parent!, point, geometry, Math.min(0.97, 0.85 + i * 0.05));
+        const at = edgePointAt(parent, point, geometry, Math.min(0.97, 0.8 + i * 0.045));
         const side = i % 2 === 0 ? 1 : -1;
         leaves.push({
-          x: at.x + side * (2.5 + (hi % 4)),
+          x: at.x + side * (2 + (hi % 5)),
           y: at.y,
-          angle: side * (16 + (hi % 40)),
-          size: 4.5 + (hi % 3),
+          angle: side * (14 + (hi % 46)),
+          size: 4.5 + (hi % 4),
           kind: 'leaf',
         });
       }
