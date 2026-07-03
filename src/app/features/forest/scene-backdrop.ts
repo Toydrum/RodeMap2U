@@ -48,6 +48,7 @@ import { Feeling } from '../../core/db/schema';
     @if (mood() === 'foggy') {
       <div class="fog" aria-hidden="true"></div>
       <div class="mist far" aria-hidden="true"></div>
+      <div class="mist mid" aria-hidden="true"></div>
       <div class="mist near" aria-hidden="true"></div>
     }
 
