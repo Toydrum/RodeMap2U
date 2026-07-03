@@ -9,6 +9,7 @@ import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
+import { WeatherFront } from './weather-front';
 import { FlowerSpec, flowerFor } from './flora';
 import { FlowerGlyph } from './flower';
 
@@ -35,7 +36,7 @@ interface GrassCluster {
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, FlowerGlyph],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
 })

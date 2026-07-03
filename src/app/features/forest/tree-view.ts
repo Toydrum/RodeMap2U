@@ -8,12 +8,13 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
 import { SceneBackdrop } from './scene-backdrop';
+import { WeatherFront } from './weather-front';
 import { NodeDetail } from '../node-detail/node-detail';
 import { DateReview } from '../check-in/date-review';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, SceneBackdrop, NodeDetail, DateReview],
+  imports: [RouterLink, TreeCanvas, SceneBackdrop, WeatherFront, NodeDetail, DateReview],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })

@@ -54,9 +54,6 @@ import { Feeling } from '../../core/db/schema';
       <div class="mist near" aria-hidden="true"></div>
     }
 
-    @if (isGloomy()) {
-      <div class="rain" [class.drizzle]="mood() === 'heavy'" aria-hidden="true"></div>
-    }
 
     <svg
       class="mountains"

@@ -118,6 +118,8 @@
     }
   </div>
 
+  <app-weather-front [mood]="mood()" />
+
   <!-- Archive-tree confirm -->
   @if (archiving(); as tree) {
     <div class="sheet-backdrop" (click)="archiving.set(null)">

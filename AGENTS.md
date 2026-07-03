@@ -55,7 +55,7 @@ src/app/
 - `tree-layout.ts` is **pure and unit-testable**: leaf-slot layered layout (root bottom, growth up), deterministic jitter, `taperedRibbon()` (sampled bezier + perpendicular offsets = filled tapered timber; NOT stroked paths), `edgeGeometry(parent, child, bowScale)` — miniatures pass `bowScale≈scale` or absolute bows read as seaweed.
 - Wood color: bark→moss mix by depth; `origin:'branch'` limbs lean golden (`--status-branched`).
 - **Flora species**: `flora.ts` maps the tree's accent → flower shape (petal5/daisy/bell/star) + palette. Rendered by `g[appFlower]` everywhere (canvas glyphs, branch blossoms, minis, trunk-base flowers, meadow flowers). One tree = one species, botanically consistent.
-- `SceneBackdrop` mood input mirrors the latest check-in feeling: sunny/foggy/heavy/stormy (storm = dark clouds + soft lightning + rain layers). Shared by forest and tree view; `?mood=` query override for demos.
+- Weather is split in two layers: `SceneBackdrop` (BEHIND the scenery: clouds, lightning, sky mist banks, fog-seam, mountain dissolve) and `WeatherFront` (OVER the scenery, pointer-transparent: the rain itself and the fog's ground veil). Rain/fog must never end at the landscape's edge — that hard line is why the split exists. Both take the same `mood` input (latest check-in feeling); `?mood=` query override for demos.
 - Tree view ground is **pinned to the meadow band** (both computed from the same `.canvas-wrap` box) — do not reintroduce independent anchors; that caused "floating tree" bugs three times.
 
 ## Dev workflow
