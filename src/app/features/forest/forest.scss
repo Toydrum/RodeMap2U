@@ -241,13 +241,18 @@
   padding-bottom: 1.6rem;
 }
 
+/* A lone tree owns the whole meadow — let it stand taller. */
+.plots:has(> .plot:only-child) .plot {
+  width: clamp(190px, 34vw, 260px);
+}
+
 .plot {
   position: relative;
   display: flex;
   flex: 0 0 auto; /* never shrink — wrap to the next meadow row instead */
   flex-direction: column;
   align-items: center;
-  width: clamp(128px, 20vw, 168px);
+  width: clamp(150px, 24vw, 204px);
   padding: 0.4rem 0.2rem 0.6rem;
   text-decoration: none;
   color: var(--text);
