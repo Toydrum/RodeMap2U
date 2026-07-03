@@ -167,6 +167,43 @@
   stroke-width: 3.8;
 }
 
+.note-letter {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-16%, -112%);
+  max-width: 240px;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 40%, transparent);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+  font-size: 0.85rem;
+  animation: letter-open 0.18s ease both;
+
+  .who {
+    display: block;
+    color: var(--text-faint);
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .words {
+    margin: 0;
+    font-style: italic;
+    color: var(--text-dim);
+    overflow-wrap: anywhere;
+  }
+}
+
+@keyframes letter-open {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+  }
+}
+
 .note-mark {
   .paper {
     fill: color-mix(in srgb, var(--surface) 92%, transparent);

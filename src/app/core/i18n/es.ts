@@ -213,7 +213,7 @@ export const ES = {
       {
         icon: '🧭',
         title: 'El check-in',
-        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. ¿Quieres que te lo pregunte de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas», dentro de Ajustes.',
+        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. ¿Quieres que te lo pregunte de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas» — la huellita 🐾 junto a la rosa de los vientos (también en Ajustes).',
       },
       {
         icon: '🌳',
@@ -223,7 +223,7 @@ export const ES = {
       {
         icon: '🌿',
         title: 'Las ramas y sus estados',
-        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol — y todas se releen juntas en «Tus huellas».',
+        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol: pasa el puntero por ella y una cartita te la muestra ahí mismo. Todas se releen juntas en «Tus huellas».',
       },
       {
         icon: '🌱',

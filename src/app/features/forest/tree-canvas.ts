@@ -72,6 +72,24 @@ export class TreeCanvas {
   protected readonly ty = signal(0);
   protected readonly k = signal(1);
 
+  /** Paper leaf under the pointer — a little letter opens beside it. */
+  protected readonly hoverNote = signal<{ node: TreeNode; wx: number; wy: number } | null>(null);
+
+  /** The letter follows its mark through pan and zoom. */
+  protected readonly letterPos = computed(() => {
+    const hover = this.hoverNote();
+    if (!hover) return null;
+    return { x: this.tx() + hover.wx * this.k(), y: this.ty() + hover.wy * this.k() };
+  });
+
+  protected showLetter(point: LayoutPoint): void {
+    this.hoverNote.set({ node: point.node, wx: point.x + 18, wy: point.y - 24 });
+  }
+
+  protected hideLetter(): void {
+    this.hoverNote.set(null);
+  }
+
   /** Roving tabindex focus (also drives the "+" bud). */
   protected readonly focusedId = signal<string | null>(null);
 

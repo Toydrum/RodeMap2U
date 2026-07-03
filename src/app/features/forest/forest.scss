@@ -54,6 +54,20 @@
     gap: 0.6rem;
   }
 
+  .paw-btn {
+    min-width: 46px;
+    min-height: 46px;
+    padding: 0.4rem;
+    font-size: 1.1rem;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    border-radius: 50%;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
+
   .checkin-btn {
     display: inline-flex;
     align-items: center;
@@ -119,6 +133,11 @@
     .checkin-btn {
       order: 2;
       font-size: 0.78rem;
+    }
+
+    /* The paw wraps together with the rose, at its side. */
+    .paw-btn {
+      order: 3;
     }
   }
 }

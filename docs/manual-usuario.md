@@ -66,7 +66,7 @@ Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles 
 
 ¿Y si más tarde quieres que la app te pregunte de nuevo? En tu bosque vive una **rosa de los vientos** con la invitación **"Buscarme en este bosque encantado"**. Tócala y el ritual vuelve a empezar, con la misma calma de siempre.
 
-Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"**, dentro de Ajustes. Solo para mirar — ahí nada se califica.
+Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica.
 
 > 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
 
@@ -140,7 +140,7 @@ Se abre con un segundo toque sobre la rama. Aquí vive todo lo suyo:
 - **Título** — qué quieres que crezca ahí.
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
 - **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
-- **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃, y todas se pueden releer juntas en **"Tus huellas"** (Ajustes) — tocando cualquiera vuelves directo a su rama.
+- **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.
 - **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
 - **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
@@ -200,7 +200,7 @@ Las sesiones vinculadas a una rama se van sumando: en su detalle verás sus *"mi
 
 # 8. Ajustes
 
-En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba encontrarás dos tarjetas: la **guía de la app** y **"Tus huellas"** 🐾 — el lugar donde se junta todo lo que has escrito: tus check-ins pasados (clima, lugar y notita de cada visita) y las notitas que viven en tus ramas, cada una con un caminito de vuelta a su árbol.
+En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba encontrarás dos tarjetas: la **guía de la app** y **"Tus huellas"** 🐾 — el lugar donde se junta todo lo que has escrito: tus check-ins pasados (clima, lugar y notita de cada visita) y las notitas que viven en tus ramas, cada una con un caminito de vuelta a su árbol. (La huellita también vive en tu bosque, junto a la rosa de los vientos.)
 
 ## Apariencia
 

@@ -211,7 +211,7 @@ export const EN: Dict = {
       {
         icon: '🧭',
         title: 'The check-in',
-        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. Want to be asked again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints", inside Settings.',
+        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. Want to be asked again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints" — the little paw 🐾 next to the wind rose (also in Settings).',
       },
       {
         icon: '🌳',
@@ -221,7 +221,7 @@ export const EN: Dict = {
       {
         icon: '🌿',
         title: 'Branches and their states',
-        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. If a branch keeps one of your little notes, a small paper leaf marks it on the tree — and they can all be reread together in "Your footprints".',
+        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. If a branch keeps one of your little notes, a small paper leaf marks it on the tree: hover over it and a little letter shows it right there. They can all be reread together in "Your footprints".',
       },
       {
         icon: '🌱',

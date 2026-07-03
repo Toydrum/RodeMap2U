@@ -10,6 +10,12 @@
     </span>
     <span class="head-actions">
       <a
+        routerLink="/trail"
+        class="btn btn-ghost paw-btn"
+        [attr.aria-label]="i18n.t().trail.title"
+        [title]="i18n.t().trail.settingsHint"
+      >🐾</a>
+      <a
         routerLink="/check-in"
         class="btn btn-ghost checkin-btn"
         [title]="i18n.t().checkIn.title"
