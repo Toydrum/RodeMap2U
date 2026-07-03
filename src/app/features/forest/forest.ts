@@ -226,15 +226,22 @@ export class ForestPage {
 
   protected plotDown(ev: PointerEvent, tree: Tree): void {
     this.suppressClick = false;
+    this.dragMoved = false;
     if ((ev.target as Element).closest('.plot-move, .plot-archive')) return;
     const pending = { tree, x: ev.clientX, y: ev.clientY, timer: null as ReturnType<typeof setTimeout> | null };
-    if (ev.pointerType !== 'mouse') {
-      pending.timer = setTimeout(() => {
+    // Holding also lifts the tree (mouse a bit sooner than a finger) —
+    // matching the natural "press and hold to grab it" instinct.
+    pending.timer = setTimeout(
+      () => {
         if (this.pendingDrag === pending) this.beginDrag(tree);
-      }, 350);
-    }
+      },
+      ev.pointerType === 'mouse' ? 250 : 350,
+    );
     this.pendingDrag = pending;
   }
+
+  /** True once the pointer really traveled during a drag. */
+  private dragMoved = false;
 
   private beginDrag(tree: Tree): void {
     this.clearPending();
@@ -271,6 +278,7 @@ export class ForestPage {
     const dragId = this.draggingId();
     const preview = this.dragPreview();
     if (!dragId || !preview) return;
+    this.dragMoved = true;
     for (const el of document.elementsFromPoint(ev.clientX, ev.clientY)) {
       const host = (el as Element).closest?.('[data-tree-id]') as HTMLElement | null;
       const overId = host?.dataset['treeId'];
@@ -292,6 +300,8 @@ export class ForestPage {
     const preview = this.dragPreview();
     this.draggingId.set(null);
     this.dragPreview.set(null);
+    // A hold that never traveled is just a slow click — let it navigate.
+    if (!this.dragMoved) this.suppressClick = false;
     if (preview) await this.trees.setOrder(preview);
   }
 
