@@ -8,29 +8,54 @@
     <p class="intro">{{ i18n.t().trail.subtitle }}</p>
   </div>
 
-  @if (footprints().length) {
-    <ol class="steps">
-      @for (fp of footprints(); track fp.checkIn.id) {
-        <li class="card footprint">
-          <span class="mark" aria-hidden="true">{{ fp.emoji }}</span>
-          <div class="body">
-            <div class="meta">
-              <strong>{{ fp.feelingName }}</strong>
-              <span class="when">{{ fp.when }}</span>
+  <section class="part">
+    <h2 class="part-title"><span aria-hidden="true">🐾</span> {{ i18n.t().trail.checkinsSection }}</h2>
+    @if (footprints().length) {
+      <ol class="steps">
+        @for (fp of footprints(); track fp.checkIn.id) {
+          <li class="card footprint">
+            <span class="mark" aria-hidden="true">{{ fp.emoji }}</span>
+            <div class="body">
+              <div class="meta">
+                <strong>{{ fp.feelingName }}</strong>
+                <span class="when">{{ fp.when }}</span>
+              </div>
+              <div class="place">{{ fp.place ?? i18n.t().trail.somewhere }}</div>
+              @if (fp.note) {
+                <p class="note">«{{ fp.note }}»</p>
+              }
             </div>
-            <div class="place">{{ fp.place ?? i18n.t().trail.somewhere }}</div>
-            @if (fp.note) {
-              <p class="note">«{{ fp.note }}»</p>
-            }
-          </div>
-        </li>
-      }
-    </ol>
-  } @else {
-    <div class="empty">
-      <span class="paw" aria-hidden="true">🐾</span>
-      <h2>{{ i18n.t().trail.empty }}</h2>
-      <p>{{ i18n.t().trail.emptyHint }}</p>
-    </div>
-  }
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="part-empty">{{ i18n.t().trail.empty }} {{ i18n.t().trail.emptyHint }}</p>
+    }
+  </section>
+
+  <section class="part">
+    <h2 class="part-title"><span aria-hidden="true">🍃</span> {{ i18n.t().trail.wordsSection }}</h2>
+    @if (branchNotes().length) {
+      <ol class="steps">
+        @for (entry of branchNotes(); track entry.node.id) {
+          <li>
+            <button type="button" class="card footprint word" (click)="openBranch(entry)">
+              <span class="mark" aria-hidden="true">🍃</span>
+              <div class="body">
+                <div class="meta">
+                  <strong>{{ entry.node.title }}</strong>
+                  <span class="when">{{ entry.when }}</span>
+                </div>
+                <div class="place">{{ entry.treeName }}</div>
+                <p class="note">«{{ entry.note }}»</p>
+              </div>
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="part-empty">{{ i18n.t().trail.wordsEmpty }}</p>
+    }
+  </section>
 </div>

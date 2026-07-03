@@ -35,7 +35,7 @@ src/app/
                 tree-layout.ts (PURE: layout, ribbons, hash) · scene-backdrop.ts (sky/mountains/mood weather)
                 flora.ts (accent→flower species) · flower.ts (g[appFlower] SVG component)
     node-detail/ node-detail.ts (sheet) · branch-flow.ts (transformation + suggestion chips)
-    timer/ · settings/ · guide/ (in-app manual)
+    timer/ · settings/ · guide/ (in-app manual) · trail/ ("Tus huellas": check-ins + branch notes, deep-links via /tree/:id?node=)
   shared/ui/  toast.service.ts
 ```
 

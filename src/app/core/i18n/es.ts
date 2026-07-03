@@ -54,8 +54,11 @@ export const ES = {
     empty: 'Aún no hay huellas por aquí.',
     emptyHint: 'Cada check-in dejará una: tu clima, dónde estabas y tu notita.',
     settingsLink: 'Tus huellas',
-    settingsHint: 'Tus check-ins de otros días: climas, lugares y notitas',
+    settingsHint: 'Tus check-ins y las notitas de tus ramas, en un solo lugar',
     somewhere: 'En algún lugar del bosque',
+    checkinsSection: 'Tus check-ins',
+    wordsSection: 'Tus notitas en las ramas',
+    wordsEmpty: 'Cuando escribas una notita dentro de una rama, aquí podrás releerla.',
   },
   forest: {
     title: 'Mi bosque',
@@ -220,7 +223,7 @@ export const ES = {
       {
         icon: '🌿',
         title: 'Las ramas y sus estados',
-        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer.',
+        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol — y todas se releen juntas en «Tus huellas».',
       },
       {
         icon: '🌱',

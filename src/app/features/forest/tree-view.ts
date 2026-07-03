@@ -1,5 +1,5 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -35,6 +35,22 @@ export class TreeViewPage {
   );
 
   protected readonly openNode = signal<TreeNode | null>(null);
+
+  private readonly route = inject(ActivatedRoute);
+  /** `?node=` deep link (e.g. from "Tus huellas"): open that branch's sheet on arrival. */
+  private pendingOpenId = this.route.snapshot.queryParamMap.get('node');
+
+  constructor() {
+    effect(() => {
+      if (!this.pendingOpenId) return;
+      const node = this.nodes.byId().get(this.pendingOpenId) as TreeNode | undefined;
+      if (!node || node.treeId !== this.id()) return;
+      this.pendingOpenId = null;
+      this.openNode.set(node);
+      const params = { ...this.route.snapshot.queryParams, node: null };
+      void this.router.navigate([], { queryParams: params, replaceUrl: true });
+    });
+  }
   /** null = closed; { parent: null } = plant a root; { parent: node } = plant under it. */
   protected readonly planting = signal<{ parent: TreeNode | null } | null>(null);
   protected readonly reviewing = signal(false);

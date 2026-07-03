@@ -5,7 +5,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { CheckIn, Feeling } from '../../core/db/schema';
+import { CheckIn, Feeling, TreeNode } from '../../core/db/schema';
 
 const FEELING_EMOJI: Record<Feeling, string> = {
   sunny: '☀️',
@@ -21,6 +21,13 @@ interface Footprint {
   feelingName: string;
   when: string;
   place: string | null;
+  note: string;
+}
+
+interface BranchNote {
+  node: TreeNode;
+  treeName: string;
+  when: string;
   note: string;
 }
 
@@ -62,6 +69,32 @@ export class TrailPage {
         };
       });
   });
+
+  /** Every written word still hanging on a branch, freshest first. */
+  protected readonly branchNotes = computed<BranchNote[]>(() => {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const out: BranchNote[] = [];
+    for (const tree of this.trees.active()) {
+      for (const node of this.nodes.byTree().get(tree.id) ?? []) {
+        const note = node.note.trim();
+        if (!note) continue;
+        out.push({
+          node,
+          treeName: tree.name,
+          note,
+          when: new Date(node.updatedAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
+        });
+      }
+    }
+    return out.sort((a, b) => b.node.updatedAt - a.node.updatedAt);
+  });
+
+  /** Reread in place: open the branch right on its tree. */
+  protected openBranch(entry: BranchNote): void {
+    void this.router.navigate(['/tree', entry.node.treeId], {
+      queryParams: { node: entry.node.id },
+    });
+  }
 
   protected goBack(): void {
     if (history.length > 1) {

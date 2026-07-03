@@ -64,9 +64,14 @@ export const DEMO_NODES: TreeNode[] = [
   // Guitar tree — a real story: roots, blooms, a branch point with alternatives
   node('demo-g-root', 'demo-guitar', null, 'Tocar guitarra', 'growing', 10),
   node('demo-g-buy', 'demo-guitar', 'demo-g-root', 'Conseguir una guitarra', 'achieved', 10),
-  node('demo-g-chords', 'demo-guitar', 'demo-g-root', 'Primeros 4 acordes', 'achieved', 20),
+  node('demo-g-chords', 'demo-guitar', 'demo-g-root', 'Primeros 4 acordes', 'achieved', 20, {
+    note: 'El Fa me costó dos semanas — y salió.',
+  }),
   node('demo-g-daily', 'demo-guitar', 'demo-g-root', 'Practicar diario 30 min', 'branched', 30),
-  node('demo-g-mini', 'demo-guitar', 'demo-g-daily', '10 min al despertar', 'growing', 10, { origin: 'branch' }),
+  node('demo-g-mini', 'demo-guitar', 'demo-g-daily', '10 min al despertar', 'growing', 10, {
+    origin: 'branch',
+    note: 'Con la guitarra a la vista es más fácil.',
+  }),
   node('demo-g-weekend', 'demo-guitar', 'demo-g-daily', 'Sesión larga los sábados', 'seed', 20, { origin: 'branch' }),
   node('demo-g-first-song', 'demo-guitar', 'demo-g-chords', 'Mi primera canción completa', 'growing', 10),
   node('demo-g-record', 'demo-guitar', 'demo-g-first-song', 'Grabarme y escucharme', 'seed', 10),

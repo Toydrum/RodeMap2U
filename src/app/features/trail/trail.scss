@@ -21,6 +21,21 @@
   }
 }
 
+.part {
+  margin-bottom: 1.7rem;
+}
+
+.part-title {
+  font-size: 1.02rem;
+  margin-bottom: 0.6rem;
+}
+
+.part-empty {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 0.2rem 0.2rem 0;
+}
+
 .steps {
   list-style: none;
   margin: 0;
@@ -28,6 +43,25 @@
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
+}
+
+.word {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .arrow {
+    color: var(--text-faint);
+    margin-top: 0.15rem;
+  }
 }
 
 .footprint {
@@ -72,18 +106,3 @@
   }
 }
 
-.empty {
-  text-align: center;
-  padding: 2.2rem 1rem;
-  color: var(--text-dim);
-
-  .paw {
-    display: block;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-  }
-
-  h2 {
-    margin-bottom: 0.2rem;
-  }
-}

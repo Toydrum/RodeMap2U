@@ -152,6 +152,16 @@
           }
         }
 
+        <!-- A little folded leaf of paper: this branch keeps written words -->
+        @if (point.node.note.trim()) {
+          <g class="note-mark" transform="translate(13 -21)" aria-hidden="true">
+            <path class="paper" d="M0 0 L7.5 0 L10.5 3 L10.5 9.5 L0 9.5 Z" />
+            <path class="fold" d="M7.5 0 L7.5 3 L10.5 3 Z" />
+            <path class="line" d="M2.2 4.6 H8.4" />
+            <path class="line" d="M2.2 6.8 H6.6" />
+          </g>
+        }
+
         <!-- Title tag -->
         @if (showLabel(point)) {
           <g class="tag" aria-hidden="true">

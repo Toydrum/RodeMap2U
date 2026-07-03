@@ -52,8 +52,11 @@ export const EN: Dict = {
     empty: 'No footprints here yet.',
     emptyHint: 'Each check-in will leave one: your weather, where you were, and your little note.',
     settingsLink: 'Your footprints',
-    settingsHint: 'Your check-ins from other days: weathers, places and little notes',
+    settingsHint: 'Your check-ins and your branch notes, in one place',
     somewhere: 'Somewhere in the forest',
+    checkinsSection: 'Your check-ins',
+    wordsSection: 'Your little notes on branches',
+    wordsEmpty: 'When you write a little note inside a branch, you can reread it here.',
   },
   forest: {
     title: 'My forest',
@@ -218,7 +221,7 @@ export const EN: Dict = {
       {
         icon: '🌿',
         title: 'Branches and their states',
-        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow.',
+        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. If a branch keeps one of your little notes, a small paper leaf marks it on the tree — and they can all be reread together in "Your footprints".',
       },
       {
         icon: '🌱',
