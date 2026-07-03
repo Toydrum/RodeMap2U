@@ -23,9 +23,13 @@ interface SceneFlower {
   sway: number;
 }
 
-interface GrassCluster {
+interface GrassTuft {
   x: number;
   y: number;
+  s: number;
+  rot: number;
+  variant: number;
+  shade: number;
   flip: boolean;
 }
 
@@ -118,11 +122,40 @@ export class ForestPage {
     });
   });
 
-  /** Clustered grass (3 blades each), deterministic positions. */
-  protected readonly grass: GrassCluster[] = Array.from({ length: 42 }, (_, i) => {
-    const h = hash('grass:' + i);
-    return { x: 15 + (h % 970), y: 206 + ((h >> 6) % 50), flip: h % 2 === 0 };
-  });
+  /** Grass grows in overlapping patches of varied tufts — that's the trick
+   *  that reads as real grass instead of repeated stamps. Fixed-seed. */
+  protected readonly grass: GrassTuft[] = (() => {
+    const out: GrassTuft[] = [];
+    const tuft = (key: string, x: number, y: number, sBase: number): GrassTuft => {
+      const h = hash(key);
+      return {
+        x,
+        y,
+        s: sBase * (0.75 + ((h >> 9) % 55) / 100),
+        rot: -9 + ((h >> 4) % 19),
+        variant: h % 5,
+        shade: (h >> 7) % 3,
+        flip: (h >> 2) % 2 === 0,
+      };
+    };
+    // 12 dense patches: 3-6 tufts crowding one another
+    for (let p = 0; p < 12; p++) {
+      const hp = hash('patch:' + p);
+      const cx = 40 + (hp % 920);
+      const cy = 210 + ((hp >> 6) % 44);
+      const members = 3 + (hp % 4);
+      for (let m = 0; m < members; m++) {
+        const hm = hash('patch:' + p + ':' + m);
+        out.push(tuft('pt:' + p + ':' + m, cx - 26 + (hm % 53), cy - 7 + ((hm >> 5) % 15), 1));
+      }
+    }
+    // plus lone wanderers between the patches
+    for (let i = 0; i < 12; i++) {
+      const h = hash('lone:' + i);
+      out.push(tuft('lt:' + i, 15 + (h % 970), 206 + ((h >> 6) % 50), 0.85));
+    }
+    return out.sort((a, b) => a.y - b.y);
+  })();
 
   /* Meadow texture — all fixed-seed, never reshuffles (references: tall
      silhouette tufts + seed-head spikes, shrubs, daisies, dappled light). */

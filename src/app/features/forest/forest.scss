@@ -228,6 +228,17 @@
   stroke-linecap: round;
 }
 
+/* Three green shades — overlapping tufts read as depth, not clones. */
+.tuft.sh1 path {
+  stroke: color-mix(in srgb, var(--rm-twig, #7f9a63) 72%, var(--rm-bark, #6f5640));
+  stroke-width: 1.9;
+}
+
+.tuft.sh2 path {
+  stroke: color-mix(in srgb, var(--primary) 42%, #b9c48a);
+  stroke-width: 2.1;
+}
+
 /* ------------------------------------------ meadow texture (references) */
 
 .sunpatch {
