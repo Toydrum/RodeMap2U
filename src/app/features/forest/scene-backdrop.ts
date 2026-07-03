@@ -7,8 +7,9 @@ import { Feeling } from '../../core/db/schema';
  * ranges with a pine treeline. Purely decorative, pointer-events: none.
  *
  * `mood` mirrors the latest check-in: the sky feels what you feel, while
- * the trees stand safe. Stormy brings soft, slow lightning (fully disabled
- * under reduced motion — no photosensitive flashing, ever).
+ * the trees stand safe. Sunny breathes light motes, foggy drifts mist
+ * banks, heavy drizzles, stormy rains with soft slow lightning (fully
+ * disabled under reduced motion — no photosensitive flashing, ever).
  */
 @Component({
   selector: 'app-scene-backdrop',
@@ -34,12 +35,24 @@ import { Feeling } from '../../core/db/schema';
       <svg class="bird b3" viewBox="0 0 18 6"><path d="M1 5 Q5 1 9 5 M9 5 Q13 1 17 5"/></svg>
     </div>
 
-    @if (mood() === 'foggy') {
-      <div class="fog" aria-hidden="true"></div>
+    @if (mood() === 'sunny') {
+      <div class="motes" aria-hidden="true">
+        <span class="mote m1"></span>
+        <span class="mote m2"></span>
+        <span class="mote m3"></span>
+        <span class="mote m4"></span>
+        <span class="mote m5"></span>
+      </div>
     }
 
-    @if (mood() === 'stormy') {
-      <div class="rain" aria-hidden="true"></div>
+    @if (mood() === 'foggy') {
+      <div class="fog" aria-hidden="true"></div>
+      <div class="mist far" aria-hidden="true"></div>
+      <div class="mist near" aria-hidden="true"></div>
+    }
+
+    @if (isGloomy()) {
+      <div class="rain" [class.drizzle]="mood() === 'heavy'" aria-hidden="true"></div>
     }
 
     <svg

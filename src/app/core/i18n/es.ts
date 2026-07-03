@@ -218,7 +218,7 @@ export const ES = {
       {
         icon: '🌳',
         title: 'Tu bosque',
-        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado.',
+        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol que respira con motitas de luz, niebla que deriva lenta, llovizna suave o tormenta con relámpagos lentos — y tus árboles siempre en pie.',
       },
       {
         icon: '🌿',

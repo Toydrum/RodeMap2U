@@ -216,7 +216,7 @@ export const EN: Dict = {
       {
         icon: '🌳',
         title: 'Your forest',
-        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow.',
+        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: a breathing sun with motes of light, slow drifting fog, soft drizzle or a storm with slow lightning — and your trees always standing.',
       },
       {
         icon: '🌿',

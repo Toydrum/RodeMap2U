@@ -26,9 +26,35 @@
   background: linear-gradient(180deg, rgba(56, 63, 78, 0.34), rgba(56, 63, 78, 0.1) 66%);
 }
 
+:host(.mood-foggy) .mood-tint {
+  background: linear-gradient(180deg, rgba(198, 204, 197, 0.18), transparent 62%);
+}
+
 :host(.mood-sunny) .sun {
   transform: scale(1.25);
   filter: brightness(1.1);
+  animation: sun-breathe 9s ease-in-out infinite;
+}
+
+@keyframes sun-breathe {
+  0%,
+  100% {
+    transform: scale(1.25);
+    filter: brightness(1.1);
+  }
+  50% {
+    transform: scale(1.33);
+    filter: brightness(1.2);
+  }
+}
+
+:host(.mood-foggy) .sun {
+  opacity: 0.45;
+}
+
+/* Birds shelter from the storm. */
+:host(.mood-stormy) .bird {
+  display: none;
 }
 
 :host(.mood-heavy) .sun,
@@ -153,8 +179,137 @@
   }
 }
 
+/* Heavy days drizzle: same streaks, softer and slower — no lightning. */
+.rain.drizzle {
+  opacity: 0.22;
+  animation-duration: 1.9s;
+
+  &::after {
+    opacity: 0.4;
+    animation-duration: 2.8s;
+  }
+}
+
 :host-context(.reduce-motion) .rain {
   display: none;
+}
+
+/* Fog banks drifting at their own pace — one tile width per loop keeps
+   them seamless. Under reduced motion they simply hang still. */
+.mist {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 170px;
+  background-repeat: repeat-x;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='170'%3E%3Cdefs%3E%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='16'/%3E%3C/filter%3E%3C/defs%3E%3Cg fill='%23dfe5dc' filter='url(%23b)'%3E%3Cellipse cx='150' cy='96' rx='82' ry='30'/%3E%3Cellipse cx='340' cy='70' rx='92' ry='26' opacity='0.85'/%3E%3Cellipse cx='255' cy='118' rx='70' ry='24' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+
+  &.far {
+    bottom: 32%;
+    background-size: 520px 170px;
+    opacity: 0.5;
+    animation: mist-drift 150s linear infinite;
+  }
+
+  &.near {
+    bottom: 5%;
+    background-size: 640px 210px;
+    height: 210px;
+    opacity: 0.68;
+    animation: mist-drift-back 110s linear infinite;
+  }
+}
+
+@keyframes mist-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 520px 0;
+  }
+}
+
+@keyframes mist-drift-back {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -640px 0;
+  }
+}
+
+[data-theme='terminal'] .mist {
+  &.far {
+    opacity: 0.16;
+  }
+  &.near {
+    opacity: 0.24;
+  }
+}
+
+/* Sunny days lift slow motes of light — invisible under reduced motion. */
+.motes {
+  position: absolute;
+  inset: 0 0 26% 0;
+}
+
+.mote {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-sand) 85%, white);
+  box-shadow: 0 0 7px 2px color-mix(in srgb, var(--accent-sand) 45%, transparent);
+  opacity: 0;
+  animation: mote-float 16s ease-in-out infinite;
+
+  &.m1 {
+    left: 16%;
+    top: 60%;
+  }
+  &.m2 {
+    left: 34%;
+    top: 72%;
+    transform: scale(0.75);
+    animation-duration: 19s;
+    animation-delay: -4s;
+  }
+  &.m3 {
+    left: 55%;
+    top: 64%;
+    animation-duration: 22s;
+    animation-delay: -9s;
+  }
+  &.m4 {
+    left: 73%;
+    top: 76%;
+    transform: scale(0.65);
+    animation-delay: -13s;
+  }
+  &.m5 {
+    left: 87%;
+    top: 58%;
+    transform: scale(1.15);
+    animation-duration: 18s;
+    animation-delay: -6s;
+  }
+}
+
+@keyframes mote-float {
+  0% {
+    opacity: 0;
+    translate: 0 26px;
+  }
+  16% {
+    opacity: 0.8;
+  }
+  70% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    translate: 16px -84px;
+  }
 }
 
 .fog {
