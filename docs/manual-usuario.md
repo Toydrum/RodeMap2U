@@ -104,7 +104,8 @@ Al entrar ves tu árbol dibujado como un árbol de verdad: tronco, ramas de made
 |---|---|
 | Botones **+ / −** (abajo a la derecha) | Acercar / alejar |
 | Pellizcar con dos dedos (o Ctrl + rueda) | Acercar / alejar |
-| Arrastrar con un dedo (o el mouse) | Moverte por el árbol — **solo cuando estás acercado**; en la vista normal el árbol se queda quietecito |
+| Arrastrar con el dedo (celular) | Moverte por el árbol — y no te preocupes: **el árbol nunca puede perderse de vista** |
+| Arrastrar con el mouse | Solo cuando estás acercado; en la vista normal el árbol se queda quietecito |
 | Botón **"⌖ Centrarme"** | Volver a encuadrar el árbol y tu posición |
 | Un toque sobre una rama | Seleccionarla (aparece el botón **+** para plantar ahí) |
 | Segundo toque sobre la misma rama | Abrir su hoja de detalle |

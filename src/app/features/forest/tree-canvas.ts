@@ -351,11 +351,30 @@ export class TreeCanvas {
     if (!this.focusedId()) this.focusedId.set(target.node.id);
   }
 
-  /** The fitted zoom — at rest the tree stands still; panning unlocks when zoomed in. */
+  /** The fitted zoom — with a mouse the tree stands still until zoomed in. */
   private restingK = 0;
 
   private panUnlocked(): boolean {
     return this.k() > this.restingK * 1.04;
+  }
+
+  /** The tree can never wander out of sight: at least 120px of it stays visible. */
+  private clampPan(tx: number, ty: number, k: number): { tx: number; ty: number } {
+    const rect = this.svgRef().nativeElement.getBoundingClientRect();
+    const l = this.layout();
+    const margin = 120;
+    const left = l.minX * k;
+    const right = (l.minX + l.width) * k;
+    const top = l.minY * k;
+    const bottom = (l.minY + l.height) * k;
+    const txMin = Math.min(margin - right, rect.width - margin - left);
+    const txMax = Math.max(margin - right, rect.width - margin - left);
+    const tyMin = Math.min(margin - bottom, rect.height - margin - top);
+    const tyMax = Math.max(margin - bottom, rect.height - margin - top);
+    return {
+      tx: Math.min(txMax, Math.max(txMin, tx)),
+      ty: Math.min(tyMax, Math.max(tyMin, ty)),
+    };
   }
 
   /** Zoom around the viewport center (the +/− buttons). */
@@ -365,8 +384,9 @@ export class TreeCanvas {
     const my = rect.height / 2;
     const k = Math.min(2.5, Math.max(0.4, this.k() * factor));
     const ratio = k / this.k();
-    this.tx.set(mx - ratio * (mx - this.tx()));
-    this.ty.set(my - ratio * (my - this.ty()));
+    const c = this.clampPan(mx - ratio * (mx - this.tx()), my - ratio * (my - this.ty()), k);
+    this.tx.set(c.tx);
+    this.ty.set(c.ty);
     this.k.set(k);
   }
 
@@ -375,7 +395,11 @@ export class TreeCanvas {
   /* ------------------------------------------------------------------ */
 
   protected onPointerDown(ev: PointerEvent): void {
-    (ev.target as Element).setPointerCapture?.(ev.pointerId);
+    try {
+      (ev.target as Element).setPointerCapture?.(ev.pointerId);
+    } catch {
+      /* synthetic or already-released pointer — capture is best-effort */
+    }
     this.pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     this.movedSinceDown = false;
     if (this.pointers.size === 1) {
@@ -403,10 +427,11 @@ export class TreeCanvas {
       const dx = ev.clientX - this.panStart.x;
       const dy = ev.clientY - this.panStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 6) this.movedSinceDown = true;
-      // At resting zoom the tree stands still — dragging only pans once zoomed in.
-      if (this.panUnlocked()) {
-        this.tx.set(this.panStart.tx + dx);
-        this.ty.set(this.panStart.ty + dy);
+      // Fingers always pan (within the corral); a mouse only pans once zoomed in.
+      if (ev.pointerType !== 'mouse' || this.panUnlocked()) {
+        const c = this.clampPan(this.panStart.tx + dx, this.panStart.ty + dy, this.k());
+        this.tx.set(c.tx);
+        this.ty.set(c.ty);
       }
     } else if (this.pointers.size === 2 && this.pinchStart) {
       this.movedSinceDown = true;
@@ -419,8 +444,13 @@ export class TreeCanvas {
       const mx = this.pinchStart.midX - rect.left;
       const my = this.pinchStart.midY - rect.top;
       this.k.set(k);
-      this.tx.set(mx - ratio * (mx - this.pinchStart.tx));
-      this.ty.set(my - ratio * (my - this.pinchStart.ty));
+      const c = this.clampPan(
+        mx - ratio * (mx - this.pinchStart.tx),
+        my - ratio * (my - this.pinchStart.ty),
+        k,
+      );
+      this.tx.set(c.tx);
+      this.ty.set(c.ty);
     }
   }
 
@@ -453,12 +483,14 @@ export class TreeCanvas {
       const ratio = k / this.k();
       const mx = ev.clientX - rect.left;
       const my = ev.clientY - rect.top;
-      this.tx.set(mx - ratio * (mx - this.tx()));
-      this.ty.set(my - ratio * (my - this.ty()));
+      const c = this.clampPan(mx - ratio * (mx - this.tx()), my - ratio * (my - this.ty()), k);
+      this.tx.set(c.tx);
+      this.ty.set(c.ty);
       this.k.set(k);
     } else {
-      this.ty.set(this.ty() - ev.deltaY * 0.6);
-      this.tx.set(this.tx() - ev.deltaX * 0.6);
+      const c = this.clampPan(this.tx() - ev.deltaX * 0.6, this.ty() - ev.deltaY * 0.6, this.k());
+      this.ty.set(c.ty);
+      this.tx.set(c.tx);
     }
   }
 
