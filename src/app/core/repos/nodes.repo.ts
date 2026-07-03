@@ -1,7 +1,8 @@
-import { Injectable, computed } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import { NodeStatus, TreeNode, newSyncBase, stamp } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
+import { TreesRepo } from './trees.repo';
 import { isPast } from '../time';
 
 export interface NewNodeDraft {
@@ -13,6 +14,16 @@ export interface NewNodeDraft {
 @Injectable({ providedIn: 'root' })
 export class NodesRepo extends RecordsRepo<TreeNode> {
   protected readonly store: StoreName = 'nodes';
+  private readonly treesRef = inject(TreesRepo);
+
+  /** A finished place releases the "you are here" pin — you can't stay at a bloom. */
+  private async releaseHereIfFinished(node: TreeNode, status: NodeStatus): Promise<void> {
+    if (status !== 'achieved' && status !== 'branched') return;
+    const tree = this.treesRef.byId().get(node.treeId);
+    if (tree && tree.currentNodeId === node.id) {
+      await this.treesRef.setCurrentNode(tree, null);
+    }
+  }
 
   /** Visible nodes (not tombstoned, not archived). */
   readonly visible = computed(() => this.all().filter((n) => !n.archivedAt));
@@ -82,11 +93,13 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
   }
 
   async setStatus(node: TreeNode, status: NodeStatus): Promise<TreeNode> {
-    return this.save({
+    const saved = await this.save({
       ...node,
       status,
       achievedAt: status === 'achieved' ? Date.now() : node.achievedAt,
     });
+    await this.releaseHereIfFinished(node, status);
+    return saved;
   }
 
   async update(node: TreeNode, patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate'>>): Promise<TreeNode> {
@@ -136,6 +149,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       archivedAt: null,
     }));
     await this.saveMany([branchedParent, ...children]);
+    await this.releaseHereIfFinished(parent, 'branched');
     return children;
   }
 }

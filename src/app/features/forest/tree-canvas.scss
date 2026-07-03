@@ -224,10 +224,17 @@
   }
 }
 
+/* Only real keyboard focus draws the dashed ring — pointer users never
+   see a stray "selected" circle parked on the tree. */
 .focus-ring {
+  display: none;
   stroke: var(--focus);
   stroke-width: 3;
   stroke-dasharray: 5 4;
+}
+
+.node:focus-visible .focus-ring {
+  display: block;
 }
 
 .here-halo {
