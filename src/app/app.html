@@ -5,7 +5,7 @@
 </main>
 
 @if (showTabs()) {
-  <nav class="tabbar" [attr.aria-label]="i18n.t().nav.forest">
+  <nav class="tabbar" [attr.aria-label]="i18n.t().a11y.mainNav">
     <a routerLink="/forest" routerLinkActive="active" class="tab">
       <span class="glyph" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -43,6 +43,6 @@
         {{ t.actionLabel }}
       </button>
     }
-    <button type="button" class="btn btn-ghost small" (click)="toast.dismiss()" aria-label="OK">✕</button>
+    <button type="button" class="btn btn-ghost small" (click)="toast.dismiss()" [attr.aria-label]="i18n.t().common.close">✕</button>
   </div>
 }

@@ -1,7 +1,7 @@
 @if (current(); as node) {
   @if (!branching()) {
-    <div class="backdrop">
-      <section class="modal card" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().dateReview.title">
+    <div class="backdrop" (click)="later()">
+      <section class="modal card" appSheet (sheetClose)="later()" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().dateReview.title">
         <span class="leaf" aria-hidden="true">🍂</span>
         <h2>{{ i18n.t().dateReview.title }}</h2>
         <p class="sub">{{ i18n.t().dateReview.subtitle }}</p>
@@ -26,19 +26,21 @@
             {{ i18n.t().dateReview.later }}
           </button>
         } @else {
-          <div class="field">
-            <label for="dr-date">{{ i18n.t().node.dateLabel }}</label>
-            <input id="dr-date" type="date" #newDate autofocus>
-            <span class="hint">{{ i18n.t().node.dateHint }}</span>
-          </div>
-          <div class="row">
-            <button type="button" class="btn btn-ghost" (click)="movingDate.set(false)">
-              {{ i18n.t().common.back }}
-            </button>
-            <button type="button" class="btn btn-primary" (click)="moveDate(newDate.value)" [disabled]="!newDate.value">
-              {{ i18n.t().common.save }}
-            </button>
-          </div>
+          <form (submit)="$event.preventDefault(); newDate.value && moveDate(newDate.value)">
+            <div class="field">
+              <label for="dr-date">{{ i18n.t().node.dateLabel }}</label>
+              <input id="dr-date" type="date" #newDate autofocus>
+              <span class="hint">{{ i18n.t().node.dateHint }}</span>
+            </div>
+            <div class="row">
+              <button type="button" class="btn btn-ghost" (click)="movingDate.set(false)">
+                {{ i18n.t().common.back }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="!newDate.value">
+                {{ i18n.t().common.save }}
+              </button>
+            </div>
+          </form>
         }
       </section>
     </div>

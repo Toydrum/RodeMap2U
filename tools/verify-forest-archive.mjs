@@ -1,8 +1,9 @@
 import { chromium } from 'playwright-core';
+const BASE = 'http://localhost:' + (process.env.RM_PORT ?? '8826');
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const out = process.argv[2];
-await page.goto('http://localhost:8797/forest?seed=demo', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/forest?seed=demo`, { waitUntil: 'networkidle' });
 await page.hover('.plot:has-text("Idea nueva")');
 await page.waitForTimeout(300);
 await page.click('.plot:has-text("Idea nueva") .plot-archive');

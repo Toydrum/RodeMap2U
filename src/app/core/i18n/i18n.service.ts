@@ -27,4 +27,10 @@ export class I18nService {
   fill(template: string, values: Record<string, string | number>): string {
     return template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
   }
+
+  /** Whole-sentence pluralization: pick the form, then fill {count}.
+   *  Pairs live in the dictionaries so ES/EN parity stays compiler-checked. */
+  plural(count: number, forms: { one: string; many: string }): string {
+    return this.fill(count === 1 ? forms.one : forms.many, { count });
+  }
 }

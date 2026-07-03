@@ -2,10 +2,34 @@
   <h1>{{ i18n.t().timer.title }}</h1>
   <p class="sub">{{ i18n.t().timer.subtitle }}</p>
 
-  @if (linkedNode(); as node) {
-    <p class="linked chip">🌿 {{ i18n.t().timer.linkedTo }}: <strong>{{ node.title }}</strong></p>
+  @if (focus.active()) {
+    <p class="linked chip">
+      @if (linkedNode(); as node) {
+        🌿 {{ i18n.t().timer.linkedTo }}: <strong>{{ node.title }}</strong>
+      } @else {
+        {{ i18n.t().timer.noNode }}
+      }
+    </p>
   } @else {
-    <p class="linked chip">{{ i18n.t().timer.noNode }}</p>
+    <div class="pick-node" role="group" [attr.aria-label]="i18n.t().timer.focusOn">
+      <span class="pick-label">{{ i18n.t().timer.focusOn }}:</span>
+      <button
+        type="button"
+        class="chip preset"
+        [class.selected]="pickedNodeId() === null"
+        (click)="pickedNodeId.set(null)"
+      >{{ i18n.t().timer.justBe }}</button>
+      @for (choice of nodeChoices(); track choice.node.id) {
+        <button
+          type="button"
+          class="chip preset"
+          [class.selected]="pickedNodeId() === choice.node.id"
+          [style.border-color]="'var(--accent-' + choice.accent + ')'"
+          [title]="choice.treeName"
+          (click)="pickedNodeId.set(choice.node.id)"
+        >@if (choice.isCurrent) {📍 }{{ choice.node.title }}</button>
+      }
+    </div>
   }
 
   <div class="ring-wrap">
@@ -14,15 +38,15 @@
       <circle
         cx="110" cy="110" r="96"
         class="fill"
-        [class.breathing]="session() && !paused()"
+        [class.breathing]="focus.active() && !focus.paused()"
         pathLength="1"
-        [style.stroke-dashoffset]="1 - progress()"
+        [style.stroke-dashoffset]="1 - focus.progress()"
       />
     </svg>
     <div class="middle">
-      @if (session()) {
-        <span class="time" role="timer">{{ display() }}</span>
-        <span class="of">/ {{ session()!.plannedMinutes }} {{ i18n.t().settings.minutes }}</span>
+      @if (focus.active(); as session) {
+        <span class="time" role="timer">{{ focus.display() }}</span>
+        <span class="of">/ {{ session.plannedMinutes }} {{ i18n.t().settings.minutes }}</span>
       } @else {
         <span class="time idle">{{ minutes() }}</span>
         <span class="of">{{ i18n.t().settings.minutes }}</span>
@@ -30,7 +54,7 @@
     </div>
   </div>
 
-  @if (!session()) {
+  @if (!focus.active()) {
     <div class="presets" role="group" [attr.aria-label]="i18n.t().timer.presets">
       @for (preset of presets; track preset) {
         <button
@@ -45,7 +69,7 @@
         <input
           type="number" min="1" max="180"
           [value]="minutes()"
-          (change)="setPreset(+$any($event.target).value || 10)"
+          (change)="setCustom($any($event.target).value)"
           [attr.aria-label]="i18n.t().timer.custom"
         >
       </label>
@@ -57,7 +81,7 @@
   } @else {
     <div class="controls">
       <button type="button" class="btn btn-soft" (click)="pauseResume()">
-        @if (paused()) { ▶ {{ i18n.t().timer.resume }} } @else { ⏸ {{ i18n.t().timer.pause }} }
+        @if (focus.paused()) { ▶ {{ i18n.t().timer.resume }} } @else { ⏸ {{ i18n.t().timer.pause }} }
       </button>
       <button type="button" class="btn btn-primary" (click)="finish()">
         🌱 {{ i18n.t().timer.finish }}

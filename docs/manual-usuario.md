@@ -149,6 +149,9 @@ Se abre con un segundo toque sobre la rama. Aquí vive todo lo suyo:
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
 - **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
 - **⏳ Sesión de enfoque aquí** — abre el temporizador vinculado a esta rama.
+- **🗃 Guardar en el archivo** — ahora te pregunta antes (y te dice cuántas ramitas se lleva consigo). Nada se borra jamás.
+
+> 💡 Ergonomía nueva: **un solo toque abre cualquier rama** (antes eran dos), la tecla **Escape cierra cualquier hoja o diálogo**, y tocar fuera también. Al cerrar, el foco vuelve a donde estabas.
 - **🗃 Guardar en el archivo** — la rama (y sus hijas) se guardan fuera de la vista. *Nada se borra.*
 
 ---
@@ -191,12 +194,14 @@ Tocas una idea y se escribe sola (editable); puedes abrir hasta tres caminos —
 
 En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*):
 
-1. Elige una duración: 10, 25, 45 minutos, u otra.
-2. Toca **"Empezar"**. Un anillo respira suavemente mientras estás en ello.
-3. Puedes **pausar** y **seguir** cuando quieras.
-4. Al tocar **"Terminar"**, la app celebra lo que haya sido: *"Estuviste aquí 12 minutos 🌱"*.
+1. **Elige en qué enfocarte** — arriba aparecen tus ramas vivas como fichitas (la 📍 de "estás aquí" primero), o **"Solo estar"** si hoy no quieres atarlo a nada.
+2. Elige una duración: 10, 25, 45 minutos, u otra.
+3. Toca **"Empezar"**. Un anillo respira suavemente mientras estás en ello.
+4. Puedes **pausar** y **seguir** cuando quieras — y también **salirte a pasear por la app**: la sesión te sigue a donde vayas, no se pierde.
+5. Cuando tu tiempo plantado se cumple, la app te lo susurra una sola vez — *"Tu tiempo floreció 🌸"* — y una florecita aparece en el título de la pestaña. **Nada suena, nada parpadea, nada se corta**: puedes quedarte todo lo que quieras.
+6. Al tocar **"Terminar"**, la app celebra lo que haya sido: *"Estuviste aquí 12 minutos 🌱"*.
 
-No hay fracaso posible: **estar un ratito es suficiente**. Los minutos nunca se juzgan, solo se agradecen. Si alguna vez cierras la app con una sesión abierta, la próxima vez se cierra sola *"con cariño"*.
+No hay fracaso posible: **estar un ratito es suficiente**. Los minutos nunca se juzgan, solo se agradecen. Y si cierras la app con una sesión abierta, al volver **te estará esperando donde la dejaste** 🌿.
 
 Las sesiones vinculadas a una rama se van sumando: en su detalle verás sus *"minutos de enfoque aquí"*.
 

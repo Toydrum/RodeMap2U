@@ -7,12 +7,13 @@ import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { BranchFlow } from './branch-flow';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'resting', 'achieved'];
 
 @Component({
   selector: 'app-node-detail',
-  imports: [BranchFlow],
+  imports: [BranchFlow, SheetDirective],
   templateUrl: './node-detail.html',
   styleUrl: './node-detail.scss',
 })
@@ -30,6 +31,20 @@ export class NodeDetail {
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly branching = signal(false);
   protected readonly stepTitle = signal('');
+  /** Archiving takes the whole subtree with it — always ask first. */
+  protected readonly confirmingArchive = signal(false);
+
+  /** Every branch that would rest along with this one (self excluded). */
+  protected readonly descendantCount = computed(() => {
+    let count = 0;
+    const queue = [...this.nodes.childrenOf(this.node())];
+    while (queue.length) {
+      const child = queue.pop()!;
+      count++;
+      queue.push(...this.nodes.childrenOf(child));
+    }
+    return count;
+  });
 
   protected readonly children = computed(() => this.nodes.childrenOf(this.node()));
   protected readonly datePassed = computed(() => {
@@ -75,6 +90,7 @@ export class NodeDetail {
 
   protected async archive(): Promise<void> {
     await this.nodes.archiveSubtree(this.node());
+    this.confirmingArchive.set(false);
     this.closed.emit();
   }
 

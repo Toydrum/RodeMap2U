@@ -64,6 +64,7 @@
 
         <textarea
           class="note"
+          autofocus
           [value]="note()"
           (input)="note.set($any($event.target).value)"
           [placeholder]="i18n.t().checkIn.notePlaceholder"
@@ -75,7 +76,7 @@
           🌱 {{ trees.active().length ? i18n.t().checkIn.done : i18n.t().forest.plantFirst }}
         </button>
         <button type="button" class="btn btn-ghost skip" (click)="finish()">
-          {{ i18n.t().common.skip }}
+          {{ i18n.t().checkIn.withoutNote }}
         </button>
       </section>
     }

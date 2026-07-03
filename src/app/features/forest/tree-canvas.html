@@ -221,9 +221,9 @@
             class="note-mark"
             transform="translate(13 -21)"
             aria-hidden="true"
-            (pointerenter)="showLetter(point)"
-            (pointerleave)="hideLetter()"
-            (click)="hideLetter()"
+            (pointerenter)="onMarkEnter($event, point)"
+            (pointerleave)="onMarkLeave($event)"
+            (click)="$event.stopPropagation(); toggleLetter(point)"
           >
             <rect class="mark-hit" x="-4" y="-4" width="18.5" height="17.5" fill="transparent" />
             <path class="paper" d="M0 0 L7.5 0 L10.5 3 L10.5 9.5 L0 9.5 Z" />

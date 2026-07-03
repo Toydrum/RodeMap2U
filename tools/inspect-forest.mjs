@@ -1,8 +1,9 @@
 // Layout truth-finder: opens the forest on a phone-sized viewport with the
 // system Edge and reports the real computed geometry of the plots row.
 import { chromium } from 'playwright-core';
+const BASE = 'http://localhost:' + (process.env.RM_PORT ?? '8826');
 
-const url = process.argv[2] ?? 'http://localhost:8788/forest?seed=demo';
+const url = process.argv[2] ?? `${BASE}/forest?seed=demo`;
 
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });

@@ -1,5 +1,5 @@
 <div class="sheet-backdrop" (click)="closed.emit()">
-  <section class="sheet card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="node().title">
+  <section class="sheet card" appSheet (sheetClose)="closed.emit()" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="node().title">
     <div class="grabber" aria-hidden="true"></div>
 
     <!-- Status + here -->
@@ -64,7 +64,7 @@
     <!-- Note -->
     <div class="field">
       <label for="nd-note">{{ i18n.t().node.noteLabel }}</label>
-      <textarea id="nd-note" [value]="node().note" (change)="setNote($any($event.target).value)" [placeholder]="i18n.t().node.notePlaceholder"></textarea>
+      <textarea id="nd-note" [value]="node().note" (change)="setNote($any($event.target).value)" [placeholder]="i18n.t().node.notePlaceholder" maxlength="240"></textarea>
     </div>
 
     <!-- Steps -->
@@ -101,24 +101,44 @@
     <p class="meta">
       {{ i18n.t().node.plantedOn }} {{ plantedOn() }}
       @if (focusMinutes()) {
-        · {{ focusMinutes() }} {{ i18n.t().node.minutesHere }}
+        · {{ i18n.plural(focusMinutes(), i18n.t().node.focusMinutes) }}
       }
     </p>
 
-    <!-- Actions -->
+    <!-- Actions (branching lives in the status row's golden chip) -->
     <div class="actions">
       @if (!isCurrent()) {
         <button type="button" class="btn btn-soft" (click)="setHere()">📍 {{ i18n.t().node.setCurrent }}</button>
       }
-      @if (node().status !== 'branched') {
-        <button type="button" class="btn btn-soft" (click)="branching.set(true)">🌿 {{ i18n.t().node.branchHere }}</button>
-      }
       <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
-      <button type="button" class="btn btn-ghost" (click)="archive()">🗃 {{ i18n.t().node.archive }}</button>
+      <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(true)">🗃 {{ i18n.t().node.archive }}</button>
     </div>
-    <p class="hint archive-hint">{{ i18n.t().node.branchHereHint }} · {{ i18n.t().node.archiveHint }}</p>
+    <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>
   </section>
 </div>
+
+@if (confirmingArchive()) {
+  <div class="sheet-backdrop" (click)="confirmingArchive.set(false)">
+    <div class="sheet card confirm" appSheet (sheetClose)="confirmingArchive.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <span class="confirm-icon" aria-hidden="true">🗃</span>
+      <h2>{{ i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title }) }}</h2>
+      <p class="confirm-body">
+        {{ i18n.t().node.archiveNodeBody }}
+        @if (descendantCount() > 0) {
+          {{ i18n.plural(descendantCount(), i18n.t().node.archiveNodeChildren) }}
+        }
+      </p>
+      <div class="row">
+        <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(false)">
+          {{ i18n.t().common.cancel }}
+        </button>
+        <button type="button" class="btn btn-primary" (click)="archive()">
+          {{ i18n.t().tree.archiveCta }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 @if (branching()) {
   <app-branch-flow [node]="node()" (closed)="branching.set(false); closed.emit()" />

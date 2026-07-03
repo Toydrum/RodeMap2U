@@ -10,6 +10,7 @@ import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { FlowerSpec, flowerFor } from './flora';
 import { FlowerGlyph } from './flower';
 
@@ -63,7 +64,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in

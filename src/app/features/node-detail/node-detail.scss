@@ -174,3 +174,22 @@
   color: var(--text-faint);
   margin-top: 0.5rem;
 }
+
+/* Archive confirm (same pattern as the tree-view confirm sheet). */
+.confirm {
+  text-align: center;
+
+  .confirm-icon {
+    font-size: 2rem;
+    display: block;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    justify-content: center !important;
+  }
+}

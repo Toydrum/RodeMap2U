@@ -10,10 +10,11 @@ import { ToastService } from '../../shared/ui/toast.service';
 import { SwUpdate } from '@angular/service-worker';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 import { APP_VERSION } from '../../core/version';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink],
+  imports: [RouterLink, SheetDirective],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

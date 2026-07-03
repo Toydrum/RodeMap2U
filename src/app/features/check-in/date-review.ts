@@ -3,6 +3,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreeNode } from '../../core/db/schema';
 import { BranchFlow } from '../node-detail/branch-flow';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 /**
  * "Esta fecha ya pasó — ¿qué quieres hacer?"
@@ -11,7 +12,7 @@ import { BranchFlow } from '../node-detail/branch-flow';
  */
 @Component({
   selector: 'app-date-review',
-  imports: [BranchFlow],
+  imports: [BranchFlow, SheetDirective],
   templateUrl: './date-review.html',
   styleUrl: './date-review.scss',
 })

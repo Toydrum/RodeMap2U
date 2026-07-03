@@ -6,6 +6,7 @@ import { I18nService } from './core/i18n/i18n.service';
 import { ThemeService } from './core/theme/theme.service';
 import { MotionService } from './core/motion.service';
 import { UpdateService } from './core/update.service';
+import { FocusSessionService } from './core/focus-session.service';
 import { ToastService } from './shared/ui/toast.service';
 
 @Component({
@@ -30,5 +31,6 @@ export class App {
     inject(ThemeService); // instantiates the <html> attribute effects
     inject(MotionService);
     inject(UpdateService).init();
+    inject(FocusSessionService); // adopts open sessions + owns the 🌸 cue from boot
   }
 }

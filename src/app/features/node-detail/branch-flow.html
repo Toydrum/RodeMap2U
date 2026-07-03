@@ -1,5 +1,5 @@
 <div class="backdrop" (click)="closed.emit()">
-  <section class="modal card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().branchFlow.title">
+  <section class="modal card" appSheet (sheetClose)="closed.emit()" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().branchFlow.title">
     <span class="knot" aria-hidden="true">🌿</span>
     <h2>{{ i18n.t().branchFlow.title }}</h2>
     <p class="sub">{{ i18n.t().branchFlow.subtitle }}</p>
@@ -20,8 +20,10 @@
           type="text"
           [value]="alt"
           (input)="setAlt($index, $any($event.target).value)"
+          (keydown.enter)="$event.preventDefault(); valid() && confirm()"
           [placeholder]="i18n.t().branchFlow.altPlaceholder"
           maxlength="80"
+          [attr.autofocus]="$index === 0 ? '' : null"
           [attr.aria-label]="i18n.t().branchFlow.altPlaceholder + ' ' + ($index + 1)"
         >
       </div>

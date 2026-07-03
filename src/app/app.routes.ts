@@ -1,17 +1,26 @@
 import { Routes } from '@angular/router';
-import { inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { SettingsService } from './core/repos/settings.service';
 
 const CHECK_IN_COOLDOWN_MS = 30 * 60 * 1000;
 
-/** Entering the forest asks for a check-in — unless one happened recently. */
+/** One gentle diversion per app-open. After that, tabs go exactly where they say. */
+@Injectable({ providedIn: 'root' })
+export class SessionGate {
+  consumed = false;
+}
+
+/** The FIRST forest visit of an app-open may ask for a check-in (respecting
+ *  the cooldown). Later tab taps never divert — the rose is the way back in. */
 const checkInGate: CanActivateFn = () => {
+  const gate = inject(SessionGate);
+  if (gate.consumed) return true;
+  gate.consumed = true;
   const settings = inject(SettingsService).settings();
-  const router = inject(Router);
   const fresh =
     settings.lastCheckInAt !== null && Date.now() - settings.lastCheckInAt < CHECK_IN_COOLDOWN_MS;
-  return fresh ? true : router.createUrlTree(['/check-in']);
+  return fresh ? true : inject(Router).createUrlTree(['/check-in']);
 };
 
 export const routes: Routes = [

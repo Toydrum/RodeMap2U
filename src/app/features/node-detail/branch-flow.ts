@@ -4,6 +4,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { TreeNode } from '../../core/db/schema';
 import { ToastService } from '../../shared/ui/toast.service';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 /**
  * The transformation moment: a goal whose moment passed becomes a branch
@@ -12,6 +13,7 @@ import { ToastService } from '../../shared/ui/toast.service';
  */
 @Component({
   selector: 'app-branch-flow',
+  imports: [SheetDirective],
   templateUrl: './branch-flow.html',
   styleUrl: './branch-flow.scss',
 })

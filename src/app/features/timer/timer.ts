@@ -1,108 +1,91 @@
-import { Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { SessionsRepo } from '../../core/repos/sessions.repo';
+import { FocusSessionService } from '../../core/focus-session.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
+import { TreesRepo } from '../../core/repos/trees.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService } from '../../shared/ui/toast.service';
-import { TimerSession, TreeNode } from '../../core/db/schema';
+import { AccentToken, TreeNode } from '../../core/db/schema';
 
 const PRESETS = [10, 25, 45];
 
+interface NodeChoice {
+  node: TreeNode;
+  accent: AccentToken;
+  treeName: string;
+  isCurrent: boolean;
+}
+
 /**
- * A gentle focus timer. Elapsed time is ALWAYS computed from timestamps —
- * the interval only refreshes the display. Ending is celebrated no matter
- * how long you stayed.
+ * A gentle focus timer — now a thin view over FocusSessionService, so the
+ * session survives navigating away and even a reload. Ending is celebrated
+ * no matter how long you stayed.
  */
 @Component({
   selector: 'app-timer',
   templateUrl: './timer.html',
   styleUrl: './timer.scss',
 })
-export class TimerPage implements OnDestroy {
+export class TimerPage {
   /** Optional ?node= query param (withComponentInputBinding). */
   readonly node = input<string | undefined>();
 
   protected readonly i18n = inject(I18nService);
-  protected readonly sessions = inject(SessionsRepo);
+  protected readonly focus = inject(FocusSessionService);
   protected readonly nodes = inject(NodesRepo);
+  protected readonly trees = inject(TreesRepo);
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
 
   protected readonly presets = PRESETS;
   protected readonly minutes = signal(this.settings.settings().timerDefaultMinutes);
-  protected readonly session = signal<TimerSession | null>(null);
-  protected readonly paused = signal(false);
 
-  /** Timestamp bookkeeping: elapsed = pausedAccum + (now - runningSince). */
-  private pausedAccum = 0;
-  private runningSince = 0;
-  private readonly nowTick = signal(Date.now());
-  private readonly interval = setInterval(() => this.nowTick.set(Date.now()), 500);
+  /** `?node=` seeds the picker; the chips can override it. */
+  protected readonly pickedNodeId = linkedSignal<string | null>(() => this.node() ?? null);
+
+  /** Same spirit as the check-in candidates: living branches, current first. */
+  protected readonly nodeChoices = computed<NodeChoice[]>(() => {
+    const currentIds = new Set(
+      this.trees.active().map((t) => t.currentNodeId).filter(Boolean),
+    );
+    const out: NodeChoice[] = [];
+    for (const tree of this.trees.active()) {
+      const picks = (this.nodes.byTree().get(tree.id) ?? [])
+        .filter((n) => n.status === 'growing' || n.status === 'seed')
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 4);
+      for (const node of picks) {
+        out.push({ node, accent: tree.accent, treeName: tree.name, isCurrent: currentIds.has(node.id) });
+      }
+    }
+    return out.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent)).slice(0, 8);
+  });
 
   protected readonly linkedNode = computed<TreeNode | null>(() => {
-    const id = this.node();
+    const id = this.focus.active()?.nodeId ?? this.pickedNodeId();
     return id ? ((this.nodes.byId().get(id) as TreeNode | undefined) ?? null) : null;
   });
 
-  protected readonly elapsedMs = computed(() => {
-    if (!this.session()) return 0;
-    const running = this.paused() ? 0 : this.nowTick() - this.runningSince;
-    return this.pausedAccum + Math.max(0, running);
-  });
-
-  protected readonly plannedMs = computed(() => (this.session()?.plannedMinutes ?? this.minutes()) * 60_000);
-
-  /** 0–1 for the breathing ring; gently caps at 1, never alarms past it. */
-  protected readonly progress = computed(() => Math.min(1, this.elapsedMs() / this.plannedMs()));
-
-  protected readonly display = computed(() => {
-    const total = Math.floor(this.elapsedMs() / 1000);
-    const m = Math.floor(total / 60);
-    const s = total % 60;
-    return `${m}:${String(s).padStart(2, '0')}`;
-  });
-
-  constructor() {
-    // A session left open from a previous visit gets closed with care.
-    const orphan = this.sessions.running();
-    if (orphan) {
-      void this.sessions.end(orphan);
-      this.toast.show({ message: this.i18n.t().timer.stillRunning });
-    }
-  }
-
-  protected async start(): Promise<void> {
-    const session = await this.sessions.start(this.linkedNode()?.id ?? null, this.minutes());
-    this.pausedAccum = 0;
-    this.runningSince = Date.now();
-    this.paused.set(false);
-    this.session.set(session);
+  protected start(): Promise<void> {
+    return this.focus.start(this.pickedNodeId(), this.minutes());
   }
 
   protected pauseResume(): void {
-    if (this.paused()) {
-      this.runningSince = Date.now();
-      this.paused.set(false);
+    if (this.focus.paused()) {
+      this.focus.resume();
     } else {
-      this.pausedAccum += Date.now() - this.runningSince;
-      this.paused.set(true);
+      this.focus.pause();
     }
   }
 
   protected async finish(): Promise<void> {
-    const session = this.session();
-    if (!session) return;
-    await this.sessions.end(session);
-    const minutes = Math.max(1, Math.round(this.elapsedMs() / 60_000));
+    const minutes = await this.focus.finish();
     this.toast.show({
       message:
         minutes >= 2
           ? this.i18n.fill(this.i18n.t().timer.wellDone, { minutes })
           : this.i18n.t().timer.wellDoneShort,
     });
-    this.session.set(null);
-    this.paused.set(false);
-    this.pausedAccum = 0;
   }
 
   protected setPreset(minutes: number): void {
@@ -110,7 +93,9 @@ export class TimerPage implements OnDestroy {
     void this.settings.patch({ timerDefaultMinutes: minutes });
   }
 
-  ngOnDestroy(): void {
-    clearInterval(this.interval);
+  /** Custom input: keep the previous value when the field is emptied. */
+  protected setCustom(raw: string): void {
+    const value = Math.min(180, Math.max(1, Math.round(+raw)));
+    if (Number.isFinite(value) && value > 0) this.setPreset(value);
   }
 }

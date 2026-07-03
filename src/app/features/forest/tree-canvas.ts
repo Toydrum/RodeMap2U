@@ -63,6 +63,8 @@ interface EdgeView {
   imports: [FlowerGlyph],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
+  // Closes the little note letter when tapping anywhere else (never preventDefault).
+  host: { '(document:pointerdown)': 'onDocPointerDown($event)' },
 })
 export class TreeCanvas {
   readonly tree = input.required<Tree>();
@@ -97,6 +99,30 @@ export class TreeCanvas {
 
   protected hideLetter(): void {
     this.hoverNote.set(null);
+  }
+
+  /** Mouse hovers; touch taps to toggle (hover events fight the tap there). */
+  protected onMarkEnter(ev: PointerEvent, point: LayoutPoint): void {
+    if (ev.pointerType === 'mouse') this.showLetter(point);
+  }
+
+  protected onMarkLeave(ev: PointerEvent): void {
+    if (ev.pointerType === 'mouse') this.hideLetter();
+  }
+
+  protected toggleLetter(point: LayoutPoint): void {
+    if (this.hoverNote()?.node.id === point.node.id) {
+      this.hideLetter();
+    } else {
+      this.showLetter(point);
+    }
+  }
+
+  /** Tapping anywhere outside the mark/letter puts the letter away. */
+  protected onDocPointerDown(ev: PointerEvent): void {
+    if (!this.hoverNote()) return;
+    if ((ev.target as Element).closest?.('.note-mark, .note-letter')) return;
+    this.hideLetter();
   }
 
   /** Roving tabindex focus (also drives the "+" bud). */
@@ -322,8 +348,8 @@ export class TreeCanvas {
   }
 
   protected showLabel(point: LayoutPoint): boolean {
-    // The focused node shows the "+" bud instead — its sheet carries the name.
-    if (this.focusedId() === point.node.id) return false;
+    // Focused and current places always speak their name.
+    if (this.focusedId() === point.node.id) return true;
     if (this.tree().currentNodeId === point.node.id) return true;
     return this.k() >= 0.55;
   }
@@ -369,8 +395,8 @@ export class TreeCanvas {
         }
         if (shelf === -1) {
           // Truly saturated: better a quiet node (name lives in its sheet)
-          // than label soup — except your current place, which always speaks.
-          if (this.tree().currentNodeId === p.node.id) {
+          // than label soup — except your place and your focus, which speak.
+          if (this.tree().currentNodeId === p.node.id || this.focusedId() === p.node.id) {
             shelf = lastEnd.indexOf(Math.min(...lastEnd));
           } else {
             placed.set(p.node.id, { shelf: 0, text: '' });
@@ -412,7 +438,7 @@ export class TreeCanvas {
       title: point.node.title,
       status: t.status[point.node.status],
     });
-    if (children) label += `, ${this.i18n.fill(t.a11y.withChildren, { count: children })}`;
+    if (children) label += `, ${this.i18n.plural(children, t.a11y.withChildren)}`;
     return label;
   }
 
@@ -557,14 +583,11 @@ export class TreeCanvas {
     }
   }
 
-  /** A drag should never count as a tap on a node. */
+  /** A drag never counts as a tap; a clean tap focuses AND opens. */
   protected onNodeClick(point: LayoutPoint): void {
     if (this.movedSinceDown) return;
-    if (this.focusedId() === point.node.id) {
-      this.nodeOpened.emit(point.node);
-    } else {
-      this.focusNode(point.node.id);
-    }
+    this.focusNode(point.node.id);
+    this.nodeOpened.emit(point.node);
   }
 
   protected onWheel(ev: WheelEvent): void {

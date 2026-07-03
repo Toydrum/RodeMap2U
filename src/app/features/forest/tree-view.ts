@@ -9,12 +9,13 @@ import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { NodeDetail } from '../node-detail/node-detail';
 import { DateReview } from '../check-in/date-review';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, SceneBackdrop, WeatherFront, NodeDetail, DateReview],
+  imports: [RouterLink, TreeCanvas, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
