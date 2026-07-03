@@ -21,7 +21,12 @@ export class UpdateService {
         this.toast.show({
           message: `${this.i18n.t().update.ready} · ${this.i18n.t().update.action}`,
           actionLabel: this.i18n.t().update.reload,
-          action: () => void this.swUpdate.activateUpdate().then(() => location.reload()),
+          // Even if activation fails (degraded SW), a full reload fetches fresh.
+          action: () =>
+            void this.swUpdate
+              .activateUpdate()
+              .then(() => location.reload())
+              .catch(() => location.reload()),
         });
       });
 
@@ -31,7 +36,8 @@ export class UpdateService {
       const now = Date.now();
       if (now - this.lastCheck < 600_000) return; // at most every 10 min
       this.lastCheck = now;
-      void this.swUpdate.checkForUpdate();
+      // Offline or mid-deploy checks reject — quiet console, retry next beat.
+      void this.swUpdate.checkForUpdate().catch(() => {});
     };
     check();
     // Long-lived windows still hear about new versions: on return, on
