@@ -27,9 +27,9 @@ export interface TreeLayout {
   minY: number;
 }
 
-const SLOT_W = 96;
-const LEVEL_H = 110;
-const JITTER_X = 10;
+export const SLOT_W = 78;
+const LEVEL_H = 116;
+const JITTER_X = 8;
 const JITTER_Y = 8;
 
 /** Small deterministic string hash (FNV-1a flavored). */

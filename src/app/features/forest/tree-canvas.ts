@@ -15,6 +15,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import {
   LayoutPoint,
+  SLOT_W,
   branchRibbon,
   edgeGeometry,
   edgePointAt,
@@ -306,7 +307,9 @@ export class TreeCanvas {
 
   /** Alternate label offsets so close siblings don't collide. */
   protected labelY(point: LayoutPoint): number {
-    return hash(point.node.id + ':label') % 2 === 0 ? 27 : 40;
+    // Alternate label rows by horizontal slot — neighbors never share a row.
+    const slotParity = ((Math.round(point.x / SLOT_W) % 2) + 2) % 2;
+    return slotParity === 0 ? 27 : 46;
   }
 
   protected nodeLabel(point: LayoutPoint): string {
