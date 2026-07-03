@@ -55,15 +55,70 @@
   }
 
   .checkin-btn {
-    min-width: 46px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     min-height: 46px;
-    padding: 0.4rem;
-    font-size: 1.15rem;
+    padding: 0.4rem 1rem 0.4rem 0.6rem;
+    border-radius: 999px;
     background: color-mix(in srgb, var(--surface) 80%, transparent);
-    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-align: left;
+    text-decoration: none;
+
+    .rose {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 auto;
+      transition: transform 0.9s cubic-bezier(0.34, 1.1, 0.64, 1);
+    }
+
+    .rose-card {
+      fill: var(--primary);
+    }
+
+    .rose-diag {
+      fill: var(--status-branched);
+      opacity: 0.8;
+    }
+
+    .rose-heart {
+      fill: var(--surface);
+      stroke: var(--primary);
+      stroke-width: 1.2px;
+    }
+
+    .rose-label {
+      line-height: 1.15;
+    }
 
     &:hover {
       background: var(--surface);
+      color: var(--text);
+
+      .rose {
+        transform: rotate(360deg);
+      }
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .head {
+    flex-wrap: wrap;
+
+    .head-actions {
+      margin-left: auto;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: 0.45rem;
+    }
+
+    .checkin-btn {
+      order: 2;
+      font-size: 0.78rem;
     }
   }
 }

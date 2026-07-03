@@ -57,6 +57,7 @@ export const ES = {
     treeNamePlaceholder: 'Nombre del árbol (p. ej. "Aprender guitarra")',
     accentLabel: 'Color',
     archivedSection: 'Árboles en el archivo',
+    checkinCta: 'Buscarme en este bosque encantado',
   },
   status: {
     seed: 'Semilla',
@@ -199,7 +200,7 @@ export const ES = {
       {
         icon: '🧭',
         title: 'El check-in',
-        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna.',
+        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. ¿Quieres que te lo pregunte de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado».',
       },
       {
         icon: '🌳',

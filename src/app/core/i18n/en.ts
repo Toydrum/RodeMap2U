@@ -55,6 +55,7 @@ export const EN: Dict = {
     treeNamePlaceholder: 'Tree name (e.g. "Learn guitar")',
     accentLabel: 'Color',
     archivedSection: 'Archived trees',
+    checkinCta: 'Find myself in this enchanted forest',
   },
   status: {
     seed: 'Seed',
@@ -197,7 +198,7 @@ export const EN: Dict = {
       {
         icon: '🧭',
         title: 'The check-in',
-        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence.',
+        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. Want to be asked again? A wind rose lives in your forest: "Find myself in this enchanted forest".',
       },
       {
         icon: '🌳',

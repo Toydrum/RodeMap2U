@@ -12,9 +12,19 @@
       <a
         routerLink="/check-in"
         class="btn btn-ghost checkin-btn"
-        [attr.aria-label]="i18n.t().nav.checkIn"
         [title]="i18n.t().checkIn.title"
-      >🧭</a>
+      >
+        <svg class="rose" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            class="rose-diag"
+            transform="rotate(45 12 12)"
+            d="M12 3.4 L13.5 10.5 L20.6 12 L13.5 13.5 L12 20.6 L10.5 13.5 L3.4 12 L10.5 10.5 Z"
+          />
+          <path class="rose-card" d="M12 0.8 L14 10 L23.2 12 L14 14 L12 23.2 L10 14 L0.8 12 L10 10 Z" />
+          <circle class="rose-heart" cx="12" cy="12" r="2.1" />
+        </svg>
+        <span class="rose-label">{{ i18n.t().forest.checkinCta }}</span>
+      </a>
       @if (trees.active().length) {
         <button type="button" class="btn btn-primary" (click)="creating.set(true)">
           + {{ i18n.t().forest.newTree }}
