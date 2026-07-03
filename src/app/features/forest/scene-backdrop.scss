@@ -6,6 +6,128 @@
   overflow: hidden;
 }
 
+/* -------------------------------------------------- inner weather */
+
+.mood-tint {
+  position: absolute;
+  inset: 0;
+  transition: background 1.2s ease;
+}
+
+:host(.mood-sunny) .mood-tint {
+  background: linear-gradient(180deg, rgba(240, 217, 140, 0.14), transparent 55%);
+}
+
+:host(.mood-heavy) .mood-tint {
+  background: linear-gradient(180deg, rgba(74, 84, 98, 0.22), rgba(74, 84, 98, 0.06) 62%);
+}
+
+:host(.mood-stormy) .mood-tint {
+  background: linear-gradient(180deg, rgba(56, 63, 78, 0.34), rgba(56, 63, 78, 0.1) 66%);
+}
+
+:host(.mood-sunny) .sun {
+  transform: scale(1.25);
+  filter: brightness(1.1);
+}
+
+:host(.mood-heavy) .sun,
+:host(.mood-stormy) .sun {
+  opacity: 0.35;
+}
+
+:host(.mood-heavy) .cloud,
+:host(.mood-stormy) .cloud {
+  background: color-mix(in srgb, #6b7484 55%, var(--surface));
+  opacity: 0.9;
+}
+
+.cloud.storm {
+  transform: scale(1.5);
+  opacity: 0.85;
+
+  &.s1 {
+    top: 40px;
+    left: -140px;
+    animation: drift 110s linear infinite;
+    animation-delay: -60s;
+  }
+  &.s2 {
+    top: 100px;
+    left: -200px;
+    transform: scale(1.9);
+    animation: drift 140s linear infinite;
+    animation-delay: -110s;
+    opacity: 0.7;
+  }
+}
+
+/* Soft, slow lightning — small glyphs, gentle glow, NEVER a screen flash.
+   Fully removed under reduced motion (photosensitivity care). */
+.bolt {
+  position: absolute;
+  width: 26px;
+  height: 48px;
+  opacity: 0;
+
+  path {
+    fill: #f4e9b0;
+  }
+
+  filter: drop-shadow(0 0 8px rgba(244, 233, 176, 0.8));
+
+  &.b1 {
+    top: 88px;
+    left: 30%;
+    animation: bolt-flicker 9s linear infinite;
+  }
+  &.b2 {
+    top: 60px;
+    left: 68%;
+    transform: scale(0.8) rotate(8deg);
+    animation: bolt-flicker 12.5s linear infinite;
+    animation-delay: -5s;
+  }
+}
+
+@keyframes bolt-flicker {
+  0%,
+  91% {
+    opacity: 0;
+  }
+  92% {
+    opacity: 0.75;
+  }
+  93.5% {
+    opacity: 0.12;
+  }
+  95% {
+    opacity: 0.6;
+  }
+  96.5%,
+  100% {
+    opacity: 0;
+  }
+}
+
+:host-context(.reduce-motion) .bolt {
+  display: none;
+}
+
+.fog {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 62%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 55%, transparent) 40%,
+    color-mix(in srgb, var(--surface) 38%, transparent) 100%
+  );
+}
+
 .sky {
   position: absolute;
   inset: 0 0 auto 0;

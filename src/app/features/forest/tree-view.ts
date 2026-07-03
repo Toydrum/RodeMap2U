@@ -4,7 +4,8 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ToastService } from '../../shared/ui/toast.service';
-import { TreeNode } from '../../core/db/schema';
+import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
 import { SceneBackdrop } from './scene-backdrop';
 import { NodeDetail } from '../node-detail/node-detail';
@@ -26,6 +27,12 @@ export class TreeViewPage {
   private readonly router = inject(Router);
 
   protected readonly tree = computed(() => this.trees.byId().get(this.id()) ?? null);
+
+  private readonly checkins = inject(CheckinsRepo);
+  private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;
+  protected readonly mood = computed<Feeling | null>(
+    () => this.moodOverride ?? this.checkins.latest()?.feeling ?? null,
+  );
 
   protected readonly openNode = signal<TreeNode | null>(null);
   /** null = closed; { parent: null } = plant a root; { parent: node } = plant under it. */

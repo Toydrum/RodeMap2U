@@ -3,7 +3,8 @@ import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { AccentToken } from '../../core/db/schema';
+import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { AccentToken, Feeling } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
@@ -46,6 +47,14 @@ export class ForestPage {
   protected readonly creating = signal(false);
   protected readonly newName = signal('');
   protected readonly newAccent = signal<AccentToken>('moss');
+
+  private readonly checkins = inject(CheckinsRepo);
+
+  /** `?mood=` dev/demo override, else the latest check-in's feeling. */
+  private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;
+  protected readonly mood = computed<Feeling | null>(
+    () => this.moodOverride ?? this.checkins.latest()?.feeling ?? null,
+  );
 
   /** The stream flows once the forest has three trees (winding ribbon + ripples). */
   protected readonly hasStream = computed(() => this.trees.active().length >= 3);

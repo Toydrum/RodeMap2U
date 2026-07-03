@@ -181,15 +181,18 @@ export class MiniTree {
       const sp = scaled.get(p.node.id)!;
 
       if (!sp.parent) {
-        // Width follows trunk LENGTH — a short young stem stays slender,
-        // never a square block (Hector's "más 3" screenshot).
         const len = Math.max(14, GROUND - sp.y);
-        const w0 = Math.min(22, Math.max(4.5, len * 0.3));
-        const w1 = Math.max(2.4, Math.min(w0 * 0.55, widthAtDepth(0) * 0.85 * s * wBoost));
+        const isBaby = layout.points.length <= 2;
+        // Grown trees: trunk top matches the branches' root width (visual
+        // continuity, no cut). Babies: slender stem proportional to length.
+        const wTop = isBaby
+          ? Math.max(2.6, len * 0.2)
+          : Math.max(3, widthAtDepth(0) * 0.82 * s * wBoost);
+        const w0 = Math.min(26, wTop * (isBaby ? 1.5 : 1.35));
         const sway = (((hashAngle(p.node.id + ':sway') % 11) - 5) * len) / 70;
         trunk = taperedRibbon(
           sp.x + sway,
-          GROUND,
+          GROUND + 2,
           sp.x + sway * 0.5,
           GROUND - len * 0.4,
           sp.x - sway * 0.3,
@@ -197,7 +200,7 @@ export class MiniTree {
           sp.x,
           sp.y,
           w0,
-          w1,
+          wTop,
         );
       } else {
         const geometry = edgeGeometry(sp.parent, sp, s * 0.9);

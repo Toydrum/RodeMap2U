@@ -31,7 +31,7 @@
 
     <div class="canvas-wrap">
       <div class="meadow-band" aria-hidden="true"></div>
-      <app-scene-backdrop mountainsBottom="25.5%" />
+      <app-scene-backdrop mountainsBottom="25.5%" [mood]="mood()" />
       @if (nodes.rootsOf(t.id).length) {
         <app-tree-canvas
           [tree]="t"
