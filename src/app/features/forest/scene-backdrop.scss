@@ -463,15 +463,46 @@
     fill: color-mix(in srgb, var(--accent-sky) 30%, var(--surface-2));
     opacity: 0.55;
 
+    &.farthest {
+      fill: color-mix(in srgb, var(--accent-sky) 20%, var(--surface-2));
+      opacity: 0.38;
+    }
+
     &.near-range {
       fill: color-mix(in srgb, var(--accent-pine) 24%, var(--surface-2));
       opacity: 0.7;
     }
   }
 
+  /* Ridge strata: the silhouette echoed downward, like layered paper. */
+  .strata {
+    fill: color-mix(in srgb, var(--text) 7%, transparent);
+
+    &.s2 {
+      fill: color-mix(in srgb, var(--text) 5%, transparent);
+    }
+  }
+
+  /* Sun-lit caps on the tallest peaks. */
+  .caps path {
+    fill: color-mix(in srgb, #ffffff 76%, var(--accent-sky));
+    opacity: 0.75;
+  }
+
   .treeline path {
     fill: color-mix(in srgb, var(--accent-pine) 45%, var(--surface-2));
     opacity: 0.75;
+  }
+}
+
+[data-theme='terminal'] .mountains {
+  .strata {
+    fill: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  .caps path {
+    fill: color-mix(in srgb, var(--primary) 40%, var(--bg));
+    opacity: 0.6;
   }
 }
 

@@ -29,6 +29,26 @@ interface GrassCluster {
   flip: boolean;
 }
 
+interface MeadowDecor {
+  x: number;
+  y: number;
+  s: number;
+  flip: boolean;
+}
+
+/** Fixed-seed scatter helper — same meadow every session, forever. */
+function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin: number, ySpan: number): MeadowDecor[] {
+  return Array.from({ length: count }, (_, i) => {
+    const h = hash(kind + ':' + i);
+    return {
+      x: xMin + (h % xSpan),
+      y: yMin + ((h >> 6) % ySpan),
+      s: 0.7 + ((h >> 3) % 55) / 100,
+      flip: h % 2 === 0,
+    };
+  });
+}
+
 /**
  * "El Prado" — the forest home as a living scene. Every tree is a real
  * miniature of its data, standing on the meadow; a stream winds through
@@ -100,6 +120,23 @@ export class ForestPage {
     const h = hash('grass:' + i);
     return { x: 20 + (h % 960), y: 214 + ((h >> 6) % 40), flip: h % 2 === 0 };
   });
+
+  /* Meadow texture — all fixed-seed, never reshuffles (references: tall
+     silhouette tufts + seed-head spikes, shrubs, dappled light, stones). */
+  protected readonly sunPatches = scatter('sunpatch', 3, 80, 820, 158, 62);
+  protected readonly bushes = scatter('bush', 3, 150, 800, 200, 36);
+  protected readonly richTufts = scatter('rich', 7, 15, 950, 210, 42);
+  protected readonly spikes = scatter('spike', 6, 30, 930, 208, 44);
+  /** Hand-placed by the stream banks (only shown once the stream flows). */
+  protected readonly cattails: MeadowDecor[] = [
+    { x: 655, y: 152, s: 1, flip: false },
+    { x: 268, y: 146, s: 0.85, flip: true },
+  ];
+  protected readonly stones: MeadowDecor[] = [
+    { x: 868, y: 144, s: 1, flip: false },
+    { x: 505, y: 146, s: 0.75, flip: true },
+    { x: 122, y: 194, s: 0.9, flip: false },
+  ];
 
   /** Deterministic per-plot vertical offset — rows stop being ruler-straight. */
   protected staggerFor(treeId: string): number {

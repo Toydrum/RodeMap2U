@@ -62,8 +62,24 @@ import { Feeling } from '../../core/db/schema';
       preserveAspectRatio="xMidYMax slice"
       aria-hidden="true"
     >
-      <path class="range far-range" d="M -20 150 L 90 66 L 175 118 L 290 38 L 400 122 L 520 58 L 640 128 L 760 48 L 880 116 L 1020 70 L 1020 150 Z" />
-      <path class="range near-range" d="M -20 150 L 60 96 L 170 140 L 310 84 L 430 142 L 585 92 L 720 146 L 850 96 L 1020 138 L 1020 150 Z" />
+      <!-- Paper-cut ranges: a palest farthest ridge, then strata bands riding
+           each silhouette (the same path nudged down = parallel ridge lines) -->
+      <path class="range farthest" [attr.d]="farthestD" />
+      <g class="massif">
+        <path class="range far-range" [attr.d]="farD" />
+        <path class="strata s1" [attr.d]="farD" transform="translate(0 16)" />
+        <path class="strata s2" [attr.d]="farD" transform="translate(0 34)" />
+        <g class="caps">
+          <path d="M 277 50 L 290 38 L 303 50 Q 290 45 277 50 Z" />
+          <path d="M 509 68 L 520 58 L 531 68 Q 520 64 509 68 Z" />
+          <path d="M 748 59 L 760 48 L 772 59 Q 760 54 748 59 Z" />
+        </g>
+      </g>
+      <g class="massif">
+        <path class="range near-range" [attr.d]="nearD" />
+        <path class="strata s1" [attr.d]="nearD" transform="translate(0 14)" />
+        <path class="strata s2" [attr.d]="nearD" transform="translate(0 30)" />
+      </g>
       <g class="treeline">
         @for (x of treelineXs; track x) {
           <path [attr.d]="'M ' + x + ' 150 l 7 -16 l 7 16 Z'" />
@@ -87,4 +103,11 @@ export class SceneBackdrop {
   protected readonly seamBottom = computed(() => `calc(${this.mountainsBottom()} - 130px)`);
 
   protected readonly treelineXs = [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960];
+
+  protected readonly farthestD =
+    'M -20 150 L 110 92 L 240 132 L 400 76 L 545 128 L 690 86 L 830 134 L 1020 96 L 1020 150 Z';
+  protected readonly farD =
+    'M -20 150 L 90 66 L 175 118 L 290 38 L 400 122 L 520 58 L 640 128 L 760 48 L 880 116 L 1020 70 L 1020 150 Z';
+  protected readonly nearD =
+    'M -20 150 L 60 96 L 170 140 L 310 84 L 430 142 L 585 92 L 720 146 L 850 96 L 1020 138 L 1020 150 Z';
 }

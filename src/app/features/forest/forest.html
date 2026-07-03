@@ -45,11 +45,42 @@
       <ellipse cx="200" cy="290" rx="580" ry="140" class="hill far" />
       <ellipse cx="830" cy="310" rx="640" ry="160" class="hill near" />
 
+      <!-- Dappled light resting on the grass -->
+      @for (p of sunPatches; track $index) {
+        <ellipse class="sunpatch" [attr.cx]="p.x" [attr.cy]="p.y" [attr.rx]="64 * p.s" [attr.ry]="13 * p.s" />
+      }
+
       @if (hasStream()) {
         <g class="stream">
           <path [attr.d]="streamPath" class="water" />
           <path [attr.d]="ripple1" class="ripple r1" pathLength="1" fill="none" />
           <path [attr.d]="ripple2" class="ripple r2" pathLength="1" fill="none" />
+        </g>
+
+        <!-- Stones and cattails settle on the banks -->
+        @for (st of stones; track $index) {
+          <g class="stone" [attr.transform]="'translate(' + st.x + ' ' + st.y + ') scale(' + st.s + ')'">
+            <ellipse rx="9" ry="5.5" />
+            <ellipse class="shine" cx="-2.5" cy="-2" rx="4" ry="2" />
+          </g>
+        }
+        @for (c of cattails; track $index) {
+          <g class="cattail" [attr.transform]="'translate(' + c.x + ' ' + c.y + ') scale(' + (c.flip ? -c.s : c.s) + ' ' + c.s + ')'">
+            <path class="blade" d="M -3 0 C -9 -8 -8 -18 -12 -24" />
+            <path class="blade" d="M 3 0 C 7 -9 6 -16 10 -22" />
+            <path class="stem" d="M 0 0 L 0 -26" />
+            <rect class="head" x="-1.8" y="-35" width="3.6" height="10" rx="1.8" />
+          </g>
+        }
+      }
+
+      <!-- Low shrubs anchor the mid-ground -->
+      @for (b of bushes; track $index) {
+        <g class="bush" [attr.transform]="'translate(' + b.x + ' ' + b.y + ') scale(' + (b.flip ? -b.s : b.s) + ' ' + b.s + ')'">
+          <ellipse class="lobe" cx="-9" cy="-4" rx="13" ry="8.5" />
+          <ellipse class="lobe" cx="9" cy="-3.5" rx="12" ry="8" />
+          <ellipse class="lobe top" cx="0" cy="-9" rx="12" ry="8.5" />
+          <ellipse class="light" cx="-3" cy="-12" rx="7" ry="3.5" />
         </g>
       }
 
@@ -65,6 +96,25 @@
           <path d="M 0 0 q -3 -12 -6 -15" />
           <path d="M 2 0 q 0 -14 1 -17" />
           <path d="M 4 0 q 4 -11 7 -13" />
+        </g>
+      }
+
+      <!-- Tall silhouette tufts (7 blades) and seed-head spikes -->
+      @for (r of richTufts; track $index) {
+        <g class="tuft rich" [attr.transform]="'translate(' + r.x + ' ' + r.y + ') scale(' + (r.flip ? -r.s : r.s) + ' ' + r.s + ')'">
+          <path d="M 0 0 C -2 -8 -5 -13 -9 -17" />
+          <path d="M 1 0 C -1 -10 -2 -16 -4 -21" />
+          <path d="M 2 0 C 2 -11 2 -17 1 -24" />
+          <path d="M 3 0 C 4 -10 6 -15 6 -20" />
+          <path d="M 4 0 C 6 -8 9 -12 12 -15" />
+          <path d="M 0.5 0 C -3 -6 -6 -9 -12 -11" />
+          <path d="M 3.5 0 C 7 -6 10 -8 14 -9" />
+        </g>
+      }
+      @for (sp of spikes; track $index) {
+        <g class="spike" [attr.transform]="'translate(' + sp.x + ' ' + sp.y + ') scale(' + (sp.flip ? -sp.s : sp.s) + ' ' + sp.s + ')'">
+          <path class="stem" d="M 0 0 C 1 -8 -1 -14 0 -21" />
+          <path class="awn" d="M 0 -21 l -3.4 -3.2 M 0.2 -18.4 l 3.2 -3 M -0.2 -16 l -3 -2.8 M 0.4 -13.6 l 2.8 -2.8" />
         </g>
       }
     </svg>
