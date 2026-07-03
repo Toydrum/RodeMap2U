@@ -245,6 +245,11 @@ export class ForestPage {
 
   private beginDrag(tree: Tree): void {
     this.clearPending();
+    // A lone tree has no neighbor to trade places with — say so kindly.
+    if (this.trees.active().length < 2) {
+      this.toast.show({ message: this.i18n.t().forest.moveNeedsTwo });
+      return;
+    }
     this.draggingId.set(tree.id);
     this.dragPreview.set(this.trees.active().map((t) => t.id));
     this.suppressClick = true;

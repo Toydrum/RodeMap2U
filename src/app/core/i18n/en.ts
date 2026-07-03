@@ -78,6 +78,7 @@ export const EN: Dict = {
     checkinCta: 'Find myself in this enchanted forest',
     moveTree: 'Arrange "{name}"',
     moveTreeHint: 'Drag to arrange your forest (or use the arrow keys)',
+    moveNeedsTwo: 'Your tree is on its own — plant another and you can arrange them 🌱',
   },
   status: {
     seed: 'Seed',

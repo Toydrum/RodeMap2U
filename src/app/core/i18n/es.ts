@@ -80,6 +80,7 @@ export const ES = {
     checkinCta: 'Buscarme en este bosque encantado',
     moveTree: 'Acomodar «{name}»',
     moveTreeHint: 'Arrastra para acomodar tu bosque (o usa las flechas del teclado)',
+    moveNeedsTwo: 'Tu árbol está solito — planta otro y podrás acomodarlos entre sí 🌱',
   },
   status: {
     seed: 'Semilla',
