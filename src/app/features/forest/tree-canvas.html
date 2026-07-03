@@ -111,12 +111,8 @@
           <circle class="focus-ring" r="24" fill="none" />
         }
 
-        <!-- "You are here" halo — never parked on a finished place -->
-        @if (
-          tree().currentNodeId === point.node.id &&
-          point.node.status !== 'achieved' &&
-          point.node.status !== 'branched'
-        ) {
+        <!-- "You are here" halo — wherever the owner pinned it -->
+        @if (tree().currentNodeId === point.node.id) {
           <circle class="here-halo" r="19" fill="none" />
         }
 
