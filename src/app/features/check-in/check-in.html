@@ -76,5 +76,32 @@
     @case ('review') {
       <app-date-review [nodesToReview]="pendingReviews()" (closed)="leave()" />
     }
+
+    @case ('choose') {
+      <section class="stage choose-stage" aria-live="polite">
+        <h1>{{ i18n.t().checkIn.chooseTitle }}</h1>
+        <p class="sub">{{ i18n.t().checkIn.chooseSubtitle }}</p>
+
+        <div class="ring" [style.--ring-count]="trees.active().length">
+          <button type="button" class="ring-center" (click)="goForest()">
+            <img src="icons/logo.svg" alt="" width="46" height="46">
+            <span>{{ i18n.t().checkIn.justForest }}</span>
+          </button>
+
+          @for (tree of trees.active(); track tree.id; let i = $index) {
+            <button
+              type="button"
+              class="ring-tree"
+              [style.transform]="ringTransform(i)"
+              [style.--enter-delay]="(i * 70) + 'ms'"
+              (click)="enterTree(tree)"
+            >
+              <app-mini-tree [tree]="tree" />
+              <span class="ring-name" [style.color]="'var(--accent-' + tree.accent + ')'">{{ tree.name }}</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
   }
 </div>

@@ -41,6 +41,9 @@ export const EN: Dict = {
     done: "Here I am",
     skipAll: "I don't want to answer today",
     thanks: 'Thanks for stopping by. Your forest is waiting.',
+    chooseTitle: 'Your forest surrounds you',
+    chooseSubtitle: 'Which tree would you like to enter today?',
+    justForest: 'Just look at the forest',
   },
   forest: {
     title: 'My forest',

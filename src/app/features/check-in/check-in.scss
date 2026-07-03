@@ -123,6 +123,121 @@
   font-size: 1.05rem;
 }
 
+/* --------------------------------------------- the circle of trees */
+
+.choose-stage {
+  width: min(720px, 100%);
+}
+
+.ring {
+  --ring-r: clamp(120px, 32vmin, 215px);
+  position: relative;
+  width: calc(var(--ring-r) * 2 + 130px);
+  height: calc(var(--ring-r) * 2 + 130px);
+  max-width: 100%;
+  margin-top: 0.6rem;
+}
+
+.ring-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 130px;
+  height: 130px;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: translate(0, -2px);
+  }
+}
+
+.ring-tree {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -62px 0 0 -55px; /* centers the 110px-wide item on its ring point */
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  animation: ring-in 0.4s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  animation-delay: var(--enter-delay, 0ms);
+
+  app-mini-tree {
+    width: 92px;
+    transition: transform 0.25s ease;
+    transform-origin: 50% 90%;
+  }
+
+  &:hover app-mini-tree {
+    transform: scale(1.12) rotate(-2deg);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: var(--radius);
+  }
+
+  .ring-name {
+    font-weight: 800;
+    font-size: 0.82rem;
+    max-width: 108px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    margin-top: -6px;
+  }
+}
+
+@keyframes ring-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@media (max-width: 560px) {
+  .ring {
+    --ring-r: clamp(104px, 36vmin, 150px);
+  }
+
+  .ring-tree {
+    width: 92px;
+    margin: -52px 0 0 -46px;
+
+    app-mini-tree {
+      width: 76px;
+    }
+  }
+
+  .ring-center {
+    width: 106px;
+    height: 106px;
+  }
+}
+
 .skip {
   margin-top: 1rem;
   font-size: 0.88rem;

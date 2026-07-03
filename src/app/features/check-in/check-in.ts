@@ -5,8 +5,9 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SettingsService } from '../../core/repos/settings.service';
-import { Feeling, TreeNode } from '../../core/db/schema';
+import { Feeling, Tree, TreeNode } from '../../core/db/schema';
 import { DateReview } from './date-review';
+import { MiniTree } from '../forest/mini-tree';
 
 const FEELINGS: { key: Feeling; emoji: string }[] = [
   { key: 'sunny', emoji: '☀️' },
@@ -16,7 +17,7 @@ const FEELINGS: { key: Feeling; emoji: string }[] = [
   { key: 'stormy', emoji: '⛈' },
 ];
 
-type Step = 'feeling' | 'where' | 'note' | 'review';
+type Step = 'feeling' | 'where' | 'note' | 'review' | 'choose';
 
 /**
  * The opening ritual: "¿Dónde sientes que estás?"
@@ -26,7 +27,7 @@ type Step = 'feeling' | 'where' | 'note' | 'review';
  */
 @Component({
   selector: 'app-check-in',
-  imports: [DateReview],
+  imports: [DateReview, MiniTree],
   templateUrl: './check-in.html',
   styleUrl: './check-in.scss',
 })
@@ -96,15 +97,36 @@ export class CheckInPage {
   /** "Hoy no quiero responder" — always available, never penalized. */
   protected async skip(): Promise<void> {
     await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
-    this.leave();
+    void this.router.navigate(['/forest']);
   }
 
+  /**
+   * "Aquí estoy" earns a moment: if you already chose a branch, we go there;
+   * otherwise your trees gather in a circle and you pick where to enter.
+   */
   protected leave(): void {
     const where = this.whereNode();
     if (where) {
       void this.router.navigate(['/tree', where.treeId]);
+    } else if (this.trees.active().length) {
+      this.step.set('choose');
     } else {
       void this.router.navigate(['/forest']);
     }
+  }
+
+  /** Circular placement for the choose ritual. */
+  protected ringTransform(index: number): string {
+    const count = this.trees.active().length;
+    const angle = (360 / Math.max(count, 1)) * index - 90;
+    return `rotate(${angle}deg) translateX(var(--ring-r)) rotate(${-angle}deg)`;
+  }
+
+  protected enterTree(tree: Tree): void {
+    void this.router.navigate(['/tree', tree.id]);
+  }
+
+  protected goForest(): void {
+    void this.router.navigate(['/forest']);
   }
 }

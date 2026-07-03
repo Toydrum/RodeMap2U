@@ -43,6 +43,9 @@ export const ES = {
     done: 'Aquí estoy',
     skipAll: 'Hoy no quiero responder',
     thanks: 'Gracias por pasar. Tu bosque te espera.',
+    chooseTitle: 'Tu bosque te rodea',
+    chooseSubtitle: '¿A cuál árbol quieres entrar hoy?',
+    justForest: 'Solo mirar el bosque',
   },
   forest: {
     title: 'Mi bosque',
