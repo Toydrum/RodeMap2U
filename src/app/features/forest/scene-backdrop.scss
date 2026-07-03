@@ -472,26 +472,42 @@
   transition: opacity 1.2s ease;
 
   .range {
-    fill: color-mix(in srgb, var(--accent-sky) 30%, var(--surface-2));
     opacity: 0.55;
 
     &.farthest {
-      fill: color-mix(in srgb, var(--accent-sky) 20%, var(--surface-2));
-      opacity: 0.38;
+      opacity: 0.4;
     }
 
     &.near-range {
-      fill: color-mix(in srgb, var(--accent-pine) 24%, var(--surface-2));
-      opacity: 0.7;
+      opacity: 0.72;
     }
   }
 
-  /* Ridge strata: the silhouette echoed downward, like layered paper. */
-  .strata {
-    fill: color-mix(in srgb, var(--text) 7%, transparent);
+  /* Summit-lit gradients (one per range) — depth without repeated contours. */
+  #rmGradFarthest {
+    .g-top {
+      stop-color: color-mix(in srgb, var(--accent-sky) 10%, #f2f5f5);
+    }
+    .g-bot {
+      stop-color: color-mix(in srgb, var(--accent-sky) 28%, var(--surface-2));
+    }
+  }
 
-    &.s2 {
-      fill: color-mix(in srgb, var(--text) 5%, transparent);
+  #rmGradFar {
+    .g-top {
+      stop-color: color-mix(in srgb, var(--accent-sky) 16%, #edf2f0);
+    }
+    .g-bot {
+      stop-color: color-mix(in srgb, var(--accent-sky) 42%, var(--surface-2));
+    }
+  }
+
+  #rmGradNear {
+    .g-top {
+      stop-color: color-mix(in srgb, var(--accent-pine) 14%, #eef1ea);
+    }
+    .g-bot {
+      stop-color: color-mix(in srgb, var(--accent-pine) 34%, var(--surface-2));
     }
   }
 
@@ -508,8 +524,22 @@
 }
 
 [data-theme='terminal'] .mountains {
-  .strata {
-    fill: color-mix(in srgb, var(--primary) 8%, transparent);
+  #rmGradFarthest .g-top,
+  #rmGradFar .g-top,
+  #rmGradNear .g-top {
+    stop-color: color-mix(in srgb, var(--primary) 20%, var(--bg));
+  }
+
+  #rmGradFarthest .g-bot {
+    stop-color: color-mix(in srgb, var(--primary) 10%, var(--bg));
+  }
+
+  #rmGradFar .g-bot {
+    stop-color: color-mix(in srgb, var(--primary) 16%, var(--bg));
+  }
+
+  #rmGradNear .g-bot {
+    stop-color: color-mix(in srgb, var(--accent-pine) 34%, var(--bg));
   }
 
   .caps path {

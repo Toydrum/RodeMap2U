@@ -301,6 +301,28 @@
   }
 }
 
+.daisy {
+  .stem {
+    stroke: color-mix(in srgb, var(--rm-twig) 65%, transparent);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+  }
+
+  .petal {
+    fill: color-mix(in srgb, #fffdf2 88%, var(--surface-2));
+    opacity: 0.95;
+  }
+
+  .heart {
+    fill: #e3b345;
+  }
+}
+
+.clover circle {
+  fill: color-mix(in srgb, var(--rm-twig) 55%, var(--surface-2));
+  opacity: 0.55;
+}
+
 /* ------------------------------------------------------------- plots */
 
 .plots {

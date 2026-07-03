@@ -36,14 +36,17 @@ interface MeadowDecor {
   flip: boolean;
 }
 
-/** Fixed-seed scatter helper — same meadow every session, forever. */
+/** Fixed-seed scatter helper — same meadow every session, forever.
+ *  Items deeper in the band (higher y) grow larger: cheap depth. */
 function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin: number, ySpan: number): MeadowDecor[] {
   return Array.from({ length: count }, (_, i) => {
     const h = hash(kind + ':' + i);
+    const y = yMin + ((h >> 6) % ySpan);
+    const depth = 0.62 + ((y - yMin) / ySpan) * 0.45;
     return {
       x: xMin + (h % xSpan),
-      y: yMin + ((h >> 6) % ySpan),
-      s: 0.7 + ((h >> 3) % 55) / 100,
+      y,
+      s: (0.7 + ((h >> 3) % 55) / 100) * depth,
       flip: h % 2 === 0,
     };
   });
@@ -116,27 +119,35 @@ export class ForestPage {
   });
 
   /** Clustered grass (3 blades each), deterministic positions. */
-  protected readonly grass: GrassCluster[] = Array.from({ length: 14 }, (_, i) => {
+  protected readonly grass: GrassCluster[] = Array.from({ length: 30 }, (_, i) => {
     const h = hash('grass:' + i);
-    return { x: 20 + (h % 960), y: 214 + ((h >> 6) % 40), flip: h % 2 === 0 };
+    return { x: 15 + (h % 970), y: 208 + ((h >> 6) % 48), flip: h % 2 === 0 };
   });
 
   /* Meadow texture — all fixed-seed, never reshuffles (references: tall
-     silhouette tufts + seed-head spikes, shrubs, dappled light, stones). */
-  protected readonly sunPatches = scatter('sunpatch', 3, 80, 820, 158, 62);
-  protected readonly bushes = scatter('bush', 3, 150, 800, 200, 36);
-  protected readonly richTufts = scatter('rich', 7, 15, 950, 210, 42);
-  protected readonly spikes = scatter('spike', 6, 30, 930, 208, 44);
+     silhouette tufts + seed-head spikes, shrubs, daisies, dappled light). */
+  protected readonly sunPatches = scatter('sunpatch', 4, 80, 820, 158, 66);
+  protected readonly bushes = scatter('bush', 7, 160, 800, 198, 42);
+  protected readonly richTufts = scatter('rich', 18, 10, 960, 198, 56);
+  protected readonly spikes = scatter('spike', 14, 20, 950, 198, 56);
+  protected readonly daisies = scatter('daisy', 9, 170, 790, 200, 52);
+  protected readonly clovers = scatter('clover', 12, 175, 790, 206, 48);
   /** Hand-placed by the stream banks (only shown once the stream flows). */
   protected readonly cattails: MeadowDecor[] = [
     { x: 655, y: 152, s: 1, flip: false },
     { x: 268, y: 146, s: 0.85, flip: true },
+    { x: 762, y: 150, s: 0.75, flip: true },
+    { x: 398, y: 138, s: 0.65, flip: false },
   ];
   protected readonly stones: MeadowDecor[] = [
     { x: 868, y: 144, s: 1, flip: false },
     { x: 505, y: 146, s: 0.75, flip: true },
     { x: 122, y: 194, s: 0.9, flip: false },
+    { x: 700, y: 150, s: 0.55, flip: false },
+    { x: 232, y: 186, s: 0.65, flip: true },
   ];
+
+  protected readonly petalAngles = [0, 72, 144, 216, 288];
 
   /** Deterministic per-plot vertical offset — rows stop being ruler-straight. */
   protected staggerFor(treeId: string): number {

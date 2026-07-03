@@ -62,24 +62,31 @@ import { Feeling } from '../../core/db/schema';
       preserveAspectRatio="xMidYMax slice"
       aria-hidden="true"
     >
-      <!-- Paper-cut ranges: a palest farthest ridge, then strata bands riding
-           each silhouette (the same path nudged down = parallel ridge lines) -->
-      <path class="range farthest" [attr.d]="farthestD" />
+      <!-- Ranges shade from lit summits to deep bases — depth without outlines -->
+      <defs>
+        <linearGradient id="rmGradFarthest" x1="0" y1="0" x2="0" y2="1">
+          <stop class="g-top" offset="0" />
+          <stop class="g-bot" offset="1" />
+        </linearGradient>
+        <linearGradient id="rmGradFar" x1="0" y1="0" x2="0" y2="1">
+          <stop class="g-top" offset="0" />
+          <stop class="g-bot" offset="1" />
+        </linearGradient>
+        <linearGradient id="rmGradNear" x1="0" y1="0" x2="0" y2="1">
+          <stop class="g-top" offset="0" />
+          <stop class="g-bot" offset="1" />
+        </linearGradient>
+      </defs>
+      <path class="range farthest" fill="url(#rmGradFarthest)" [attr.d]="farthestD" />
       <g class="massif">
-        <path class="range far-range" [attr.d]="farD" />
-        <path class="strata s1" [attr.d]="farD" transform="translate(0 16)" />
-        <path class="strata s2" [attr.d]="farD" transform="translate(0 34)" />
+        <path class="range far-range" fill="url(#rmGradFar)" [attr.d]="farD" />
         <g class="caps">
           <path d="M 277 50 L 290 38 L 303 50 Q 290 45 277 50 Z" />
           <path d="M 509 68 L 520 58 L 531 68 Q 520 64 509 68 Z" />
           <path d="M 748 59 L 760 48 L 772 59 Q 760 54 748 59 Z" />
         </g>
       </g>
-      <g class="massif">
-        <path class="range near-range" [attr.d]="nearD" />
-        <path class="strata s1" [attr.d]="nearD" transform="translate(0 14)" />
-        <path class="strata s2" [attr.d]="nearD" transform="translate(0 30)" />
-      </g>
+      <path class="range near-range" fill="url(#rmGradNear)" [attr.d]="nearD" />
       <g class="treeline">
         @for (x of treelineXs; track x) {
           <path [attr.d]="'M ' + x + ' 150 l 7 -16 l 7 16 Z'" />
