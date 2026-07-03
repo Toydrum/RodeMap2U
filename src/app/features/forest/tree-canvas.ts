@@ -388,6 +388,16 @@ export class TreeCanvas {
     return title.length > max ? title.slice(0, max - 1).trimEnd() + '…' : title;
   }
 
+  /** The growing sapling leans along its limb's incoming direction —
+   *  tempered toward the sky (phototropism), never lying flat. */
+  protected saplingAngle(point: LayoutPoint): number {
+    if (!point.parent) return 0;
+    const geometry = edgeGeometry(point.parent, point, this.wood().bow);
+    const deg = (Math.atan2(point.y - geometry.c2y, point.x - geometry.c2x) * 180) / Math.PI + 90;
+    const normalized = ((deg + 180) % 360) - 180;
+    return Math.max(-70, Math.min(70, normalized * 0.8));
+  }
+
   protected labelY(point: LayoutPoint): number {
     // Anchor labels to the level's NOMINAL line (cancel the node's organic
     // y-jitter) so shelf rows are exact and can never brush each other.
