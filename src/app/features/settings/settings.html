@@ -140,6 +140,7 @@
   </section>
 
   <p class="about">{{ i18n.t().settings.aboutText }}</p>
+  <p class="version">{{ version }}</p>
 
   @if (deleting(); as tree) {
     <div class="confirm-backdrop" (click)="deleting.set(null)">

@@ -8,6 +8,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { BackupService } from '../../core/repos/backup.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
+import { APP_VERSION } from '../../core/version';
 
 @Component({
   selector: 'app-settings',
@@ -16,6 +17,7 @@ import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schem
   styleUrl: './settings.scss',
 })
 export class SettingsPage {
+  protected readonly version = APP_VERSION;
   protected readonly i18n = inject(I18nService);
   protected readonly settings = inject(SettingsService);
   protected readonly theme = inject(ThemeService);

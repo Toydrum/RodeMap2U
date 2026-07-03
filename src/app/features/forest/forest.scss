@@ -423,6 +423,11 @@
 
   -webkit-touch-callout: none;
   user-select: none;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &.dragging {
     z-index: 6;

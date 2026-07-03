@@ -186,6 +186,15 @@
   margin-top: 1.6rem;
 }
 
+.version {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  opacity: 0.8;
+  margin-top: 0.2rem;
+  font-family: var(--font-mono, monospace);
+}
+
 .danger {
   color: color-mix(in srgb, var(--status-achieved) 70%, var(--text-dim));
 
