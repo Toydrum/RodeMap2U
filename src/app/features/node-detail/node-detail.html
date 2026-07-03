@@ -36,6 +36,15 @@
             {{ i18n.t().status[status] }}
           </button>
         }
+        <button
+          type="button"
+          class="chip pick branch-chip"
+          (click)="branching.set(true)"
+          [title]="i18n.t().node.branchHereHint"
+        >
+          <span class="status-dot branched"></span>
+          🌿 {{ i18n.t().node.branchChip }}
+        </button>
       </div>
     }
 

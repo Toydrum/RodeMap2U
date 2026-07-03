@@ -120,6 +120,7 @@ export const ES = {
     addStep: 'Agregar un pasito',
     stepPlaceholder: 'Un pasito chiquito desde aquí…',
     branchHere: 'Brotar ramitas nuevas',
+    branchChip: 'Ramificar…',
     branchHereHint: 'Desde aquí pueden crecer caminos distintos — en el triunfo o en la pausa.',
     datePassedNudge: 'Esta fecha ya pasó — y tú sigues aquí. Partamos de aquí',
     focusHere: 'Sesión de enfoque aquí',

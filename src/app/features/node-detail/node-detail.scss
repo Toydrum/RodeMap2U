@@ -66,6 +66,15 @@
     cursor: pointer;
     min-height: 40px;
 
+    &.branch-chip {
+      border-color: color-mix(in srgb, var(--status-branched) 60%, transparent);
+      color: color-mix(in srgb, var(--status-branched) 55%, var(--text));
+
+      &:hover {
+        border-color: var(--status-branched);
+      }
+    }
+
     &.selected {
       border-color: var(--primary);
       color: var(--text);

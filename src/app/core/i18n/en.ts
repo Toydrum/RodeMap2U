@@ -118,6 +118,7 @@ export const EN: Dict = {
     addStep: 'Add a small step',
     stepPlaceholder: 'One tiny step from here…',
     branchHere: 'Sprout new little branches',
+    branchChip: 'Branch out…',
     branchHereHint: 'Different paths can grow from here — in triumph or in rest.',
     datePassedNudge: "This date has passed — and you are still here. Let's start from here",
     focusHere: 'Focus session here',

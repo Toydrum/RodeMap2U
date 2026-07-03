@@ -120,7 +120,7 @@ Al entrar ves tu árbol dibujado como un árbol de verdad: tronco, ramas de made
 | **Florecida** | Flor rosa 🌸 | ¡Floreció! |
 | **Ramificada** | Nudo dorado | De aquí nacieron caminos nuevos |
 
-> 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia.
+> 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia. Para empezar esa transformación tienes dos caminos: el chip dorado **"🌿 Ramificar…"** al final de la fila de estados, o el botón **"Brotar ramitas nuevas"** — ambos abren el mismo ritual.
 
 ## Plantar ramas
 

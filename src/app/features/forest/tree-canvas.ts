@@ -157,7 +157,7 @@ export class TreeCanvas {
           d: branchRibbon(p.parent!, p, geometry, isLeaf),
           fill: this.woodFill(p),
           isNew: this.bornThisSession.has(p.node.id),
-          leaves: this.leavesFor(p, geometry),
+          leaves: this.leavesFor(p, geometry, isLeaf),
         };
       }),
   );
@@ -190,24 +190,46 @@ export class TreeCanvas {
   }
 
   /** Deterministic little leaves sprinkled along live branches. */
-  private leavesFor(point: LayoutPoint, geometry: ReturnType<typeof edgeGeometry>): LeafDecoration[] {
+  private leavesFor(
+    point: LayoutPoint,
+    geometry: ReturnType<typeof edgeGeometry>,
+    isTip: boolean,
+  ): LeafDecoration[] {
     const status = point.node.status;
-    if (status === 'resting') return [];
     const h = hash(point.node.id + ':leaves');
-    const count = status === 'achieved' ? 3 : status === 'growing' ? 2 + (h % 2) : 1 + (h % 2);
+    // Every living branch wears foliage; resting keeps just a quiet pair.
+    const base = status === 'achieved' ? 5 : status === 'growing' ? 4 : status === 'resting' ? 1 : 3;
+    const count = base + (h % 2);
     const leaves: LeafDecoration[] = [];
     for (let i = 0; i < count; i++) {
       const hi = hash(point.node.id + ':leaf:' + i);
-      const t = 0.35 + ((hi % 50) / 100); // 0.35–0.85 along the branch
+      // Spread along the whole limb, evenly seeded + jittered, alternating sides.
+      const t = Math.min(0.92, 0.22 + (i / count) * 0.62 + ((hi % 12) / 100));
       const at = edgePointAt(point.parent!, point, geometry, t);
-      const side = hi % 2 === 0 ? 1 : -1;
+      const side = (i + (h % 2)) % 2 === 0 ? 1 : -1;
       leaves.push({
-        x: at.x + side * (4 + (hi % 6)),
+        x: at.x + side * (3.5 + (hi % 6)),
         y: at.y,
-        angle: side * (30 + (hi % 50)),
-        size: 5.5 + ((hi >> 4) % 4),
+        angle: side * (28 + (hi % 52)),
+        size: 5 + ((hi >> 4) % 4),
         kind: status === 'achieved' && i === 0 ? 'blossom' : 'leaf',
       });
+    }
+    // Foliage gathers where the branch ends: twig tips grow a little tuft.
+    if (isTip && status !== 'achieved' && status !== 'branched') {
+      const tuftCount = status === 'resting' ? 1 : 2 + (h % 2);
+      for (let i = 0; i < tuftCount; i++) {
+        const hi = hash(point.node.id + ':tuft:' + i);
+        const at = edgePointAt(point.parent!, point, geometry, Math.min(0.97, 0.85 + i * 0.05));
+        const side = i % 2 === 0 ? 1 : -1;
+        leaves.push({
+          x: at.x + side * (2.5 + (hi % 4)),
+          y: at.y,
+          angle: side * (16 + (hi % 40)),
+          size: 4.5 + (hi % 3),
+          kind: 'leaf',
+        });
+      }
     }
     return leaves;
   }
