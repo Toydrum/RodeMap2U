@@ -4,7 +4,10 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-export const SCHEMA_VERSION = 1;
+/** v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
+ *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults).
+ *  Old v1 backups import cleanly; v2 backups are refused by v1 apps. */
+export const SCHEMA_VERSION = 2;
 export const DB_VERSION = 1;
 export const DB_NAME = 'rodemap2u';
 
@@ -65,6 +68,10 @@ export interface TreeNode extends SyncBase {
   /** 'branch' = born as an alternative under a branched parent. */
   origin: 'planned' | 'branch';
   archivedAt: number | null;
+  /** The user's own if-then plan ("cuando me sirva el café…") — free text,
+   *  NEVER parsed or scheduled. Ahora re-presents it; nothing alarms.
+   *  Optional: records born before v2 simply lack it (undefined ≡ null). */
+  trigger?: string | null;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
@@ -106,6 +113,9 @@ export interface Settings {
   lastCheckInAt: number | null;
   /** First-run flag for the welcome flow. */
   onboarded: boolean;
+  /** Up to 3 branches chosen for today. Expires silently when the date
+   *  moves on — no carryover, no history, no done/undone counts. */
+  todayIntentions: { date: string; nodeIds: string[] } | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -118,6 +128,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timerEndChime: false,
   lastCheckInAt: null,
   onboarded: false,
+  todayIntentions: null,
 };
 
 /** Versioned backup file format. */

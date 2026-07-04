@@ -55,6 +55,14 @@ export const ES = {
     bloomToast: '«{title}» floreció 🌸',
     bloomMore: '¿Otro pasito?',
     birdAria: 'Un pajarito te acompaña — solo está aquí, contigo',
+    todayKicker: 'Hoy',
+    todayPick: '🌅 Elegir mis ramas de hoy',
+    todayPickTitle: '¿Qué quiere crecer hoy?',
+    todayPickHint: 'Hasta tres ramitas. Mañana se sueltan solas — sin arrastres, sin cuentas.',
+    todayPickSave: 'Así está bien',
+    todayEditAria: 'Cambiar mis ramas de hoy',
+    reasonToday: 'La elegiste para hoy 🌅',
+    reasonTrigger: '🧶 «{trigger}»',
   },
   checkIn: {
     title: '¿Dónde sientes que estás?',
@@ -157,6 +165,9 @@ export const ES = {
     notePlaceholder: 'Lo que quieras recordar…',
     dateLabel: 'Fecha amable',
     dateHint: 'Es una brújula, no un contrato. Puedes cambiarla o soltarla cuando quieras.',
+    triggerLabel: 'Ramita cuando-entonces',
+    triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
+    triggerHint: 'Tu propio plan «cuando pase X, toco esta rama». Ahora te lo recordará — jamás con alarmas.',
     steps: 'Pasitos',
     addStep: 'Agregar un pasito',
     stepPlaceholder: 'Un pasito chiquito desde aquí…',
@@ -289,7 +300,7 @@ export const ES = {
       {
         icon: '🧶',
         title: 'Ahora — tu hilo',
-        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
+        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Si quieres, elige hasta tres «ramas de hoy» 🌅 — mañana se sueltan solas, sin arrastres ni cuentas. Y si a una rama le escribes su «cuando-entonces» 🧶 («cuando me sirva el café…»), Ahora te lo recordará con tus propias palabras — jamás con alarmas. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
       },
       {
         icon: '🌳',

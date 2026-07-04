@@ -68,6 +68,20 @@
       </button>
     }
 
+    <!-- If-then twig: the user's own plan, re-presented in Ahora — never scheduled -->
+    <div class="field">
+      <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+      <input
+        id="nd-trigger"
+        type="text"
+        [value]="node().trigger ?? ''"
+        (change)="setTrigger($any($event.target).value)"
+        [placeholder]="i18n.t().node.triggerPlaceholder"
+        maxlength="120"
+      >
+      <span class="hint">{{ i18n.t().node.triggerHint }}</span>
+    </div>
+
     <!-- Note -->
     <div class="field">
       <label for="nd-note">{{ i18n.t().node.noteLabel }}</label>

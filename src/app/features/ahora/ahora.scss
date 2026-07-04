@@ -229,3 +229,106 @@ h1 {
   color: var(--text-faint);
   margin-top: 1.2rem;
 }
+
+/* ------------------------------------------------ today's little branches */
+
+.today-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+
+  .today-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .today-chip {
+    text-decoration: none;
+    border-left-width: 4px;
+    max-width: 15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .today-edit {
+    min-height: 34px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+  }
+}
+
+.today-pick {
+  margin-bottom: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* Picker sheet — same bottom-sheet ceremony as everywhere else. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(20, 26, 18, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  width: min(600px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 1.1rem 1.4rem calc(1.6rem + env(safe-area-inset-bottom));
+  animation: sheet-up 0.28s ease both;
+
+  h2 {
+    margin: 0 0 0.2rem;
+  }
+
+  .pick-hint {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin: 0 0 0.9rem;
+  }
+
+  .pick-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .pick-chip {
+    cursor: pointer;
+    border-left-width: 4px;
+    max-width: 100%;
+
+    &.selected {
+      background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+      font-weight: 700;
+    }
+  }
+
+  .row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(48px);
+    opacity: 0;
+  }
+}

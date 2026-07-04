@@ -12,7 +12,14 @@ import { hash } from '../forest/tree-layout';
  * counts refusals.
  */
 
-export type SuggestKind = 'step-of-current' | 'current' | 'recent' | 'fresh-growing' | 'fresh-seed';
+export type SuggestKind =
+  | 'today'
+  | 'trigger'
+  | 'step-of-current'
+  | 'current'
+  | 'recent'
+  | 'fresh-growing'
+  | 'fresh-seed';
 
 export interface Suggestion {
   node: TreeNode;
@@ -102,9 +109,12 @@ export function resolveThread(
 }
 
 /** Priority-ordered candidate pool, deduped, capped. Buckets:
- *  P1 pasitos of the thread node (tiny + concrete beats abstract),
- *  P2 the thread node itself, P3 momentum (sessions in the last 7 days),
- *  P4 freshest growing, P5 freshest seeds. */
+ *  P0 today's chosen intentions (in the user's own order),
+ *  P0.5 branches carrying a "cuando-entonces" (the user's own if-then plan
+ *  — re-presenting it IS the mechanism), P1 pasitos of the thread node
+ *  (tiny + concrete beats abstract), P2 the thread node itself,
+ *  P3 momentum (sessions in the last 7 days), P4 freshest growing,
+ *  P5 freshest seeds. */
 export function suggestionPool(
   activeTrees: Tree[],
   nodesByTree: ReadonlyMap<string, TreeNode[]>,
@@ -112,6 +122,7 @@ export function suggestionPool(
   sessions: TimerSession[],
   checkins: CheckIn[],
   nodesById: ReadonlyMap<string, TreeNode>,
+  todayIds: string[] = [],
 ): Suggestion[] {
   const treeById = new Map(activeTrees.map((t) => [t.id, t]));
   const actionable = (n: TreeNode) => n.status === 'seed' || n.status === 'growing';
@@ -125,6 +136,14 @@ export function suggestionPool(
     seen.add(node.id);
     pool.push({ node, tree, parent, kind });
   };
+
+  for (const id of todayIds) {
+    const node = nodesById.get(id);
+    if (node && !node.deletedAt && !node.archivedAt) add(node, 'today');
+  }
+
+  const all = activeTrees.flatMap((t) => nodesByTree.get(t.id) ?? []);
+  for (const node of all.filter((n) => n.trigger?.trim()).sort(byFresh)) add(node, 'trigger');
 
   const thread = resolveThread(activeTrees, nodesById, sessions, checkins);
   if (thread) {
@@ -141,7 +160,6 @@ export function suggestionPool(
     if (node && !node.deletedAt && !node.archivedAt && node.status === 'growing') add(node, 'recent');
   }
 
-  const all = activeTrees.flatMap((t) => nodesByTree.get(t.id) ?? []);
   for (const node of all.filter((n) => n.status === 'growing').sort(byFresh)) add(node, 'fresh-growing');
   for (const node of all.filter((n) => n.status === 'seed').sort(byFresh)) add(node, 'fresh-seed');
 
@@ -166,6 +184,9 @@ export function suggestNext(
   sessions: TimerSession[],
   checkins: CheckIn[],
   nodesById: ReadonlyMap<string, TreeNode>,
+  todayIds: string[] = [],
 ): Suggestion | null {
-  return suggestionPool(activeTrees, nodesByTree, childrenOf, sessions, checkins, nodesById)[0] ?? null;
+  return (
+    suggestionPool(activeTrees, nodesByTree, childrenOf, sessions, checkins, nodesById, todayIds)[0] ?? null
+  );
 }

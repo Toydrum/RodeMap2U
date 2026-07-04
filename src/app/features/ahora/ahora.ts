@@ -5,12 +5,14 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { SettingsService } from '../../core/repos/settings.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { TreeNode } from '../../core/db/schema';
 import { daysFromToday, today } from '../../core/time';
 import { MiniTree } from '../forest/mini-tree';
 import { DateReview } from '../check-in/date-review';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
 import { Suggestion, ThreadContext, pickAt, resolveThread, suggestionPool } from './suggest';
 
@@ -22,7 +24,7 @@ import { Suggestion, ThreadContext, pickAt, resolveThread, suggestionPool } from
  */
 @Component({
   selector: 'app-ahora',
-  imports: [RouterLink, MiniTree, DateReview, CompanionBird],
+  imports: [RouterLink, MiniTree, DateReview, CompanionBird, SheetDirective],
   templateUrl: './ahora.html',
   styleUrl: './ahora.scss',
 })
@@ -33,12 +35,27 @@ export class AhoraPage {
   protected readonly nodes = inject(NodesRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly checkins = inject(CheckinsRepo);
+  private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
   protected readonly reviewing = signal(false);
   /** "Otra idea" taps; wraps at pool length so the cycle returns home. */
   private readonly ideaOffset = signal(0);
+
+  /** Today-intentions picker sheet. */
+  protected readonly pickingToday = signal(false);
+  protected readonly pickedToday = signal<string[]>([]);
+
+  /** Today's chosen branches — silently empty once the date moves on. */
+  protected readonly todayNodes = computed<TreeNode[]>(() => {
+    const intentions = this.settings.settings().todayIntentions;
+    if (!intentions || intentions.date !== today()) return [];
+    const activeIds = new Set(this.trees.active().map((t) => t.id));
+    return intentions.nodeIds
+      .map((id) => this.nodes.byId().get(id))
+      .filter((n): n is TreeNode => !!n && !n.deletedAt && !n.archivedAt && activeIds.has(n.treeId));
+  });
 
   protected readonly thread = computed(() =>
     resolveThread(this.trees.active(), this.nodes.byId(), this.sessions.all(), this.checkins.all()),
@@ -52,6 +69,7 @@ export class AhoraPage {
       this.sessions.all(),
       this.checkins.all(),
       this.nodes.byId(),
+      this.todayNodes().map((n) => n.id),
     ),
   );
 
@@ -118,6 +136,10 @@ export class AhoraPage {
   protected reasonText(s: Suggestion): string {
     const t = this.i18n.t().ahora;
     switch (s.kind) {
+      case 'today':
+        return t.reasonToday;
+      case 'trigger':
+        return this.i18n.fill(t.reasonTrigger, { trigger: s.node.trigger ?? '' });
       case 'step-of-current':
         return this.i18n.fill(t.reasonStepOfCurrent, { title: s.parent?.title ?? '' });
       case 'current':
@@ -130,6 +152,34 @@ export class AhoraPage {
         return this.i18n.fill(t.reasonFreshSeed, { tree: s.tree.name });
     }
   }
+
+  /* ------------------------------------------- today's little branches */
+
+  protected openTodayPicker(): void {
+    this.pickedToday.set(this.todayNodes().map((n) => n.id));
+    this.pickingToday.set(true);
+  }
+
+  protected toggleToday(id: string): void {
+    this.pickedToday.update((ids) =>
+      ids.includes(id) ? ids.filter((x) => x !== id) : ids.length < 3 ? [...ids, id] : ids,
+    );
+  }
+
+  protected async saveToday(): Promise<void> {
+    const ids = this.pickedToday();
+    await this.settings.patch({
+      todayIntentions: ids.length ? { date: today(), nodeIds: ids } : null,
+    });
+    this.pickingToday.set(false);
+    this.ideaOffset.set(0);
+  }
+
+  /** Candidates for the picker: the pool's nodes, deduped, in rank order. */
+  protected readonly todayChoices = computed(() => {
+    const chosen = new Set(this.pickedToday());
+    return this.pool().map((s) => ({ s, chosen: chosen.has(s.node.id) }));
+  });
 
   protected threadLine(t: ThreadContext): string {
     const dict = this.i18n.t().ahora;

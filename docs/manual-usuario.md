@@ -83,6 +83,8 @@ Al abrirla encuentras, en este orden:
 - **"Ibas aquí"** — tu hilo: la rama donde estuviste la última vez, con su arbolito y cuándo fue ("Ayer estuviste aquí 22 min 🌱"). Tocarla te lleva directo a esa rama en su árbol.
 - **UNA sugerencia — nunca una lista.** "¿Y si seguimos por aquí?" te ofrece un solo pasito, y siempre te dice **por qué** ("Un pasito chiquito de «Mi primera canción»"). Si ese no te llama, **"Otra idea"** te muestra otro camino con calma — y tu bosque completo sigue a un toque en **"Ver mi bosque"**. La app sugiere; **tú decides siempre**.
 - **Dos puertas para entrar**: **"Tocarla 2 minutitos"** (la puerta más chiquita que existe — empieza ahí mismo, y si te quedas más, mejor) o **"Una sesión"** completa en el temporizador.
+- **🌅 Tus ramas de hoy** *(opcional)*: elige hasta **tres** ramas para el día con "Elegir mis ramas de hoy". Aparecen como fichitas arriba y la sugerencia las respeta ("La elegiste para hoy 🌅"). **Mañana se sueltan solas** — sin arrastres, sin cuentas de cumplidas/no cumplidas: hoy es hoy.
+- **🧶 Cuando-entonces**: si a una rama le escribiste su ramita cuando-entonces (ver sección 6), Ahora te la recuerda **con tus propias palabras** — "🧶 «Cuando me sirva el café de la mañana»" — y esa rama pasa al frente de la fila. Es la técnica con más evidencia para arrancar en TDAH: tú escribes el plan, la app solo te lo vuelve a poner enfrente. Jamás con alarmas.
 - Si hay **fechas que quieren platicar contigo**, el aviso suave aparece arriba — la misma conversación digna de siempre, jamás un rojo.
 - Y abajo, cuando aplica, una línea de gratitud: *"Hoy estuviste 34 minutitos con tu bosque 🌱"*. No es una meta ni una cuota — es un gracias.
 
@@ -163,6 +165,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 - **Título** — qué quieres que crezca ahí.
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
 - **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
+- **🧶 Ramita cuando-entonces** *(opcional)* — tu propio plan "cuando pase X, toco esta rama": *"Cuando me sirva el café de la mañana…"*. La app nunca lo interpreta ni lo agenda — solo te lo vuelve a mostrar en Ahora y en las tarjetitas del check-in, con tus palabras. Escribir el plan una vez es lo que hace la magia.
 - **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.
 - **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
@@ -302,6 +305,8 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Nudo** | El punto dorado donde una meta se transformó — parte de tu historia |
 | **Check-in** | La pregunta de apertura: *¿Dónde sientes que estás?* |
 | **Ahora / El hilo** | La pantalla que te recibe: dónde ibas + un solo pasito sugerido |
+| **Ramas de hoy** 🌅 | Hasta 3 ramas que eliges para el día; mañana se sueltan solas |
+| **Cuando-entonces** 🧶 | Tu plan "cuando pase X, toco esta rama" — la app solo te lo recuerda |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |

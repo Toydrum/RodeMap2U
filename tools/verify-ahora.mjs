@@ -13,13 +13,13 @@ const emptyShown = (await page.locator('.empty').count()) === 1;
 const tabs = await page.locator('.tabbar .tab').count();
 console.log(`A gate+landing: diverted-once + skip -> /ahora | empty=${emptyShown} tabs=${tabs} | OK=${emptyShown && tabs === 4}`);
 
-// B — thread + suggestion on demo data
+// B — thread + suggestion on demo data (a when-then twig outranks everything)
 await page.goto(`${BASE}/ahora?seed=demo`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 const threadTitle = (await page.locator('.thread .node-title').textContent()).trim();
 const nextTitle = (await page.locator('.next-title').textContent()).trim();
 const reason = (await page.locator('.reason').textContent()).trim();
-const okB = threadTitle === 'Mi primera canción completa' && nextTitle === 'Grabarme y escucharme' && reason.includes('pasito') && reason.includes('Mi primera canción completa');
+const okB = threadTitle === 'Mi primera canción completa' && nextTitle === '10 min al despertar' && reason.includes('🧶') && reason.includes('café');
 console.log(`B thread="${threadTitle}" next="${nextTitle}" reason="${reason}" | OK=${okB}`);
 
 // C — "Otra idea" full deterministic cycle (returns home; length = pool size)

@@ -77,6 +77,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       branchedAt: null,
       origin: 'planned',
       archivedAt: null,
+      trigger: null,
     };
     return this.insert(node);
   }
@@ -89,7 +90,10 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     });
   }
 
-  async update(node: TreeNode, patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate'>>): Promise<TreeNode> {
+  async update(
+    node: TreeNode,
+    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger'>>,
+  ): Promise<TreeNode> {
     return this.save({ ...node, ...patch });
   }
 
@@ -148,6 +152,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       branchedAt: null,
       origin: 'branch' as const,
       archivedAt: null,
+      trigger: null,
     }));
     await this.saveMany([branchedParent, ...children]);
     return children;

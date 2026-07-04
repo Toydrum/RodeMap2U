@@ -71,6 +71,7 @@ export const DEMO_NODES: TreeNode[] = [
   node('demo-g-mini', 'demo-guitar', 'demo-g-daily', '10 min al despertar', 'growing', 10, {
     origin: 'branch',
     note: 'Con la guitarra a la vista es más fácil.',
+    trigger: 'Cuando me sirva el café de la mañana',
   }),
   node('demo-g-weekend', 'demo-guitar', 'demo-g-daily', 'Sesión larga los sábados', 'seed', 20, { origin: 'branch' }),
   node('demo-g-first-song', 'demo-guitar', 'demo-g-chords', 'Mi primera canción completa', 'growing', 10),

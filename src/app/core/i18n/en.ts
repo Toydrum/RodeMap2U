@@ -53,6 +53,14 @@ export const EN: Dict = {
     bloomToast: '"{title}" bloomed 🌸',
     bloomMore: 'Another little step?',
     birdAria: 'A little bird keeps you company — just here, with you',
+    todayKicker: 'Today',
+    todayPick: '🌅 Choose my branches for today',
+    todayPickTitle: 'What wants to grow today?',
+    todayPickHint: 'Up to three little branches. Tomorrow they let go on their own — no carryover, no counts.',
+    todayPickSave: 'That feels right',
+    todayEditAria: 'Change my branches for today',
+    reasonToday: 'You chose it for today 🌅',
+    reasonTrigger: '🧶 "{trigger}"',
   },
   checkIn: {
     title: 'Where do you feel you are?',
@@ -155,6 +163,9 @@ export const EN: Dict = {
     notePlaceholder: 'Anything you want to remember…',
     dateLabel: 'Gentle date',
     dateHint: "It's a compass, not a contract. Change it or let it go anytime.",
+    triggerLabel: 'When-then twig',
+    triggerPlaceholder: 'When I pour my morning coffee…',
+    triggerHint: 'Your own "when X happens, I touch this branch" plan. Now will remind you — never with alarms.',
     steps: 'Small steps',
     addStep: 'Add a small step',
     stepPlaceholder: 'One tiny step from here…',
@@ -287,7 +298,7 @@ export const EN: Dict = {
       {
         icon: '🧶',
         title: 'Now — your thread',
-        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
+        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. If you like, choose up to three "branches for today" 🌅 — tomorrow they let go on their own, no carryover, no counts. And if you write a branch its "when-then" 🧶 ("when I pour my coffee…"), Now will remind you in your own words — never with alarms. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
       },
       {
         icon: '🌳',

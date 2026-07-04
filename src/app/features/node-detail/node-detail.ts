@@ -91,6 +91,13 @@ export class NodeDetail {
     await this.nodes.update(this.node(), { targetDate: value || null });
   }
 
+  protected async setTrigger(value: string): Promise<void> {
+    const trigger = value.trim() || null;
+    if (trigger !== (this.node().trigger ?? null)) {
+      await this.nodes.update(this.node(), { trigger });
+    }
+  }
+
   protected async setStatus(status: NodeStatus): Promise<void> {
     if (status !== this.node().status) await this.nodes.setStatus(this.node(), status);
   }

@@ -131,6 +131,14 @@
   .node-name {
     font-weight: 700;
   }
+
+  .node-trigger {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .note {

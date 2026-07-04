@@ -55,6 +55,9 @@
             >
               <span class="tree-name">{{ candidate.treeName }}</span>
               <span class="node-name">{{ candidate.node.title }}</span>
+              @if (candidate.node.trigger) {
+                <span class="node-trigger">🧶 {{ candidate.node.trigger }}</span>
+              }
             </button>
           }
         </div>

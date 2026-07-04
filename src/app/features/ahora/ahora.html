@@ -42,6 +42,30 @@
       <p class="hint">{{ i18n.t().ahora.sessionFollows }}</p>
     </section>
   } @else {
+    <!-- Today's little branches — chosen by you, released by tomorrow -->
+    @if (todayNodes().length) {
+      <div class="today-row">
+        <span class="today-kicker">🌅 {{ i18n.t().ahora.todayKicker }}:</span>
+        @for (node of todayNodes(); track node.id) {
+          <a
+            class="chip today-chip"
+            [routerLink]="['/tree', node.treeId]"
+            [queryParams]="{ node: node.id }"
+          >@if (node.status === 'achieved') {🌸 }{{ node.title }}</a>
+        }
+        <button
+          type="button"
+          class="btn btn-ghost today-edit"
+          (click)="openTodayPicker()"
+          [attr.aria-label]="i18n.t().ahora.todayEditAria"
+        >✎</button>
+      </div>
+    } @else if (suggestion()) {
+      <button type="button" class="btn btn-ghost today-pick" (click)="openTodayPicker()">
+        {{ i18n.t().ahora.todayPick }}
+      </button>
+    }
+
     @if (thread(); as t) {
       <a class="card thread" [routerLink]="['/tree', t.tree.id]" [queryParams]="{ node: t.node.id }">
         <span class="kicker">🧭 {{ i18n.t().ahora.threadKicker }}</span>
@@ -98,4 +122,33 @@
 
 @if (reviewing()) {
   <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+}
+
+@if (pickingToday()) {
+  <div class="sheet-backdrop" (click)="pickingToday.set(false)">
+    <section class="sheet card" appSheet (sheetClose)="pickingToday.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().ahora.todayPickTitle">
+      <h2>{{ i18n.t().ahora.todayPickTitle }}</h2>
+      <p class="pick-hint">{{ i18n.t().ahora.todayPickHint }}</p>
+      <div class="pick-grid" role="group" [attr.aria-label]="i18n.t().ahora.todayPickTitle">
+        @for (choice of todayChoices(); track choice.s.node.id) {
+          <button
+            type="button"
+            class="chip pick-chip"
+            [class.selected]="choice.chosen"
+            [style.border-color]="'var(--accent-' + choice.s.tree.accent + ')'"
+            [title]="choice.s.tree.name"
+            (click)="toggleToday(choice.s.node.id)"
+          >{{ choice.s.node.title }}</button>
+        }
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn-ghost" (click)="pickingToday.set(false)">
+          {{ i18n.t().common.cancel }}
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveToday()">
+          {{ i18n.t().ahora.todayPickSave }}
+        </button>
+      </div>
+    </section>
+  </div>
 }
