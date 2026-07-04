@@ -82,9 +82,13 @@ export const DEMO_NODES: TreeNode[] = [
   node('demo-h-sleep', 'demo-health', 'demo-h-root', 'Dormir antes de las 12', 'resting', 20),
   node('demo-h-water', 'demo-health', 'demo-h-walk', 'Llevar botella de agua', 'achieved', 10),
 
-  // Work tree — young
+  // Work tree — young, with one branch asleep long enough to appear
+  // in the trail's "Ramas dormidas" section (dormant = 30+ quiet days).
   node('demo-w-root', 'demo-work', null, 'Lanzar mi proyecto', 'seed', 10),
-  node('demo-w-idea', 'demo-work', 'demo-w-root', 'Aterrizar la idea en una página', 'growing', 10),
+  node('demo-w-idea', 'demo-work', 'demo-w-root', 'Aterrizar la idea en una página', 'growing', 10, {
+    createdAt: now - 45 * day,
+    updatedAt: now - 45 * day,
+  }),
 
   // Single-branch baby tree (sapling rendering check)
   node('demo-s-root', 'demo-seedling', null, 'Explorar esta idea', 'seed', 10),
