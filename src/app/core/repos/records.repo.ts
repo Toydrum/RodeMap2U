@@ -66,6 +66,15 @@ export abstract class RecordsRepo<T extends SyncBase> {
     await this.save({ ...record, deletedAt: Date.now() });
   }
 
+  /** Undo of a user "let go" — lifts the tombstone with a fresh stamp.
+   *  Re-reads the live record so the restore's rev moves PAST the tombstone
+   *  write (never re-save a captured pre-action record: stale rev loses LWW). */
+  async revive(record: T): Promise<void> {
+    const current = this.records().get(record.id) ?? record;
+    if (current.deletedAt === null) return;
+    await this.save({ ...current, deletedAt: null });
+  }
+
   /** Re-read specific ids from disk and apply if newer (cross-tab / future sync). */
   async refreshFromDisk(ids: string[]): Promise<void> {
     for (const id of ids) {

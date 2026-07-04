@@ -149,6 +149,18 @@
   font-size: 1.05rem;
 }
 
+/* One-tap "same as last time" — sits above the true skip. */
+.express {
+  margin-bottom: 0.4rem;
+}
+
+/* A mis-tap is not a commitment. */
+.step-back {
+  align-self: flex-start;
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+}
+
 /* --------------------------------------------- the circle of trees */
 
 .choose-stage {
@@ -162,6 +174,15 @@
   height: calc(var(--ring-r) * 2 + 130px);
   max-width: 100%;
   margin-top: 0.6rem;
+
+  /* Two interleaved petal rings past RING_COMFORT — box grows to the outer
+   * one, and the base radius tightens so the 1.14× outer ring still fits a
+   * 360px phone (outer reach ≈ 1.14·r + half a shrunken mini). */
+  &.crowded {
+    --ring-r: clamp(96px, 30vmin, 190px);
+    width: calc(var(--ring-r) * 2.28 + 120px);
+    height: calc(var(--ring-r) * 2.28 + 120px);
+  }
 }
 
 .ring-center {
@@ -225,8 +246,9 @@
 
   .ring-name {
     font-weight: 800;
-    font-size: 0.82rem;
-    max-width: 108px;
+    /* --ring-count, finally load-bearing: pills tighten as the circle fills. */
+    font-size: clamp(0.6rem, calc(0.94rem - 0.012rem * var(--ring-count, 6)), 0.82rem);
+    max-width: calc(124px - 3px * var(--ring-count, 6));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -11,6 +11,13 @@
           }
         </span>
       </div>
+      <a
+        class="btn btn-ghost tree-focus"
+        [routerLink]="['/timer']"
+        [queryParams]="t.currentNodeId ? { node: t.currentNodeId } : {}"
+        [attr.aria-label]="i18n.t().tree.focusLink"
+        [title]="i18n.t().tree.focusLink"
+      >⏳</a>
       <button
         type="button"
         class="btn btn-ghost tree-archive"
@@ -18,7 +25,7 @@
         [attr.aria-label]="i18n.t().tree.archiveAction"
         [title]="i18n.t().tree.archiveAction"
       >🗃</button>
-      <button type="button" class="btn btn-primary plant" (click)="planting.set({ parent: null })">
+      <button type="button" class="btn btn-primary plant" (click)="openPlanting(null)">
         + {{ i18n.t().tree.plant }}
       </button>
     </header>
@@ -36,13 +43,13 @@
         <app-tree-canvas
           [tree]="t"
           (nodeOpened)="onNodeOpened($event)"
-          (plantRequested)="planting.set({ parent: $event })"
+          (plantRequested)="openPlanting($event)"
         />
       } @else {
         <div class="empty-tree">
           <span aria-hidden="true">🌱</span>
           <p>{{ i18n.t().tree.emptyTree }}</p>
-          <button type="button" class="btn btn-primary" (click)="planting.set({ parent: null })">
+          <button type="button" class="btn btn-primary" (click)="openPlanting(null)">
             {{ i18n.t().tree.plant }}
           </button>
         </div>
@@ -57,6 +64,7 @@
           <div class="field">
             <label for="root-title">{{ i18n.t().node.titleLabel }}</label>
             <input
+              #plantInput
               id="root-title"
               type="text"
               [value]="newTitle()"
@@ -66,9 +74,12 @@
               autofocus
             >
           </div>
+          @if (plantedCount()) {
+            <p class="planted-flash">🌱 {{ i18n.plural(plantedCount(), i18n.t().tree.plantedCount) }}</p>
+          }
           <div class="row">
             <button type="button" class="btn btn-ghost" (click)="planting.set(null)">
-              {{ i18n.t().common.cancel }}
+              {{ plantedCount() ? i18n.t().common.done : i18n.t().common.cancel }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="!newTitle().trim()">
               {{ i18n.t().tree.plant }}

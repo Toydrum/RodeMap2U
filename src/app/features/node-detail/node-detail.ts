@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -6,6 +6,7 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
+import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 
@@ -27,12 +28,15 @@ export class NodeDetail {
   protected readonly trees = inject(TreesRepo);
   protected readonly sessions = inject(SessionsRepo);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly branching = signal(false);
   protected readonly stepTitle = signal('');
+  private readonly stepInput = viewChild<ElementRef<HTMLInputElement>>('stepInput');
   /** Archiving takes the whole subtree with it — always ask first. */
   protected readonly confirmingArchive = signal(false);
+  protected readonly confirmingRevert = signal(false);
 
   /** Every branch that would rest along with this one (self excluded). */
   protected readonly descendantCount = computed(() => {
@@ -53,6 +57,24 @@ export class NodeDetail {
   });
   protected readonly focusMinutes = computed(() => this.sessions.totalMinutesFor(this.node().id));
   protected readonly isCurrent = computed(() => this.tree().currentNodeId === this.node().id);
+
+  /** Branch-born children still blank soil — revert stays honest. Once any
+   *  alternative is touched, the transformation took root and this hides. */
+  protected readonly revertable = computed(() => {
+    const node = this.node();
+    if (node.status !== 'branched') return false;
+    return this.nodes
+      .childrenOf(node)
+      .filter((c) => c.origin === 'branch')
+      .every(
+        (c) =>
+          c.status === 'seed' &&
+          !c.note.trim() &&
+          c.targetDate === null &&
+          this.nodes.childrenOf(c).length === 0 &&
+          !this.sessions.all().some((s) => s.nodeId === c.id),
+      );
+  });
 
   protected async setTitle(title: string): Promise<void> {
     const trimmed = title.trim();
@@ -78,6 +100,8 @@ export class NodeDetail {
     if (!title) return;
     await this.nodes.plant(this.node().treeId, this.node().id, { title });
     this.stepTitle.set('');
+    // Clicking the + button steals focus — hand it back for the next step.
+    this.stepInput()?.nativeElement.focus();
   }
 
   protected async setHere(): Promise<void> {
@@ -89,9 +113,29 @@ export class NodeDetail {
   }
 
   protected async archive(): Promise<void> {
-    await this.nodes.archiveSubtree(this.node());
+    const node = this.node();
+    const archived = await this.nodes.archiveSubtree(node);
     this.confirmingArchive.set(false);
+    this.toast.show(
+      {
+        message: this.i18n.fill(this.i18n.t().node.archivedToast, { title: node.title }),
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.nodes.unarchiveMany(archived),
+      },
+      UNDO_MS,
+    );
     this.closed.emit();
+  }
+
+  /** Undo of an unrooted branching — the only way out of 'branched'. */
+  protected async revertBranch(): Promise<void> {
+    const node = this.node();
+    const removed = await this.nodes.revertBranch(node);
+    if (removed.some((c) => c.id === this.tree().currentNodeId)) {
+      await this.trees.setCurrentNode(this.tree(), node.id);
+    }
+    this.confirmingRevert.set(false);
+    this.toast.show({ message: this.i18n.t().node.revertedToast });
   }
 
   protected plantedOn(): string {

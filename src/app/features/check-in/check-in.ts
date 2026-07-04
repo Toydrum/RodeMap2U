@@ -19,6 +19,9 @@ const FEELINGS: { key: Feeling; emoji: string }[] = [
 
 type Step = 'feeling' | 'where' | 'note' | 'review' | 'choose';
 
+/** Past this many trees the circle interleaves two radii and shrinks. */
+const RING_COMFORT = 9;
+
 /**
  * The opening ritual: "¿Dónde sientes que estás?"
  * Two gentle questions and an optional note — skippable at every step,
@@ -35,9 +38,12 @@ export class CheckInPage {
   protected readonly i18n = inject(I18nService);
   protected readonly nodes = inject(NodesRepo);
   protected readonly trees = inject(TreesRepo);
-  private readonly checkins = inject(CheckinsRepo);
+  protected readonly checkins = inject(CheckinsRepo);
   private readonly settings = inject(SettingsService);
   private readonly router = inject(Router);
+
+  /** Express path taken — after a pending review, go straight to the meadow. */
+  private readonly expressExit = signal(false);
 
   protected readonly feelings = FEELINGS;
   protected readonly step = signal<Step>('feeling');
@@ -91,6 +97,33 @@ export class CheckInPage {
     this.step.set('note');
   }
 
+  /** A mis-tap is not a commitment — steps walk back, choices stay. */
+  protected stepBack(): void {
+    const s = this.step();
+    if (s === 'note') this.step.set(this.candidates().length ? 'where' : 'feeling');
+    else if (s === 'where') this.step.set('feeling');
+  }
+
+  protected feelingEmoji(feeling: Feeling): string {
+    return FEELINGS.find((f) => f.key === feeling)?.emoji ?? '';
+  }
+
+  /** One tap: same weather as last time, no note, no place. Pending
+   *  date-reviews still get their word — then straight to the meadow. */
+  protected async expressCheckIn(): Promise<void> {
+    const last = this.checkins.latest();
+    if (!last) return;
+    this.feeling.set(last.feeling);
+    await this.checkins.record(last.feeling, { note: '' });
+    await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
+    if (this.pendingReviews().length) {
+      this.expressExit.set(true);
+      this.step.set('review');
+    } else {
+      void this.router.navigate(['/forest']);
+    }
+  }
+
   protected async finish(): Promise<void> {
     const feeling = this.feeling();
     if (feeling) {
@@ -122,6 +155,10 @@ export class CheckInPage {
    * and lands with the planting sheet already open.
    */
   protected leave(): void {
+    if (this.expressExit()) {
+      void this.router.navigate(['/forest']);
+      return;
+    }
     const where = this.whereNode();
     if (where) {
       void this.router.navigate(['/tree', where.treeId]);
@@ -132,11 +169,25 @@ export class CheckInPage {
     }
   }
 
-  /** Circular placement for the choose ritual. */
+  protected readonly ringCrowded = computed(() => this.trees.active().length > RING_COMFORT);
+
+  /** Circular placement for the choose ritual. Past RING_COMFORT trees the
+   *  circle becomes two interleaved petal rings (outer/inner) and the
+   *  miniatures shrink — deterministic, viewport-safe up to ~20 trees. */
   protected ringTransform(index: number): string {
     const count = this.trees.active().length;
     const angle = (360 / Math.max(count, 1)) * index - 90;
-    return `rotate(${angle}deg) translateX(var(--ring-r)) rotate(${-angle}deg)`;
+    if (count <= RING_COMFORT) {
+      return `rotate(${angle}deg) translateX(var(--ring-r)) rotate(${-angle}deg)`;
+    }
+    const radius = index % 2 === 0 ? 1.14 : 0.78;
+    const scale = Math.max(0.6, Math.round((RING_COMFORT / count) * 100) / 100);
+    return `rotate(${angle}deg) translateX(calc(var(--ring-r) * ${radius})) rotate(${-angle}deg) scale(${scale})`;
+  }
+
+  /** Entrance cascade, capped so a big forest doesn't feel like waiting. */
+  protected enterDelay(index: number): string {
+    return Math.min(index, 12) * 70 + 'ms';
   }
 
   protected enterTree(tree: Tree): void {

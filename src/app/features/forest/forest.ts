@@ -4,7 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
-import { ToastService } from '../../shared/ui/toast.service';
+import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
 import { MiniTree } from './mini-tree';
@@ -219,16 +219,10 @@ export class ForestPage {
   private pendingDrag: { tree: Tree; x: number; y: number; timer: ReturnType<typeof setTimeout> | null } | null = null;
   private suppressClick = false;
 
-  protected startMove(ev: PointerEvent, tree: Tree): void {
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.beginDrag(tree);
-  }
-
   protected plotDown(ev: PointerEvent, tree: Tree): void {
     this.suppressClick = false;
     this.dragMoved = false;
-    if ((ev.target as Element).closest('.plot-move, .plot-archive')) return;
+    if ((ev.target as Element).closest('.plot-archive')) return;
     const pending = { tree, x: ev.clientX, y: ev.clientY, timer: null as ReturnType<typeof setTimeout> | null };
     // Holding also lifts the tree (mouse a bit sooner than a finger) —
     // matching the natural "press and hold to grab it" instinct.
@@ -354,9 +348,14 @@ export class ForestPage {
     if (!tree) return;
     await this.trees.archive(tree);
     this.archiving.set(null);
-    this.toast.show({
-      message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
-    });
+    this.toast.show(
+      {
+        message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.trees.restore(tree),
+      },
+      UNDO_MS,
+    );
   }
 
   protected async create(): Promise<void> {

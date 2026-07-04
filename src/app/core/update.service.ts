@@ -21,6 +21,7 @@ export class UpdateService {
         this.toast.show({
           message: `${this.i18n.t().update.ready} · ${this.i18n.t().update.action}`,
           actionLabel: this.i18n.t().update.reload,
+          sticky: true,
           // Even if activation fails (degraded SW), a full reload fetches fresh.
           action: () =>
             void this.swUpdate

@@ -93,7 +93,8 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     return this.save({ ...node, ...patch });
   }
 
-  async archiveSubtree(node: TreeNode): Promise<void> {
+  /** Returns the archived records so callers can offer an undo. */
+  async archiveSubtree(node: TreeNode): Promise<TreeNode[]> {
     const now = Date.now();
     const toArchive: TreeNode[] = [];
     const walk = (current: TreeNode) => {
@@ -102,6 +103,19 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     };
     walk(node);
     await this.saveMany(toArchive);
+    return toArchive;
+  }
+
+  /** Inverse of archiveSubtree — one atomic write. Re-reads live records and
+   *  re-stamps so the restore's rev moves PAST the archive write (cross-tab
+   *  LWW accepts it); already-restored records are skipped (double-tap safe). */
+  async unarchiveMany(records: TreeNode[]): Promise<void> {
+    const now = Date.now();
+    const fresh = records
+      .map((r) => this.byId().get(r.id) ?? r)
+      .filter((r) => r.archivedAt !== null)
+      .map((r) => stamp({ ...r, archivedAt: null }, now));
+    if (fresh.length) await this.saveMany(fresh);
   }
 
   /** Permanent removal (sync tombstones) for a whole tree's nodes — atomic. */
@@ -136,6 +150,32 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       archivedAt: null,
     }));
     await this.saveMany([branchedParent, ...children]);
+    return children;
+  }
+
+  /**
+   * The only exit from 'branched' — undo of a branching, atomic. The parent
+   * leaves the knot and its origin:'branch' children leave with it as sync
+   * tombstones (archived nodes are invisible in every UI; a tombstone is the
+   * honest shape, still travels in backups). Default landing is 'growing' +
+   * dateless: a preserved past targetDate must NOT re-arm date-review
+   * (mirrors date-review's keepGoing). Returns the removed children so the
+   * caller can repair the tree's currentNodeId.
+   */
+  async revertBranch(
+    parent: TreeNode,
+    restoreTo: { status: NodeStatus; targetDate: string | null } = {
+      status: 'growing',
+      targetDate: null,
+    },
+  ): Promise<TreeNode[]> {
+    const now = Date.now();
+    const children = this.childrenOf(parent).filter((c) => c.origin === 'branch');
+    const reverted = stamp(
+      { ...parent, status: restoreTo.status, targetDate: restoreTo.targetDate, branchedAt: null },
+      now,
+    );
+    await this.saveMany([reverted, ...children.map((c) => stamp({ ...c, deletedAt: now }, now))]);
     return children;
   }
 }

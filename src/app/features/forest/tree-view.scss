@@ -45,12 +45,20 @@
     white-space: nowrap;
   }
 
-  .tree-archive {
+  .tree-archive,
+  .tree-focus {
     min-height: 44px;
     min-width: 44px;
     padding: 0.4rem 0.5rem;
     font-size: 1.05rem;
   }
+}
+
+/* Session-scoped celebration while the plant sheet stays open. */
+.planted-flash {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0.1rem 0 0.3rem;
 }
 
 .confirm {

@@ -26,6 +26,11 @@
           }
         </div>
 
+        @if (checkins.latest(); as last) {
+          <button type="button" class="btn btn-soft express" (click)="expressCheckIn()">
+            {{ feelingEmoji(last.feeling) }} {{ i18n.t().checkIn.express }}
+          </button>
+        }
         <button type="button" class="btn btn-ghost skip" (click)="skip()">
           {{ i18n.t().checkIn.skipAll }}
         </button>
@@ -34,6 +39,9 @@
 
     @case ('where') {
       <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="stepBack()">
+          ← {{ i18n.t().common.back }}
+        </button>
         <h1>{{ i18n.t().checkIn.whereTitle }}</h1>
         <p class="sub">{{ i18n.t().checkIn.whereSubtitle }}</p>
 
@@ -59,6 +67,9 @@
 
     @case ('note') {
       <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="stepBack()">
+          ← {{ i18n.t().common.back }}
+        </button>
         <h1>{{ i18n.t().checkIn.noteLabel }}</h1>
         <p class="sub">({{ i18n.t().common.optional }})</p>
 
@@ -90,7 +101,7 @@
         <h1>{{ i18n.t().checkIn.chooseTitle }}</h1>
         <p class="sub">{{ i18n.t().checkIn.chooseSubtitle }}</p>
 
-        <div class="ring" [style.--ring-count]="trees.active().length">
+        <div class="ring" [class.crowded]="ringCrowded()" [style.--ring-count]="trees.active().length">
           <button type="button" class="ring-center" (click)="goForest()">
             <img src="icons/logo.svg" alt="" width="46" height="46">
             <span>{{ i18n.t().checkIn.justForest }}</span>
@@ -101,7 +112,7 @@
               type="button"
               class="ring-tree"
               [style.transform]="ringTransform(i)"
-              [style.--enter-delay]="(i * 70) + 'ms'"
+              [style.--enter-delay]="enterDelay(i)"
               (click)="enterTree(tree)"
             >
               <app-mini-tree [tree]="tree" />

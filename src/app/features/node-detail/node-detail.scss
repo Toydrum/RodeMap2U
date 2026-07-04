@@ -56,6 +56,14 @@
   margin: -0.4rem 0 0.9rem;
 }
 
+/* Quiet way back from an unrooted branching. */
+.revert-branch {
+  display: inline-flex;
+  margin: -0.5rem 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
 .status-row {
   display: flex;
   flex-wrap: wrap;

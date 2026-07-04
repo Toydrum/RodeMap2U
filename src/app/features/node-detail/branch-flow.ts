@@ -3,7 +3,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { TreeNode } from '../../core/db/schema';
-import { ToastService } from '../../shared/ui/toast.service';
+import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 /**
@@ -77,13 +77,39 @@ export class BranchFlow {
       .map((title) => ({ title }));
     if (!drafts.length) return;
 
-    const children = await this.nodes.branch(this.node(), drafts);
+    // Held for the undo window: the exact pre-branch record and pin.
+    const before = this.node();
+    const tree = this.trees.byId().get(before.treeId);
+    const prevCurrent = tree?.currentNodeId ?? null;
+
+    const children = await this.nodes.branch(before, drafts);
 
     // "You are here" moves to the first new path.
-    const tree = this.trees.byId().get(this.node().treeId);
     if (tree && children.length) await this.trees.setCurrentNode(tree, children[0].id);
 
-    this.toast.show({ message: this.i18n.t().branchFlow.celebrate });
+    this.toast.show(
+      {
+        message: this.i18n.t().branchFlow.celebrate,
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.undoBranch(before, prevCurrent),
+      },
+      UNDO_MS,
+    );
     this.closed.emit();
+  }
+
+  /** Seconds-old undo restores the EXACT prior record — including a passed
+   *  targetDate, whose review conversation honestly re-offers itself. */
+  private async undoBranch(before: TreeNode, prevCurrent: string | null): Promise<void> {
+    const parent = this.nodes.byId().get(before.id);
+    if (!parent || parent.status !== 'branched') return;
+    const removed = await this.nodes.revertBranch(parent, {
+      status: before.status,
+      targetDate: before.targetDate,
+    });
+    const tree = this.trees.byId().get(parent.treeId);
+    if (tree && removed.some((c) => c.id === tree.currentNodeId)) {
+      await this.trees.setCurrentNode(tree, prevCurrent);
+    }
   }
 }

@@ -1,9 +1,9 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { ToastService } from '../../shared/ui/toast.service';
+import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
@@ -58,6 +58,9 @@ export class TreeViewPage {
   protected readonly reviewing = signal(false);
   protected readonly archiving = signal(false);
   protected readonly newTitle = signal('');
+  /** Little branches planted since this sheet opened — a celebration, not a counter. */
+  protected readonly plantedCount = signal(0);
+  private readonly plantInput = viewChild<ElementRef<HTMLInputElement>>('plantInput');
   private readonly toast = inject(ToastService);
 
   /** Dates on THIS tree wanting a word. */
@@ -89,6 +92,13 @@ export class TreeViewPage {
     return this.i18n.t().node.newTitle;
   }
 
+  protected openPlanting(parent: TreeNode | null): void {
+    this.plantedCount.set(0);
+    this.newTitle.set('');
+    this.planting.set({ parent });
+  }
+
+  /** The sheet stays open: name, Enter, name, Enter — the tree grows behind it. */
   protected async plant(): Promise<void> {
     const tree = this.tree();
     const target = this.planting();
@@ -97,7 +107,8 @@ export class TreeViewPage {
     const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, { title });
     if (!tree.currentNodeId) await this.trees.setCurrentNode(tree, node.id);
     this.newTitle.set('');
-    this.planting.set(null);
+    this.plantedCount.update((c) => c + 1);
+    this.plantInput()?.nativeElement.focus();
   }
 
   protected notFoundGoHome(): void {
@@ -110,9 +121,14 @@ export class TreeViewPage {
     if (!tree) return;
     await this.trees.archive(tree);
     this.archiving.set(false);
-    this.toast.show({
-      message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
-    });
+    this.toast.show(
+      {
+        message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.trees.restore(tree),
+      },
+      UNDO_MS,
+    );
     void this.router.navigate(['/forest']);
   }
 }

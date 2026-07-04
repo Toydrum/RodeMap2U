@@ -57,6 +57,8 @@ export class TreesRepo extends RecordsRepo<Tree> {
   }
 
   async restore(tree: Tree): Promise<void> {
-    await this.save({ ...tree, archivedAt: null });
+    const current = this.byId().get(tree.id) ?? tree;
+    if (!current.archivedAt) return;
+    await this.save({ ...current, archivedAt: null });
   }
 }

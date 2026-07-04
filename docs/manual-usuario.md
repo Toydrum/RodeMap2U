@@ -62,11 +62,13 @@ El check-in tiene tres pasos, y **todos se pueden saltar** sin consecuencia algu
 
 Si ese día no quieres responder nada, toca **"Hoy no quiero responder"** — la app te lleva a tu bosque sin más.
 
+Para el día a día hay un **atajo exprés**: si ya hiciste check-in antes, en el primer paso aparece **"Me siento igual que la última vez"** (con tu último clima). Un toque registra tu check-in de hoy y te lleva directo al bosque — el ritual completo sigue ahí para cuando quieras recorrerlo. Y si tocas algo por error, cada paso tiene su **"← Volver"**: regresar no borra lo que ya habías elegido.
+
 Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles se reúnen en un círculo a tu alrededor — *"Tu bosque te rodea"* — y eliges a cuál entrar hoy (o **"Solo mirar el bosque"**, que también es una forma de estar). Y si tu bosque todavía está vacío, el botón se transforma: dice **"Plantar mi primer árbol"** y te deja en el prado con la palita lista.
 
 ¿Y si más tarde quieres que la app te pregunte de nuevo? En tu bosque vive una **rosa de los vientos** con la invitación **"Buscarme en este bosque encantado"**. Tócala y el ritual vuelve a empezar, con la misma calma de siempre.
 
-Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica. Y si alguna huella ya no quieres cargarla, cada tarjeta tiene una **✕** para dejarla ir, con una pequeña confirmación — sin dramas.
+Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica. Y si alguna huella ya no quieres cargarla, cada tarjeta tiene una **✕** para dejarla ir, con una pequeña confirmación — sin dramas (y si te arrepientes al instante, el avisito ofrece **"Deshacer"** unos segundos). Ahí mismo, cuando alguna aplica, asoma la sección **"Ramas dormidas"**: ramitas sin fecha que llevan una temporada quietecitas, por si un día quieres despertarlas. Solo aparece si vas a buscarla — dormir también es crecer.
 
 > 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
 
@@ -88,7 +90,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 - Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
 - **Cuando juntas tres árboles o más, aparece un arroyo** cruzando tu pradera.
 - **Cada meta que floreces hace brotar una flor** en el prado. Tu bosque se llena de vida con tu historia.
-- **Acomoda tu bosque a tu gusto**: al pasar el cursor por un árbol aparece el asidero **⠿** (a la izquierda) — arrástralo para mover el árbol a donde quieras en las filas, o con el asidero enfocado usa las **flechas del teclado**. El orden se guarda.
+- **Acomoda tu bosque a tu gusto**: **mantén presionado cualquier árbol** (un momentito) y arrástralo a su nuevo lugar; un toque normal sigue abriéndolo. Con teclado, enfoca el árbol y usa las **flechas**. El orden se guarda.
 - **El cielo siente contigo.** Según tu último check-in: el sol respira y levanta motitas de luz (☀️), la niebla deriva despacio entre tus árboles (🌫), cae una llovizna suave (🌧) o llega la tormenta con lluvia y relámpagos lentos (⛈) — y tus árboles siempre en pie. Todo el movimiento es lento y amable, y se detiene por completo si activas movimiento reducido.
 
 Toca cualquier árbol para entrar a su mapa.
@@ -108,8 +110,7 @@ Al entrar ves tu árbol dibujado como un árbol de verdad: tronco, ramas de made
 | Arrastrar con el dedo (celular) | Moverte por el árbol — y no te preocupes: **el árbol nunca puede perderse de vista** |
 | Arrastrar con el mouse | Solo cuando estás acercado; en la vista normal el árbol se queda quietecito |
 | Botón **"⌖ Centrarme"** | Volver a encuadrar el árbol y tu posición |
-| Un toque sobre una rama | Seleccionarla (aparece el botón **+** para plantar ahí) |
-| Segundo toque sobre la misma rama | Abrir su hoja de detalle |
+| Un toque sobre una rama | Abrir su hoja de detalle (y aparece el botón **+** para plantar ahí) |
 
 **Con teclado:** las flechas te mueven entre ramas (↓ al tronco, ↑ hacia las puntas, ←/→ entre hermanas), `Inicio` te lleva a donde estás, `Enter` abre el detalle y `+` o `p` plantan una rama ahí.
 
@@ -133,13 +134,13 @@ Hay tres formas, todas equivalentes:
 - **"+ Plantar aquí"** (arriba a la derecha): planta una rama nueva desde la raíz del árbol.
 - **Pasitos** (dentro del detalle de una rama): la vía rápida para varios seguidos.
 
-Cada rama nueva crece con una pequeña animación — el árbol está vivo.
+La hoja de plantar **se queda abierta**: nombra, Enter, nombra, Enter — cada ramita crece al fondo mientras sigues, con su contador amable ("🌱 3 ramitas plantadas"). Cierras con **"Listo"** (o Escape, o tocando fuera) cuando termines. Cada rama nueva crece con una pequeña animación — el árbol está vivo.
 
 ---
 
 # 5. La hoja de detalle de una rama
 
-Se abre con un segundo toque sobre la rama. Aquí vive todo lo suyo:
+Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
 - **Título** — qué quieres que crezca ahí.
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
@@ -149,10 +150,10 @@ Se abre con un segundo toque sobre la rama. Aquí vive todo lo suyo:
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
 - **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
 - **⏳ Sesión de enfoque aquí** — abre el temporizador vinculado a esta rama.
-- **🗃 Guardar en el archivo** — ahora te pregunta antes (y te dice cuántas ramitas se lleva consigo). Nada se borra jamás.
+- **🗃 Guardar en el archivo** — te pregunta antes (y te dice cuántas ramitas se lleva consigo), y el avisito ofrece **"Deshacer"** unos segundos por si cambias de opinión. Nada se borra jamás.
+- **↩ La rama vuelve a crecer** — solo aparece en ramas **ramificadas** cuyos brotes siguen recién sembrados (sin notas, sin pasitos, sin minutos): recoge esos caminitos y la rama sigue creciendo como iba, sin fecha y a su ritmo. En cuanto trabajas en alguna alternativa, la transformación echó raíz y esta opción se despide.
 
-> 💡 Ergonomía nueva: **un solo toque abre cualquier rama** (antes eran dos), la tecla **Escape cierra cualquier hoja o diálogo**, y tocar fuera también. Al cerrar, el foco vuelve a donde estabas.
-- **🗃 Guardar en el archivo** — la rama (y sus hijas) se guardan fuera de la vista. *Nada se borra.*
+> 💡 Ergonomía: **un solo toque abre cualquier rama**, la tecla **Escape cierra cualquier hoja o diálogo**, y tocar fuera también. Al cerrar, el foco vuelve a donde estabas.
 
 ---
 
@@ -187,12 +188,13 @@ Tocas una idea y se escribe sola (editable); puedes abrir hasta tres caminos —
 - Tu meta original se convierte en un **nudo dorado** del árbol: no se borra, no se tacha. Queda como el lugar donde tu ruta se abrió.
 - Los caminos nuevos brotan de ese nudo como ramitas doradas.
 - Tu "estás aquí" se muda al primer camino nuevo.
+- El avisito de celebración ofrece **"Deshacer"** unos segundos — si fue un toque en falso, todo vuelve exactamente a como estaba. Y mientras los brotes sigan sin tocar, la hoja de esa rama guarda el camino de vuelta: **"La rama vuelve a crecer"** (ver sección 5).
 
 ---
 
 # 7. Sesiones de enfoque
 
-En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*):
+En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*, o con el **⏳** en la cabecera del árbol — llega con tu rama 📍 ya elegida):
 
 1. **Elige en qué enfocarte** — arriba aparecen tus ramas vivas como fichitas (la 📍 de "estás aquí" primero), o **"Solo estar"** si hoy no quieres atarlo a nada.
 2. Elige una duración: 10, 25, 45 minutos, u otra.
@@ -231,6 +233,8 @@ En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba enc
 ## Archivo
 
 Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en la cabecera de cada árbol). **"Devolver al bosque"** los restaura completos. **"Borrar para siempre"** es la única acción irreversible de la app: pide confirmación y descarga un respaldo automático antes de ejecutarse.
+
+> 💡 Además, **cada aviso de archivo ofrece "Deshacer" durante unos segundos** — para los arrepentimientos instantáneos ni siquiera necesitas venir aquí.
 
 ---
 

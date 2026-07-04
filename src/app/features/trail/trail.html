@@ -98,4 +98,30 @@
       <p class="part-empty">{{ i18n.t().trail.wordsEmpty }}</p>
     }
   </section>
+
+  <!-- Only appears when someone is actually sleeping — absence is silence. -->
+  @if (dormant().length) {
+    <section class="part">
+      <h2 class="part-title"><span aria-hidden="true">🌙</span> {{ i18n.t().trail.dormantSection }}</h2>
+      <p class="part-hint">{{ i18n.t().trail.dormantHint }}</p>
+      <ol class="steps">
+        @for (entry of dormant(); track entry.node.id) {
+          <li class="card footprint word-card">
+            <button type="button" class="word-open" (click)="openBranch(entry)">
+              <span class="mark" aria-hidden="true">🌙</span>
+              <div class="body">
+                <div class="meta">
+                  <strong>{{ entry.node.title }}</strong>
+                </div>
+                <div class="place">
+                  {{ entry.treeName }} · {{ i18n.fill(i18n.t().trail.dormantSince, { date: entry.since }) }}
+                </div>
+              </div>
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </section>
+  }
 </div>
