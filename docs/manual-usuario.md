@@ -248,6 +248,14 @@ En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba enc
 
 - **Duración predeterminada** del temporizador.
 
+## Susurros del bosque 🌬
+
+Si los enciendes, de vez en cuando la app te hace una **pregunta suave**: *"¿Dónde sientes que estás ahorita?"*, *"¿En qué anda tu cabeza?"*, *"¿Cómo está tu clima interno?"*. Tocarla te lleva al check-in — contestas cómo te sientes y, si quieres, te dejas una notita. **Jamás te dicen que trabajes**: son compañía que pregunta, no capataz que ordena.
+
+- **Apagados de fábrica** — tú decides si existen, y su ritmo: seguido (~2 h), de vez en cuando (~4 h) o una vez al día.
+- **Silenciosos siempre** (sin sonido ni vibración), solo en horas despiertas (9–21), nunca durante una sesión (ya estás acompañado) y nunca si acabas de hacer check-in.
+- Si estás dentro de la app aparecen como avisito suave; si la app está de fondo, como notificación. **Viven mientras la app esté abierta** (aunque sea en otra pestaña) — con la app totalmente cerrada, el bosque duerme.
+
 ## Tus datos
 
 - **Exportar mi copia**: descarga un archivo con todo tu bosque (árboles, ramas, check-ins, sesiones y ajustes). Hazlo seguido — es tu respaldo.

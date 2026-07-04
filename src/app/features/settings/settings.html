@@ -100,6 +100,44 @@
     </div>
   </section>
 
+  <!-- Whispers -->
+  <section class="card block">
+    <h2>{{ i18n.t().whispers.settingsTitle }}</h2>
+    <p class="hint">{{ i18n.t().whispers.settingsHint }}</p>
+    <div class="row">
+      <label class="label" for="whispers-toggle">{{ i18n.t().whispers.settingsTitle }}</label>
+      <button
+        id="whispers-toggle"
+        type="button"
+        class="switch"
+        role="switch"
+        [attr.aria-checked]="settings.settings().whispersEnabled"
+        (click)="toggleWhispers()"
+      >
+        <span class="knob" [class.on]="settings.settings().whispersEnabled"></span>
+      </button>
+    </div>
+    @if (settings.settings().whispersEnabled) {
+      <div class="row">
+        <span class="label">{{ i18n.t().whispers.rhythmLabel }}</span>
+        <div class="opts">
+          <button type="button" class="chip opt" [class.selected]="settings.settings().whisperRhythm === 'often'" (click)="setWhisperRhythm('often')">
+            {{ i18n.t().whispers.rhythmOften }}
+          </button>
+          <button type="button" class="chip opt" [class.selected]="settings.settings().whisperRhythm === 'sometimes'" (click)="setWhisperRhythm('sometimes')">
+            {{ i18n.t().whispers.rhythmSometimes }}
+          </button>
+          <button type="button" class="chip opt" [class.selected]="settings.settings().whisperRhythm === 'daily'" (click)="setWhisperRhythm('daily')">
+            {{ i18n.t().whispers.rhythmDaily }}
+          </button>
+        </div>
+      </div>
+      @if (whispersDenied()) {
+        <p class="hint">{{ i18n.t().whispers.deniedHint }}</p>
+      }
+    }
+  </section>
+
   <!-- Data -->
   <section class="card block">
     <h2>{{ i18n.t().settings.data }}</h2>

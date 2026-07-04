@@ -20,7 +20,9 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
-    provideServiceWorker('ngsw-worker.js', {
+    // sw.js wraps ngsw-worker.js (importScripts) and adds whisper-tap
+    // handling. MUST stay relative — the app lives under /RodeMap2U/.
+    provideServiceWorker('sw.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),

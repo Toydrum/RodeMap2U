@@ -116,6 +116,11 @@ export interface Settings {
   /** Up to 3 branches chosen for today. Expires silently when the date
    *  moves on — no carryover, no history, no done/undone counts. */
   todayIntentions: { date: string; nodeIds: string[] } | null;
+  /** Gentle whispers: orientation questions ("¿dónde sientes que estás?"),
+   *  opt-in, never about work, never counted. */
+  whispersEnabled: boolean;
+  whisperRhythm: 'often' | 'sometimes' | 'daily';
+  lastWhisperAt: number | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -129,6 +134,9 @@ export const DEFAULT_SETTINGS: Settings = {
   lastCheckInAt: null,
   onboarded: false,
   todayIntentions: null,
+  whispersEnabled: false,
+  whisperRhythm: 'sometimes',
+  lastWhisperAt: null,
 };
 
 /** Versioned backup file format. */

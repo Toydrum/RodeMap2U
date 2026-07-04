@@ -8,6 +8,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { BackupService } from '../../core/repos/backup.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { SwUpdate } from '@angular/service-worker';
+import { AccompanimentService } from '../../core/accompaniment.service';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 import { APP_VERSION } from '../../core/version';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -65,6 +66,25 @@ export class SettingsPage {
   /** Tree pending permanent deletion (confirm sheet open). */
   protected readonly deleting = signal<Tree | null>(null);
   private readonly nodes = inject(NodesRepo);
+  private readonly accompaniment = inject(AccompanimentService);
+
+  /** True when the browser refused notifications — whispers stay in-app. */
+  protected readonly whispersDenied = signal(
+    'Notification' in window && Notification.permission === 'denied',
+  );
+
+  protected async toggleWhispers(): Promise<void> {
+    if (this.settings.settings().whispersEnabled) {
+      await this.accompaniment.disable();
+    } else {
+      await this.accompaniment.enable();
+      this.whispersDenied.set('Notification' in window && Notification.permission === 'denied');
+    }
+  }
+
+  protected setWhisperRhythm(rhythm: 'often' | 'sometimes' | 'daily'): void {
+    void this.settings.patch({ whisperRhythm: rhythm });
+  }
 
   protected setTheme(theme: ThemeName): void {
     void this.theme.setTheme(theme);
