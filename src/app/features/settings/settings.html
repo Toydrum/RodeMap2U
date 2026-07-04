@@ -130,6 +130,9 @@
           <button type="button" class="chip opt" [class.selected]="settings.settings().whisperRhythm === 'daily'" (click)="setWhisperRhythm('daily')">
             {{ i18n.t().whispers.rhythmDaily }}
           </button>
+          <button type="button" class="chip opt" [class.selected]="settings.settings().whisperRhythm === 'surprise'" (click)="setWhisperRhythm('surprise')">
+            {{ i18n.t().whispers.rhythmSurprise }}
+          </button>
         </div>
       </div>
       @if (whispersDenied()) {

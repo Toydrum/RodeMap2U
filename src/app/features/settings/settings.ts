@@ -82,7 +82,7 @@ export class SettingsPage {
     }
   }
 
-  protected setWhisperRhythm(rhythm: 'often' | 'sometimes' | 'daily'): void {
+  protected setWhisperRhythm(rhythm: 'often' | 'sometimes' | 'daily' | 'surprise'): void {
     void this.settings.patch({ whisperRhythm: rhythm });
   }
 

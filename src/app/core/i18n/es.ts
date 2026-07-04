@@ -78,7 +78,10 @@ export const ES = {
     rhythmOften: 'Seguido (~2 h)',
     rhythmSometimes: 'De vez en cuando (~4 h)',
     rhythmDaily: 'Una vez al día',
+    rhythmSurprise: '🍃 Cuando el bosque quiera',
     deniedHint: 'Tu navegador no dio permiso de notificaciones — los susurros vivirán solo dentro de la app.',
+    tinyOffer: 'Si traes tantita pila: «{title}» — chiquito a propósito 🍃',
+    tinyAction: '2 minutitos',
   },
   checkIn: {
     title: '¿Dónde sientes que estás?',

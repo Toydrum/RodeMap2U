@@ -252,9 +252,10 @@ En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba enc
 
 Si los enciendes, de vez en cuando la app te hace una **pregunta suave**: *"¿Dónde sientes que estás ahorita?"*, *"¿En qué anda tu cabeza?"*, *"¿Cómo está tu clima interno?"*. Tocarla te lleva al check-in — contestas cómo te sientes y, si quieres, te dejas una notita. **Jamás te dicen que trabajes**: son compañía que pregunta, no capataz que ordena.
 
-- **Apagados de fábrica** — tú decides si existen, y su ritmo: seguido (~2 h), de vez en cuando (~4 h) o una vez al día.
+- **Apagados de fábrica** — tú decides si existen, y su ritmo: seguido (~2 h), de vez en cuando (~4 h), una vez al día, o **🍃 "Cuando el bosque quiera"** — momentos impredecibles (entre hora y media y seis horas), para que la sorpresa mantenga viva la pregunta.
 - **Silenciosos siempre** (sin sonido ni vibración), solo en horas despiertas (9–21), nunca durante una sesión (ya estás acompañado) y nunca si acabas de hacer check-in.
 - Si estás dentro de la app aparecen como avisito suave; si la app está de fondo, como notificación. **Viven mientras la app esté abierta** (aunque sea en otra pestaña) — con la app totalmente cerrada, el bosque duerme.
+- **El segundo tiempo** 🍃: un ratito después de la pregunta — la contestes o la dejes ir — llega UNA sola oferta chiquita: *"Si traes tantita pila: «sacar la guitarra del estuche» — chiquito a propósito"*, con su botón de **2 minutitos** que arranca ahí mismo. Es un pasito de poca energía elegido a propósito (el más hoja de tus ramas vivas). Una vez, descartable, y jamás se repite ni aparece si ya estás en sesión.
 
 ## Tus datos
 

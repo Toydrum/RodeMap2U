@@ -117,9 +117,10 @@ export interface Settings {
    *  moves on — no carryover, no history, no done/undone counts. */
   todayIntentions: { date: string; nodeIds: string[] } | null;
   /** Gentle whispers: orientation questions ("¿dónde sientes que estás?"),
-   *  opt-in, never about work, never counted. */
+   *  opt-in, never about work, never counted. 'surprise' = the forest picks
+   *  an unpredictable moment (deterministic pseudo-random, 1.5–6 h). */
   whispersEnabled: boolean;
-  whisperRhythm: 'often' | 'sometimes' | 'daily';
+  whisperRhythm: 'often' | 'sometimes' | 'daily' | 'surprise';
   lastWhisperAt: number | null;
 }
 

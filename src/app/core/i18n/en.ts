@@ -76,7 +76,10 @@ export const EN: Dict = {
     rhythmOften: 'Often (~2 h)',
     rhythmSometimes: 'Every so often (~4 h)',
     rhythmDaily: 'Once a day',
+    rhythmSurprise: '🍃 Whenever the forest feels like it',
     deniedHint: 'Your browser did not grant notification permission — whispers will live inside the app only.',
+    tinyOffer: 'If you have a little spark: "{title}" — tiny on purpose 🍃',
+    tinyAction: '2 little minutes',
   },
   checkIn: {
     title: 'Where do you feel you are?',
