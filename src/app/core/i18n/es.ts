@@ -137,6 +137,7 @@ export const ES = {
     newTree: 'Plantar un árbol',
     branches: { one: '{count} rama', many: '{count} ramas' },
     treeNamePlaceholder: 'Nombre del árbol (p. ej. "Aprender guitarra")',
+    firstSproutHint: 'Nacerá con su primera ramita del mismo nombre — renómbrala cuando quieras.',
     accentLabel: 'Color',
     checkinCta: 'Buscarme en este bosque encantado',
     plotAria: 'Árbol «{name}» — ábrelo con Enter; acomódalo con las flechas',
@@ -334,7 +335,7 @@ export const ES = {
       {
         icon: '🌱',
         title: 'Plantar',
-        body: 'Toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque.',
+        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque.',
       },
       {
         icon: '🗓',

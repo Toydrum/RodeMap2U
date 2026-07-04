@@ -135,6 +135,7 @@ export const EN: Dict = {
     newTree: 'Plant a tree',
     branches: { one: '{count} branch', many: '{count} branches' },
     treeNamePlaceholder: 'Tree name (e.g. "Learn guitar")',
+    firstSproutHint: 'It will be born with its first little branch of the same name — rename it anytime.',
     accentLabel: 'Color',
     checkinCta: 'Find myself in this enchanted forest',
     plotAria: 'Tree "{name}" — open with Enter; arrange with the arrow keys',
@@ -332,7 +333,7 @@ export const EN: Dict = {
       {
         icon: '🌱',
         title: 'Planting',
-        body: 'Tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap.',
+        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap.',
       },
       {
         icon: '🗓',

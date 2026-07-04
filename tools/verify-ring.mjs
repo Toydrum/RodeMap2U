@@ -4,11 +4,12 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const context = await browser.newContext({ viewport: { width: 900, height: 800 } });
 const page = await context.newPage();
 
-// Fresh store: the gate diverts the first forest visit — skip the ritual once.
+// Fresh store: skip the ritual once (lands on /ahora), then head to the forest.
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
 await page.locator('.skip').click();
-await page.waitForURL('**/forest**');
+await page.waitForURL('**/ahora**');
+await page.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
 for (let i = 1; i <= 12; i++) {
   const opener = i === 1 ? 'Plantar mi primer árbol' : 'Plantar un árbol';
@@ -23,6 +24,11 @@ async function measureRing(p, vw, vh, label) {
   await p.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
   await p.locator('.feeling').first().click();
   await p.waitForTimeout(200);
+  // Trees are born with a root branch now — the "where" step appears.
+  if (await p.locator('.where-grid').count()) {
+    await p.locator('button', { hasText: 'Solo quiero mirar' }).click();
+    await p.waitForTimeout(200);
+  }
   await p.locator('button', { hasText: 'Aquí estoy' }).click();
   await p.waitForSelector('.ring-tree');
   await p.waitForTimeout(1400); // let the entrance cascade finish

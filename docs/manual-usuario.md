@@ -102,7 +102,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 
 1. Toca **"+ Plantar un árbol"** (arriba a la derecha).
 2. Escríbele un nombre y elige su color.
-3. Guarda. Tu árbol aparece plantado en la pradera.
+3. Guarda. Tu árbol aparece plantado en la pradera — **y nace ya con su primera ramita del mismo nombre**: una sola pregunta y ya hay algo vivo que tocar (aparece de inmediato en las sugerencias de Ahora). Si quieres que esa raíz se llame distinto, la renombras cuando quieras en su hoja.
 
 ## Leer tu bosque de un vistazo
 

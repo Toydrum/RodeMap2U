@@ -358,10 +358,14 @@ export class ForestPage {
     );
   }
 
+  /** A tree is born WITH its first little branch (same name — rename any
+   *  time): one naming, never an empty tree, instantly actionable in Ahora. */
   protected async create(): Promise<void> {
     const name = this.newName().trim();
     if (!name) return;
-    await this.trees.create(name, this.newAccent());
+    const tree = await this.trees.create(name, this.newAccent());
+    const root = await this.nodes.plant(tree.id, null, { title: name });
+    await this.trees.setCurrentNode(tree, root.id);
     this.newName.set('');
     this.creating.set(false);
   }
