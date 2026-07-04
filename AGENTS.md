@@ -16,8 +16,11 @@ A local-first Angular PWA for **neurodivergent users** where goals grow as a tre
 6. **Everything bilingual.** All copy lives in `core/i18n/es.ts` (source of truth) and `en.ts` (`const EN: Dict` — the compiler enforces parity). Never hardcode user-facing strings in templates; never index dictionaries with dynamic string keys (kills the type guarantee). **Counts pluralize via `i18n.plural(count, dict.section.key)`** where the key is a `{ one, many }` sentence pair — whole-sentence pairs, never word-splicing, so Spanish gender/order works.
 7. **Privacy: local-first, zero backend.** No accounts, no cloud, no analytics, no notifications. Do not add network calls.
 8. **Every modal sheet uses `shared/ui/sheet.directive.ts` (`appSheet`)** — it provides Escape-to-close (topmost of the stack only), initial focus (`[autofocus]` else host), a minimal Tab trap, and focus restoration to the opener. New sheets MUST wire `appSheet (sheetClose)="…same close expr…"` plus the usual backdrop click-close.
-9. **The check-in gate diverts once per app-open** (`SessionGate` in `app.routes.ts`): the first forest visit may redirect to the ritual (cooldown respected); later tab taps never do. The wind rose is the manual re-entry — don't reintroduce per-navigation gating. The ritual has an express chip ("same as last time", records a real check-in, still surfaces pending date-reviews) and per-step back buttons; the choose ring interleaves two radii past 9 trees (deterministic formula in `check-in.ts`; `--ring-count` feeds pill sizing).
+9. **The check-in gate diverts once per app-open** (`SessionGate` in `app.routes.ts`) and it guards **`/ahora`** (home), not the forest: the first Ahora visit may redirect to the ritual (cooldown respected); later tab taps never do, and the forest NEVER diverts. Express/skip/express-review exits land on `/ahora`; explicit destinations keep their word ("Solo mirar el bosque" → forest, whereNode → its tree). The wind rose is the manual re-entry — don't reintroduce per-navigation gating. The ritual has an express chip ("same as last time", records a real check-in, still surfaces pending date-reviews) and per-step back buttons; the choose ring interleaves two radii past 9 trees (deterministic formula in `check-in.ts`; `--ring-count` feeds pill sizing).
 10. **Focus sessions live in `core/focus-session.service.ts`**, not in the timer page: cross-route, adopts the open IndexedDB session row on reload, one-time 🌸 cue at planned time (toast + tab-title suffix), never auto-ends, never alarms. The timer page is a thin view over it.
+11. **Ahora is home + the ONE-suggestion doctrine.** `''` and `**` redirect to `/ahora` — the companion surface: the thread ("Ibas aquí", reconstruction done FOR the user) + exactly ONE suggested pasito, never a list. The suggestion is always explainable (kind → reason line), always overridable ("Otra idea" walks a deterministic day-stable cycle — `hash(today())` permutation, offset 0 always the ranked best), pool capped at 12, and NEVER suggests `resting` (paused on purpose), `achieved`, `branched`, or anything in archived trees. It never schedules the user's day and never counts refusals. The ranker is PURE (`features/ahora/suggest.ts`) — keep it free of Angular.
+12. **In-app accompaniment doctrine.** Accompaniment exists at exactly three moments: **returning** (the thread card), **during** (the companion bird + the warm-ring bridge), and **right after** (momentum toasts at session-finish "Un pasito más" and step-bloom "¿Otro pasito?"). Notifications remain banned (rule 7). Momentum offers ride the single toast slot: dismissible, auto-expiring, never stacked, never re-pushed.
+13. **Companion bird constraints** (`features/timer/companion-bird.ts`): CSS-only animation with deterministic phase (`hash(sessionId)`), slow non-harmonic cycles (4s/6s/47s), poses are class swaps, ONE gentle hop max at overtime, fully static-but-present under `.reduce-motion`, renders ONLY while a session runs (no idle surveillance), never displays numbers or judgments, no sounds ever. The approach bridge (last 2 planned minutes) warms the ring toward gold — never red — and turns the bird; visual only.
 
 ## Stack & architecture
 
@@ -33,12 +36,14 @@ src/app/
     theme/    theme.service.ts (data-theme attr; ?theme= session override)
     motion.service.ts · time.ts (date-only helpers) · boot.service.ts (init + demo seed) · update.service.ts (SW toast)
   features/
+    ahora/      ahora.ts (HOME: thread card + ONE suggested pasito + session companion card) · suggest.ts (PURE ranker + thread resolver)
     check-in/   check-in.ts (ritual: weather → where → note → [date-review] → CIRCLE of trees) · date-review.ts
     forest/     forest.ts (meadow scene) · mini-tree.ts (real data miniatures) · tree-view.ts · tree-canvas.ts
                 tree-layout.ts (PURE: layout, ribbons, hash) · scene-backdrop.ts (sky/mountains/mood weather)
                 flora.ts (accent→flower species) · flower.ts (g[appFlower] SVG component)
     node-detail/ node-detail.ts (sheet) · branch-flow.ts (transformation + suggestion chips)
-    timer/ · settings/ · guide/ (in-app manual) · trail/ ("Tus huellas": check-ins + branch notes, deep-links via /tree/:id?node=)
+    timer/      timer.ts (thin view over FocusSessionService) · companion-bird.ts (single-player body double)
+    settings/ · guide/ (in-app manual) · trail/ ("Tus huellas": check-ins + branch notes + sleeping branches, deep-links via /tree/:id?node=)
   shared/ui/  toast.service.ts
 ```
 

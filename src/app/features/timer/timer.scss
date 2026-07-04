@@ -64,12 +64,26 @@
     stroke-width: 12;
     stroke-linecap: round;
     stroke-dasharray: 1;
-    transition: stroke-dashoffset 0.5s linear;
+    transition: stroke-dashoffset 0.5s linear, stroke 2s ease;
 
     &.breathing {
       animation: breathe 4s ease-in-out infinite;
     }
+
+    /* The goodbye light: last two planned minutes warm toward gold — never red. */
+    &.approaching {
+      stroke: color-mix(in srgb, var(--status-branched) 45%, var(--primary));
+    }
   }
+}
+
+/* The little companion, perched on the ring's crown. */
+.perch {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 @keyframes breathe {

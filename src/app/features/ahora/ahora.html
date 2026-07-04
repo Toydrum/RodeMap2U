@@ -1,0 +1,101 @@
+<div class="container page">
+  <h1>{{ i18n.t().ahora.title }}</h1>
+  <p class="sub">{{ i18n.t().ahora.subtitle }}</p>
+
+  @if (pendingReviews().length && !reviewing()) {
+    <button type="button" class="review-banner" (click)="reviewing.set(true)">
+      🍂 {{ i18n.t().tree.dateReviewBanner }} — <strong>{{ i18n.t().tree.reviewNow }}</strong>
+    </button>
+  }
+
+  @if (focus.active(); as session) {
+    <!-- The session lives here too — the bird keeps you company. -->
+    <section class="card session-card">
+      <a class="session-face" routerLink="/timer" [attr.aria-label]="i18n.t().timer.title">
+        <app-companion-bird class="perch" [state]="birdState()" [seed]="session.sessionId" />
+        <svg class="ring-lite" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="27" class="track" />
+          <circle
+            cx="32" cy="32" r="27"
+            class="fill"
+            pathLength="1"
+            [class.approaching]="birdState() === 'approaching'"
+            [style.stroke-dashoffset]="1 - focus.progress()"
+          />
+        </svg>
+        <span class="words">
+          <strong class="clock" role="timer">{{ focus.display() }}</strong>
+          <span class="of">/ {{ session.plannedMinutes }} {{ i18n.t().settings.minutes }}</span>
+          <span class="what">
+            @if (sessionNode(); as n) { 🌿 {{ n.title }} } @else { {{ i18n.t().timer.noNode }} }
+          </span>
+        </span>
+      </a>
+      <div class="session-actions">
+        <button type="button" class="btn btn-soft" (click)="pauseResume()">
+          @if (focus.paused()) { ▶ {{ i18n.t().timer.resume }} } @else { ⏸ {{ i18n.t().timer.pause }} }
+        </button>
+        <button type="button" class="btn btn-primary" (click)="finishSession()">
+          🌱 {{ i18n.t().timer.finish }}
+        </button>
+      </div>
+      <p class="hint">{{ i18n.t().ahora.sessionFollows }}</p>
+    </section>
+  } @else {
+    @if (thread(); as t) {
+      <a class="card thread" [routerLink]="['/tree', t.tree.id]" [queryParams]="{ node: t.node.id }">
+        <span class="kicker">🧭 {{ i18n.t().ahora.threadKicker }}</span>
+        <div class="thread-body">
+          <app-mini-tree [tree]="t.tree" />
+          <div class="thread-words">
+            <span class="tree-name" [style.color]="'var(--accent-' + t.tree.accent + ')'">{{ t.tree.name }}</span>
+            <strong class="node-title">{{ t.node.title }}</strong>
+            <span class="when">{{ threadLine(t) }}</span>
+          </div>
+        </div>
+      </a>
+    }
+
+    @if (suggestion(); as s) {
+      <section class="card next">
+        <span class="kicker">{{ i18n.t().ahora.nextKicker }}</span>
+        <h2 class="next-title">{{ s.node.title }}</h2>
+        <p class="reason">{{ reasonText(s) }}</p>
+        <div class="next-actions">
+          <button type="button" class="btn btn-primary" (click)="ramp2()">🌱 {{ i18n.t().ahora.ramp2 }}</button>
+          <button type="button" class="btn btn-soft" (click)="goSession()">⏳ {{ i18n.t().ahora.rampSession }}</button>
+        </div>
+        <div class="next-alt">
+          @if (canCycle()) {
+            <button type="button" class="btn btn-ghost" (click)="otherIdea()">{{ i18n.t().ahora.otherIdea }}</button>
+          }
+          <a class="btn btn-ghost" routerLink="/forest">🌳 {{ i18n.t().ahora.seeForest }}</a>
+        </div>
+      </section>
+    }
+
+    @if (!thread() && !suggestion()) {
+      <section class="card empty">
+        <img src="icons/logo.svg" alt="" width="64" height="64">
+        <h2>{{ i18n.t().ahora.emptyTitle }}</h2>
+        <p>{{ i18n.t().ahora.emptyBody }}</p>
+        @if (trees.active().length) {
+          <a class="btn btn-primary" routerLink="/check-in">🧭 {{ i18n.t().forest.checkinCta }}</a>
+          <a class="btn btn-soft" routerLink="/forest">🌳 {{ i18n.t().ahora.seeForest }}</a>
+        } @else {
+          <a class="btn btn-primary" routerLink="/forest" [queryParams]="{ plant: 1 }">
+            🌱 {{ i18n.t().forest.plantFirst }}
+          </a>
+        }
+      </section>
+    }
+  }
+
+  @if (todayMinutes() > 0) {
+    <p class="today-minutes">{{ i18n.plural(todayMinutes(), i18n.t().ahora.todayMinutes) }}</p>
+  }
+</div>
+
+@if (reviewing()) {
+  <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+}

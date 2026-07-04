@@ -60,9 +60,9 @@ El check-in tiene tres pasos, y **todos se pueden saltar** sin consecuencia algu
 2. **¿En qué rama estás hoy?** La app te muestra tus metas activas como tarjetitas. Tocas donde sientas que estás, y el mapa te llevará ahí. Siempre existe la opción **"Solo quiero mirar"**.
 3. **Una notita (opcional).** Un mensaje corto para tu yo del futuro.
 
-Si ese día no quieres responder nada, toca **"Hoy no quiero responder"** — la app te lleva a tu bosque sin más.
+Si ese día no quieres responder nada, toca **"Hoy no quiero responder"** — la app te deja en **Ahora** sin más preguntas (ver sección 3).
 
-Para el día a día hay un **atajo exprés**: si ya hiciste check-in antes, en el primer paso aparece **"Me siento igual que la última vez"** (con tu último clima). Un toque registra tu check-in de hoy y te lleva directo al bosque — el ritual completo sigue ahí para cuando quieras recorrerlo. Y si tocas algo por error, cada paso tiene su **"← Volver"**: regresar no borra lo que ya habías elegido.
+Para el día a día hay un **atajo exprés**: si ya hiciste check-in antes, en el primer paso aparece **"Me siento igual que la última vez"** (con tu último clima). Un toque registra tu check-in de hoy y te deja en **Ahora**, con tu hilo esperándote — el ritual completo sigue ahí para cuando quieras recorrerlo. Y si tocas algo por error, cada paso tiene su **"← Volver"**: regresar no borra lo que ya habías elegido.
 
 Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles se reúnen en un círculo a tu alrededor — *"Tu bosque te rodea"* — y eliges a cuál entrar hoy (o **"Solo mirar el bosque"**, que también es una forma de estar). Y si tu bosque todavía está vacío, el botón se transforma: dice **"Plantar mi primer árbol"** y te deja en el prado con la palita lista.
 
@@ -70,11 +70,29 @@ Al final, el botón **"Aquí estoy"** hace una pequeña ceremonia: tus árboles 
 
 Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-in, arriba de la pregunta aparecerá — *"Tu yo del pasado te dejó esto"*. Y todas tus huellas (clima, lugar y notita de cada visita) viven en **"Tus huellas"** — la huellita 🐾 junto a la rosa de los vientos en tu bosque (también en Ajustes). Solo para mirar — ahí nada se califica. Y si alguna huella ya no quieres cargarla, cada tarjeta tiene una **✕** para dejarla ir, con una pequeña confirmación — sin dramas (y si te arrepientes al instante, el avisito ofrece **"Deshacer"** unos segundos). Ahí mismo, cuando alguna aplica, asoma la sección **"Ramas dormidas"**: ramitas sin fecha que llevan una temporada quietecitas, por si un día quieres despertarlas. Solo aparece si vas a buscarla — dormir también es crecer.
 
-> 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 6).
+> 🧭 Si alguna de tus fechas amables ya pasó, justo después del check-in la app te lo contará con calma (ver sección 7).
 
 ---
 
-# 3. Tu bosque
+# 3. Ahora — tu hilo
+
+**Ahora es la pantalla donde la app te recibe** — y existe por una razón muy concreta: cuando el día se desvía (y los días se desvían), lo más caro para tu cabeza es reconstruir dónde ibas. Ahora lo reconstruye por ti.
+
+Al abrirla encuentras, en este orden:
+
+- **"Ibas aquí"** — tu hilo: la rama donde estuviste la última vez, con su arbolito y cuándo fue ("Ayer estuviste aquí 22 min 🌱"). Tocarla te lleva directo a esa rama en su árbol.
+- **UNA sugerencia — nunca una lista.** "¿Y si seguimos por aquí?" te ofrece un solo pasito, y siempre te dice **por qué** ("Un pasito chiquito de «Mi primera canción»"). Si ese no te llama, **"Otra idea"** te muestra otro camino con calma — y tu bosque completo sigue a un toque en **"Ver mi bosque"**. La app sugiere; **tú decides siempre**.
+- **Dos puertas para entrar**: **"Tocarla 2 minutitos"** (la puerta más chiquita que existe — empieza ahí mismo, y si te quedas más, mejor) o **"Una sesión"** completa en el temporizador.
+- Si hay **fechas que quieren platicar contigo**, el aviso suave aparece arriba — la misma conversación digna de siempre, jamás un rojo.
+- Y abajo, cuando aplica, una línea de gratitud: *"Hoy estuviste 34 minutitos con tu bosque 🌱"*. No es una meta ni una cuota — es un gracias.
+
+Mientras corre una sesión, Ahora se transforma en su **tarjeta compañera**: el anillo pequeñito avanzando, tu rama, los botones de pausa y terminar, y el pajarito acompañándote (ver sección 8). La sesión te sigue por toda la app — pasea tranquilo.
+
+> 🌙 Qué NO hace Ahora: no te agenda el día, no te muestra listas, no cuenta cuántas veces dices "otra idea", jamás sugiere ramas **Descansando** (esa pausa es tuya y a propósito), y nunca te manda notificaciones. Es un compañero, no un capataz.
+
+---
+
+# 4. Tu bosque
 
 El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un proyecto, un hábito, un sueño ("Aprender guitarra", "Cuidarme", "Mi negocio"…).
 
@@ -97,7 +115,7 @@ Toca cualquier árbol para entrar a su mapa.
 
 ---
 
-# 4. Dentro de un árbol
+# 5. Dentro de un árbol
 
 Al entrar ves tu árbol dibujado como un árbol de verdad: tronco, ramas de madera que se afinan, hojitas, y tus metas viviendo en las puntas.
 
@@ -138,7 +156,7 @@ La hoja de plantar **se queda abierta**: nombra, Enter, nombra, Enter — cada r
 
 ---
 
-# 5. La hoja de detalle de una rama
+# 6. La hoja de detalle de una rama
 
 Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
@@ -157,7 +175,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
 ---
 
-# 6. Cuando una fecha ya pasó
+# 7. Cuando una fecha ya pasó
 
 Esto es el corazón de RodeMap2U. Si le pusiste fecha amable a una rama y ese día llegó y pasó, **no pasa nada malo**. La app te lo cuenta así:
 
@@ -188,28 +206,30 @@ Tocas una idea y se escribe sola (editable); puedes abrir hasta tres caminos —
 - Tu meta original se convierte en un **nudo dorado** del árbol: no se borra, no se tacha. Queda como el lugar donde tu ruta se abrió.
 - Los caminos nuevos brotan de ese nudo como ramitas doradas.
 - Tu "estás aquí" se muda al primer camino nuevo.
-- El avisito de celebración ofrece **"Deshacer"** unos segundos — si fue un toque en falso, todo vuelve exactamente a como estaba. Y mientras los brotes sigan sin tocar, la hoja de esa rama guarda el camino de vuelta: **"La rama vuelve a crecer"** (ver sección 5).
+- El avisito de celebración ofrece **"Deshacer"** unos segundos — si fue un toque en falso, todo vuelve exactamente a como estaba. Y mientras los brotes sigan sin tocar, la hoja de esa rama guarda el camino de vuelta: **"La rama vuelve a crecer"** (ver sección 6).
 
 ---
 
-# 7. Sesiones de enfoque
+# 8. Sesiones de enfoque
 
 En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*, o con el **⏳** en la cabecera del árbol — llega con tu rama 📍 ya elegida):
 
 1. **Elige en qué enfocarte** — arriba aparecen tus ramas vivas como fichitas (la 📍 de "estás aquí" primero), o **"Solo estar"** si hoy no quieres atarlo a nada.
 2. Elige una duración: 10, 25, 45 minutos, u otra.
-3. Toca **"Empezar"**. Un anillo respira suavemente mientras estás en ello.
-4. Puedes **pausar** y **seguir** cuando quieras — y también **salirte a pasear por la app**: la sesión te sigue a donde vayas, no se pierde.
-5. Cuando tu tiempo plantado se cumple, la app te lo susurra una sola vez — *"Tu tiempo floreció 🌸"* — y una florecita aparece en el título de la pestaña. **Nada suena, nada parpadea, nada se corta**: puedes quedarte todo lo que quieras.
-6. Al tocar **"Terminar"**, la app celebra lo que haya sido: *"Estuviste aquí 12 minutos 🌱"*.
+3. Toca **"Empezar"**. Un anillo respira suavemente mientras estás en ello — y **un pajarito se posa en su corona para acompañarte**. No mide nada, no apura nada: respira contigo, parpadea de vez en cuando, y si pausas, él también descansa. Es compañía, como estudiar junto a alguien.
+4. Puedes **pausar** y **seguir** cuando quieras — y también **salirte a pasear por la app**: la sesión te sigue a donde vayas, no se pierde (en Ahora la ves como tarjeta compañera).
+5. Cuando tu tiempo plantado **se acerca** (últimos dos minutos), el anillo entibia su color hacia dorado y el pajarito voltea a verte — un aviso de luz, sin sonidos. Cuando se cumple, la app te lo susurra una sola vez — *"Tu tiempo floreció 🌸"* — y una florecita aparece en el título de la pestaña. **Nada suena, nada parpadea, nada se corta**: puedes quedarte todo lo que quieras.
+6. Al tocar **"Terminar"**, la app celebra lo que haya sido: *"Estuviste aquí 12 minutos 🌱"* — y si traes cuerda, el avisito te ofrece **"Un pasito más"**, que te deja en Ahora con la siguiente sugerencia lista.
 
 No hay fracaso posible: **estar un ratito es suficiente**. Los minutos nunca se juzgan, solo se agradecen. Y si cierras la app con una sesión abierta, al volver **te estará esperando donde la dejaste** 🌿.
+
+> 🌸 También al florecer un pasito (el botoncito 🌸 de la lista) la app celebra y pregunta *"¿Otro pasito?"* — por si quieres sembrar el siguiente ahí mismo, aprovechando el envión.
 
 Las sesiones vinculadas a una rama se van sumando: en su detalle verás sus *"minutos de enfoque aquí"*.
 
 ---
 
-# 8. Ajustes
+# 9. Ajustes
 
 En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba encontrarás dos tarjetas: la **guía de la app** y **"Tus huellas"** 🐾 — el lugar donde se junta todo lo que has escrito: tus check-ins pasados (clima, lugar y notita de cada visita) y las notitas que viven en tus ramas, cada una con un caminito de vuelta a su árbol. (La huellita también vive en tu bosque, junto a la rosa de los vientos.)
 
@@ -238,7 +258,7 @@ Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en 
 
 ---
 
-# 9. Tu privacidad
+# 10. Tu privacidad
 
 - **Todo vive en tu dispositivo.** RodeMap2U no tiene servidor, ni cuentas, ni nube. Nadie —ni siquiera quien hizo la app— puede ver tus metas, tus climas ni tus notas.
 - Por lo mismo, **tus datos no viajan solos entre dispositivos**: si quieres pasar tu bosque del teléfono a la computadora, usa *Exportar* en uno e *Importar* en el otro.
@@ -246,7 +266,7 @@ Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en 
 
 ---
 
-# 10. Preguntas frecuentes
+# 11. Preguntas frecuentes
 
 **¿Qué pasa si no entro en semanas?**
 Nada. La app no cuenta días, no rompe rachas (no existen) y no te reclama. Cuando vuelvas, te preguntará dónde sientes que estás — y partirán de ahí.
@@ -281,6 +301,8 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Ramificar / Brotar** | Transformar una meta en caminos nuevos |
 | **Nudo** | El punto dorado donde una meta se transformó — parte de tu historia |
 | **Check-in** | La pregunta de apertura: *¿Dónde sientes que estás?* |
+| **Ahora / El hilo** | La pantalla que te recibe: dónde ibas + un solo pasito sugerido |
+| **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |
 

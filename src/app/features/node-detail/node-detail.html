@@ -86,7 +86,7 @@
               <span class="mini-note" aria-hidden="true" [title]="i18n.t().node.noteLabel">🍃</span>
             }
             @if (child.status !== 'achieved') {
-              <button type="button" class="btn btn-ghost tiny" (click)="nodes.setStatus(child, 'achieved')" [attr.aria-label]="i18n.t().status.achieved + ': ' + child.title">🌸</button>
+              <button type="button" class="btn btn-ghost tiny" (click)="bloomStep(child)" [attr.aria-label]="i18n.t().status.achieved + ': ' + child.title">🌸</button>
             }
           </li>
         }

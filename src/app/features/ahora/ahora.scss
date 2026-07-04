@@ -1,0 +1,231 @@
+.page {
+  padding-bottom: 1.6rem;
+}
+
+h1 {
+  margin-bottom: 0.1rem;
+}
+
+.sub {
+  color: var(--text-dim);
+  margin: 0 0 1.1rem;
+}
+
+/* Same gentle banner as the tree view — dates that want a word. */
+.review-banner {
+  display: block;
+  width: 100%;
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--status-branched);
+  background: color-mix(in srgb, var(--status-branched) 12%, var(--surface));
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.card {
+  display: block;
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 0.9rem;
+}
+
+.kicker {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  margin-bottom: 0.5rem;
+}
+
+/* ------------------------------------------------ thread: "Ibas aquí" */
+
+.thread {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .thread-body {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  app-mini-tree {
+    width: 76px;
+    flex-shrink: 0;
+  }
+
+  .thread-words {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .tree-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .node-title {
+    font-size: 1.05rem;
+  }
+
+  .when {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+}
+
+/* ------------------------------------------------ ONE next step */
+
+.next {
+  .next-title {
+    margin: 0 0 0.15rem;
+    font-size: 1.25rem;
+  }
+
+  .reason {
+    margin: 0 0 0.9rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .next-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .next-alt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    .btn {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+/* ------------------------------------------------ session companion card */
+
+.session-card {
+  .session-face {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    padding-top: 10px;
+  }
+
+  .perch {
+    position: absolute;
+    top: -6px;
+    left: 34px;
+  }
+
+  .ring-lite {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+
+    .track {
+      fill: none;
+      stroke: var(--border-strong);
+      stroke-width: 5;
+    }
+
+    .fill {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-dasharray: 1;
+      transition: stroke 2s ease;
+
+      /* The goodbye light warms toward gold — never red. */
+      &.approaching {
+        stroke: color-mix(in srgb, var(--status-branched) 45%, var(--primary));
+      }
+    }
+  }
+
+  .words {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    .clock {
+      font-size: 1.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .of {
+      font-size: 0.82rem;
+      color: var(--text-faint);
+    }
+
+    .what {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-top: 0.2rem;
+    }
+  }
+
+  .session-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+
+  .hint {
+    margin: 0.7rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+}
+
+/* ------------------------------------------------ warm empty + footer */
+
+.empty {
+  text-align: center;
+
+  img {
+    margin-bottom: 0.4rem;
+  }
+
+  h2 {
+    margin: 0 0 0.3rem;
+  }
+
+  p {
+    color: var(--text-dim);
+    margin: 0 0 1rem;
+  }
+
+  .btn {
+    margin: 0.2rem 0.25rem;
+  }
+}
+
+.today-minutes {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  margin-top: 1.2rem;
+}

@@ -6,6 +6,15 @@
 
 @if (showTabs()) {
   <nav class="tabbar" [attr.aria-label]="i18n.t().a11y.mainNav">
+    <a routerLink="/ahora" routerLinkActive="active" class="tab">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M15.6 8.4 13.4 13.4 8.4 15.6 10.6 10.6 Z"/>
+        </svg>
+      </span>
+      <span class="label">{{ i18n.t().nav.ahora }}</span>
+    </a>
     <a routerLink="/forest" routerLinkActive="active" class="tab">
       <span class="glyph" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

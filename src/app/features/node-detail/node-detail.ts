@@ -104,6 +104,17 @@ export class NodeDetail {
     this.stepInput()?.nativeElement.focus();
   }
 
+  /** Blooming a pasito is an unambiguous "done!" — celebrate it and offer
+   *  to plant the next tiny step right at the dopamine peak. */
+  protected async bloomStep(child: TreeNode): Promise<void> {
+    await this.nodes.setStatus(child, 'achieved');
+    this.toast.show({
+      message: this.i18n.fill(this.i18n.t().ahora.bloomToast, { title: child.title }),
+      actionLabel: this.i18n.t().ahora.bloomMore,
+      action: () => this.stepInput()?.nativeElement.focus(),
+    });
+  }
+
   protected async setHere(): Promise<void> {
     await this.trees.setCurrentNode(this.tree(), this.node().id);
   }

@@ -11,14 +11,14 @@ await page.locator('.express').click();
 await page.waitForSelector('app-date-review, .review, [class*=review]', { timeout: 4000 }).catch(() => {});
 const sawReview = await page.locator('button', { hasText: 'Sigo aquí, a mi ritmo' }).count();
 await page.locator('button', { hasText: 'Sigo aquí, a mi ritmo' }).click();
-await page.waitForURL('**/forest**', { timeout: 5000 });
-console.log(`A express+review: chip="${chipText}" review-shown=${sawReview === 1} landed=/forest | OK=${sawReview === 1}`);
+await page.waitForURL('**/ahora**', { timeout: 5000 });
+console.log(`A express+review: chip="${chipText}" review-shown=${sawReview === 1} landed=/ahora | OK=${sawReview === 1}`);
 
-// B — express with nothing pending: one tap, straight to the forest
+// B — express with nothing pending: one tap, straight to Ahora (the thread)
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
 await page.locator('.express').click();
-await page.waitForURL('**/forest**', { timeout: 5000 });
-console.log('B express direct: landed=/forest | OK=true');
+await page.waitForURL('**/ahora**', { timeout: 5000 });
+console.log('B express direct: landed=/ahora | OK=true');
 
 // C — gentle back: feeling -> where -> back -> feeling -> where -> note -> back -> where
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });

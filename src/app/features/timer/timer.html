@@ -33,12 +33,16 @@
   }
 
   <div class="ring-wrap">
+    @if (focus.active(); as session) {
+      <app-companion-bird class="perch" [state]="birdState()" [seed]="session.sessionId" />
+    }
     <svg viewBox="0 0 220 220" class="ring" aria-hidden="true">
       <circle cx="110" cy="110" r="96" class="track" />
       <circle
         cx="110" cy="110" r="96"
         class="fill"
         [class.breathing]="focus.active() && !focus.paused()"
+        [class.approaching]="focus.active() && birdState() === 'approaching'"
         pathLength="1"
         [style.stroke-dashoffset]="1 - focus.progress()"
       />

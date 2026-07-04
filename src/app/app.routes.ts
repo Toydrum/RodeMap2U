@@ -11,8 +11,10 @@ export class SessionGate {
   consumed = false;
 }
 
-/** The FIRST forest visit of an app-open may ask for a check-in (respecting
- *  the cooldown). Later tab taps never divert — the rose is the way back in. */
+/** The FIRST Ahora visit of an app-open may ask for a check-in (respecting
+ *  the cooldown). Later tab taps never divert — the rose is the way back in.
+ *  The ritual exits back onto /ahora, which then passes (consumed is set
+ *  BEFORE the redirect, so no loop is possible). */
 const checkInGate: CanActivateFn = () => {
   const gate = inject(SessionGate);
   if (gate.consumed) return true;
@@ -24,15 +26,20 @@ const checkInGate: CanActivateFn = () => {
 };
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'forest' },
+  { path: '', pathMatch: 'full', redirectTo: 'ahora' },
   {
     path: 'check-in',
     loadComponent: () => import('./features/check-in/check-in').then((m) => m.CheckInPage),
     title: 'RodeMap2U',
   },
   {
-    path: 'forest',
+    path: 'ahora',
     canActivate: [checkInGate],
+    loadComponent: () => import('./features/ahora/ahora').then((m) => m.AhoraPage),
+    title: 'RodeMap2U — Ahora',
+  },
+  {
+    path: 'forest',
     loadComponent: () => import('./features/forest/forest').then((m) => m.ForestPage),
     title: 'RodeMap2U — Mi bosque',
   },
@@ -61,5 +68,5 @@ export const routes: Routes = [
     loadComponent: () => import('./features/trail/trail').then((m) => m.TrailPage),
     title: 'RodeMap2U — Huellas',
   },
-  { path: '**', redirectTo: 'forest' },
+  { path: '**', redirectTo: 'ahora' },
 ];

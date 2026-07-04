@@ -1,11 +1,16 @@
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
+import { SessionsRepo } from '../../core/repos/sessions.repo';
+import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { AccentToken, TreeNode } from '../../core/db/schema';
+import { BirdState, CompanionBird, birdStateFrom } from './companion-bird';
+import { suggestNext } from '../ahora/suggest';
 
 const PRESETS = [10, 25, 45];
 
@@ -23,6 +28,7 @@ interface NodeChoice {
  */
 @Component({
   selector: 'app-timer',
+  imports: [CompanionBird],
   templateUrl: './timer.html',
   styleUrl: './timer.scss',
 })
@@ -34,8 +40,11 @@ export class TimerPage {
   protected readonly focus = inject(FocusSessionService);
   protected readonly nodes = inject(NodesRepo);
   protected readonly trees = inject(TreesRepo);
+  private readonly sessions = inject(SessionsRepo);
+  private readonly checkins = inject(CheckinsRepo);
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected readonly presets = PRESETS;
   protected readonly minutes = signal(this.settings.settings().timerDefaultMinutes);
@@ -66,6 +75,10 @@ export class TimerPage {
     return id ? ((this.nodes.byId().get(id) as TreeNode | undefined) ?? null) : null;
   });
 
+  protected readonly birdState = computed<BirdState>(() =>
+    birdStateFrom(this.focus.paused(), this.focus.overtime(), this.focus.plannedMs() - this.focus.elapsedMs()),
+  );
+
   protected start(): Promise<void> {
     return this.focus.start(this.pickedNodeId(), this.minutes());
   }
@@ -80,11 +93,26 @@ export class TimerPage {
 
   protected async finish(): Promise<void> {
     const minutes = await this.focus.finish();
+    // Momentum at the dopamine moment: offer ONE more little step, on Ahora.
+    const next = suggestNext(
+      this.trees.active(),
+      this.nodes.byTree(),
+      (n) => this.nodes.childrenOf(n),
+      this.sessions.all(),
+      this.checkins.all(),
+      this.nodes.byId(),
+    );
     this.toast.show({
       message:
         minutes >= 2
           ? this.i18n.fill(this.i18n.t().timer.wellDone, { minutes })
           : this.i18n.t().timer.wellDoneShort,
+      ...(next
+        ? {
+            actionLabel: this.i18n.t().ahora.momentumAction,
+            action: () => void this.router.navigate(['/ahora']),
+          }
+        : {}),
     });
   }
 

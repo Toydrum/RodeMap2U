@@ -109,7 +109,7 @@ export class CheckInPage {
   }
 
   /** One tap: same weather as last time, no note, no place. Pending
-   *  date-reviews still get their word — then straight to the meadow. */
+   *  date-reviews still get their word — then straight back to Ahora. */
   protected async expressCheckIn(): Promise<void> {
     const last = this.checkins.latest();
     if (!last) return;
@@ -120,7 +120,7 @@ export class CheckInPage {
       this.expressExit.set(true);
       this.step.set('review');
     } else {
-      void this.router.navigate(['/forest']);
+      void this.router.navigate(['/ahora']);
     }
   }
 
@@ -142,10 +142,11 @@ export class CheckInPage {
     }
   }
 
-  /** "Hoy no quiero responder" — always available, never penalized. */
+  /** "Hoy no quiero responder" — always available, never penalized.
+   *  Lands on Ahora: orientation without interrogation. */
   protected async skip(): Promise<void> {
     await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
-    void this.router.navigate(['/forest']);
+    void this.router.navigate(['/ahora']);
   }
 
   /**
@@ -156,7 +157,7 @@ export class CheckInPage {
    */
   protected leave(): void {
     if (this.expressExit()) {
-      void this.router.navigate(['/forest']);
+      void this.router.navigate(['/ahora']);
       return;
     }
     const where = this.whereNode();
