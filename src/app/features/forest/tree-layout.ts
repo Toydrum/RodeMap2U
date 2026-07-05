@@ -16,8 +16,9 @@ export interface LayoutPoint {
   y: number;
   depth: number;
   parent: LayoutPoint | null;
-  /** Row line labels anchor to — differs from -depth·LEVEL_H along step chains. */
-  nominalY?: number;
+  /** The node's visual row line (pre-jitter, lift included) — labels anchor
+   *  here so they ride with their branch instead of drifting to a nominal row. */
+  rowY?: number;
   /** True for links of an ordered-steps chain ('flow: steps' pasitos). */
   chain?: boolean;
   /** The next link up the chain, when this one isn't the last. */
@@ -39,9 +40,12 @@ const JITTER_X = 8;
 const JITTER_Y = 8;
 /** Sibling count at which the two-row "vase" canopy kicks in. */
 const STAGGER_MIN = 4;
-/** Sibling count at which leaf slots tighten. */
-const COMPRESS_MIN = 6;
-const COMPRESS = 0.85;
+/** Leaf slot advance inside a staggered fan — the two rows interleave, so
+ *  same-row neighbors stay ~2 slots apart while the fan stops sprawling. */
+const TIGHT = 0.62;
+/** Extra rise for children that carry their own crown — subtrees grow UP
+ *  instead of pulling the canopy sideways. Propagates to the whole crown. */
+const CROWN_LIFT = 26;
 /** Segment height of an ordered-steps chain — short links, one filling limb. */
 const CHAIN_H = 46;
 
@@ -92,12 +96,29 @@ export function layoutTree(
     parent: LayoutPoint | null,
     sibIndex: number,
     sibCount: number,
-    parentNominalY: number,
+    parentRowY: number,
     chainish: boolean,
   ): { point: LayoutPoint; baseX: number; leaves: number } => {
     const children = kidsOf(node);
-    const nominalY = parent === null ? 0 : parentNominalY - (chainish ? CHAIN_H : LEVEL_H);
-    const point: LayoutPoint = { node, x: 0, y: 0, depth, parent, nominalY };
+    const nominalY = parent === null ? 0 : parentRowY - (chainish ? CHAIN_H : LEVEL_H);
+
+    // Two-row "vase" canopy: big sibling groups alternate between two rows
+    // (S) and sweep their OUTER limbs upward (V); children that carry a crown
+    // rise further (CROWN_LIFT) — the tree grows UP, not just sideways.
+    // Computed BEFORE recursing so the lift carries the whole subtree with it.
+    // Deterministic from (index, count); roots and chain links exempt.
+    let lift = 0;
+    if (parent !== null && !chainish && sibCount >= STAGGER_MIN) {
+      const t = (sibIndex + 0.5) / sibCount;
+      const s = Math.min(30, 16 + sibCount * 1.8);
+      const v = Math.min(14, (sibCount - 3) * 2.5);
+      lift = Math.min(
+        64,
+        s * (sibIndex % 2) + v * Math.pow(Math.abs(2 * t - 1), 1.5) + (children.length ? CROWN_LIFT : 0),
+      );
+    }
+    const rowY = nominalY - lift;
+    const point: LayoutPoint = { node, x: 0, y: 0, depth, parent, rowY };
     if (chainish) {
       point.chain = true;
       const next = chainNext.get(node.id);
@@ -109,10 +130,10 @@ export function layoutTree(
     let leaves: number;
     if (children.length === 0) {
       baseX = cursor;
-      cursor += SLOT_W * (sibCount >= COMPRESS_MIN ? COMPRESS : 1);
+      cursor += SLOT_W * (sibCount >= STAGGER_MIN ? TIGHT : 1);
       leaves = 1;
     } else {
-      // Fan geometry (stagger/compression) counts only the real fan children;
+      // Fan geometry (stagger/tightening) counts only the real fan children;
       // a trailing chain link rides along without weighing on the vase.
       const fan = children.filter((c) => c !== chainNext.get(node.id));
       const placed = children.map((child) => {
@@ -124,7 +145,7 @@ export function layoutTree(
           point,
           fanIdx,
           isLink ? 1 : fan.length,
-          nominalY,
+          rowY,
           isLink || stepsParents.has(node.id),
         );
       });
@@ -142,19 +163,7 @@ export function layoutTree(
 
     const h = hash(node.id);
     point.x = baseX + ((h % (JITTER_X * 2 + 1)) - JITTER_X);
-
-    // Two-row "vase" canopy: big sibling groups alternate between two rows
-    // (S) and sweep their OUTER limbs upward (V) so wide fans stop being a
-    // flat horizontal line. Deterministic from (index, count); roots and
-    // chain links exempt.
-    let lift = 0;
-    if (parent !== null && !chainish && sibCount >= STAGGER_MIN) {
-      const t = (sibIndex + 0.5) / sibCount;
-      const s = Math.min(30, 16 + sibCount * 1.8);
-      const v = Math.min(14, (sibCount - 3) * 2.5);
-      lift = Math.min(42, s * (sibIndex % 2) + v * Math.pow(Math.abs(2 * t - 1), 1.5));
-    }
-    point.y = nominalY - lift + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
+    point.y = rowY + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
 
     points.push(point);
     byId.set(node.id, point);

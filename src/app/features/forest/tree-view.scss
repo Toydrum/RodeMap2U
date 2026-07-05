@@ -211,3 +211,27 @@
   color: var(--text);
   font: inherit;
 }
+
+/* ------------------------- the "tablita": floating branch outline */
+
+.outline-rail {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  width: min(276px, 82vw);
+  z-index: 40;
+  padding: 0.8rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--surface) 93%, transparent);
+  backdrop-filter: blur(2px);
+  animation: rail-in 0.22s ease both;
+}
+
+@keyframes rail-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}

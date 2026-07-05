@@ -182,6 +182,9 @@ export const ES = {
     zoomOut: 'Alejar',
     plant: 'Plantar aquí',
     youAreHere: 'Estás aquí',
+    outlineToggle: 'Lista de ramas',
+    outlineTitle: 'Las ramas de tu árbol',
+    outlineHint: 'Toca una para ubicarla en el mapa; tócala otra vez para abrir su hoja.',
     dateReviewBanner: 'Hay fechas que quieren platicar contigo',
     reviewNow: 'Verlas',
     archiveAction: 'Guardar árbol en el archivo',
@@ -356,7 +359,7 @@ export const ES = {
       {
         icon: '🌿',
         title: 'Las ramas y sus estados',
-        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol: pasa el puntero por ella y una cartita te la muestra ahí mismo. Todas se releen juntas en «Tus huellas», donde también asoman las ramas dormidas — las que llevan una temporada quietecitas, por si un día quieres despertarlas. ¿Y si ramificaste y te arrepientes enseguida? Mientras los brotes sigan recién sembrados, la hoja de esa rama ofrece «La rama vuelve a crecer».',
+        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. En árboles grandes, el botón 📋 abre «la tablita»: la lista de todas tus ramas — un toque ubica la rama en el mapa, dos toques abren su hoja. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol: pasa el puntero por ella y una cartita te la muestra ahí mismo. Todas se releen juntas en «Tus huellas», donde también asoman las ramas dormidas — las que llevan una temporada quietecitas, por si un día quieres despertarlas. ¿Y si ramificaste y te arrepientes enseguida? Mientras los brotes sigan recién sembrados, la hoja de esa rama ofrece «La rama vuelve a crecer».',
       },
       {
         icon: '🌱',

@@ -25,6 +25,14 @@
         [attr.aria-label]="i18n.t().tree.archiveAction"
         [title]="i18n.t().tree.archiveAction"
       >🗃</button>
+      <button
+        type="button"
+        class="btn btn-ghost tree-outline-toggle"
+        (click)="outlineOpen.set(!outlineOpen())"
+        [attr.aria-label]="i18n.t().tree.outlineToggle"
+        [title]="i18n.t().tree.outlineToggle"
+        [attr.aria-expanded]="outlineOpen()"
+      >📋</button>
       <button type="button" class="btn btn-primary plant" (click)="openPlanting(null)">
         + {{ i18n.t().tree.plant }}
       </button>
@@ -55,6 +63,19 @@
         </div>
       }
       <app-weather-front [mood]="mood()" />
+
+      <!-- The "tablita": browse every branch without leaving the map. -->
+      @if (outlineOpen()) {
+        <aside class="outline-rail card">
+          <app-tree-outline
+            [tree]="t"
+            [focusedId]="outlineFocusId()"
+            (locate)="locateNode($event)"
+            (open)="outlineOpenNode($event)"
+            (closed)="outlineOpen.set(false)"
+          />
+        </aside>
+      }
     </div>
 
     @if (planting()) {

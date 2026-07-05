@@ -180,6 +180,9 @@ export const EN: Dict = {
     zoomOut: 'Zoom out',
     plant: 'Plant here',
     youAreHere: 'You are here',
+    outlineToggle: 'Branch list',
+    outlineTitle: "Your tree's branches",
+    outlineHint: 'Tap one to locate it on the map; tap it again to open its sheet.',
     dateReviewBanner: 'Some dates would like a word with you',
     reviewNow: 'See them',
     archiveAction: 'Move tree to the archive',
@@ -354,7 +357,7 @@ export const EN: Dict = {
       {
         icon: '🌿',
         title: 'Branches and their states',
-        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. If a branch keeps one of your little notes, a small paper leaf marks it on the tree: hover over it and a little letter shows it right there. They can all be reread together in "Your footprints", where the sleeping branches also peek out — the ones that have been still for a season, in case you ever want to wake them. Branched and regretted it right away? While the sprouts are still freshly sown, that branch\'s sheet offers "The branch grows on".',
+        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. On big trees, the 📋 button opens "the little table": a list of all your branches — one tap locates a branch on the map, two taps open its sheet. If a branch keeps one of your little notes, a small paper leaf marks it on the tree: hover over it and a little letter shows it right there. They can all be reread together in "Your footprints", where the sleeping branches also peek out — the ones that have been still for a season, in case you ever want to wake them. Branched and regretted it right away? While the sprouts are still freshly sown, that branch\'s sheet offers "The branch grows on".',
       },
       {
         icon: '🌱',

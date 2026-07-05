@@ -125,8 +125,9 @@ export class TreeCanvas {
     this.hideLetter();
   }
 
-  /** Roving tabindex focus (also drives the "+" bud). */
-  protected readonly focusedId = signal<string | null>(null);
+  /** Roving tabindex focus (also drives the "+" bud). Public: the outline
+   *  rail highlights the focused row and calls focusNode() to locate. */
+  readonly focusedId = signal<string | null>(null);
 
   /** Nodes created this session get the grow animation exactly once. */
   private readonly bornThisSession = new Set<string>();
@@ -414,14 +415,17 @@ export class TreeCanvas {
    *  its neighbor — long names stack instead of overlapping. */
   private readonly labelShelf = computed(() => {
     const placed = new Map<string, { shelf: number; text: string }>();
-    const byDepth = new Map<number, LayoutPoint[]>();
+    // Group by VISUAL row band (lift included): staggered rows get their own
+    // shelves instead of fighting nodes that merely share a depth number.
+    const byBand = new Map<number, LayoutPoint[]>();
     for (const p of this.layout().points) {
-      const group = byDepth.get(p.depth) ?? [];
+      const band = Math.round(-(p.rowY ?? -p.depth * LEVEL_H) / 24);
+      const group = byBand.get(band) ?? [];
       group.push(p);
-      byDepth.set(p.depth, group);
+      byBand.set(band, group);
     }
     const GAP = 16;
-    for (const group of byDepth.values()) {
+    for (const group of byBand.values()) {
       // Chain links manage their own (mostly silent) labels — see showLabel.
       const swept = group.filter((p) => !p.chain);
       group.length = 0;
@@ -473,11 +477,11 @@ export class TreeCanvas {
   }
 
   protected labelY(point: LayoutPoint): number {
-    // Anchor labels to the level's NOMINAL line (cancel the node's organic
-    // y-jitter) so shelf rows are exact and can never brush each other.
-    // Chain links carry their own nominal line (short CHAIN_H segments).
-    const nominal = point.nominalY ?? -point.depth * LEVEL_H;
-    const jitter = point.y - nominal;
+    // Anchor labels to the node's VISUAL row (lift included, jitter canceled)
+    // so a name always sits right under its own branch — never drifting to
+    // some nominal depth line far below a lifted crown.
+    const row = point.rowY ?? -point.depth * LEVEL_H;
+    const jitter = point.y - row;
     return 27 + (this.labelShelf().get(point.node.id)?.shelf ?? 0) * 21 - jitter;
   }
 
@@ -742,7 +746,7 @@ export class TreeCanvas {
     }
   }
 
-  protected focusNode(id: string): void {
+  focusNode(id: string): void {
     this.focusedId.set(id);
     const point = this.layout().byId.get(id);
     if (point) this.panIntoView(point);

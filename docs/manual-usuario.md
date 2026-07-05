@@ -128,8 +128,13 @@ Las copas con muchas ramas ahora se acomodan **en dos alturas, como un jarrón**
 | Arrastrar con el dedo (celular) | Moverte por el árbol — y no te preocupes: **el árbol nunca puede perderse de vista** |
 | Arrastrar con el mouse | Cuando estás acercado — o siempre que el árbol no quepa completo en la vista |
 | Botón **"⌖ Centrarme"** | Volver a encuadrar el árbol completo |
+| Botón **📋** (arriba) | Abre **la tablita**: la lista de todas tus ramas |
 | Un toque sobre una rama | Abrir su hoja de detalle (y aparece el botón **+** para plantar ahí) |
 | Plantar una rama nueva | La vista se desliza sola para que el brote nunca nazca fuera de pantalla |
+
+**La tablita 📋** es tu índice del árbol: todas las ramas y sub-ramas en una lista sangrada, con su puntito de estado, tu 📍 y — en los caminos ordenados — su número de paso. **Un toque ubica esa rama en el mapa** (la vista se desliza hasta ella y su nombre se enciende); **tocar la misma fila otra vez abre su hoja**. Es para pasear por árboles grandes sin perderte; mirar nunca abre nada.
+
+Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo ancho — las ramas con hijos **suben con toda su copa** (el árbol crece hacia arriba) y cada título vive pegadito a su propia ramita, nunca flotando en otra altura.
 
 **Con teclado:** las flechas te mueven entre ramas (↓ al tronco, ↑ hacia las puntas, ←/→ entre hermanas), `Inicio` te lleva a donde estás, `Enter` abre el detalle y `+` o `p` plantan una rama ahí.
 
@@ -319,6 +324,7 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Cuando-entonces** 🧶 | Tu plan "cuando pase X, toco esta rama" — la app solo te lo recuerda |
 | **Pasos en orden** | Pasitos numerados (paso 1 → 2 → …); la rama florece como caminito |
 | **Varios a la vez** | Sembrar muchas ramitas de un jalón: una por línea, sangría = hija |
+| **La tablita** 📋 | La lista de ramas del árbol: un toque ubica, dos toques abren |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |

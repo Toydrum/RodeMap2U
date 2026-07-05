@@ -8,6 +8,7 @@ import { FocusSessionService } from '../../core/focus-session.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
+import { TreeOutline } from './tree-outline';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -16,7 +17,7 @@ import { DateReview } from '../check-in/date-review';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective],
+  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
@@ -83,6 +84,24 @@ export class TreeViewPage {
 
   protected onNodeOpened(node: TreeNode): void {
     this.openNode.set(node);
+  }
+
+  /* -------------------------------------------- the "tablita" outline */
+
+  protected readonly outlineOpen = signal(false);
+  private readonly canvas = viewChild(TreeCanvas);
+  protected readonly outlineFocusId = computed(() => this.canvas()?.focusedId() ?? null);
+
+  /** Outline tap: put the branch in view and speak its name — nothing opens. */
+  protected locateNode(node: TreeNode): void {
+    this.canvas()?.focusNode(node.id);
+    if (window.innerWidth < 700) this.outlineOpen.set(false);
+  }
+
+  /** Second tap on the same row: open its sheet. */
+  protected outlineOpenNode(node: TreeNode): void {
+    this.openNode.set(node);
+    if (window.innerWidth < 980) this.outlineOpen.set(false);
   }
 
   /** Keep the sheet showing the live version of the node. */
