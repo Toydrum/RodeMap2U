@@ -85,6 +85,9 @@
         <span class="kicker">{{ i18n.t().ahora.nextKicker }}</span>
         <h2 class="next-title">{{ s.node.title }}</h2>
         <p class="reason">{{ reasonText(s) }}</p>
+        @if (firstThen(s); as ft) {
+          <p class="first-then">{{ ft }}</p>
+        }
         <div class="next-actions">
           <button type="button" class="btn btn-primary" (click)="ramp2()">🌱 {{ i18n.t().ahora.ramp2 }}</button>
           <button type="button" class="btn btn-soft" (click)="goSession()">⏳ {{ i18n.t().ahora.rampSession }}</button>

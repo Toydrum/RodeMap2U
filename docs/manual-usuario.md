@@ -165,6 +165,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 - **🧶 Ramita cuando-entonces** *(opcional)* — tu propio plan "cuando pase X, toco esta rama": *"Cuando me sirva el café de la mañana…"*. La app nunca lo interpreta ni lo agenda — solo te lo vuelve a mostrar en Ahora y en las tarjetitas del check-in, con tus palabras. Escribir el plan una vez es lo que hace la magia.
 - **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.
 - **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
+- **¿Van en orden?** *(opcional)* — si tus pasitos son un camino (paso 1 → paso 2 → …), marca esta casilla y se vuelven una **lista numerada** con flechitas ↑↓ para acomodarlos. En el árbol, esa rama se dibuja como un **caminito que va floreciendo**: lo completado lleva su flor, el paso donde vas es un brote que dice *"siguiente"*, y lo que falta espera como yemas. Al florecer un paso, el avisito ofrece **"¿Siguiente paso?"**; y en **Ahora**, la sugerencia dice *"El siguiente paso de «tu meta»"* con su **primero-y-luego** ("Primero: ensayarla → luego: grabar voz"). Nada te obliga a ir en orden — es tu mapa, no un contrato.
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
 - **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
 - **⏳ Sesión de enfoque aquí** — abre el temporizador vinculado a esta rama.
@@ -313,6 +314,7 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Ahora / El hilo** | La pantalla que te recibe: dónde ibas + un solo pasito sugerido |
 | **Ramas de hoy** 🌅 | Hasta 3 ramas que eliges para el día; mañana se sueltan solas |
 | **Cuando-entonces** 🧶 | Tu plan "cuando pase X, toco esta rama" — la app solo te lo recuerda |
+| **Pasos en orden** | Pasitos numerados (paso 1 → 2 → …); la rama florece como caminito |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |

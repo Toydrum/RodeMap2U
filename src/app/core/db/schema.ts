@@ -4,10 +4,12 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
- *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults).
- *  Old v1 backups import cleanly; v2 backups are refused by v1 apps. */
-export const SCHEMA_VERSION = 2;
+/** v3: additive TreeNode.flow (optional — absent ≡ 'free'; 'steps' marks an
+ *  ordered path of pasitos). Same policy as v2: no migration pass, older
+ *  backups import cleanly, newer backups are refused by older apps.
+ *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
+ *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
+export const SCHEMA_VERSION = 3;
 export const DB_VERSION = 1;
 export const DB_NAME = 'rodemap2u';
 
@@ -72,6 +74,11 @@ export interface TreeNode extends SyncBase {
    *  NEVER parsed or scheduled. Ahora re-presents it; nothing alarms.
    *  Optional: records born before v2 simply lack it (undefined ≡ null). */
   trigger?: string | null;
+  /** How this branch's pasitos grow: 'steps' = an ordered path (paso 1 → 2…)
+   *  drawn as a chain that fills with flowers as stages bloom; 'free' = the
+   *  parallel fan. Optional: records born before v3 lack it (undefined ≡ 'free').
+   *  Never forced — the toggle lives in the node sheet. */
+  flow?: 'free' | 'steps';
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */

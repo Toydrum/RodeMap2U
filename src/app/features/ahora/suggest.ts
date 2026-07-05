@@ -16,6 +16,7 @@ export type SuggestKind =
   | 'today'
   | 'trigger'
   | 'step-of-current'
+  | 'step-in-order'
   | 'current'
   | 'recent'
   | 'fresh-growing'
@@ -147,7 +148,10 @@ export function suggestionPool(
 
   const thread = resolveThread(activeTrees, nodesById, sessions, checkins);
   if (thread) {
-    for (const child of childrenOf(thread.node)) add(child, 'step-of-current', thread.node);
+    // Order-asc children mean the earliest open pasito surfaces first — on a
+    // 'steps' branch that IS "the next step of the path", and says so.
+    const stepKind = thread.node.flow === 'steps' ? 'step-in-order' : 'step-of-current';
+    for (const child of childrenOf(thread.node)) add(child, stepKind, thread.node);
     add(thread.node, 'current');
   }
 

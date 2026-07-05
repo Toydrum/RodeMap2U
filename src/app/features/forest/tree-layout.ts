@@ -16,6 +16,12 @@ export interface LayoutPoint {
   y: number;
   depth: number;
   parent: LayoutPoint | null;
+  /** Row line labels anchor to — differs from -depth·LEVEL_H along step chains. */
+  nominalY?: number;
+  /** True for links of an ordered-steps chain ('flow: steps' pasitos). */
+  chain?: boolean;
+  /** The next link up the chain, when this one isn't the last. */
+  chainNextId?: string;
 }
 
 export interface TreeLayout {
@@ -36,6 +42,8 @@ const STAGGER_MIN = 4;
 /** Sibling count at which leaf slots tighten. */
 const COMPRESS_MIN = 6;
 const COMPRESS = 0.85;
+/** Segment height of an ordered-steps chain — short links, one filling limb. */
+const CHAIN_H = 46;
 
 /** Small deterministic string hash (FNV-1a flavored). */
 export function hash(text: string): number {
@@ -55,15 +63,46 @@ export function layoutTree(
   const byId = new Map<string, LayoutPoint>();
   let cursor = 0;
 
+  // Ordered-steps prepass: a 'steps' parent shows only its FIRST pasito in
+  // the traversal; each step then carries the next one — the siblings render
+  // as one chain of short segments (the path that fills with flowers).
+  const chainNext = new Map<string, TreeNode>();
+  const stepsParents = new Set<string>();
+  const scan = (node: TreeNode) => {
+    const kids = childrenOf(node);
+    if (node.flow === 'steps' && kids.length > 0) {
+      stepsParents.add(node.id);
+      for (let i = 0; i < kids.length - 1; i++) chainNext.set(kids[i].id, kids[i + 1]);
+    }
+    for (const k of kids) scan(k);
+  };
+  for (const root of roots) scan(root);
+
+  /** Traversal children: own subtree (chain-rewritten) + the next chain link. */
+  const kidsOf = (node: TreeNode): TreeNode[] => {
+    const own = childrenOf(node);
+    const shown = stepsParents.has(node.id) ? (own.length ? [own[0]] : []) : own;
+    const next = chainNext.get(node.id);
+    return next ? [...shown, next] : shown;
+  };
+
   const place = (
     node: TreeNode,
     depth: number,
     parent: LayoutPoint | null,
     sibIndex: number,
     sibCount: number,
+    parentNominalY: number,
+    chainish: boolean,
   ): { point: LayoutPoint; baseX: number; leaves: number } => {
-    const children = childrenOf(node);
-    const point: LayoutPoint = { node, x: 0, y: 0, depth, parent };
+    const children = kidsOf(node);
+    const nominalY = parent === null ? 0 : parentNominalY - (chainish ? CHAIN_H : LEVEL_H);
+    const point: LayoutPoint = { node, x: 0, y: 0, depth, parent, nominalY };
+    if (chainish) {
+      point.chain = true;
+      const next = chainNext.get(node.id);
+      if (next) point.chainNextId = next.id;
+    }
 
     // baseX is jitter-free so ancestors center on real mass, not on wobble.
     let baseX: number;
@@ -73,7 +112,22 @@ export function layoutTree(
       cursor += SLOT_W * (sibCount >= COMPRESS_MIN ? COMPRESS : 1);
       leaves = 1;
     } else {
-      const placed = children.map((child, i) => place(child, depth + 1, point, i, children.length));
+      // Fan geometry (stagger/compression) counts only the real fan children;
+      // a trailing chain link rides along without weighing on the vase.
+      const fan = children.filter((c) => c !== chainNext.get(node.id));
+      const placed = children.map((child) => {
+        const isLink = child === chainNext.get(node.id);
+        const fanIdx = isLink ? 0 : fan.indexOf(child);
+        return place(
+          child,
+          isLink ? depth : depth + 1,
+          point,
+          fanIdx,
+          isLink ? 1 : fan.length,
+          nominalY,
+          isLink || stepsParents.has(node.id),
+        );
+      });
       let mass = 0;
       let sum = 0;
       for (const p of placed) {
@@ -91,22 +145,23 @@ export function layoutTree(
 
     // Two-row "vase" canopy: big sibling groups alternate between two rows
     // (S) and sweep their OUTER limbs upward (V) so wide fans stop being a
-    // flat horizontal line. Deterministic from (index, count); roots exempt.
+    // flat horizontal line. Deterministic from (index, count); roots and
+    // chain links exempt.
     let lift = 0;
-    if (parent !== null && sibCount >= STAGGER_MIN) {
+    if (parent !== null && !chainish && sibCount >= STAGGER_MIN) {
       const t = (sibIndex + 0.5) / sibCount;
       const s = Math.min(30, 16 + sibCount * 1.8);
       const v = Math.min(14, (sibCount - 3) * 2.5);
       lift = Math.min(42, s * (sibIndex % 2) + v * Math.pow(Math.abs(2 * t - 1), 1.5));
     }
-    point.y = -depth * LEVEL_H - lift + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
+    point.y = nominalY - lift + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
 
     points.push(point);
     byId.set(node.id, point);
     return { point, baseX, leaves };
   };
 
-  for (let r = 0; r < roots.length; r++) place(roots[r], 0, null, r, roots.length);
+  for (let r = 0; r < roots.length; r++) place(roots[r], 0, null, r, roots.length, 0, false);
 
   if (!points.length) {
     return { points, byId, width: 0, height: 0, minX: 0, minY: 0 };

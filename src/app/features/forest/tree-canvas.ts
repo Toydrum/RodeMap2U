@@ -187,7 +187,8 @@ export class TreeCanvas {
       .map((p) => {
         const wood = this.wood();
         const geometry = edgeGeometry(p.parent!, p, wood.bow);
-        const isLeaf = this.nodes.childrenOf(p.node).length === 0;
+        // A chain link that continues is timber, not a twig tip.
+        const isLeaf = this.nodes.childrenOf(p.node).length === 0 && !p.chainNextId;
         return {
           id: p.node.id,
           d: branchRibbon(p.parent!, p, geometry, isLeaf, wood.girth),
@@ -368,10 +369,32 @@ export class TreeCanvas {
     return Math.max(14, Math.min(20, 16 / this.k()));
   }
 
+  /** The bud floats above the node — except on an ordered-steps branch,
+   *  where straight-up would land exactly on the first chain link (46px). */
+  protected budTransform(point: LayoutPoint): string {
+    const chainParent = point.node.flow === 'steps' && this.nodes.childrenOf(point.node).length > 0;
+    return chainParent ? 'translate(32 -30)' : 'translate(0 -46)';
+  }
+
+  /** Per steps-branch: the earliest still-open step — it speaks its name. */
+  private readonly nextStepIds = computed(() => {
+    const out = new Set<string>();
+    for (const p of this.layout().points) {
+      if (p.node.flow !== 'steps') continue;
+      const next = this.nodes
+        .childrenOf(p.node)
+        .find((c) => c.status === 'seed' || c.status === 'growing');
+      if (next) out.add(next.id);
+    }
+    return out;
+  });
+
   protected showLabel(point: LayoutPoint): boolean {
     // Focused and current places always speak their name.
     if (this.focusedId() === point.node.id) return true;
     if (this.tree().currentNodeId === point.node.id) return true;
+    // Chain links stay quiet except the NEXT step — a path, not label soup.
+    if (point.chain) return this.nextStepIds().has(point.node.id);
     return this.k() >= 0.55;
   }
 
@@ -399,6 +422,10 @@ export class TreeCanvas {
     }
     const GAP = 16;
     for (const group of byDepth.values()) {
+      // Chain links manage their own (mostly silent) labels — see showLabel.
+      const swept = group.filter((p) => !p.chain);
+      group.length = 0;
+      group.push(...swept);
       const sorted = [...group].sort(
         (a, b) => a.x + this.labelX(a) - (b.x + this.labelX(b)),
       );
@@ -448,7 +475,9 @@ export class TreeCanvas {
   protected labelY(point: LayoutPoint): number {
     // Anchor labels to the level's NOMINAL line (cancel the node's organic
     // y-jitter) so shelf rows are exact and can never brush each other.
-    const jitter = point.y - -point.depth * LEVEL_H;
+    // Chain links carry their own nominal line (short CHAIN_H segments).
+    const nominal = point.nominalY ?? -point.depth * LEVEL_H;
+    const jitter = point.y - nominal;
     return 27 + (this.labelShelf().get(point.node.id)?.shelf ?? 0) * 21 - jitter;
   }
 
@@ -680,8 +709,9 @@ export class TreeCanvas {
         move(point.parent);
         break;
       case 'ArrowUp': {
-        const children = this.nodes.childrenOf(point.node);
-        move(children.length ? this.layout().byId.get(children[0].id) : null);
+        // Up a chain link continues the path; otherwise into the first child.
+        const upId = point.chainNextId ?? this.nodes.childrenOf(point.node)[0]?.id;
+        move(upId ? this.layout().byId.get(upId) : null);
         break;
       }
       case 'ArrowLeft':

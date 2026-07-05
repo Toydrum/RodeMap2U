@@ -109,6 +109,28 @@
   margin: 0.4rem 0 0.5rem;
 }
 
+/* "¿Van en orden?" — the pasitos become a numbered path. */
+.flow-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-bottom: 0.3rem;
+
+  input {
+    accent-color: var(--primary);
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}
+
+.flow-hint {
+  margin: 0 0 0.5rem;
+}
+
 .steps {
   list-style: none;
   margin: 0 0 0.6rem;
@@ -120,6 +142,39 @@
     gap: 0.6rem;
     padding: 0.45rem 0.2rem;
     border-bottom: 1px solid var(--border);
+
+    .step-num {
+      color: var(--text-faint);
+      font-weight: 700;
+      font-size: 0.85rem;
+      min-width: 1.2rem;
+      text-align: right;
+    }
+
+    .next-tag {
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .reorder {
+      display: inline-flex;
+
+      .tiny[disabled] {
+        opacity: 0.25;
+      }
+    }
+
+    &.next-step {
+      background: color-mix(in srgb, var(--primary) 6%, transparent);
+      border-radius: 8px;
+    }
+
+    &.glow {
+      background: color-mix(in srgb, var(--status-achieved) 16%, transparent);
+      border-radius: 8px;
+    }
 
     .step-name {
       flex: 1;

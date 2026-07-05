@@ -247,7 +247,7 @@
             class="plant-bud"
             role="button"
             [attr.aria-label]="i18n.t().node.plantChild"
-            transform="translate(0 -46)"
+            [attr.transform]="budTransform(point)"
             (click)="$event.stopPropagation(); plantRequested.emit(point.node)"
             (keydown.enter)="$event.stopPropagation(); plantRequested.emit(point.node)"
             tabindex="-1"

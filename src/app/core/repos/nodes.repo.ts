@@ -92,9 +92,25 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
 
   async update(
     node: TreeNode,
-    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger'>>,
+    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow'>>,
   ): Promise<TreeNode> {
     return this.save({ ...node, ...patch });
+  }
+
+  /** Swap a step with its neighbor — the app's first node reorder. Both
+   *  records re-stamp in one atomic write; a no-op at either end. */
+  async moveStep(node: TreeNode, dir: -1 | 1): Promise<void> {
+    const siblings = node.parentId
+      ? (this.childrenIndex().get(node.parentId) ?? [])
+      : this.rootsOf(node.treeId);
+    const idx = siblings.findIndex((s) => s.id === node.id);
+    const other = siblings[idx + dir];
+    if (idx === -1 || !other) return;
+    const now = Date.now();
+    await this.saveMany([
+      stamp({ ...node, order: other.order }, now),
+      stamp({ ...other, order: node.order }, now),
+    ]);
   }
 
   /** Returns the archived records so callers can offer an undo. */

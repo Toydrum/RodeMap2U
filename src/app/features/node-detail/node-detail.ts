@@ -33,6 +33,8 @@ export class NodeDetail {
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly branching = signal(false);
   protected readonly stepTitle = signal('');
+  /** Briefly spotlights the next step after a bloom ("¿Siguiente paso?"). */
+  protected readonly highlightId = signal<string | null>(null);
   private readonly stepInput = viewChild<ElementRef<HTMLInputElement>>('stepInput');
   /** Archiving takes the whole subtree with it — always ask first. */
   protected readonly confirmingArchive = signal(false);
@@ -51,6 +53,14 @@ export class NodeDetail {
   });
 
   protected readonly children = computed(() => this.nodes.childrenOf(this.node()));
+
+  /** 'steps' = the pasitos are an ordered path (paso 1 → paso 2 → …). */
+  protected readonly flowSteps = computed(() => this.node().flow === 'steps');
+
+  /** The earliest still-open step — "→ siguiente" on the ordered list. */
+  protected readonly nextStepId = computed(
+    () => this.children().find((c) => c.status === 'seed' || c.status === 'growing')?.id ?? null,
+  );
   protected readonly datePassed = computed(() => {
     const date = this.node().targetDate;
     return date !== null && isPast(date) && this.node().status !== 'achieved' && this.node().status !== 'branched';
@@ -111,14 +121,35 @@ export class NodeDetail {
     this.stepInput()?.nativeElement.focus();
   }
 
+  /** The pasitos become (or stop being) an ordered path. Never forced. */
+  protected async toggleFlow(): Promise<void> {
+    await this.nodes.update(this.node(), { flow: this.flowSteps() ? 'free' : 'steps' });
+  }
+
+  protected async moveStep(child: TreeNode, dir: -1 | 1): Promise<void> {
+    await this.nodes.moveStep(child, dir);
+  }
+
   /** Blooming a pasito is an unambiguous "done!" — celebrate it and offer
-   *  to plant the next tiny step right at the dopamine peak. */
+   *  the next move right at the dopamine peak: on an ordered path that is
+   *  the NEXT step; otherwise, planting another tiny one. */
   protected async bloomStep(child: TreeNode): Promise<void> {
     await this.nodes.setStatus(child, 'achieved');
+    const next = this.flowSteps()
+      ? this.children().find((c) => c.status === 'seed' || c.status === 'growing')
+      : null;
     this.toast.show({
       message: this.i18n.fill(this.i18n.t().ahora.bloomToast, { title: child.title }),
-      actionLabel: this.i18n.t().ahora.bloomMore,
-      action: () => this.stepInput()?.nativeElement.focus(),
+      actionLabel: next ? this.i18n.t().node.nextStepAction : this.i18n.t().ahora.bloomMore,
+      action: () => {
+        if (next) {
+          this.highlightId.set(next.id);
+          document.getElementById('step-' + next.id)?.scrollIntoView({ block: 'nearest' });
+          setTimeout(() => this.highlightId.set(null), 2600);
+        } else {
+          this.stepInput()?.nativeElement.focus();
+        }
+      },
     });
   }
 

@@ -142,6 +142,8 @@ export class AhoraPage {
         return this.i18n.fill(t.reasonTrigger, { trigger: s.node.trigger ?? '' });
       case 'step-of-current':
         return this.i18n.fill(t.reasonStepOfCurrent, { title: s.parent?.title ?? '' });
+      case 'step-in-order':
+        return this.i18n.fill(t.reasonStepInOrder, { title: s.parent?.title ?? '' });
       case 'current':
         return t.reasonCurrent;
       case 'recent':
@@ -151,6 +153,20 @@ export class AhoraPage {
       case 'fresh-seed':
         return this.i18n.fill(t.reasonFreshSeed, { tree: s.tree.name });
     }
+  }
+
+  /** First→then in tree language: on an ordered path, say what follows —
+   *  the step after this one, or the branch blooming when it's the last. */
+  protected firstThen(s: Suggestion): string | null {
+    if (s.kind !== 'step-in-order' || !s.parent) return null;
+    const t = this.i18n.t().ahora;
+    const after = this.nodes
+      .childrenOf(s.parent)
+      .find((c) => c.order > s.node.order && (c.status === 'seed' || c.status === 'growing'));
+    return this.i18n.fill(t.firstThen, {
+      step: s.node.title,
+      then: after ? after.title : t.thenBloom,
+    });
   }
 
   /* ------------------------------------------- today's little branches */

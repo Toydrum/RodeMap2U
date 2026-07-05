@@ -90,14 +90,39 @@
 
     <!-- Steps -->
     <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
+    @if (children().length > 1 || flowSteps()) {
+      <label class="flow-toggle">
+        <input type="checkbox" [checked]="flowSteps()" (change)="toggleFlow()">
+        {{ i18n.t().node.flowToggle }}
+      </label>
+      @if (flowSteps()) {
+        <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
+      }
+    }
     @if (children().length) {
-      <ul class="steps">
-        @for (child of children(); track child.id) {
-          <li>
+      <ul class="steps" [class.ordered]="flowSteps()">
+        @for (child of children(); track child.id; let idx = $index; let first = $first; let last = $last) {
+          <li
+            [id]="'step-' + child.id"
+            [class.next-step]="flowSteps() && nextStepId() === child.id"
+            [class.glow]="highlightId() === child.id"
+          >
+            @if (flowSteps()) {
+              <span class="step-num">{{ idx + 1 }}.</span>
+            }
             <span class="status-dot" [class]="'status-dot ' + child.status"></span>
             <span class="step-name" [class.done]="child.status === 'achieved'">{{ child.title }}</span>
+            @if (flowSteps() && nextStepId() === child.id) {
+              <span class="next-tag">→ {{ i18n.t().node.nextStepTag }}</span>
+            }
             @if (child.note.trim()) {
               <span class="mini-note" aria-hidden="true" [title]="i18n.t().node.noteLabel">🍃</span>
+            }
+            @if (flowSteps()) {
+              <span class="reorder">
+                <button type="button" class="btn btn-ghost tiny" [disabled]="first" (click)="moveStep(child, -1)" [attr.aria-label]="i18n.t().node.moveUp + ': ' + child.title">↑</button>
+                <button type="button" class="btn btn-ghost tiny" [disabled]="last" (click)="moveStep(child, 1)" [attr.aria-label]="i18n.t().node.moveDown + ': ' + child.title">↓</button>
+              </span>
             }
             @if (child.status !== 'achieved') {
               <button type="button" class="btn btn-ghost tiny" (click)="bloomStep(child)" [attr.aria-label]="i18n.t().status.achieved + ': ' + child.title">🌸</button>
