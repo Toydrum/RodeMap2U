@@ -89,6 +89,24 @@
   }
 }
 
+/* Foliage pads — soft clustered crown volumes; overlaps deepen like canopy */
+.pad {
+  fill: color-mix(in srgb, var(--status-growing) 74%, var(--surface));
+  opacity: 0.5;
+
+  &.sh1 {
+    fill: color-mix(in srgb, var(--status-growing) 62%, #38562f);
+  }
+
+  &.sh2 {
+    fill: color-mix(in srgb, var(--status-growing) 56%, #b3c178);
+  }
+
+  &.is-new {
+    animation: leaf-pop 0.5s ease-out 0.45s both;
+  }
+}
+
 /* Little leaves along branches — two-tone: body + a sunlit crescent */
 .leaf {
   path {
@@ -131,7 +149,8 @@
 
 /* Reduced motion: growth becomes a soft fade */
 :host-context(.reduce-motion) .branch.is-new,
-:host-context(.reduce-motion) .leaf.is-new {
+:host-context(.reduce-motion) .leaf.is-new,
+:host-context(.reduce-motion) .pad.is-new {
   animation: soft-appear 0.2s ease both;
 }
 

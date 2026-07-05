@@ -336,34 +336,96 @@
 
 /* ------------------------------------------------------------- plots */
 
+/* The clearing: trees stand SCATTERED on the meadow band (absolute anchors
+ * seeded by order-index, wobbled by each tree's own hash) — never stacked
+ * into sky-bound rows. The band shares the grass's bottom anchor. */
 .plots {
   position: relative;
   z-index: 2;
+  height: min(400px, 50vh);
+  margin-bottom: 0.6rem;
+}
+
+:host-context(.reduce-motion) .plot {
+  transition: none;
+}
+
+/* ‹ › — walking between clearings */
+.clearing-nav {
+  position: absolute;
+  bottom: 42%;
+  z-index: 50;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+
+  &.prev {
+    left: -6px;
+  }
+
+  &.next {
+    right: -6px;
+  }
+
+  &:hover:not([disabled]) {
+    border-color: var(--primary);
+  }
+
+  &[disabled] {
+    opacity: 0.25;
+    cursor: default;
+  }
+}
+
+.clearing-dots {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  z-index: 50;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 0 1.3rem;
-  padding-bottom: 1.6rem;
+  gap: 0.55rem;
+
+  .dot {
+    width: 11px;
+    height: 11px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    cursor: pointer;
+
+    &.on {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+  }
 }
 
 /* A lone tree owns the whole meadow — let it stand taller. */
 .plots:has(> .plot:only-child) .plot {
-  width: clamp(190px, 34vw, 260px);
+  width: clamp(190px, 34vw, 250px);
 }
 
 .plot {
-  position: relative;
+  position: absolute;
   display: flex;
-  flex: 0 0 auto; /* never shrink — wrap to the next meadow row instead */
   flex-direction: column;
   align-items: center;
-  width: clamp(150px, 24vw, 204px);
+  width: clamp(140px, 22vw, 184px);
   padding: 0.4rem 0.2rem 0.6rem;
   text-decoration: none;
   color: var(--text);
   border-radius: var(--radius);
-  transition: transform 0.25s ease;
+  transform-origin: 50% 100%;
+  transition: left 0.35s ease, bottom 0.35s ease, transform 0.3s ease;
 
   app-mini-tree {
     position: relative;
@@ -645,4 +707,17 @@
   .starters-blank {
     font-size: 0.85rem;
   }
+}
+
+.sr-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* Full clearings tighten the plots a step so hearts stay tappable. */
+.plots.crowded .plot {
+  width: clamp(128px, 19vw, 168px);
 }

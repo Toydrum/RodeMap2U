@@ -103,6 +103,8 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 ## Leer tu bosque de un vistazo
 
 - **Cada árbol se dibuja con su forma real**: un árbol con muchas ramas y logros se ve frondoso y con flores; uno recién plantado es un brotecito. El crecimiento se *ve*.
+- **Cada color es una especie con su porte**: unos crecen como **roble** redondo y denso, otros como **acacia** de copas planas con aire entre ellas, otros **esbeltos** hacia el cielo. Todos comparten lo esencial de un árbol de verdad: un tronco continuo que serpentea hasta la copa, ramas que se desprenden de él a distintas alturas y **se engrosan según lo que cargan**, y follaje que se junta en las puntas.
+- **Tus árboles brotan repartidos por el prado** — cada uno en su lugarcito, con su propia variación natural, siempre con los pies en el pasto (los de atrás, al otro lado del arroyo, se ven más pequeñitos). Cuando ya no caben en un claro, aparecen las **flechitas ‹ ›** y los puntitos: tu bosque se organiza en **claros** y las flechas te pasean entre ellos. Al plantar un árbol nuevo, el prado te lleva a su claro.
 - Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
 - **Cuando juntas tres árboles o más, aparece un arroyo** cruzando tu pradera.
 - **Cada meta que floreces hace brotar una flor** en el prado. Tu bosque se llena de vida con tu historia.
@@ -132,7 +134,7 @@ Las copas con muchas ramas ahora se acomodan **en dos alturas, como un jarrón**
 | Un toque sobre una rama | Abrir su hoja de detalle (y aparece el botón **+** para plantar ahí) |
 | Plantar una rama nueva | La vista se desliza sola para que el brote nunca nazca fuera de pantalla |
 
-**La tablita 📋** es tu índice del árbol: todas las ramas y sub-ramas en una lista sangrada, con su puntito de estado, tu 📍 y — en los caminos ordenados — su número de paso. **Un toque ubica esa rama en el mapa** (la vista se desliza hasta ella y su nombre se enciende); **tocar la misma fila otra vez abre su hoja**. Es para pasear por árboles grandes sin perderte; mirar nunca abre nada.
+**La tablita 📋** es tu índice del árbol: todas las ramas y sub-ramas en una lista sangrada, con su puntito de estado, tu 📍 y — en los caminos ordenados — su número de paso. **Un toque ubica esa rama en el mapa** (la vista se desliza hasta ella y su nombre se enciende); **tocar la misma fila otra vez abre su hoja**. Es para pasear por árboles grandes sin perderte; mirar nunca abre nada. Las ramas con hijas llevan un **triangulito ▸/▾** para cerrar y abrir sus sub-ramas — y si tu árbol pasa de ~12 ramas, la tablita llega **ya plegada a las ramas principales**, con un numerito `(3)` que te dice cuántas duermen dentro.
 
 Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo ancho — las ramas con hijos **suben con toda su copa** (el árbol crece hacia arriba) y cada título vive pegadito a su propia ramita, nunca flotando en otra altura.
 
@@ -325,6 +327,8 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Pasos en orden** | Pasitos numerados (paso 1 → 2 → …); la rama florece como caminito |
 | **Varios a la vez** | Sembrar muchas ramitas de un jalón: una por línea, sangría = hija |
 | **La tablita** 📋 | La lista de ramas del árbol: un toque ubica, dos toques abren |
+| **Los claros** | Las "páginas" del prado; las flechitas ‹ › pasean entre ellos |
+| **El porte** | La especie de tu árbol según su color: roble, acacia o esbelto |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |

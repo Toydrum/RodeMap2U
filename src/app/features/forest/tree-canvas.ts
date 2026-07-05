@@ -14,6 +14,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import {
+  EdgeGeometry,
   LEVEL_H,
   LayoutPoint,
   branchRibbon,
@@ -21,10 +22,12 @@ import {
   edgePointAt,
   hash,
   layoutTree,
+  ribbonWidthAt,
   taperedRibbon,
-  widthAtDepth,
+  widthForMass,
 } from './tree-layout';
 import { FlowerSpec, flowerFor } from './flora';
+import { TreeForm, formFor } from './tree-forms';
 import { FlowerGlyph } from './flower';
 
 interface LeafDecoration {
@@ -39,16 +42,37 @@ interface LeafDecoration {
   shade: number;
 }
 
+interface PadDecoration {
+  x: number;
+  y: number;
+  rx: number;
+  ry: number;
+  rot: number;
+  shade: number;
+}
+
 interface EdgeView {
   id: string;
   d: string;
   fill: string;
   isNew: boolean;
   leaves: LeafDecoration[];
+  /** Foliage pads clustering at the tip — the crown's soft volume. */
+  pads: PadDecoration[];
   /** Bark grain: the limb's center line, stroked dashed and faint. */
   grain: string;
   grainWidth: number;
   grainOffset: number;
+}
+
+/** How one limb is drawn: where it starts (the parent point, or an anchor
+ *  along the leader limb for side forks), its curve, and its wood widths. */
+interface LimbPlan {
+  start: { x: number; y: number };
+  geom: EdgeGeometry;
+  w0: number;
+  w1: number;
+  isLeaf: boolean;
 }
 
 /**
@@ -142,6 +166,9 @@ export class TreeCanvas {
   /** This tree's flower species (shape + colors from its accent). */
   protected readonly species = computed<FlowerSpec>(() => flowerFor(this.tree().accent));
 
+  /** This tree's silhouette personality — "cada árbol su porte". */
+  protected readonly form = computed<TreeForm>(() => formFor(this.tree().accent));
+
   protected readonly roots = computed(() => this.layout().points.filter((p) => p.parent === null));
 
   /** Ground line sits a bit under the deepest root. */
@@ -182,22 +209,99 @@ export class TreeCanvas {
     return { grass, flowers };
   });
 
+  /** The silhouette brain: how every limb is drawn. Per parent, the child
+   *  carrying the most leaf-mass is the LEADER — its edge continues the
+   *  trunk line (calm bow, opposite hand, full width); the other children
+   *  fork off the leader limb at staggered heights (their wood starts at an
+   *  anchor along it, node positions untouched). Chains keep their classic
+   *  vertical treatment — they already ARE a continuation. */
+  private readonly limbPlan = computed<Map<string, LimbPlan>>(() => {
+    const plan = new Map<string, LimbPlan>();
+    const wood = this.wood();
+    const f = this.form();
+    const girth = wood.girth * f.girthMul;
+    const width = (p: LayoutPoint) => widthForMass(p.mass ?? 1, girth);
+    const tip = (p: LayoutPoint) => this.nodes.childrenOf(p.node).length === 0 && !p.chainNextId;
+
+    const byParent = new Map<string, LayoutPoint[]>();
+    for (const p of this.layout().points) {
+      if (!p.parent) continue;
+      const list = byParent.get(p.parent.node.id) ?? [];
+      list.push(p);
+      byParent.set(p.parent.node.id, list);
+    }
+
+    for (const children of byParent.values()) {
+      const parent = children[0].parent!;
+      const normal = children.filter((c) => !c.chain);
+
+      // Chain links: exactly the classic path — vertical, no leader math.
+      for (const c of children.filter((x) => x.chain)) {
+        const geom = edgeGeometry(parent, c, wood.bow);
+        plan.set(c.node.id, {
+          start: parent,
+          geom,
+          w0: width(parent) * 0.9,
+          w1: Math.max(2.4, width(c) * (tip(c) ? 0.45 : 0.95)),
+          isLeaf: tip(c),
+        });
+      }
+      if (!normal.length) continue;
+
+      let leader = normal[0];
+      for (const c of normal) if ((c.mass ?? 1) > (leader.mass ?? 1)) leader = c;
+
+      const parentHand: 1 | -1 = hash(parent.node.id) % 2 === 0 ? 1 : -1;
+      const leaderGeom = edgeGeometry(parent, leader, wood.bow, {
+        upBias: Math.min(0.95, f.upBias + 0.5 * f.leaderBias),
+        bowMul: f.bowMul * (1 - f.leaderBias),
+        hand: (parentHand * -1) as 1 | -1,
+      });
+      const leaderW0 = width(parent) * 0.98;
+      const leaderW1 = Math.max(2.4, width(leader) * (tip(leader) ? 0.45 : 1));
+      plan.set(leader.node.id, {
+        start: parent,
+        geom: leaderGeom,
+        w0: leaderW0,
+        w1: leaderW1,
+        isLeaf: tip(leader),
+      });
+
+      const sides = normal.filter((c) => c !== leader);
+      sides.forEach((c, i) => {
+        const h = hash(c.node.id + ':fork');
+        const span = f.forkTMax - f.forkTMin;
+        const t = f.forkTMin + span * ((i + 0.3 + (h % 41) / 100) / Math.max(1, sides.length));
+        const start = edgePointAt(parent, leader, leaderGeom, t);
+        const geom = edgeGeometry(start, c, wood.bow, { upBias: f.upBias, bowMul: f.bowMul });
+        // A limb may flare at its collar but never outgrow the wood it forks from.
+        const collar = 0.9 * ribbonWidthAt(leaderW0, leaderW1, t);
+        plan.set(c.node.id, {
+          start,
+          geom,
+          w0: Math.min(width(c) * 1.25, Math.max(2.6, collar)),
+          w1: Math.max(2.4, width(c) * (tip(c) ? 0.45 : 0.9)),
+          isLeaf: tip(c),
+        });
+      });
+    }
+    return plan;
+  });
+
   protected readonly edges = computed<EdgeView[]>(() =>
     this.layout()
       .points.filter((p) => p.parent !== null)
       .map((p) => {
-        const wood = this.wood();
-        const geometry = edgeGeometry(p.parent!, p, wood.bow);
-        // A chain link that continues is timber, not a twig tip.
-        const isLeaf = this.nodes.childrenOf(p.node).length === 0 && !p.chainNextId;
+        const plan = this.limbPlan().get(p.node.id)!;
         return {
           id: p.node.id,
-          d: branchRibbon(p.parent!, p, geometry, isLeaf, wood.girth),
+          d: branchRibbon(plan.start, p, plan.geom, plan.w0, plan.w1),
           fill: this.woodFill(p),
           isNew: this.bornThisSession.has(p.node.id),
-          leaves: this.leavesFor(p, geometry, isLeaf),
-          grain: geometry.d,
-          grainWidth: Math.max(1.1, widthAtDepth(p.depth, wood.girth) * 0.28),
+          leaves: this.leavesFor(p, plan.start, plan.geom, plan.isLeaf),
+          pads: this.padsFor(p, plan.start, plan.geom, plan.isLeaf),
+          grain: plan.geom.d,
+          grainWidth: Math.max(1.1, plan.w1 * 0.35),
           grainOffset: hash(p.node.id + ':grain') % 16,
         };
       }),
@@ -227,10 +331,12 @@ export class TreeCanvas {
       : base;
   }
 
-  /** Trunk ribbon: ground → root, with a gentle sway. */
+  /** Trunk ribbon: ground → root, with a gentle sway. Its top matches the
+   *  root's mass-width so trunk → leader limb reads as one column of wood. */
   protected trunkPath(root: LayoutPoint): string {
     const gy = this.groundY();
     const wood = this.wood();
+    const rootW = widthForMass(root.mass ?? 1, wood.girth * this.form().girthMul);
     const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6 * wood.bow;
     return taperedRibbon(
       root.x + sway,
@@ -241,8 +347,8 @@ export class TreeCanvas {
       root.y + (gy - root.y) * 0.35,
       root.x,
       root.y,
-      26 * wood.girth,
-      widthAtDepth(0, wood.girth) * 0.9,
+      Math.min(34, rootW * 1.4),
+      rootW,
     );
   }
 
@@ -250,21 +356,27 @@ export class TreeCanvas {
    *  opposite twins (leaf pairs), and twig tips gather a tuft. */
   private leavesFor(
     point: LayoutPoint,
-    geometry: ReturnType<typeof edgeGeometry>,
+    start: { x: number; y: number },
+    geometry: EdgeGeometry,
     isTip: boolean,
   ): LeafDecoration[] {
     const status = point.node.status;
+    const f = this.form();
     const h = hash(point.node.id + ':leaves');
-    const parent = point.parent!;
-    const length = Math.hypot(point.x - parent.x, point.y - parent.y);
-    // One leaf slot every ~10-14px of limb; resting stays deliberately sparse.
+    const length = Math.hypot(point.x - start.x, point.y - start.y);
+    // One leaf slot every ~10-14px of limb; resting stays deliberately sparse;
+    // the form's density dial gives acacias their air between pads.
     const spacing = status === 'achieved' ? 10 : status === 'growing' ? 11 : status === 'resting' ? 30 : 14;
-    const slots = Math.max(status === 'resting' ? 2 : 4, Math.min(14, Math.round(length / spacing)));
+    const density = status === 'resting' ? 1 : f.leafDensityMul;
+    const slots = Math.max(
+      status === 'resting' ? 2 : 3,
+      Math.min(14, Math.round((length / spacing) * density)),
+    );
     const leaves: LeafDecoration[] = [];
     for (let i = 0; i < slots; i++) {
       const hi = hash(point.node.id + ':leaf:' + i);
       const t = Math.min(0.93, 0.16 + (i / slots) * 0.72 + ((hi % 10) / 100));
-      const at = edgePointAt(parent, point, geometry, t);
+      const at = edgePointAt(start, point, geometry, t);
       const side = (i + (h % 2)) % 2 === 0 ? 1 : -1;
       leaves.push({
         x: at.x + side * (3 + (hi % 6)),
@@ -288,25 +400,44 @@ export class TreeCanvas {
         });
       }
     }
-    // Foliage gathers where the branch ends: twig tips grow a real tuft.
-    if (isTip && status !== 'achieved' && status !== 'branched') {
-      const tuftCount = status === 'resting' ? 2 : 4 + (h % 2);
-      for (let i = 0; i < tuftCount; i++) {
-        const hi = hash(point.node.id + ':tuft:' + i);
-        const at = edgePointAt(parent, point, geometry, Math.min(0.97, 0.8 + i * 0.045));
-        const side = i % 2 === 0 ? 1 : -1;
-        leaves.push({
-          x: at.x + side * (2 + (hi % 5)),
-          y: at.y,
-          angle: side * (14 + (hi % 46)),
-          size: 4.5 + (hi % 4),
-          kind: 'leaf',
-          variant: (hi >> 4) % 4,
-          shade: (hi >> 9) % 3,
-        });
-      }
-    }
     return leaves;
+  }
+
+  /** Foliage PADS: soft clustered volumes at branch tips — how real crowns
+   *  read from afar (the tuft, grown up). Resting stays winter-quiet;
+   *  growing keeps its sapling glyph clear. */
+  private padsFor(
+    point: LayoutPoint,
+    start: { x: number; y: number },
+    geometry: EdgeGeometry,
+    isTip: boolean,
+  ): PadDecoration[] {
+    const f = this.form();
+    const status = point.node.status;
+    if (!isTip || status === 'branched' || status === 'resting') return [];
+    const h = hash(point.node.id + ':pads');
+    const count = f.padCount[0] + (h % (f.padCount[1] - f.padCount[0] + 1));
+    const tLo = status === 'growing' ? 0.6 : 0.82;
+    const tHi = status === 'growing' ? 0.78 : 0.98;
+    const pads: PadDecoration[] = [];
+    for (let i = 0; i < count; i++) {
+      const hi = hash(point.node.id + ':pad:' + i);
+      const t = tLo + ((i + (hi % 30) / 100) / count) * (tHi - tLo);
+      const at = edgePointAt(start, point, geometry, Math.min(0.99, t));
+      const x = at.x + (((hi >> 3) % (f.padSpread * 2 + 1)) - f.padSpread);
+      const y = at.y - ((hi >> 6) % Math.max(2, Math.round(f.padSpread * 0.8)));
+      // The growing sapling glyph must stay visible through its crown.
+      if (status === 'growing' && Math.hypot(x - point.x, y - point.y) < 18) continue;
+      pads.push({
+        x,
+        y,
+        rx: f.padRx[0] + ((hi >> 9) % (f.padRx[1] - f.padRx[0] + 1)),
+        ry: f.padRy[0] + ((hi >> 12) % (f.padRy[1] - f.padRy[0] + 1)),
+        rot: f.id === 'acacia' ? ((hi >> 15) % 13) - 6 : ((hi >> 15) % 41) - 20,
+        shade: (hi >> 5) % 3,
+      });
+    }
+    return pads;
   }
 
   private readonly pointers = new Map<number, { x: number; y: number }>();
@@ -467,11 +598,13 @@ export class TreeCanvas {
   }
 
   /** The growing sapling leans along its limb's incoming direction —
-   *  tempered toward the sky (phototropism), never lying flat. */
+   *  tempered toward the sky (phototropism), never lying flat. Reads the
+   *  SAME geometry the limb is drawn with (leader/fork aware). */
   protected saplingAngle(point: LayoutPoint): number {
     if (!point.parent) return 0;
-    const geometry = edgeGeometry(point.parent, point, this.wood().bow);
-    const deg = (Math.atan2(point.y - geometry.c2y, point.x - geometry.c2x) * 180) / Math.PI + 90;
+    const plan = this.limbPlan().get(point.node.id);
+    if (!plan) return 0;
+    const deg = (Math.atan2(point.y - plan.geom.c2y, point.x - plan.geom.c2x) * 180) / Math.PI + 90;
     const normalized = ((deg + 180) % 360) - 180;
     return Math.max(-70, Math.min(70, normalized * 0.8));
   }

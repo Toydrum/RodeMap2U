@@ -143,6 +143,9 @@ export const EN: Dict = {
     plotAria: 'Tree "{name}" — open with Enter; arrange with the arrow keys',
     plotHint: 'Press and hold to drag and arrange your forest (or use the arrow keys)',
     moveNeedsTwo: 'Your tree is on its own — plant another and you can arrange them 🌱',
+    prevClearing: 'Previous clearing',
+    nextClearing: 'Next clearing',
+    clearingDot: 'Go to clearing {n}',
   },
   sow: {
     toggle: 'Several at once',
@@ -183,6 +186,8 @@ export const EN: Dict = {
     outlineToggle: 'Branch list',
     outlineTitle: "Your tree's branches",
     outlineHint: 'Tap one to locate it on the map; tap it again to open its sheet.',
+    outlineExpand: 'Open the sub-branches of "{title}"',
+    outlineCollapse: 'Close the sub-branches of "{title}"',
     dateReviewBanner: 'Some dates would like a word with you',
     reviewNow: 'See them',
     archiveAction: 'Move tree to the archive',
@@ -352,7 +357,7 @@ export const EN: Dict = {
       {
         icon: '🌳',
         title: 'Your forest',
-        body: 'Each tree is an area of your life: a project, a habit, a dream. Trees are drawn with their real shape — one with achievements looks lush and flowered; a freshly planted one is a little sprout. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: a breathing sun with motes of light, slow drifting fog, soft drizzle or a storm with slow lightning — and your trees always standing. Want a different arrangement? Press and hold any tree and drag it to its new spot (or move it with the arrow keys).',
+        body: 'Each tree is an area of your life: a project, a habit, a dream. And each color is a SPECIES with its own bearing: some grow like a round dense oak, some like an acacia with flat crowns and air between them, some slender toward the sky — all with a continuous trunk that thickens with what it carries. Your trees sprout scattered across the meadow, each in its own little spot; when they no longer fit one clearing, the ‹ › arrows walk you between the clearings of your forest. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: sun, fog, drizzle or storm — and your trees always standing. Want a different arrangement? Press and hold any tree and drag it (or move it with the arrow keys).',
       },
       {
         icon: '🌿',

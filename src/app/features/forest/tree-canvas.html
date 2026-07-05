@@ -91,6 +91,21 @@
           [style.stroke-width]="edge.grainWidth"
           [style.stroke-dashoffset]="edge.grainOffset"
         />
+        <!-- Foliage pads: the crown's soft volume at the tip -->
+        @for (pad of edge.pads; track $index) {
+          <ellipse
+            class="pad"
+            [class.is-new]="edge.isNew"
+            [class.sh1]="pad.shade === 1"
+            [class.sh2]="pad.shade === 2"
+            [attr.cx]="pad.x"
+            [attr.cy]="pad.y"
+            [attr.rx]="pad.rx"
+            [attr.ry]="pad.ry"
+            [attr.transform]="'rotate(' + pad.rot + ' ' + pad.x + ' ' + pad.y + ')'"
+            aria-hidden="true"
+          />
+        }
         <!-- Little leaves along the branch -->
         @for (leaf of edge.leaves; track $index) {
           <g

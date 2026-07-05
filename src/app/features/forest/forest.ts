@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -329,9 +329,61 @@ export class ForestPage {
     await this.trees.setOrder(ids);
   }
 
-  /** Deterministic per-plot vertical offset — rows stop being ruler-straight. */
-  protected staggerFor(treeId: string): number {
-    return hash(treeId + ':stagger') % 22;
+  /* ----------------------------------------- the clearings ("claros") */
+
+  /** Trees per clearing — every tree keeps a clear, tappable heart. */
+  private readonly pageSizeValue =
+    typeof matchMedia !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 4 : 6;
+
+  protected readonly page = signal(0);
+  protected readonly pageCount = computed(() =>
+    Math.max(1, Math.ceil(this.trees.active().length / this.pageSizeValue)),
+  );
+  protected readonly dots = computed(() => Array.from({ length: this.pageCount() }, (_, i) => i));
+
+  /** The trees standing in the current clearing (drag preview respected). */
+  protected readonly pageTrees = computed(() => {
+    const size = this.pageSizeValue;
+    const clamped = Math.min(this.page(), this.pageCount() - 1);
+    return this.displayTrees().slice(clamped * size, (clamped + 1) * size);
+  });
+
+  protected goPage(delta: number): void {
+    this.page.set(Math.max(0, Math.min(this.pageCount() - 1, this.page() + delta)));
+  }
+
+  /** Archiving can shrink the meadow — never strand the view past the end. */
+  private readonly pageClamp = effect(() => {
+    const max = this.pageCount() - 1;
+    if (this.page() > max) this.page.set(Math.max(0, max));
+  });
+
+  /** Hand-tuned constellations: for n trees, n organic anchors on the meadow
+   *  band — x in % of the band, b (feet) in % of the band's height. Same-row
+   *  neighbors keep breathing room; nothing ever climbs toward the sky. */
+  private static readonly ARRANGEMENTS: ReadonlyArray<ReadonlyArray<{ x: number; b: number }>> = [
+    [],
+    [{ x: 50, b: 10 }],
+    [{ x: 30, b: 8 }, { x: 70, b: 38 }],
+    [{ x: 24, b: 6 }, { x: 50, b: 38 }, { x: 78, b: 10 }],
+    // Back-row anchors sit mid-BETWEEN front ones: every tree's heart stays
+    // clear of its taller front neighbors (tappable by construction).
+    [{ x: 28, b: 8 }, { x: 72, b: 6 }, { x: 50, b: 38 }, { x: 13, b: 34 }],
+    [{ x: 18, b: 8 }, { x: 50, b: 6 }, { x: 82, b: 10 }, { x: 34, b: 37 }, { x: 66, b: 38 }],
+    [{ x: 15, b: 6 }, { x: 45, b: 10 }, { x: 75, b: 8 }, { x: 30, b: 37 }, { x: 60, b: 38 }, { x: 88, b: 35 }],
+  ];
+
+  /** Where the i-th tree of this clearing stands: its anchor plus the tree's
+   *  own small deterministic wobble — natural sprouts, never a stamped grid. */
+  protected slotFor(i: number, tree: Tree): { x: number; b: number; s: number; z: number } {
+    const n = Math.min(this.pageTrees().length, ForestPage.ARRANGEMENTS.length - 1);
+    const anchor = ForestPage.ARRANGEMENTS[Math.max(1, n)][Math.min(i, n - 1)] ?? { x: 50, b: 10 };
+    const h = hash(tree.id + ':meadow');
+    const x = Math.min(89, Math.max(11, anchor.x + ((h % 7) - 3)));
+    const b = Math.max(2, anchor.b + (((h >> 4) % 5) - 2));
+    // Depth: feet higher up the band → a touch smaller, standing behind.
+    const s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+    return { x, b, s, z: 10 + Math.round(40 - b) };
   }
 
   protected countFor(treeId: string): number {
@@ -374,6 +426,8 @@ export class ForestPage {
     await this.trees.setCurrentNode(tree, root.id);
     this.newName.set('');
     this.creating.set(false);
+    // The newborn gets the highest order — walk to its clearing so it's seen.
+    this.page.set(this.pageCount() - 1);
   }
 
   /** A starter sapling: a young tree with two example branches — content to

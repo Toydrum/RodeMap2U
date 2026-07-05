@@ -145,6 +145,9 @@ export const ES = {
     plotAria: 'Árbol «{name}» — ábrelo con Enter; acomódalo con las flechas',
     plotHint: 'Mantén presionado y arrastra para acomodar tu bosque (o usa las flechas del teclado)',
     moveNeedsTwo: 'Tu árbol está solito — planta otro y podrás acomodarlos entre sí 🌱',
+    prevClearing: 'Claro anterior',
+    nextClearing: 'Siguiente claro',
+    clearingDot: 'Ir al claro {n}',
   },
   sow: {
     toggle: 'Varios a la vez',
@@ -185,6 +188,8 @@ export const ES = {
     outlineToggle: 'Lista de ramas',
     outlineTitle: 'Las ramas de tu árbol',
     outlineHint: 'Toca una para ubicarla en el mapa; tócala otra vez para abrir su hoja.',
+    outlineExpand: 'Abrir las sub-ramas de «{title}»',
+    outlineCollapse: 'Cerrar las sub-ramas de «{title}»',
     dateReviewBanner: 'Hay fechas que quieren platicar contigo',
     reviewNow: 'Verlas',
     archiveAction: 'Guardar árbol en el archivo',
@@ -354,7 +359,7 @@ export const ES = {
       {
         icon: '🌳',
         title: 'Tu bosque',
-        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Se dibujan con su forma real — el que tiene logros se ve frondoso y con flores; el recién plantado es un brotecito. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol que respira con motitas de luz, niebla que deriva lenta, llovizna suave o tormenta con relámpagos lentos — y tus árboles siempre en pie. ¿Quieres otro acomodo? Mantén presionado cualquier árbol y arrástralo a su nuevo lugar (o muévelo con las flechas del teclado).',
+        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Y cada color es una ESPECIE con su propio porte: unos crecen como roble redondo y denso, otros como acacia de copas planas con aire entre ellas, otros esbeltos hacia el cielo — todos con un tronco continuo que se engrosa con lo que carga. Tus árboles brotan repartidos por el prado, cada uno en su lugarcito; cuando ya no caben en un claro, las flechitas ‹ › te pasean entre los claros de tu bosque. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol, niebla, llovizna o tormenta — y tus árboles siempre en pie. ¿Quieres otro acomodo? Mantén presionado cualquier árbol y arrástralo (o muévelo con las flechas del teclado).',
       },
       {
         icon: '🌿',

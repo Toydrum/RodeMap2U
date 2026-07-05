@@ -176,10 +176,11 @@
       }
     </svg>
 
-    <!-- Planted trees -->
+    <!-- Planted trees: one clearing at a time, scattered like real sprouts -->
     @if (trees.active().length) {
-      <div class="plots container">
-        @for (tree of displayTrees(); track tree.id) {
+      <div class="plots container" [class.paged]="pageCount() > 1" [class.crowded]="pageTrees().length >= 5">
+        @for (tree of pageTrees(); track tree.id; let i = $index) {
+          @let slot = slotFor(i, tree);
           <a
             class="plot"
             [routerLink]="['/tree', tree.id]"
@@ -193,7 +194,10 @@
             [attr.aria-label]="i18n.fill(i18n.t().forest.plotAria, { name: tree.name })"
             [title]="i18n.t().forest.plotHint"
             [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
-            [style.transform]="'translateY(' + staggerFor(tree.id) + 'px) scale(' + (0.96 + staggerFor(tree.id) * 0.004) + ')'"
+            [style.left.%]="slot.x"
+            [style.bottom.%]="slot.b"
+            [style.zIndex]="slot.z"
+            [style.transform]="'translateX(-50%) scale(' + slot.s + ')'"
           >
             <button
               type="button"
@@ -219,6 +223,37 @@
               </span>
             </span>
           </a>
+        }
+
+        <!-- More trees than one clearing holds: little arrows walk the meadow -->
+        @if (pageCount() > 1) {
+          <button
+            type="button"
+            class="clearing-nav prev"
+            [disabled]="page() === 0 || !!draggingId()"
+            (click)="goPage(-1)"
+            [attr.aria-label]="i18n.t().forest.prevClearing"
+          >‹</button>
+          <button
+            type="button"
+            class="clearing-nav next"
+            [disabled]="page() >= pageCount() - 1 || !!draggingId()"
+            (click)="goPage(1)"
+            [attr.aria-label]="i18n.t().forest.nextClearing"
+          >›</button>
+          <div class="clearing-dots" role="tablist">
+            @for (d of dots(); track d) {
+              <button
+                type="button"
+                class="dot"
+                [class.on]="d === page()"
+                (click)="page.set(d)"
+                [attr.aria-label]="i18n.fill(i18n.t().forest.clearingDot, { n: d + 1 })"
+                [attr.aria-selected]="d === page()"
+              ></button>
+            }
+          </div>
+          <span class="sr-live" aria-live="polite">{{ i18n.fill(i18n.t().forest.clearingDot, { n: page() + 1 }) }}</span>
         }
       </div>
     } @else if (!creating()) {

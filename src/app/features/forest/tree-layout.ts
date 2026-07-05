@@ -19,6 +19,9 @@ export interface LayoutPoint {
   /** The node's visual row line (pre-jitter, lift included) — labels anchor
    *  here so they ride with their branch instead of drifting to a nominal row. */
   rowY?: number;
+  /** Subtree leaf-mass (leaves carry 1; parents sum their children) — feeds
+   *  the da Vinci width law: limbs are as thick as what they carry. */
+  mass?: number;
   /** True for links of an ordered-steps chain ('flow: steps' pasitos). */
   chain?: boolean;
   /** The next link up the chain, when this one isn't the last. */
@@ -164,6 +167,7 @@ export function layoutTree(
     const h = hash(node.id);
     point.x = baseX + ((h % (JITTER_X * 2 + 1)) - JITTER_X);
     point.y = rowY + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
+    point.mass = leaves;
 
     points.push(point);
     byId.set(node.id, point);
@@ -198,13 +202,40 @@ export interface EdgeGeometry {
   c2y: number;
 }
 
+export interface EdgeOpts {
+  /** 0..1 — mixes the arrival tangent toward straight-up. 0 = classic curve. */
+  upBias?: number;
+  /** Multiplies the bow (sinuosity). 1 = classic. */
+  bowMul?: number;
+  /** Fixes the bow's handedness (leader-axis continuity) instead of h%2. */
+  hand?: 1 | -1;
+}
+
+/** Wood width from carried leaf-mass (da Vinci: area ∝ mass) — twig floor,
+ *  fan ceiling. Trees thicken as they grow; a one-leaf baby stays a stem. */
+export function widthForMass(mass: number, girth = 1): number {
+  return Math.min(30, Math.max(2.4, 5.2 * girth * Math.sqrt(Math.max(1, mass))));
+}
+
+/** The ribbon's eased half-width at parameter t — where a side branch forks
+ *  off a limb, its collar must match the wood it grows from. */
+export function ribbonWidthAt(w0: number, w1: number, t: number): number {
+  const eased = t * t * (3 - 2 * t);
+  return w0 + (w1 - w0) * eased;
+}
+
 /**
  * Organic cubic bezier from parent to child (child sits above the parent).
  * Thick limbs bow more; twigs stay tighter — the vecteezy-silhouette look.
  * `bowScale` lets miniature renders damp the curvature (absolute bow values
  * over compressed coordinates read as seaweed otherwise).
  */
-export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint, bowScale = 1): EdgeGeometry {
+export function edgeGeometry(
+  parent: { x: number; y: number },
+  child: LayoutPoint,
+  bowScale = 1,
+  opts: EdgeOpts = {},
+): EdgeGeometry {
   const dx = child.x - parent.x;
   const dy = child.y - parent.y; // negative (upward)
   const len = Math.hypot(dx, dy) || 1;
@@ -216,14 +247,21 @@ export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint, bowScale =
   const nx = -uy;
   const ny = ux;
   const h = hash(child.node.id);
-  const hand = h % 2 === 0 ? 1 : -1;
+  const hand = opts.hand ?? (h % 2 === 0 ? 1 : -1);
   const bowBase = 14 + (h % 18);
   const shallow = 0.65 + 0.35 * Math.abs(uy); // near-horizontal limbs bow less
-  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18) * bowScale * shallow;
+  const bow =
+    hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18) * bowScale * shallow * (opts.bowMul ?? 1);
   const c1x = parent.x + ux * (len * 0.45) + nx * (bow * 0.5);
   const c1y = parent.y + uy * (len * 0.45) + ny * (bow * 0.5);
-  const c2x = parent.x + ux * (len * 0.65) - nx * (bow * 0.7);
-  const c2y = parent.y + uy * (len * 0.65) - ny * (bow * 0.7);
+  // Arrival: mix the limb direction toward straight-up (phototropism) — at
+  // upBias 0 this is byte-identical to the classic c2.
+  const b = opts.upBias ?? 0;
+  const mx = ux * (1 - b);
+  const my = uy * (1 - b) - b;
+  const ml = Math.hypot(mx, my) || 1;
+  const c2x = child.x - (mx / ml) * (len * 0.35) - nx * (bow * 0.7 * (1 - b));
+  const c2y = child.y - (my / ml) * (len * 0.35) - ny * (bow * 0.7 * (1 - b));
   return {
     d: `M ${parent.x} ${parent.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${child.x} ${child.y}`,
     c1x,
@@ -235,8 +273,8 @@ export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint, bowScale =
 
 /** Point at parameter t along the edge's cubic bezier (for leaf placement). */
 export function edgePointAt(
-  parent: LayoutPoint,
-  child: LayoutPoint,
+  parent: { x: number; y: number },
+  child: { x: number; y: number },
   geometry: EdgeGeometry,
   t: number,
 ): { x: number; y: number } {
@@ -248,11 +286,6 @@ export function edgePointAt(
   return { x, y };
 }
 
-/** Wood width by depth — exponential taper like a real tree.
- *  `girth` is the tree's personal thickness (chunky oaks vs slim birches). */
-export function widthAtDepth(depth: number, girth = 1): number {
-  return Math.max(2.6, 18 * girth * Math.pow(0.6, depth));
-}
 
 /**
  * A branch as a FILLED tapered ribbon (not a uniform stroke): the cubic
@@ -294,19 +327,19 @@ export function taperedRibbon(
   return `M ${left[0]} L ${left.slice(1).join(' L ')} L ${right.reverse().join(' L ')} Z`;
 }
 
-/** Ribbon for a parent→child edge, widths derived from tree depth. */
+/** Ribbon for a limb from an arbitrary start point to its node — widths are
+ *  supplied by the caller (the mass-width law lives at the component layer,
+ *  where the tree's form/girth are known). */
 export function branchRibbon(
-  parent: LayoutPoint,
+  start: { x: number; y: number },
   child: LayoutPoint,
   geometry: EdgeGeometry,
-  childIsLeaf: boolean,
-  girth = 1,
+  w0: number,
+  w1: number,
 ): string {
-  const w0 = widthAtDepth(parent.depth, girth) * 0.82;
-  const w1 = widthAtDepth(child.depth, girth) * (childIsLeaf ? 0.45 : 0.82);
   return taperedRibbon(
-    parent.x,
-    parent.y,
+    start.x,
+    start.y,
     geometry.c1x,
     geometry.c1y,
     geometry.c2x,
