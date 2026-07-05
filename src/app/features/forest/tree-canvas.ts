@@ -313,23 +313,37 @@ export class TreeCanvas {
   private movedSinceDown = false;
 
   constructor() {
-    // Track newborn nodes for the grow animation.
+    // Track newborn nodes for the grow animation; pan the newest into view
+    // so planting can never grow the tree off-screen unnoticed.
     effect(() => {
       const ids = new Set(this.layout().points.map((p) => p.node.id));
       if (this.knownIds) {
+        let lastNew: LayoutPoint | null = null;
         for (const id of ids) {
-          if (!this.knownIds.has(id)) this.bornThisSession.add(id);
+          if (!this.knownIds.has(id)) {
+            this.bornThisSession.add(id);
+            lastNew = this.layout().byId.get(id) ?? null;
+          }
+        }
+        if (lastNew) {
+          const p = lastNew;
+          queueMicrotask(() => this.panIntoView(p));
         }
       }
       this.knownIds = ids;
     });
 
-    // Fit + center when the tree changes.
+    // Frame ONCE per tree (id-keyed): renames and status flips must never
+    // yank the camera around — that was a real pre-0.0.39 annoyance.
     effect(() => {
-      this.tree();
-      queueMicrotask(() => this.centerOnCurrent());
+      const id = this.tree().id;
+      if (!this.layout().points.length || id === this.lastFitId) return;
+      this.lastFitId = id;
+      queueMicrotask(() => this.fitTree());
     });
   }
+
+  private lastFitId: string | null = null;
 
   /* ------------------------------------------------------------------ */
   /* View helpers                                                        */
@@ -343,8 +357,15 @@ export class TreeCanvas {
     return `var(--status-${node.status})`;
   }
 
+  /** Cosmetic hover zone only — taps resolve via the canvas-level nearest
+   *  pick, so this may never outgrow the slot spacing again (24 · 2 < 66). */
   protected hitRadius(): number {
-    return Math.min(44, Math.max(18, 26 / this.k()));
+    return Math.min(24, Math.max(16, 24 / this.k()));
+  }
+
+  /** The "+" bud keeps a finger-sized target even zoomed out. */
+  protected budHitRadius(): number {
+    return Math.max(14, Math.min(20, 16 / this.k()));
   }
 
   protected showLabel(point: LayoutPoint): boolean {
@@ -442,7 +463,9 @@ export class TreeCanvas {
     return label;
   }
 
-  centerOnCurrent(): void {
+  /** Frame the WHOLE tree; when even the 0.5 floor can't fit it, keep that
+   *  zoom and center on the 📍 neighborhood instead (panning reaches the rest). */
+  fitTree(): void {
     const layout = this.layout();
     if (!layout.points.length) return;
     const svg = this.svgRef().nativeElement;
@@ -451,30 +474,41 @@ export class TreeCanvas {
 
     // The tree STANDS on the scenery's meadow line — never floats.
     const groundScreen = rect.height * 0.8;
-    const pad = 100;
+    const padX = 40;
+    const worldW = layout.width + 120; // label + jitter margin
     const fitK = Math.min(
-      rect.width / (layout.width + pad * 2),
+      (rect.width - padX * 2) / worldW,
       (groundScreen - 70) / (layout.height + 90),
     );
     // Young trees should still fill the view instead of drowning in it.
     const fillK = (rect.height * 0.42) / Math.max(layout.height + 60, 180);
-    const k = Math.min(1.6, Math.max(0.4, Math.min(fitK, Math.max(1.15, fillK))));
+    // Floor 0.5: same-row spacing stays ≥ ~39 screen px — comfortably tappable.
+    const k = Math.min(1.6, Math.max(0.5, Math.min(fitK, Math.max(1.15, fillK))));
 
+    this.fitsWhole = worldW * k <= rect.width - padX * 2;
     const currentId = this.tree().currentNodeId;
-    const target = (currentId && layout.byId.get(currentId)) || layout.points[layout.points.length - 1];
+    const current = currentId ? layout.byId.get(currentId) : null;
+    const cx = this.fitsWhole || !current ? layout.minX + layout.width / 2 : current.x;
 
     this.k.set(k);
     this.restingK = k;
-    this.tx.set(rect.width / 2 - target.x * k);
+    const tx = rect.width / 2 - cx * k;
+    this.tx.set(this.fitsWhole ? tx : this.clampPan(tx, 0, k).tx);
     this.ty.set(groundScreen - this.groundY() * k);
-    if (!this.focusedId()) this.focusedId.set(target.node.id);
+    if (!this.focusedId()) {
+      this.focusedId.set((current ?? layout.points[layout.points.length - 1]).node.id);
+    }
   }
 
   /** The fitted zoom — with a mouse the tree stands still until zoomed in. */
   private restingK = 0;
 
+  /** True when the whole tree fits the viewport at the resting zoom. */
+  private fitsWhole = true;
+
   private panUnlocked(): boolean {
-    return this.k() > this.restingK * 1.04;
+    // An overflowing tree must always be pannable — even with a mouse.
+    return this.k() > this.restingK * 1.04 || !this.fitsWhole;
   }
 
   /** The tree can never wander out of sight: at least 120px of it stays visible. */
@@ -583,11 +617,31 @@ export class TreeCanvas {
     }
   }
 
-  /** A drag never counts as a tap; a clean tap focuses AND opens. */
-  protected onNodeClick(point: LayoutPoint): void {
+  /** Taps resolve at the CANVAS level to the nearest node center, so a
+   *  neighbor's invisible hit disc can never swallow a tap — the effective
+   *  target is each node's Voronoi cell. Drags never count as taps; the
+   *  note-mark and the "+" bud win when hit directly (they stop propagation,
+   *  and the guard below covers any future refactor). */
+  protected onCanvasClick(ev: MouseEvent): void {
     if (this.movedSinceDown) return;
-    this.focusNode(point.node.id);
-    this.nodeOpened.emit(point.node);
+    if ((ev.target as Element).closest?.('.note-mark, .plant-bud')) return;
+    const rect = this.svgRef().nativeElement.getBoundingClientRect();
+    const k = this.k();
+    const wx = (ev.clientX - rect.left - this.tx()) / k;
+    const wy = (ev.clientY - rect.top - this.ty()) / k;
+    let best: LayoutPoint | null = null;
+    let bestD = Infinity;
+    for (const p of this.layout().points) {
+      const d = Math.hypot(p.x - wx, p.y - wy);
+      if (d < bestD) {
+        bestD = d;
+        best = p;
+      }
+    }
+    // Reach: at least 28 screen px, at least 20 world units.
+    if (!best || bestD > Math.max(28 / k, 20)) return;
+    this.focusNode(best.node.id);
+    this.nodeOpened.emit(best.node);
   }
 
   protected onWheel(ev: WheelEvent): void {

@@ -3,16 +3,16 @@ const BASE = 'http://localhost:' + (process.env.RM_PORT ?? '8826');
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const page = await browser.newPage({ viewport: { width: 900, height: 800 } });
 
-// A — express with a pending review: review still gets its word, then straight to the meadow
+// A — express with a pending review: straight to Ahora, ONE tap — the 🍂
+// banner on Ahora holds the date conversation (reviews left the ritual in 0.0.39)
 await page.goto(`${BASE}/check-in?seed=demo`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 const chipText = (await page.locator('.express').textContent()).trim();
 await page.locator('.express').click();
-await page.waitForSelector('app-date-review, .review, [class*=review]', { timeout: 4000 }).catch(() => {});
-const sawReview = await page.locator('button', { hasText: 'Sigo aquí, a mi ritmo' }).count();
-await page.locator('button', { hasText: 'Sigo aquí, a mi ritmo' }).click();
 await page.waitForURL('**/ahora**', { timeout: 5000 });
-console.log(`A express+review: chip="${chipText}" review-shown=${sawReview === 1} landed=/ahora | OK=${sawReview === 1}`);
+await page.waitForTimeout(400);
+const banner = await page.locator('.review-banner').count();
+console.log(`A express: chip="${chipText}" landed=/ahora 🍂-banner-on-ahora=${banner === 1} | OK=${banner === 1}`);
 
 // B — express with nothing pending: one tap, straight to Ahora (the thread)
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
@@ -20,21 +20,21 @@ await page.locator('.express').click();
 await page.waitForURL('**/ahora**', { timeout: 5000 });
 console.log('B express direct: landed=/ahora | OK=true');
 
-// C — gentle back: feeling -> where -> back -> feeling -> where -> note -> back -> where
+// C — two-screen ritual: feeling -> destination (branch cards + ring together),
+// notita folded into screen one, gentle back returns to feeling
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
+const noteToggle = await page.locator('.note-toggle').count();
 await page.locator('.feeling').first().click();
-await page.waitForSelector('.where-grid');
+await page.waitForSelector('.destination-stage');
+const hasRing = (await page.locator('.ring').count()) === 1;
+const hasCards = await page.locator('.where').count();
+const noAquiEstoy = (await page.locator('button', { hasText: 'Aquí estoy' }).count()) === 0;
 await page.locator('.step-back').click();
 await page.waitForTimeout(300);
 const backAtFeeling = (await page.locator('.weather').count()) === 1;
-await page.locator('.feeling').nth(1).click();
-await page.waitForTimeout(300);
-await page.locator('.where').first().click();
-await page.waitForSelector('.note');
-await page.locator('.step-back').click();
-await page.waitForTimeout(300);
-const backAtWhere = (await page.locator('.where-grid').count()) === 1;
-console.log(`C back: feeling=${backAtFeeling} where=${backAtWhere} | OK=${backAtFeeling && backAtWhere}`);
+console.log(
+  `C destination: note-toggle=${noteToggle === 1} ring=${hasRing} branch-cards=${hasCards} no-"Aquí estoy"=${noAquiEstoy} back=${backAtFeeling} | OK=${noteToggle === 1 && hasRing && hasCards > 0 && noAquiEstoy && backAtFeeling}`,
+);
 
 await browser.close();

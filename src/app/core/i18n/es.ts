@@ -84,6 +84,10 @@ export const ES = {
     tinyAction: '2 minutitos',
   },
   checkIn: {
+    welcomeTitle: 'Este es tu bosque',
+    welcomeBody1: 'Cada área de tu vida puede ser un árbol: la escuela, un proyecto, la gente que quieres.',
+    welcomeBody2: 'Lo que quieras lograr crece como rama, y lo logrado florece. Aquí nada se vence ni se pierde: todo crece a tu ritmo.',
+    welcomeStart: 'Empezar 🌱',
     title: '¿Dónde sientes que estás?',
     subtitle: 'No hay respuestas correctas. Solo tú, hoy.',
     feelings: {
@@ -93,18 +97,13 @@ export const ES = {
       heavy: 'Pesado',
       stormy: 'En tormenta',
     },
-    whereTitle: '¿En qué rama estás hoy?',
-    whereSubtitle: 'Toca donde sientas que estás — o solo pasa a mirar tu bosque.',
-    justLooking: 'Solo quiero mirar',
-    noteLabel: '¿Quieres dejarte una notita?',
+    noteExpander: '¿Te dejas una notita?',
     notePlaceholder: 'Para ti, del futuro…',
     pastNote: 'Tu yo del pasado te dejó esto',
-    done: 'Aquí estoy',
     skipAll: 'Hoy no quiero responder',
-    withoutNote: 'Continuar sin notita',
     express: 'Me siento igual que la última vez',
-    chooseTitle: 'Tu bosque te rodea',
-    chooseSubtitle: '¿A cuál árbol quieres entrar hoy?',
+    destinationTitle: '¿Por dónde andas hoy?',
+    destinationSubtitle: 'Toca la rama donde andas o el árbol que quieras visitar — o solo pasa a mirar.',
     justForest: 'Solo mirar el bosque',
   },
   trail: {
@@ -224,7 +223,7 @@ export const ES = {
   },
   branchFlow: {
     title: 'Un buen lugar para brotar',
-    subtitle: 'Estás aquí, y aquí puede crecer algo nuevo. Hasta tres caminos — con uno basta.',
+    subtitle: 'Estás aquí, y aquí puede crecer algo nuevo. Hasta cinco caminos — con uno basta.',
     suggestionsLabel: '¿Y si probamos…?',
     suggestions: {
       smaller: '🌱 Más pequeño',
@@ -240,6 +239,8 @@ export const ES = {
     },
     altPlaceholder: 'Un camino posible…',
     addAlt: 'Otro camino',
+    altCount: '({count} de {max})',
+    altsFull: 'Cinco caminos listos — con uno basta 🌿',
     confirm: 'Que crezcan',
     celebrate: 'El árbol siguió creciendo 🌱',
   },
@@ -315,7 +316,7 @@ export const ES = {
       {
         icon: '🧭',
         title: 'El check-in',
-        body: 'Al entrar, la app pregunta "¿Dónde sientes que estás?". Eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), tocas la rama donde sientas que estás, y si quieres te dejas una notita. Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. Para el día a día hay un atajo: «Me siento igual que la última vez» registra tu check-in en un toque y te deja en Ahora, con tu hilo esperándote. Y si tocas algo por error, cada paso tiene su «← Volver». ¿Quieres el ritual de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas» — la huellita 🐾 junto a la rosa de los vientos (también en Ajustes).',
+        body: 'La primera vez, el bosque se presenta con una bienvenida cortita. Después, el ritual son solo DOS pantallas. Primera: "¿Dónde sientes que estás?" — eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), y si quieres, ahí mismo te dejas una notita 💌 antes de tocar tu clima. Segunda: "¿Por dónde andas hoy?" — tus ramas más vivas como atajos, tus árboles en círculo, o «Solo mirar el bosque». Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. Para el día a día hay un atajo: «Me siento igual que la última vez» registra tu check-in en un toque y te deja en Ahora, con tu hilo esperándote. Y si tocas algo por error, hay «← Volver». ¿Quieres el ritual de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas» — la huellita 🐾 junto a la rosa de los vientos (también en Ajustes).',
       },
       {
         icon: '🧶',
@@ -345,7 +346,7 @@ export const ES = {
       {
         icon: '🍂',
         title: 'Cuando una fecha pasa',
-        body: 'No pasa nada malo. La app te dice: "Esta fecha ya pasó — y tú sigues aquí. Respira." Y te muestra caminos: seguir sin fecha, buscar otro momento, o brotar ramitas nuevas — con ideas listas para no enfrentar la página en blanco (más pequeño, en otro momento, de otra manera, con alguien, descansar). Tu meta original se vuelve un nudo dorado: parte de tu historia, jamás un tache.',
+        body: 'No pasa nada malo. La app te dice: "Esta fecha ya pasó — y tú sigues aquí. Respira." Y te muestra caminos: seguir sin fecha, buscar otro momento, o brotar ramitas nuevas — con ideas listas para no enfrentar la página en blanco (más pequeño, en otro momento, de otra manera, con alguien, descansar). Esa conversación te espera en Ahora, con su aviso 🍂 — nunca en medio de tu check-in. Tu meta original se vuelve un nudo dorado: parte de tu historia, jamás un tache.',
       },
       {
         icon: '⏳',

@@ -5,10 +5,7 @@ const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
 const out = process.argv[2];
 await page.goto(`${BASE}/check-in?seed=demo`, { waitUntil: 'networkidle' });
 await page.click('.feeling:has-text("En calma")');
-await page.click('button:has-text("Solo quiero mirar")');
-await page.click('button:has-text("Aquí estoy")');
-// demo seeds a passed date — the gentle review comes first
-await page.click('button:has-text("Lo veo después")');
+// Two-screen ritual: the ring lives on the destination step — no review interception.
 await page.waitForSelector('.ring', { timeout: 5000 });
 await page.waitForTimeout(900);
 await page.screenshot({ path: `${out}/circle.png` });

@@ -6,6 +6,9 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const page = await browser.newPage({ viewport: { width: 900, height: 800 } });
 await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
 await page.waitForURL('**/check-in**', { timeout: 5000 });
+// Fresh store greets with the one-time welcome first.
+await page.locator('button', { hasText: 'Empezar' }).click();
+await page.waitForTimeout(300);
 await page.locator('.skip').click();
 await page.waitForURL('**/ahora**', { timeout: 5000 });
 await page.waitForTimeout(400);

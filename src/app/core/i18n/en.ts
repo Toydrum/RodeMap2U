@@ -82,6 +82,10 @@ export const EN: Dict = {
     tinyAction: '2 little minutes',
   },
   checkIn: {
+    welcomeTitle: 'This is your forest',
+    welcomeBody1: 'Each area of your life can be a tree: school, a project, the people you love.',
+    welcomeBody2: 'Whatever you want to achieve grows as a branch, and what you achieve blooms. Nothing here expires or gets lost: it all grows at your pace.',
+    welcomeStart: 'Begin 🌱',
     title: 'Where do you feel you are?',
     subtitle: 'There are no right answers. Just you, today.',
     feelings: {
@@ -91,18 +95,13 @@ export const EN: Dict = {
       heavy: 'Heavy',
       stormy: 'Stormy',
     },
-    whereTitle: 'Which branch are you on today?',
-    whereSubtitle: 'Tap where you feel you are — or just go look at your forest.',
-    justLooking: 'Just looking',
-    noteLabel: 'Want to leave yourself a little note?',
+    noteExpander: 'Leave yourself a little note?',
     notePlaceholder: 'For future you…',
     pastNote: 'Your past self left you this',
-    done: "Here I am",
     skipAll: "I don't want to answer today",
-    withoutNote: 'Continue without a note',
     express: 'I feel the same as last time',
-    chooseTitle: 'Your forest surrounds you',
-    chooseSubtitle: 'Which tree would you like to enter today?',
+    destinationTitle: 'Where are you today?',
+    destinationSubtitle: "Tap the branch you're on or the tree you want to visit — or just go look around.",
     justForest: 'Just look at the forest',
   },
   trail: {
@@ -222,7 +221,7 @@ export const EN: Dict = {
   },
   branchFlow: {
     title: 'A good place to sprout',
-    subtitle: 'You are here, and something new can grow here. Up to three paths — one is enough.',
+    subtitle: 'You are here, and something new can grow here. Up to five paths — one is enough.',
     suggestionsLabel: 'What if we try…?',
     suggestions: {
       smaller: '🌱 Smaller',
@@ -238,6 +237,8 @@ export const EN: Dict = {
     },
     altPlaceholder: 'A possible path…',
     addAlt: 'Another path',
+    altCount: '({count} of {max})',
+    altsFull: 'Five paths ready — one is enough 🌿',
     confirm: 'Let them grow',
     celebrate: 'The tree kept growing 🌱',
   },
@@ -313,7 +314,7 @@ export const EN: Dict = {
       {
         icon: '🧭',
         title: 'The check-in',
-        body: 'When you arrive, the app asks "Where do you feel you are?". You pick your inner weather (☀️ to ⛈ — weather, not a grade), tap the branch where you feel you are, and leave yourself a little note if you like. Everything can be skipped with "I don\'t want to answer today", with zero consequence. For everyday use there is a shortcut: "I feel the same as last time" records your check-in in one tap and leaves you in Now, with your thread waiting. And if you tap something by mistake, every step has its "← Back". Want the full ritual again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints" — the little paw 🐾 next to the wind rose (also in Settings).',
+        body: 'The very first time, the forest introduces itself with a short welcome. After that, the ritual is just TWO screens. First: "Where do you feel you are?" — you pick your inner weather (☀️ to ⛈ — weather, not a grade), and if you like, you leave yourself a little note 💌 right there before tapping your weather. Second: "Where are you today?" — your liveliest branches as shortcuts, your trees in a circle, or "Just look at the forest". Everything can be skipped with "I don\'t want to answer today", with zero consequence. For everyday use there is a shortcut: "I feel the same as last time" records your check-in in one tap and leaves you in Now, with your thread waiting. And if you tap something by mistake, there is "← Back". Want the full ritual again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints" — the little paw 🐾 next to the wind rose (also in Settings).',
       },
       {
         icon: '🧶',
@@ -343,7 +344,7 @@ export const EN: Dict = {
       {
         icon: '🍂',
         title: 'When a date passes',
-        body: 'Nothing bad happens. The app tells you: "This date has passed — and you are still here. Breathe." And it shows you paths: keep going without a date, find another moment, or sprout new branches — with ready-made ideas so you never face a blank page (smaller, another time, a different way, with someone, rest). Your original goal becomes a golden knot: part of your story, never a strike-through.',
+        body: 'Nothing bad happens. The app tells you: "This date has passed — and you are still here. Breathe." And it shows you paths: keep going without a date, find another moment, or sprout new branches — with ready-made ideas so you never face a blank page (smaller, another time, a different way, with someone, rest). That conversation waits for you in Now, under its 🍂 notice — never in the middle of your check-in. Your original goal becomes a golden knot: part of your story, never a strike-through.',
       },
       {
         icon: '⏳',

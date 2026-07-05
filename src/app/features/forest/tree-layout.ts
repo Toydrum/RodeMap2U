@@ -31,6 +31,11 @@ export const SLOT_W = 78;
 export const LEVEL_H = 100;
 const JITTER_X = 8;
 const JITTER_Y = 8;
+/** Sibling count at which the two-row "vase" canopy kicks in. */
+const STAGGER_MIN = 4;
+/** Sibling count at which leaf slots tighten. */
+const COMPRESS_MIN = 6;
+const COMPRESS = 0.85;
 
 /** Small deterministic string hash (FNV-1a flavored). */
 export function hash(text: string): number {
@@ -48,32 +53,60 @@ export function layoutTree(
 ): TreeLayout {
   const points: LayoutPoint[] = [];
   const byId = new Map<string, LayoutPoint>();
-  let nextSlot = 0;
+  let cursor = 0;
 
-  const place = (node: TreeNode, depth: number, parent: LayoutPoint | null): LayoutPoint => {
+  const place = (
+    node: TreeNode,
+    depth: number,
+    parent: LayoutPoint | null,
+    sibIndex: number,
+    sibCount: number,
+  ): { point: LayoutPoint; baseX: number; leaves: number } => {
     const children = childrenOf(node);
     const point: LayoutPoint = { node, x: 0, y: 0, depth, parent };
 
+    // baseX is jitter-free so ancestors center on real mass, not on wobble.
+    let baseX: number;
+    let leaves: number;
     if (children.length === 0) {
-      point.x = nextSlot * SLOT_W;
-      nextSlot++;
+      baseX = cursor;
+      cursor += SLOT_W * (sibCount >= COMPRESS_MIN ? COMPRESS : 1);
+      leaves = 1;
     } else {
-      const placed = children.map((child) => place(child, depth + 1, point));
-      const first = placed[0].x;
-      const last = placed[placed.length - 1].x;
-      point.x = (first + last) / 2;
+      const placed = children.map((child, i) => place(child, depth + 1, point, i, children.length));
+      let mass = 0;
+      let sum = 0;
+      for (const p of placed) {
+        sum += p.baseX * p.leaves;
+        mass += p.leaves;
+      }
+      // Leaf-mass centroid: the hub sits under the canopy's visual weight
+      // (midpoint-of-extremes dragged lopsided parents into no-man's-land).
+      baseX = sum / mass;
+      leaves = mass;
     }
 
     const h = hash(node.id);
-    point.x += ((h % (JITTER_X * 2 + 1)) - JITTER_X);
-    point.y = -depth * LEVEL_H + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
+    point.x = baseX + ((h % (JITTER_X * 2 + 1)) - JITTER_X);
+
+    // Two-row "vase" canopy: big sibling groups alternate between two rows
+    // (S) and sweep their OUTER limbs upward (V) so wide fans stop being a
+    // flat horizontal line. Deterministic from (index, count); roots exempt.
+    let lift = 0;
+    if (parent !== null && sibCount >= STAGGER_MIN) {
+      const t = (sibIndex + 0.5) / sibCount;
+      const s = Math.min(30, 16 + sibCount * 1.8);
+      const v = Math.min(14, (sibCount - 3) * 2.5);
+      lift = Math.min(42, s * (sibIndex % 2) + v * Math.pow(Math.abs(2 * t - 1), 1.5));
+    }
+    point.y = -depth * LEVEL_H - lift + (((h >> 7) % (JITTER_Y * 2 + 1)) - JITTER_Y);
 
     points.push(point);
     byId.set(node.id, point);
-    return point;
+    return { point, baseX, leaves };
   };
 
-  for (const root of roots) place(root, 0, null);
+  for (let r = 0; r < roots.length; r++) place(roots[r], 0, null, r, roots.length);
 
   if (!points.length) {
     return { points, byId, width: 0, height: 0, minX: 0, minY: 0 };
@@ -108,15 +141,25 @@ export interface EdgeGeometry {
  * over compressed coordinates read as seaweed otherwise).
  */
 export function edgeGeometry(parent: LayoutPoint, child: LayoutPoint, bowScale = 1): EdgeGeometry {
+  const dx = child.x - parent.x;
   const dy = child.y - parent.y; // negative (upward)
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  // The bow rides the limb's PERPENDICULAR: vertical limbs render exactly as
+  // before (their perpendicular IS horizontal), while slanted limbs arc
+  // sideways instead of cusping into an S along the x axis.
+  const nx = -uy;
+  const ny = ux;
   const h = hash(child.node.id);
   const hand = h % 2 === 0 ? 1 : -1;
   const bowBase = 14 + (h % 18);
-  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18) * bowScale;
-  const c1x = parent.x + bow * 0.5;
-  const c1y = parent.y + dy * 0.45;
-  const c2x = child.x - bow * 0.7;
-  const c2y = child.y - dy * 0.35;
+  const shallow = 0.65 + 0.35 * Math.abs(uy); // near-horizontal limbs bow less
+  const bow = hand * bowBase * Math.max(0.5, 1.4 - child.depth * 0.18) * bowScale * shallow;
+  const c1x = parent.x + ux * (len * 0.45) + nx * (bow * 0.5);
+  const c1y = parent.y + uy * (len * 0.45) + ny * (bow * 0.5);
+  const c2x = parent.x + ux * (len * 0.65) - nx * (bow * 0.7);
+  const c2y = parent.y + uy * (len * 0.65) - ny * (bow * 0.7);
   return {
     d: `M ${parent.x} ${parent.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${child.x} ${child.y}`,
     c1x,

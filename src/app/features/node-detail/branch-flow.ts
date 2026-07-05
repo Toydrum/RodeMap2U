@@ -6,9 +6,12 @@ import { TreeNode } from '../../core/db/schema';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 
+/** Cap on alternative paths — visible in the UI as a counter, never silent. */
+const MAX_PATHS = 5;
+
 /**
  * The transformation moment: a goal whose moment passed becomes a branch
- * point. Up to three alternative paths; one is enough. The original stays
+ * point. Up to five alternative paths; one is enough. The original stays
  * in the tree, honored as part of the story.
  */
 @Component({
@@ -27,6 +30,15 @@ export class BranchFlow {
   private readonly toast = inject(ToastService);
 
   protected readonly alternatives = signal<string[]>(['']);
+  protected readonly maxPaths = MAX_PATHS;
+
+  /** "n de 5" — the cap speaks instead of silently hiding the button. */
+  protected altCountLabel(): string {
+    return this.i18n.fill(this.i18n.t().branchFlow.altCount, {
+      count: this.alternatives().length,
+      max: MAX_PATHS,
+    });
+  }
 
   /** The five honest ways a goal gets stuck — each prefills an editable path. */
   protected readonly suggestionKeys = ['smaller', 'otherTime', 'otherWay', 'together', 'rest'] as const;
@@ -53,7 +65,7 @@ export class BranchFlow {
     this.alternatives.update((alts) => {
       const emptyIdx = alts.findIndex((a) => !a.trim());
       if (emptyIdx !== -1) return alts.map((a, i) => (i === emptyIdx ? text : a));
-      if (alts.length < 3) return [...alts, text];
+      if (alts.length < MAX_PATHS) return [...alts, text];
       return alts;
     });
   }
@@ -63,7 +75,7 @@ export class BranchFlow {
   }
 
   protected addAlt(): void {
-    if (this.alternatives().length < 3) this.alternatives.update((alts) => [...alts, '']);
+    if (this.alternatives().length < MAX_PATHS) this.alternatives.update((alts) => [...alts, '']);
   }
 
   protected valid(): boolean {

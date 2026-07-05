@@ -8,6 +8,7 @@
   (pointerup)="onPointerUp($event)"
   (pointercancel)="onPointerUp($event)"
   (wheel)="onWheel($event)"
+  (click)="onCanvasClick($event)"
 >
   <g [attr.transform]="transform()">
     <!-- Ground under the roots: wide soft knoll, faded edges -->
@@ -142,9 +143,9 @@
         [attr.aria-label]="nodeLabel(point)"
         [attr.tabindex]="focusedId() === point.node.id ? 0 : -1"
         (keydown)="onNodeKeydown($event, point)"
-        (click)="onNodeClick(point)"
       >
-        <!-- Invisible hit area, counter-scaled to stay ≥44px on screen -->
+        <!-- Cosmetic hover zone — actual taps resolve at the canvas level
+             to the NEAREST node, so discs can never swallow a neighbor. -->
         <circle class="hit" [attr.r]="hitRadius()" fill="transparent" />
 
         <!-- Focus ring (drawn — SVG has no native outline) -->
@@ -251,6 +252,8 @@
             (keydown.enter)="$event.stopPropagation(); plantRequested.emit(point.node)"
             tabindex="-1"
           >
+            <!-- Counter-scaled so the bud stays finger-sized when zoomed out -->
+            <circle class="bud-hit" [attr.r]="budHitRadius()" fill="transparent" />
             <circle r="14" class="bud-bg" />
             <path d="M -5.5 0 H 5.5 M 0 -5.5 V 5.5" class="bud-plus" />
           </g>
@@ -265,7 +268,7 @@
   <button type="button" class="btn btn-soft zoom-btn" (click)="zoomBy(1 / 1.3)" [attr.aria-label]="i18n.t().tree.zoomOut">−</button>
 </div>
 
-<button type="button" class="btn btn-soft center-btn" (click)="centerOnCurrent()">
+<button type="button" class="btn btn-soft center-btn" (click)="fitTree()">
   ⌖ {{ i18n.t().tree.center }}
 </button>
 

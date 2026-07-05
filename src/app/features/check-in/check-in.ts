@@ -1,12 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { NavigationExtras, Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { Feeling, Tree, TreeNode } from '../../core/db/schema';
-import { DateReview } from './date-review';
 import { MiniTree } from '../forest/mini-tree';
 
 const FEELINGS: { key: Feeling; emoji: string }[] = [
@@ -17,20 +16,24 @@ const FEELINGS: { key: Feeling; emoji: string }[] = [
   { key: 'stormy', emoji: '⛈' },
 ];
 
-type Step = 'feeling' | 'where' | 'note' | 'review' | 'choose';
+type Step = 'welcome' | 'feeling' | 'destination';
 
 /** Past this many trees the circle interleaves two radii and shrinks. */
 const RING_COMFORT = 9;
 
+/** Branch shortcuts shown on the destination step — a hand, not a catalog. */
+const DESTINATION_BRANCHES = 4;
+
 /**
- * The opening ritual: "¿Dónde sientes que estás?"
- * Two gentle questions and an optional note — skippable at every step,
- * no guilt attached. If any gentle dates have passed, they get one soft
- * conversation at the end.
+ * The opening ritual, two screens flat: how are you → where to.
+ * (Plus a one-time welcome the very first time the forest greets someone.)
+ * The optional notita folds into the first screen; the second merges the old
+ * branch picker and the circle of trees. Skippable at every step, no guilt.
+ * Passed dates never interrupt here — Ahora's banner is their single home.
  */
 @Component({
   selector: 'app-check-in',
-  imports: [DateReview, MiniTree],
+  imports: [MiniTree],
   templateUrl: './check-in.html',
   styleUrl: './check-in.scss',
 })
@@ -42,34 +45,29 @@ export class CheckInPage {
   private readonly settings = inject(SettingsService);
   private readonly router = inject(Router);
 
-  /** Express path taken — after a pending review, go straight to the meadow. */
-  private readonly expressExit = signal(false);
-
   protected readonly feelings = FEELINGS;
   protected readonly step = signal<Step>('feeling');
   protected readonly feeling = signal<Feeling | null>(null);
-  protected readonly whereNode = signal<TreeNode | null>(null);
   protected readonly note = signal('');
+  protected readonly noteOpen = signal(false);
 
-  /** Candidate "where I am" nodes: active ones, grouped by tree, capped. */
+  private readonly noteBox = viewChild<ElementRef<HTMLTextAreaElement>>('noteBox');
+
+  constructor() {
+    if (!this.settings.settings().onboarded) this.step.set('welcome');
+  }
+
+  /** Freshest live branches across the forest — shortcuts on the destination step. */
   protected readonly candidates = computed(() => {
     const result: { treeName: string; accent: string; node: TreeNode }[] = [];
     for (const tree of this.trees.active()) {
-      const nodes = (this.nodes.byTree().get(tree.id) ?? [])
-        .filter((n) => n.status === 'growing' || n.status === 'seed')
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .slice(0, 4);
-      for (const node of nodes) {
-        result.push({ treeName: tree.name, accent: tree.accent, node });
+      for (const node of this.nodes.byTree().get(tree.id) ?? []) {
+        if (node.status === 'growing' || node.status === 'seed') {
+          result.push({ treeName: tree.name, accent: tree.accent, node });
+        }
       }
     }
-    return result.slice(0, 12);
-  });
-
-  /** Only dates from trees still standing in the forest — archived ones rest in peace. */
-  protected readonly pendingReviews = computed(() => {
-    const activeIds = new Set(this.trees.active().map((t) => t.id));
-    return this.nodes.needsDateReview().filter((n) => activeIds.has(n.treeId));
+    return result.sort((a, b) => b.node.updatedAt - a.node.updatedAt).slice(0, DESTINATION_BRANCHES);
   });
 
   /** The freshest little note — a letter your past self left for today. */
@@ -87,59 +85,41 @@ export class CheckInPage {
     return new Date(letter.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'long' });
   }
 
-  protected pickFeeling(feeling: Feeling): void {
-    this.feeling.set(feeling);
-    this.step.set(this.candidates().length ? 'where' : 'note');
+  protected begin(): void {
+    this.step.set('feeling');
   }
 
-  protected pickWhere(node: TreeNode | null): void {
-    this.whereNode.set(node);
-    this.step.set('note');
+  protected pickFeeling(feeling: Feeling): void {
+    this.feeling.set(feeling);
+    if (this.trees.active().length) {
+      this.step.set('destination');
+    } else {
+      // Empty forest: nothing to choose from — land planting, sheet already open.
+      void this.depart(['/forest'], { queryParams: { plant: 1 } });
+    }
+  }
+
+  protected openNote(): void {
+    this.noteOpen.set(true);
+    setTimeout(() => this.noteBox()?.nativeElement.focus(), 30);
   }
 
   /** A mis-tap is not a commitment — steps walk back, choices stay. */
   protected stepBack(): void {
-    const s = this.step();
-    if (s === 'note') this.step.set(this.candidates().length ? 'where' : 'feeling');
-    else if (s === 'where') this.step.set('feeling');
+    if (this.step() === 'destination') this.step.set('feeling');
   }
 
   protected feelingEmoji(feeling: Feeling): string {
     return FEELINGS.find((f) => f.key === feeling)?.emoji ?? '';
   }
 
-  /** One tap: same weather as last time, no note, no place. Pending
-   *  date-reviews still get their word — then straight back to Ahora. */
+  /** One tap: same weather as last time, no note, no place — back to Ahora. */
   protected async expressCheckIn(): Promise<void> {
     const last = this.checkins.latest();
     if (!last) return;
-    this.feeling.set(last.feeling);
     await this.checkins.record(last.feeling, { note: '' });
     await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
-    if (this.pendingReviews().length) {
-      this.expressExit.set(true);
-      this.step.set('review');
-    } else {
-      void this.router.navigate(['/ahora']);
-    }
-  }
-
-  protected async finish(): Promise<void> {
-    const feeling = this.feeling();
-    if (feeling) {
-      await this.checkins.record(feeling, {
-        note: this.note().trim(),
-        treeId: this.whereNode()?.treeId ?? null,
-        nodeId: this.whereNode()?.id ?? null,
-      });
-    }
-    await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
-
-    if (this.pendingReviews().length) {
-      this.step.set('review');
-    } else {
-      this.leave();
-    }
+    void this.router.navigate(['/ahora']);
   }
 
   /** "Hoy no quiero responder" — always available, never penalized.
@@ -149,30 +129,38 @@ export class CheckInPage {
     void this.router.navigate(['/ahora']);
   }
 
-  /**
-   * "Aquí estoy" earns a moment: if you already chose a branch, we go there;
-   * otherwise your trees gather in a circle and you pick where to enter.
-   * With an empty forest the button reads "plant my first tree" instead,
-   * and lands with the planting sheet already open.
-   */
-  protected leave(): void {
-    if (this.expressExit()) {
-      void this.router.navigate(['/ahora']);
-      return;
+  /** Every real departure records the check-in once, then travels. */
+  private async depart(commands: unknown[], extras?: NavigationExtras, where?: TreeNode | null): Promise<void> {
+    const feeling = this.feeling();
+    if (feeling) {
+      await this.checkins.record(feeling, {
+        note: this.note().trim(),
+        treeId: where?.treeId ?? null,
+        nodeId: where?.id ?? null,
+      });
     }
-    const where = this.whereNode();
-    if (where) {
-      void this.router.navigate(['/tree', where.treeId]);
-    } else if (this.trees.active().length) {
-      this.step.set('choose');
-    } else {
-      void this.router.navigate(['/forest'], { queryParams: { plant: 1 } });
-    }
+    await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });
+    void this.router.navigate(commands, extras);
+  }
+
+  /** Destination: a branch shortcut — the 📍 moves with you (record handles it). */
+  protected pickBranch(node: TreeNode): void {
+    void this.depart(['/tree', node.treeId], undefined, node);
+  }
+
+  /** Destination: a whole tree from the circle. */
+  protected enterTree(tree: Tree): void {
+    void this.depart(['/tree', tree.id]);
+  }
+
+  /** Destination: just wander the meadow. */
+  protected goForest(): void {
+    void this.depart(['/forest']);
   }
 
   protected readonly ringCrowded = computed(() => this.trees.active().length > RING_COMFORT);
 
-  /** Circular placement for the choose ritual. Past RING_COMFORT trees the
+  /** Circular placement for the tree circle. Past RING_COMFORT trees the
    *  circle becomes two interleaved petal rings (outer/inner) and the
    *  miniatures shrink — deterministic, viewport-safe up to ~20 trees. */
   protected ringTransform(index: number): string {
@@ -189,13 +177,5 @@ export class CheckInPage {
   /** Entrance cascade, capped so a big forest doesn't feel like waiting. */
   protected enterDelay(index: number): string {
     return Math.min(index, 12) * 70 + 'ms';
-  }
-
-  protected enterTree(tree: Tree): void {
-    void this.router.navigate(['/tree', tree.id]);
-  }
-
-  protected goForest(): void {
-    void this.router.navigate(['/forest']);
   }
 }

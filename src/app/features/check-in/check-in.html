@@ -1,5 +1,17 @@
 <div class="ritual">
   @switch (step()) {
+    @case ('welcome') {
+      <section class="stage welcome-stage" aria-live="polite">
+        <img class="welcome-logo" src="icons/logo.svg" alt="" width="76" height="76" />
+        <h1>{{ i18n.t().checkIn.welcomeTitle }}</h1>
+        <p class="sub welcome-line">{{ i18n.t().checkIn.welcomeBody1 }}</p>
+        <p class="sub welcome-line">{{ i18n.t().checkIn.welcomeBody2 }}</p>
+        <button type="button" class="btn btn-primary big" (click)="begin()">
+          {{ i18n.t().checkIn.welcomeStart }}
+        </button>
+      </section>
+    }
+
     @case ('feeling') {
       <section class="stage" aria-live="polite">
         <h1>{{ i18n.t().checkIn.title }}</h1>
@@ -26,6 +38,23 @@
           }
         </div>
 
+        <!-- The notita, folded in: it used to be a whole screen of its own. -->
+        @if (!noteOpen()) {
+          <button type="button" class="btn btn-ghost note-toggle" (click)="openNote()">
+            💌 {{ i18n.t().checkIn.noteExpander }} <span class="opt">({{ i18n.t().common.optional }})</span>
+          </button>
+        } @else {
+          <textarea
+            #noteBox
+            class="note"
+            [value]="note()"
+            (input)="note.set($any($event.target).value)"
+            [placeholder]="i18n.t().checkIn.notePlaceholder"
+            maxlength="240"
+            rows="2"
+          ></textarea>
+        }
+
         @if (checkins.latest(); as last) {
           <button type="button" class="btn btn-soft express" (click)="expressCheckIn()">
             {{ feelingEmoji(last.feeling) }} {{ i18n.t().checkIn.express }}
@@ -37,72 +66,32 @@
       </section>
     }
 
-    @case ('where') {
-      <section class="stage" aria-live="polite">
+    @case ('destination') {
+      <section class="stage destination-stage" aria-live="polite">
         <button type="button" class="btn btn-ghost step-back" (click)="stepBack()">
           ← {{ i18n.t().common.back }}
         </button>
-        <h1>{{ i18n.t().checkIn.whereTitle }}</h1>
-        <p class="sub">{{ i18n.t().checkIn.whereSubtitle }}</p>
+        <h1>{{ i18n.t().checkIn.destinationTitle }}</h1>
+        <p class="sub">{{ i18n.t().checkIn.destinationSubtitle }}</p>
 
-        <div class="where-grid">
-          @for (candidate of candidates(); track candidate.node.id) {
-            <button
-              type="button"
-              class="where card"
-              [style.border-left-color]="'var(--accent-' + candidate.accent + ')'"
-              (click)="pickWhere(candidate.node)"
-            >
-              <span class="tree-name">{{ candidate.treeName }}</span>
-              <span class="node-name">{{ candidate.node.title }}</span>
-              @if (candidate.node.trigger) {
-                <span class="node-trigger">🧶 {{ candidate.node.trigger }}</span>
-              }
-            </button>
-          }
-        </div>
-
-        <button type="button" class="btn btn-soft" (click)="pickWhere(null)">
-          👀 {{ i18n.t().checkIn.justLooking }}
-        </button>
-      </section>
-    }
-
-    @case ('note') {
-      <section class="stage" aria-live="polite">
-        <button type="button" class="btn btn-ghost step-back" (click)="stepBack()">
-          ← {{ i18n.t().common.back }}
-        </button>
-        <h1>{{ i18n.t().checkIn.noteLabel }}</h1>
-        <p class="sub">({{ i18n.t().common.optional }})</p>
-
-        <textarea
-          class="note"
-          autofocus
-          [value]="note()"
-          (input)="note.set($any($event.target).value)"
-          [placeholder]="i18n.t().checkIn.notePlaceholder"
-          maxlength="240"
-          rows="3"
-        ></textarea>
-
-        <button type="button" class="btn btn-primary big" (click)="finish()">
-          🌱 {{ trees.active().length ? i18n.t().checkIn.done : i18n.t().forest.plantFirst }}
-        </button>
-        <button type="button" class="btn btn-ghost skip" (click)="finish()">
-          {{ i18n.t().checkIn.withoutNote }}
-        </button>
-      </section>
-    }
-
-    @case ('review') {
-      <app-date-review [nodesToReview]="pendingReviews()" (closed)="leave()" />
-    }
-
-    @case ('choose') {
-      <section class="stage choose-stage" aria-live="polite">
-        <h1>{{ i18n.t().checkIn.chooseTitle }}</h1>
-        <p class="sub">{{ i18n.t().checkIn.chooseSubtitle }}</p>
+        @if (candidates().length) {
+          <div class="where-grid">
+            @for (candidate of candidates(); track candidate.node.id) {
+              <button
+                type="button"
+                class="where card"
+                [style.border-left-color]="'var(--accent-' + candidate.accent + ')'"
+                (click)="pickBranch(candidate.node)"
+              >
+                <span class="tree-name">{{ candidate.treeName }}</span>
+                <span class="node-name">{{ candidate.node.title }}</span>
+                @if (candidate.node.trigger) {
+                  <span class="node-trigger">🧶 {{ candidate.node.trigger }}</span>
+                }
+              </button>
+            }
+          </div>
+        }
 
         <div class="ring" [class.crowded]="ringCrowded()" [style.--ring-count]="trees.active().length">
           <button type="button" class="ring-center" (click)="goForest()">

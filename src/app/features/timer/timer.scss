@@ -38,6 +38,12 @@
     white-space: nowrap;
     cursor: pointer;
   }
+
+  /* Which tree the branch belongs to — a naked "Sub 2" says nothing. */
+  .chip-tree {
+    color: var(--text-faint);
+    font-size: 0.78rem;
+  }
 }
 
 .ring-wrap {

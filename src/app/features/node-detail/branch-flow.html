@@ -29,10 +29,12 @@
       </div>
     }
 
-    @if (alternatives().length < 3) {
+    @if (alternatives().length < maxPaths) {
       <button type="button" class="btn btn-ghost" (click)="addAlt()">
-        + {{ i18n.t().branchFlow.addAlt }}
+        + {{ i18n.t().branchFlow.addAlt }} <span class="alt-count">{{ altCountLabel() }}</span>
       </button>
+    } @else {
+      <p class="alt-count full">{{ i18n.t().branchFlow.altsFull }}</p>
     }
 
     <div class="row">

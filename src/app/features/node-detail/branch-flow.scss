@@ -33,6 +33,16 @@
     margin-bottom: 1.1rem;
   }
 
+  /* The cap speaks: "(n de 5)" beside the add button, a quiet line at 5. */
+  .alt-count {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+
+    &.full {
+      margin: 0.2rem 0 0;
+    }
+  }
+
   .suggest-label {
     font-size: 0.88rem;
     font-weight: 700;
