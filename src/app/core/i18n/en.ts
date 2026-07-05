@@ -144,6 +144,22 @@ export const EN: Dict = {
     plotHint: 'Press and hold to drag and arrange your forest (or use the arrow keys)',
     moveNeedsTwo: 'Your tree is on its own — plant another and you can arrange them 🌱',
   },
+  sow: {
+    toggle: 'Several at once',
+    label: 'Your little branches, one per line',
+    placeholder: 'Pick a song\nRehearse it\n\tRecord a take',
+    hint: 'Each line sows a branch. Indent with Tab (or two spaces) to hang it from the line above — paste your whole list if you already have one.',
+    sowCta: 'Sow 🌱',
+    burstInvite: 'Your tree looks ready — shall we grow one little branch? 🌱',
+    startersTitle: 'Start from an example?',
+    startersHint: "They are yours: rename everything, prune what you don't need.",
+    startersBlank: "I'd rather start blank",
+    starters: {
+      school: { name: 'School', b1: 'My favorite subject', b2: "This week's homework" },
+      home: { name: 'My home', b1: 'My tidy little space', b2: 'Help with something small' },
+      project: { name: 'A project', b1: 'The first idea', b2: 'The first tiny step' },
+    },
+  },
   status: {
     seed: 'Seed',
     growing: 'Growing',
@@ -343,7 +359,7 @@ export const EN: Dict = {
       {
         icon: '🌱',
         title: 'Planting',
-        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then.',
+        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. Already have the whole plan in your head? In the planting sheet, "Several at once" opens a little box where every line sows a branch (indent = child branch) — paste your whole list and the tree sprouts at once. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then.',
       },
       {
         icon: '🗓',

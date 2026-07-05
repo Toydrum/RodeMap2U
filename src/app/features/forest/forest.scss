@@ -597,3 +597,52 @@
     transform: scale(1.12);
   }
 }
+
+/* --------------------------- starter saplings on the empty meadow */
+
+.starters {
+  margin-top: 1.7rem;
+
+  .starters-title {
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+  }
+
+  .starter-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .starter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    width: 108px;
+    padding: 0.9rem 0.5rem;
+    cursor: pointer;
+    border-width: 2px;
+    transition: transform 0.18s ease, border-color 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+    }
+
+    .starter-emoji {
+      font-size: 1.7rem;
+    }
+
+    .starter-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+  }
+
+  .starters-blank {
+    font-size: 0.85rem;
+  }
+}

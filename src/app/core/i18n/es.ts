@@ -146,6 +146,22 @@ export const ES = {
     plotHint: 'Mantén presionado y arrastra para acomodar tu bosque (o usa las flechas del teclado)',
     moveNeedsTwo: 'Tu árbol está solito — planta otro y podrás acomodarlos entre sí 🌱',
   },
+  sow: {
+    toggle: 'Varios a la vez',
+    label: 'Tus ramitas, una por línea',
+    placeholder: 'Elegir canción\nEnsayarla\n\tGrabar un ensayo',
+    hint: 'Cada línea siembra una ramita. Sangra con Tab (o dos espacios) para colgarla de la línea de arriba — pega tu lista completa si ya la traes.',
+    sowCta: 'Sembrar 🌱',
+    burstInvite: 'Tu árbol se ve listo — ¿le crecemos una ramita? 🌱',
+    startersTitle: '¿Empezamos con un ejemplo?',
+    startersHint: 'Son tuyos: renómbralo todo, poda lo que sobre.',
+    startersBlank: 'Prefiero empezar en blanco',
+    starters: {
+      school: { name: 'La escuela', b1: 'Mi materia favorita', b2: 'La tarea de esta semana' },
+      home: { name: 'Mi casa', b1: 'Mi espacio ordenadito', b2: 'Ayudar en algo chiquito' },
+      project: { name: 'Un proyecto', b1: 'La primera idea', b2: 'El primer pasito' },
+    },
+  },
   status: {
     seed: 'Semilla',
     growing: 'Creciendo',
@@ -345,7 +361,7 @@ export const ES = {
       {
         icon: '🌱',
         title: 'Plantar',
-        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego.',
+        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. ¿Ya traes el plan completo en la cabeza? En la hoja de plantar, «Varios a la vez» abre una cajita donde cada línea siembra una ramita (con sangría = ramita hija) — pega tu lista entera y el árbol brota de golpe. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego.',
       },
       {
         icon: '🗓',

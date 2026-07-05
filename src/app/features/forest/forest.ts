@@ -4,6 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash, taperedRibbon } from './tree-layout';
@@ -87,6 +88,11 @@ export class ForestPage {
   /** Tree pending archive (confirm sheet open). */
   protected readonly archiving = signal<Tree | null>(null);
   private readonly toast = inject(ToastService);
+  private readonly settings = inject(SettingsService);
+
+  /** Prunable example saplings on the empty meadow — never a blank canvas. */
+  protected readonly starterKinds = ['school', 'home', 'project'] as const;
+  protected readonly startersHidden = computed(() => this.settings.settings().startersHidden);
 
   private readonly checkins = inject(CheckinsRepo);
   private readonly route = inject(ActivatedRoute);
@@ -368,5 +374,22 @@ export class ForestPage {
     await this.trees.setCurrentNode(tree, root.id);
     this.newName.set('');
     this.creating.set(false);
+  }
+
+  /** A starter sapling: a young tree with two example branches — content to
+   *  prune and rename, never a form to fill. */
+  protected async plantStarter(kind: 'school' | 'home' | 'project'): Promise<void> {
+    const s = this.i18n.t().sow.starters[kind];
+    const accent: AccentToken = kind === 'school' ? 'sky' : kind === 'home' ? 'clay' : 'moss';
+    const tree = await this.trees.create(s.name, accent);
+    const root = await this.nodes.plant(tree.id, null, { title: s.name });
+    await this.trees.setCurrentNode(tree, root.id);
+    await this.nodes.plant(tree.id, root.id, { title: s.b1 });
+    await this.nodes.plant(tree.id, root.id, { title: s.b2 });
+  }
+
+  /** "Prefiero empezar en blanco" — the examples bow out for good. */
+  protected hideStarters(): void {
+    void this.settings.patch({ startersHidden: true });
   }
 }

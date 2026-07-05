@@ -129,6 +129,8 @@ export interface Settings {
   whispersEnabled: boolean;
   whisperRhythm: 'often' | 'sometimes' | 'daily' | 'surprise';
   lastWhisperAt: number | null;
+  /** "Prefiero empezar en blanco" — hides the starter saplings for good. */
+  startersHidden: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -145,6 +147,7 @@ export const DEFAULT_SETTINGS: Settings = {
   whispersEnabled: false,
   whisperRhythm: 'sometimes',
   lastWhisperAt: null,
+  startersHidden: false,
 };
 
 /** Versioned backup file format. */

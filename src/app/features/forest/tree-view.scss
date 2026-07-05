@@ -180,3 +180,34 @@
 .page {
   padding: 2rem 0;
 }
+
+/* --------------------------------- "Varios a la vez": the planner's door */
+
+.sow-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin: 0.1rem 0 0.7rem;
+
+  input {
+    accent-color: var(--primary);
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}
+
+.sow-box {
+  width: 100%;
+  resize: vertical;
+  tab-size: 2;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}

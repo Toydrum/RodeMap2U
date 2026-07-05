@@ -229,6 +229,25 @@
         <button type="button" class="btn btn-primary" (click)="creating.set(true)">
           {{ i18n.t().forest.plantFirst }}
         </button>
+
+        <!-- Never a blank canvas: young example trees, ready to prune. -->
+        @if (!startersHidden()) {
+          <div class="starters">
+            <p class="starters-title">{{ i18n.t().sow.startersTitle }}</p>
+            <div class="starter-row">
+              @for (kind of starterKinds; track kind) {
+                <button type="button" class="starter card" (click)="plantStarter(kind)">
+                  <span class="starter-emoji" aria-hidden="true">{{ kind === 'school' ? '🎒' : kind === 'home' ? '🏡' : '🚀' }}</span>
+                  <span class="starter-name">{{ i18n.t().sow.starters[kind].name }}</span>
+                </button>
+              }
+            </div>
+            <p class="hint">{{ i18n.t().sow.startersHint }}</p>
+            <button type="button" class="btn btn-ghost starters-blank" (click)="hideStarters()">
+              {{ i18n.t().sow.startersBlank }}
+            </button>
+          </div>
+        }
         <a routerLink="/guide" class="first-time">{{ i18n.t().guide.firstTime }}</a>
       </div>
     }

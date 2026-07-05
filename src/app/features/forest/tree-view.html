@@ -58,31 +58,56 @@
     </div>
 
     @if (planting()) {
-      <div class="sheet-backdrop" (click)="planting.set(null)">
-        <form class="sheet card" appSheet (sheetClose)="planting.set(null)" (click)="$event.stopPropagation()" (submit)="$event.preventDefault(); plant()">
+      <div class="sheet-backdrop" (click)="closePlanting()">
+        <form class="sheet card" appSheet (sheetClose)="closePlanting()" (click)="$event.stopPropagation()" (submit)="$event.preventDefault(); sowMode() ? sow() : plant()">
           <h2>{{ plantSheetTitle() }}</h2>
-          <div class="field">
-            <label for="root-title">{{ i18n.t().node.titleLabel }}</label>
-            <input
-              #plantInput
-              id="root-title"
-              type="text"
-              [value]="newTitle()"
-              (input)="newTitle.set($any($event.target).value)"
-              [placeholder]="i18n.t().node.titlePlaceholder"
-              maxlength="80"
-              autofocus
-            >
-          </div>
+
+          @if (!sowMode()) {
+            <div class="field">
+              <label for="root-title">{{ i18n.t().node.titleLabel }}</label>
+              <input
+                #plantInput
+                id="root-title"
+                type="text"
+                [value]="newTitle()"
+                (input)="newTitle.set($any($event.target).value)"
+                [placeholder]="i18n.t().node.titlePlaceholder"
+                maxlength="80"
+                autofocus
+              >
+            </div>
+          } @else {
+            <div class="field">
+              <label for="sow-box">{{ i18n.t().sow.label }}</label>
+              <textarea
+                id="sow-box"
+                class="sow-box"
+                [value]="sowText()"
+                (input)="sowText.set($any($event.target).value)"
+                (keydown.tab)="$event.preventDefault(); insertTab($any($event.target))"
+                [placeholder]="i18n.t().sow.placeholder"
+                rows="6"
+                autofocus
+              ></textarea>
+              <span class="hint">{{ i18n.t().sow.hint }}</span>
+            </div>
+          }
+
+          <!-- The planner's door: dump a whole list; growers never open it. -->
+          <label class="sow-toggle">
+            <input type="checkbox" [checked]="sowMode()" (change)="sowMode.set(!sowMode())">
+            {{ i18n.t().sow.toggle }}
+          </label>
+
           @if (plantedCount()) {
             <p class="planted-flash">🌱 {{ i18n.plural(plantedCount(), i18n.t().tree.plantedCount) }}</p>
           }
           <div class="row">
-            <button type="button" class="btn btn-ghost" (click)="planting.set(null)">
+            <button type="button" class="btn btn-ghost" (click)="closePlanting()">
               {{ plantedCount() ? i18n.t().common.done : i18n.t().common.cancel }}
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="!newTitle().trim()">
-              {{ i18n.t().tree.plant }}
+            <button type="submit" class="btn btn-primary" [disabled]="sowMode() ? !sowText().trim() : !newTitle().trim()">
+              {{ sowMode() ? i18n.t().sow.sowCta : i18n.t().tree.plant }}
             </button>
           </div>
         </form>

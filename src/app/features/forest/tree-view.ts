@@ -4,6 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
+import { FocusSessionService } from '../../core/focus-session.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
 import { TreeCanvas } from './tree-canvas';
@@ -60,8 +61,15 @@ export class TreeViewPage {
   protected readonly newTitle = signal('');
   /** Little branches planted since this sheet opened — a celebration, not a counter. */
   protected readonly plantedCount = signal(0);
+  /** "Varios a la vez": one line = one branch; indent = child of the line above. */
+  protected readonly sowMode = signal(false);
+  protected readonly sowText = signal('');
   private readonly plantInput = viewChild<ElementRef<HTMLInputElement>>('plantInput');
   private readonly toast = inject(ToastService);
+  private readonly focus = inject(FocusSessionService);
+  /** First branch planted this sheet session — the burst invitation's door. */
+  private burstFirstId: string | null = null;
+  private burstInvited = false;
 
   /** Dates on THIS tree wanting a word. */
   protected readonly pendingReviews = computed(() =>
@@ -95,7 +103,25 @@ export class TreeViewPage {
   protected openPlanting(parent: TreeNode | null): void {
     this.plantedCount.set(0);
     this.newTitle.set('');
+    this.sowText.set('');
+    this.burstFirstId = null;
     this.planting.set({ parent });
+  }
+
+  /** Closing the sheet after a real planting burst earns ONE gentle
+   *  invitation to touch something — an offer, never a nag. */
+  protected closePlanting(): void {
+    const count = this.plantedCount();
+    const firstId = this.burstFirstId;
+    this.planting.set(null);
+    if (count >= 6 && firstId && !this.burstInvited && !this.focus.active()) {
+      this.burstInvited = true;
+      this.toast.show({
+        message: this.i18n.t().sow.burstInvite,
+        actionLabel: this.i18n.t().whispers.tinyAction,
+        action: () => void this.focus.start(firstId, 2),
+      });
+    }
   }
 
   /** The sheet stays open: name, Enter, name, Enter — the tree grows behind it. */
@@ -106,9 +132,55 @@ export class TreeViewPage {
     if (!tree || !target || !title) return;
     const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, { title });
     if (!tree.currentNodeId) await this.trees.setCurrentNode(tree, node.id);
+    this.burstFirstId ??= node.id;
     this.newTitle.set('');
     this.plantedCount.update((c) => c + 1);
     this.plantInput()?.nativeElement.focus();
+  }
+
+  /** Brain-dump planting: every line sows a branch; leading tabs (or pairs
+   *  of spaces) hang it from the nearest shallower line above. Paste-friendly. */
+  protected async sow(): Promise<void> {
+    const tree = this.tree();
+    const target = this.planting();
+    if (!tree || !target) return;
+    const lines = this.sowText()
+      .split('\n')
+      .map((raw) => {
+        const lead = raw.match(/^[\t ]*/)![0];
+        const tabs = lead.split('\t').length - 1;
+        const spacePairs = Math.floor(lead.replaceAll('\t', '').length / 2);
+        return { depth: tabs + spacePairs, title: raw.trim() };
+      })
+      .filter((l) => l.title);
+    if (!lines.length) return;
+
+    const stack: { depth: number; node: TreeNode }[] = [];
+    let count = 0;
+    for (const line of lines) {
+      while (stack.length && stack[stack.length - 1].depth >= line.depth) stack.pop();
+      const parent = stack.length ? stack[stack.length - 1].node : (target.parent ?? null);
+      const node = await this.nodes.plant(tree.id, parent?.id ?? null, { title: line.title });
+      this.burstFirstId ??= node.id;
+      stack.push({ depth: line.depth, node });
+      count++;
+    }
+    const fresh = this.tree();
+    if (fresh && !fresh.currentNodeId && this.burstFirstId) {
+      const first = this.nodes.byId().get(this.burstFirstId) as TreeNode | undefined;
+      if (first) await this.trees.setCurrentNode(fresh, first.id);
+    }
+    this.sowText.set('');
+    this.plantedCount.update((c) => c + count);
+  }
+
+  /** Tab indents inside the sowing box instead of walking focus away. */
+  protected insertTab(el: HTMLTextAreaElement): void {
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? start;
+    el.value = el.value.slice(0, start) + '\t' + el.value.slice(end);
+    el.selectionStart = el.selectionEnd = start + 1;
+    this.sowText.set(el.value);
   }
 
   protected notFoundGoHome(): void {
