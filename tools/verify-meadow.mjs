@@ -130,5 +130,40 @@ const dotsM = await page.locator('.clearing-dots .dot').count();
 const fits = mob.every((r) => r.left >= -6 && r.right <= 396 && r.top > 200);
 console.log(`F mobile: visible=${mob.length} dots=${dotsM} all-inside=${fits} | OK=${mob.length === 4 && dotsM === 4 && fits}`);
 
+// G — DRY FEET on a WIDE window (Hector's case): no trunk stands in the river.
+await page.setViewportSize({ width: 1700, height: 800 });
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(700);
+const wet = await page.evaluate(() => {
+  const w = innerWidth;
+  const h = innerHeight;
+  const sceneH = Math.min(460, 0.58 * h);
+  const scale = Math.max(w / 1000, sceneH / 260);
+  const visibleVb = w / scale;
+  const sceneBottom = document.querySelector('.scene').getBoundingClientRect().bottom;
+  const offenders = [];
+  for (const p of document.querySelectorAll('.plot')) {
+    const r = p.getBoundingClientRect();
+    const cx = (r.left + r.right) / 2;
+    const trunkBaseY = r.bottom - 66 * 0.9; // approx trunk base above the sign
+    const xVb = 500 - visibleVb / 2 + (cx / w) * visibleVb;
+    let best = { d: Infinity, y: 150, half: 17 };
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24;
+      const u = 1 - t;
+      const bx = u * u * u * 1060 + 3 * u * u * t * 700 + 3 * u * t * t * 400 + t * t * t * -60;
+      const by = u * u * u * 96 + 3 * u * u * t * 168 + 3 * u * t * t * 76 + t * t * t * 208;
+      if (Math.abs(bx - xVb) < best.d) best = { d: Math.abs(bx - xVb), y: by, half: (22 + 24 * t) / 2 };
+    }
+    const waterTopY = sceneBottom - (260 - (best.y - best.half)) * scale;
+    const waterBottomY = sceneBottom - (260 - (best.y + best.half)) * scale;
+    if (trunkBaseY > waterTopY && trunkBaseY < waterBottomY) {
+      offenders.push(p.dataset.treeId?.slice(0, 6));
+    }
+  }
+  return offenders;
+});
+console.log(`G dry feet @1700px: wet-trunks=[${wet.join(' ')}] | OK=${wet.length === 0}`);
+
 await browser.close();
 console.log('meadow done');

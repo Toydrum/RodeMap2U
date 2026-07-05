@@ -106,6 +106,12 @@ export class ForestPage {
       void this.router.navigate([], { queryParams: params, replaceUrl: true });
     }
 
+    // The stream's on-screen geometry moves with the window — keep the
+    // dry-feet clamp honest across resizes.
+    const onResize = () => this.viewportSize.set({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    inject(DestroyRef).onDestroy(() => window.removeEventListener('resize', onResize));
+
     // Chromium treats document touchmove listeners as passive by default;
     // dragging needs a REAL preventDefault or the browser steals the gesture
     // for scrolling and fires pointercancel mid-drag.
@@ -373,6 +379,35 @@ export class ForestPage {
     [{ x: 15, b: 6 }, { x: 45, b: 10 }, { x: 75, b: 8 }, { x: 30, b: 37 }, { x: 60, b: 38 }, { x: 88, b: 35 }],
   ];
 
+  /** Live viewport — the stream's on-screen position depends on it. */
+  private readonly viewportSize = signal({ w: window.innerWidth, h: window.innerHeight });
+
+  /** DRY FEET: the highest a foot may stand at x% so the TRUNK BASE stays on
+   *  the near bank of the stream — sampled from the SAME bezier the scene
+   *  draws (centerline (1060,96)→(-60,208), width 22→46, xMidYMax slice).
+   *  Wide windows scale the scene by WIDTH and the river climbs; percentages
+   *  alone put trees in the water (shipped once — never again). */
+  private bankLimitPct(xPct: number, treeScale: number): number {
+    const { w, h } = this.viewportSize();
+    const sceneH = Math.min(460, 0.58 * h);
+    const scale = Math.max(w / 1000, sceneH / 260);
+    const visibleVb = w / scale;
+    const xVb = 500 - visibleVb / 2 + (xPct / 100) * visibleVb;
+    let best = { d: Infinity, y: 150, half: 17 };
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24;
+      const u = 1 - t;
+      const bx = u * u * u * 1060 + 3 * u * u * t * 700 + 3 * u * t * t * 400 + t * t * t * -60;
+      const by = u * u * u * 96 + 3 * u * u * t * 168 + 3 * u * t * t * 76 + t * t * t * 208;
+      const d = Math.abs(bx - xVb);
+      if (d < best.d) best = { d, y: by, half: (22 + 24 * t) / 2 };
+    }
+    const bankPx = (260 - (best.y + best.half)) * scale; // water's near edge, from the scene bottom
+    const plotsH = Math.min(400, 0.5 * h);
+    // Trunk base sits ~66px (scaled) above the plot's foot; plots rest ~16px up.
+    return Math.max(4, ((bankPx - 26 - 66 * treeScale) / plotsH) * 100);
+  }
+
   /** Where the i-th tree of this clearing stands: its anchor plus the tree's
    *  own small deterministic wobble — natural sprouts, never a stamped grid. */
   protected slotFor(i: number, tree: Tree): { x: number; b: number; s: number; z: number } {
@@ -380,9 +415,13 @@ export class ForestPage {
     const anchor = ForestPage.ARRANGEMENTS[Math.max(1, n)][Math.min(i, n - 1)] ?? { x: 50, b: 10 };
     const h = hash(tree.id + ':meadow');
     const x = Math.min(89, Math.max(11, anchor.x + ((h % 7) - 3)));
-    const b = Math.max(2, anchor.b + (((h >> 4) % 5) - 2));
-    // Depth: feet higher up the band → a touch smaller, standing behind.
-    const s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+    let b = Math.max(2, anchor.b + (((h >> 4) % 5) - 2));
+    let s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+    // Back rows hug the near bank — nobody ever stands in the water.
+    if (this.hasStream() && b > 16) {
+      b = Math.min(b, this.bankLimitPct(x, s));
+      s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+    }
     return { x, b, s, z: 10 + Math.round(40 - b) };
   }
 
