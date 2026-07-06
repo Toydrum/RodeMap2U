@@ -404,10 +404,11 @@ export class ForestPage {
     }
     const bankPx = (260 - (best.y + best.half)) * scale; // water's near edge, from the scene bottom
     const plotsH = Math.min(400, 0.5 * h);
-    // Trunk base sits ~66px (scaled) above the plot's foot; the extra margin
-    // absorbs the plot-internal offsets that shift with scale — better a
-    // step further from the water than one toe in it.
-    return Math.max(4, ((bankPx - 44 - 66 * treeScale) / plotsH) * 100);
+    // Margin anatomy (measured, not guessed): .plots bottoms out 16px above
+    // the painted scene (meadow padding); above the foot sit the name label
+    // (2 lines worst case) and the mini's own ground inset — those scale with
+    // the plot. Better a step further from the water than one toe in it.
+    return Math.max(4, ((bankPx - 60 - 80 * treeScale) / plotsH) * 100);
   }
 
   /** A tree EARNS its size: branches + blooms (double weight) grow the plot —

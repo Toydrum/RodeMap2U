@@ -272,7 +272,16 @@ La sección **Cuenta** es la puerta a algo que apenas está germinando: **una ll
 
 - Hoy la llave funciona en **modo ensayo**: puedes crear una cuenta y entrar, pero la "nube" todavía es de práctica y vive dentro de tu propio dispositivo. Nada viaja a internet.
 - Entrar o salir de tu cuenta **jamás toca tus árboles**: tu bosque local sigue intacto, exactamente donde estaba.
-- Las cuentas de peques no se crean solas: las creará su familia, con su propio nombre de usuario y sin necesidad de correo (eso llega en una versión próxima).
+
+### La familia 🤝
+
+Con sesión iniciada, en Ajustes aparece la sección **Familia**:
+
+- **Crear cuenta de peque**: eliges su nombre de usuario y cómo le llamamos — sin correo. La app te muestra **una sola vez** su contraseña temporal para que se la entregues en persona; al entrar por primera vez, le pedirá estrenar una contraseña suya. Tú eres su recuperación: si la olvida, le generas otra temporal desde su tarjetita.
+- **Cada peque a tu cuidado** tiene su hojita: renombrar, encender o apagar **amigos y visitas**, nueva contraseña temporal, descargar su respaldo, invitar a **otro adulto que le cuide** (código de 72 horas, un solo uso — para que mamá y papá cuiden el mismo bosque), soltar el vínculo o borrar su cuenta (antes se descarga su respaldo completo, siempre).
+- **Vincular una cuenta existente**: genera un código para alguien que ya tiene su propia cuenta (por ejemplo, un adolescente que se registró solo). Al aceptarlo, podrás ver y cuidar su jardín — pero su cuenta sigue siendo suya: sin cambios de contraseña ni borrado desde fuera.
+- **Quien es cuidado siempre lo sabe**: su sección Familia nombra a quienes pueden ver su bosque, con la regla completa a la vista: *tu familia puede ver tu bosque y plantar contigo — y tú puedes ver el suyo; tus sentimientos, tus check-ins y tu clima siguen siendo solo tuyos*.
+- Una cuenta de peque no puede quedarse sin nadie: **el último vínculo de cuidado no se puede soltar** — primero invita a otro adulto, o borra la cuenta con su respaldo.
 
 ## Tus datos
 

@@ -1,0 +1,197 @@
+// The familia section leans on the global .card/.btn/.chip/.field set; only
+// the row layout, the once-only password plate and the sheet innards are ours.
+.familia {
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.fam-group {
+  margin-bottom: 0.9rem;
+}
+
+.fam-kicker {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.35rem;
+}
+
+.fam-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  margin-bottom: 0.4rem;
+}
+
+.fam-open {
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+}
+
+.fam-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fam-name {
+  font-weight: 700;
+}
+
+.fam-handle {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.fam-kind {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.fam-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+}
+
+.error-line {
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-resting) 16%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--status-resting) 45%, transparent);
+  font-size: 0.9rem;
+  margin: 0.7rem 0 0;
+}
+
+// ── Sheet innards (backdrop/.confirm come from the settings pattern) ────────
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(20, 26, 18, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.confirm {
+  width: min(480px, 100%);
+  padding: 1.5rem;
+  text-align: center;
+  max-height: 90svh;
+  overflow-y: auto;
+
+  .confirm-icon {
+    font-size: 2rem;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+}
+
+.familia-sheet {
+  .fam-form {
+    text-align: left;
+    margin-top: 0.6rem;
+
+    .field > span {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+  }
+
+  .fam-handle {
+    margin-top: -0.4rem;
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+  }
+}
+
+/* The once-only plate: temp passwords and invite codes. */
+.temp-password {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  letter-spacing: 0.12em;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-achieved) 12%, var(--surface));
+  border: 1.5px dashed color-mix(in srgb, var(--status-achieved) 45%, transparent);
+  user-select: all;
+}
+
+.code-entry {
+  font-family: var(--font-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.fam-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  text-align: left;
+  margin: 0.8rem 0;
+
+  .hint {
+    display: block;
+    font-weight: 400;
+  }
+}
+
+.fam-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0.6rem 0;
+
+  .btn {
+    width: 100%;
+  }
+}
+
+.fam-danger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.8rem 0 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+}
+
+.danger {
+  color: color-mix(in srgb, var(--status-resting) 70%, var(--text));
+}

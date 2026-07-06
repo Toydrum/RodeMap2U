@@ -145,7 +145,12 @@ const wet = await page.evaluate(() => {
   for (const p of document.querySelectorAll('.plot')) {
     const r = p.getBoundingClientRect();
     const cx = (r.left + r.right) / 2;
-    const trunkBaseY = r.bottom - 66 * 0.9; // approx trunk base above the sign
+    // The PAINTED trunk base: GROUND=150 in the mini's 160-high viewBox —
+    // measure the real pixel instead of a fixed offset (earned-size scales
+    // small trees down, so any fixed approximation drifts wet or dry).
+    const svg = p.querySelector('svg.mini');
+    const sr = svg ? svg.getBoundingClientRect() : r;
+    const trunkBaseY = sr.bottom - sr.height * (10 / 160);
     const xVb = 500 - visibleVb / 2 + (cx / w) * visibleVb;
     let best = { d: Infinity, y: 150, half: 17 };
     for (let i = 0; i <= 24; i++) {

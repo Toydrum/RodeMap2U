@@ -44,6 +44,10 @@ src/app/
     motion.service.ts · time.ts (date-only helpers) · boot.service.ts (init + demo seed) · update.service.ts (SW toast)
   features/
     account/    account.ts (full-screen auth ritual: welcome→signIn/create→code→newPassword→profile)
+    familia/    familia-card.ts (Settings section, signed-in only: create-minor w/ once-only temp password,
+                per-child admin sheet, coGuardian + linkExisting invites, code redemption, guardians view
+                w/ the honest visibility disclosure; consumes core/family.service.ts — signals over GET /me,
+                meta 'family.me' stale-while-revalidate, export-first deleteChild)
     ahora/      ahora.ts (HOME: thread card + ONE suggested pasito + session companion card) · suggest.ts (PURE ranker + thread resolver)
     check-in/   check-in.ts (ritual: weather → where → note → [date-review] → CIRCLE of trees) · date-review.ts
     forest/     forest.ts (meadow scene) · mini-tree.ts (real data miniatures) · tree-view.ts · tree-canvas.ts

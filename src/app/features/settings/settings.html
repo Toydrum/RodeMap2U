@@ -168,6 +168,11 @@
     }
   </section>
 
+  <!-- Familia (signed-in only) -->
+  @if (auth.user()) {
+    <app-familia-card />
+  }
+
   <!-- Data -->
   <section class="card block">
     <h2>{{ i18n.t().settings.data }}</h2>

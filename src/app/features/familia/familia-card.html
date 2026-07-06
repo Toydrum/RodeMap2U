@@ -1,0 +1,281 @@
+<section class="card block familia">
+  <h2>{{ i18n.t().familia.title }}</h2>
+
+  @if (fam.guardians().length) {
+    <div class="fam-group">
+      <span class="fam-kicker">{{ i18n.t().familia.guardiansTitle }}</span>
+      @for (link of fam.guardians(); track link.linkId) {
+        <div class="fam-row">
+          <span class="fam-who">
+            <span class="fam-name">{{ link.user.displayName }}</span>
+            <span class="fam-handle">&#64;{{ link.user.username }}</span>
+          </span>
+          @if (link.kind === 'invited' && auth.user()?.userId !== link.user.userId) {
+            <button type="button" class="chip opt" (click)="confirmUnlink(link, true)">
+              {{ i18n.t().familia.unlinkMineCta }}
+            </button>
+          }
+        </div>
+      }
+      <p class="hint">{{ i18n.t().familia.disclosure }}</p>
+    </div>
+  }
+
+  @if (fam.minors().length) {
+    <div class="fam-group">
+      <span class="fam-kicker">{{ i18n.t().familia.minorsTitle }}</span>
+      @for (link of fam.minors(); track link.linkId) {
+        <button type="button" class="fam-row fam-open" (click)="openChild(link)">
+          <span class="fam-who">
+            <span class="fam-name">{{ link.user.displayName }}</span>
+            <span class="fam-handle">&#64;{{ link.user.username }}</span>
+          </span>
+          <span class="fam-kind">
+            {{ link.kind === 'created' ? i18n.t().familia.kindCreated : i18n.t().familia.kindInvited }}
+            <span aria-hidden="true"> →</span>
+          </span>
+        </button>
+      }
+    </div>
+  } @else if (isAdult() && !fam.loading()) {
+    <p class="hint">{{ i18n.t().familia.emptyAdult }}</p>
+  }
+
+  <div class="fam-actions">
+    @if (isAdult()) {
+      <button type="button" class="btn btn-soft" (click)="openCreate()">
+        🌱 {{ i18n.t().familia.createCta }}
+      </button>
+      <button type="button" class="btn btn-soft" (click)="doInviteExisting()" [disabled]="fam.loading()">
+        🧷 {{ i18n.t().familia.linkExistingCta }}
+      </button>
+    }
+    <button type="button" class="btn btn-ghost" (click)="openAccept()">
+      🗝 {{ i18n.t().familia.acceptCta }}
+    </button>
+  </div>
+
+  @if (!sheet() && errorText()) {
+    <p class="error-line" role="alert">{{ errorText() }}</p>
+  }
+</section>
+
+@if (sheet(); as s) {
+  <div class="confirm-backdrop" (click)="close()">
+    <div
+      class="confirm card familia-sheet"
+      appSheet
+      (sheetClose)="close()"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+    >
+      @switch (s.kind) {
+        @case ('create') {
+          <h2>{{ i18n.t().familia.createTitle }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.createBody }}</p>
+          <form class="fam-form" (submit)="$event.preventDefault(); submitCreate()">
+            <label class="field">
+              <span>{{ i18n.t().account.username }}</span>
+              <input
+                type="text"
+                autocapitalize="none"
+                spellcheck="false"
+                [value]="newUsername()"
+                (input)="newUsername.set($any($event.target).value)"
+              />
+            </label>
+            <label class="field">
+              <span>{{ i18n.t().familia.displayNameLabel }}</span>
+              <input
+                type="text"
+                [value]="newDisplayName()"
+                (input)="newDisplayName.set($any($event.target).value)"
+              />
+            </label>
+            @if (errorText()) {
+              <p class="error-line" role="alert">{{ errorText() }}</p>
+            }
+            <div class="row">
+              <button type="button" class="btn btn-ghost" (click)="close()">
+                {{ i18n.t().common.cancel }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="fam.loading()">
+                {{ fam.loading() ? i18n.t().common.loading : i18n.t().familia.createSubmit }}
+              </button>
+            </div>
+          </form>
+        }
+
+        @case ('created') {
+          <span class="confirm-icon" aria-hidden="true">🌱</span>
+          <h2>{{ i18n.fill(i18n.t().familia.createdTitle, { name: s.child.displayName }) }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.tempIntro }}</p>
+          <p class="temp-password">{{ s.tempPassword }}</p>
+          <p class="hint">{{ i18n.t().familia.tempHint }}</p>
+          <button type="button" class="btn btn-primary" (click)="close()">
+            {{ i18n.t().common.done }}
+          </button>
+        }
+
+        @case ('child') {
+          <h2>{{ s.link.user.displayName }}</h2>
+          <p class="fam-handle">&#64;{{ s.link.user.username }}</p>
+
+          @if (s.link.kind === 'created') {
+            <form class="fam-form" (submit)="$event.preventDefault(); doRename(s.link)">
+              <label class="field">
+                <span>{{ i18n.t().familia.displayNameLabel }}</span>
+                <input
+                  type="text"
+                  [value]="renameValue()"
+                  (input)="renameValue.set($any($event.target).value)"
+                />
+              </label>
+              <button type="submit" class="btn btn-soft" [disabled]="fam.loading()">
+                {{ i18n.t().common.save }}
+              </button>
+            </form>
+
+            <div class="fam-switch-row">
+              <span>
+                <strong>{{ i18n.t().familia.socialLabel }}</strong>
+                <span class="hint">{{ i18n.t().familia.socialHint }}</span>
+              </span>
+              <button
+                type="button"
+                class="chip opt"
+                [class.selected]="s.link.user.socialEnabled"
+                (click)="toggleSocial(s.link)"
+                [disabled]="fam.loading()"
+              >
+                {{ s.link.user.socialEnabled ? i18n.t().familia.socialOn : i18n.t().familia.socialOff }}
+              </button>
+            </div>
+
+            <div class="fam-tools">
+              <button type="button" class="btn btn-soft" (click)="doReset(s.link)" [disabled]="fam.loading()">
+                🔑 {{ i18n.t().familia.resetCta }}
+              </button>
+              <button type="button" class="btn btn-soft" (click)="doExport(s.link)" [disabled]="fam.loading()">
+                ⬇ {{ i18n.t().familia.exportCta }}
+              </button>
+              <button type="button" class="btn btn-soft" (click)="doInviteCo(s.link)" [disabled]="fam.loading()">
+                🤝 {{ i18n.t().familia.inviteCoCta }}
+              </button>
+            </div>
+          }
+
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <div class="fam-danger">
+            <button type="button" class="btn btn-ghost" (click)="confirmUnlink(s.link, false)">
+              {{ i18n.t().familia.unlinkCta }}
+            </button>
+            @if (s.link.kind === 'created') {
+              <button type="button" class="btn btn-ghost danger" (click)="confirmDelete(s.link)">
+                {{ i18n.t().familia.deleteCta }}
+              </button>
+            }
+          </div>
+          <button type="button" class="btn btn-ghost" (click)="close()">
+            {{ i18n.t().common.close }}
+          </button>
+        }
+
+        @case ('reset') {
+          <span class="confirm-icon" aria-hidden="true">🔑</span>
+          <h2>{{ i18n.fill(i18n.t().familia.resetTitle, { name: s.link.user.displayName }) }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.tempIntro }}</p>
+          <p class="temp-password">{{ s.tempPassword }}</p>
+          <p class="hint">{{ i18n.t().familia.tempHint }}</p>
+          <button type="button" class="btn btn-primary" (click)="close()">
+            {{ i18n.t().common.done }}
+          </button>
+        }
+
+        @case ('invite') {
+          <span class="confirm-icon" aria-hidden="true">🤝</span>
+          <h2>{{ i18n.t().familia.inviteTitle }}</h2>
+          <p class="confirm-body">
+            {{ s.flavor === 'coGuardian' ? i18n.t().familia.inviteCoBody : i18n.t().familia.inviteLinkBody }}
+          </p>
+          <p class="temp-password">{{ prettyCode(s.grant.code) }}</p>
+          <p class="hint">
+            {{ i18n.fill(i18n.t().familia.inviteExpiry, { date: expiryDate(s.grant) }) }}
+          </p>
+          <button type="button" class="btn btn-primary" (click)="close()">
+            {{ i18n.t().common.done }}
+          </button>
+        }
+
+        @case ('accept') {
+          <h2>{{ i18n.t().familia.acceptTitle }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.acceptBody }}</p>
+          <form class="fam-form" (submit)="$event.preventDefault(); submitAccept()">
+            <label class="field">
+              <span>{{ i18n.t().familia.acceptLabel }}</span>
+              <input
+                class="code-entry"
+                type="text"
+                autocapitalize="characters"
+                spellcheck="false"
+                [value]="acceptCode()"
+                (input)="acceptCode.set($any($event.target).value)"
+              />
+            </label>
+            @if (errorText()) {
+              <p class="error-line" role="alert">{{ errorText() }}</p>
+            }
+            <div class="row">
+              <button type="button" class="btn btn-ghost" (click)="close()">
+                {{ i18n.t().common.cancel }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="fam.loading()">
+                {{ fam.loading() ? i18n.t().common.loading : i18n.t().familia.acceptSubmit }}
+              </button>
+            </div>
+          </form>
+        }
+
+        @case ('unlink') {
+          <span class="confirm-icon" aria-hidden="true">🍃</span>
+          <h2>
+            {{ i18n.fill(s.mineSide ? i18n.t().familia.unlinkMineTitle : i18n.t().familia.unlinkTitle, { name: s.link.user.displayName }) }}
+          </h2>
+          <p class="confirm-body">{{ i18n.t().familia.unlinkBody }}</p>
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+          <div class="row">
+            <button type="button" class="btn btn-primary" (click)="close()">
+              {{ i18n.t().common.cancel }}
+            </button>
+            <button type="button" class="btn btn-ghost danger" (click)="doUnlink(s.link)" [disabled]="fam.loading()">
+              {{ i18n.t().familia.unlinkConfirm }}
+            </button>
+          </div>
+        }
+
+        @case ('delete') {
+          <span class="confirm-icon" aria-hidden="true">🍃</span>
+          <h2>{{ i18n.fill(i18n.t().familia.deleteTitle, { name: s.link.user.displayName }) }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.deleteBody }}</p>
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+          <div class="row">
+            <button type="button" class="btn btn-primary" (click)="close()">
+              {{ i18n.t().common.cancel }}
+            </button>
+            <button type="button" class="btn btn-ghost danger" (click)="doDelete(s.link)" [disabled]="fam.loading()">
+              {{ i18n.t().familia.deleteConfirm }}
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

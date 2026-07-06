@@ -15,10 +15,11 @@ import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { AuthService } from '../../core/auth/auth.service';
 import { APP_CONFIG } from '../../core/config';
 import { resetMockCloud } from '../../core/api/mock-cloud';
+import { FamiliaCard } from '../familia/familia-card';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink, SheetDirective],
+  imports: [RouterLink, SheetDirective, FamiliaCard],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

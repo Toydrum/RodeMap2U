@@ -110,6 +110,8 @@ export type TextSize = 'md' | 'lg' | 'xl';
  * The `meta` store is key-value; its known keys:
  *   'settings'      — the Settings singleton below (exported in backups).
  *   'auth.identity' — device session snapshot (core/auth/auth-types.ts).
+ *   'family.me'     — cached GET /me for instant offline paint
+ *                     (core/family.service.ts, stale-while-revalidate).
  *   'account.link'  — which account owns this device's forest (future
  *                     «conectar mi bosque» phase).
  * Auth keys are deliberately NOT part of ExportEnvelope: backups are shared
