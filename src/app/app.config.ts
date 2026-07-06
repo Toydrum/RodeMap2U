@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
     // sw.js wraps ngsw-worker.js (importScripts) and adds whisper-tap
-    // handling. MUST stay relative — the app lives under /RodeMap2U/.
+    // handling. MUST stay relative — the app lives under /RoadMap2U/.
     provideServiceWorker('sw.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

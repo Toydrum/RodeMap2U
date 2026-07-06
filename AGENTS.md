@@ -1,10 +1,10 @@
-# RodeMap2U — Agent Onboarding
+# RoadMap2U — Agent Onboarding
 
 Context file for AI agents (Codex, Claude, Cursor, etc.) and new contributors. Read this before changing anything. The README covers *what* the app is; this covers *why it is the way it is* and *what will break if you ignore it*.
 
 ## What this is
 
-A local-first Angular PWA for **neurodivergent users** where goals grow as a tree. Missed deadlines are never failures — they become **branch points** that sprout alternative paths. Live at `https://toydrum.github.io/RodeMap2U/`, deployed from `main` via GitHub Actions → GitHub Pages.
+A local-first Angular PWA for **neurodivergent users** where goals grow as a tree. Missed deadlines are never failures — they become **branch points** that sprout alternative paths. Live at `https://toydrum.github.io/RoadMap2U/`, deployed from `main` via GitHub Actions → GitHub Pages.
 
 ## Product rules (NON-NEGOTIABLE — these override any technical preference)
 
@@ -14,7 +14,7 @@ A local-first Angular PWA for **neurodivergent users** where goals grow as a tre
 4. **Predictability.** All decorative randomness is **deterministic** from stable ids via `hash()` (`tree-layout.ts`). A user's tree/forest must NEVER reshuffle between sessions. If you add visual variety, derive it from ids, not `Math.random()`.
 5. **Motion is opt-out-able, always.** Every animation must respect `MotionService.reduced()` (combines `prefers-reduced-motion` with the user setting; global `.reduce-motion` CSS class is the backstop). Lightning/rain are photosensitivity-sensitive: flashes are small, slow (≥4s apart), low-contrast, and fully removed under reduced motion.
 6. **Everything bilingual.** All copy lives in `core/i18n/es.ts` (source of truth) and `en.ts` (`const EN: Dict` — the compiler enforces parity). Never hardcode user-facing strings in templates; never index dictionaries with dynamic string keys (kills the type guarantee). **Counts pluralize via `i18n.plural(count, dict.section.key)`** where the key is a `{ one, many }` sentence pair — whole-sentence pairs, never word-splicing, so Spanish gender/order works.
-7. **Privacy: local-first storage, cloud through ONE seam.** The forest lives and works in this device's IndexedDB — offline always. Accounts/cloud (Cognito + DynamoDB via API Gateway) are being integrated for the families-and-friends model: the backend is SIMULATED today (`core/config.ts` `backend: 'mock'` → the on-device `rodemap2u-mockcloud` DB); flipping that config to `'aws'` IS the migration (**step-by-step runbook: `docs/aws-connect.md`** — identity can connect before the API exists), and **login becomes mandatory at AWS go-live** (owner decision 2026-07-06; `requireAuth` flag + `authRequiredGate` are already wired on every route, inert). Network calls are allowed ONLY inside `core/api/` and `core/auth/` behind the `API_CLIENT`/`AUTH_PROVIDER` seams — never sprinkled through features. **No analytics, no ads, no tracking, ever.** Signing in/out NEVER mutates local forest data, and auth state lives in `meta` keys (`auth.identity`) — never in `Settings`, never in backup exports. `aws-amplify` may be mentioned ONLY in `cognito-auth.provider.ts` and only via dynamic `import()` (it must stay a lazy chunk — after every build, `main-*.js` must NOT match `cognito-idp|amazonaws\.com`). Notifications exist ONLY as the opt-in **whispers** (`core/accompaniment.service.ts`): orientation QUESTIONS ("¿dónde sientes que estás?") that land on the check-in — **they may ask how you are; they may never tell you what to do**. No task names in the QUESTION, no counts of missed anything, silent (no sound/vibration), waking hours only (9–21), never during a session, never within 3h of a check-in, varying interval (fixed pings go blind; rhythm 'surprise' = deterministic pseudo-random 1.5–6h gaps). **Beat two**: ~45s after the question (answered or let go), ONE tiny low-energy offer — the first LEAF in the ranked pool — with a 2-minute start action; one shot, dismissible, never repeated, dropped silently if a session already exists or 10 min passed. Off by default; the toggle is the permission gesture. Technical floor: they live only while the app is open somewhere (no push backend) — never promise more.
+7. **Privacy: local-first storage, cloud through ONE seam.** The forest lives and works in this device's IndexedDB — offline always. Accounts/cloud (Cognito + DynamoDB via API Gateway) are being integrated for the families-and-friends model: the backend is SIMULATED today (`core/config.ts` `backend: 'mock'` → the on-device `roadmap2u-mockcloud` DB); flipping that config to `'aws'` IS the migration (**step-by-step runbook: `docs/aws-connect.md`** — identity can connect before the API exists), and **login becomes mandatory at AWS go-live** (owner decision 2026-07-06; `requireAuth` flag + `authRequiredGate` are already wired on every route, inert). Network calls are allowed ONLY inside `core/api/` and `core/auth/` behind the `API_CLIENT`/`AUTH_PROVIDER` seams — never sprinkled through features. **No analytics, no ads, no tracking, ever.** Signing in/out NEVER mutates local forest data, and auth state lives in `meta` keys (`auth.identity`) — never in `Settings`, never in backup exports. `aws-amplify` may be mentioned ONLY in `cognito-auth.provider.ts` and only via dynamic `import()` (it must stay a lazy chunk — after every build, `main-*.js` must NOT match `cognito-idp|amazonaws\.com`). Notifications exist ONLY as the opt-in **whispers** (`core/accompaniment.service.ts`): orientation QUESTIONS ("¿dónde sientes que estás?") that land on the check-in — **they may ask how you are; they may never tell you what to do**. No task names in the QUESTION, no counts of missed anything, silent (no sound/vibration), waking hours only (9–21), never during a session, never within 3h of a check-in, varying interval (fixed pings go blind; rhythm 'surprise' = deterministic pseudo-random 1.5–6h gaps). **Beat two**: ~45s after the question (answered or let go), ONE tiny low-energy offer — the first LEAF in the ranked pool — with a 2-minute start action; one shot, dismissible, never repeated, dropped silently if a session already exists or 10 min passed. Off by default; the toggle is the permission gesture. Technical floor: they live only while the app is open somewhere (no push backend) — never promise more.
 8. **Every modal sheet uses `shared/ui/sheet.directive.ts` (`appSheet`)** — it provides Escape-to-close (topmost of the stack only), initial focus (`[autofocus]` else host), a minimal Tab trap, and focus restoration to the opener. New sheets MUST wire `appSheet (sheetClose)="…same close expr…"` plus the usual backdrop click-close.
 9. **The check-in gate diverts once per app-open** (`SessionGate` in `app.routes.ts`) and it guards **`/ahora`** (home), not the forest: the first Ahora visit may redirect to the ritual (cooldown respected); later tab taps never do, and the forest NEVER diverts. **The ritual is TWO screens flat** (`feeling → destination`, plus a one-time `welcome` step when `!onboarded`): the optional notita folds into the feeling screen as an expander (never its own screen again), and the destination screen merges the branch shortcuts (the 4 freshest live branches) with the tree ring and "Solo mirar el bosque". A branch tap records the check-in WITH `nodeId` (the 📍 moves inside `CheckinsRepo.record`); ring/forest taps record without one; skip, back and express record exactly what they always did. **Passed-date reviews never interrupt the ritual** — Ahora's 🍂 banner and the tree-view banner are their only homes. Express/skip exits land on `/ahora`; explicit destinations keep their word. The wind rose is the manual re-entry — don't reintroduce per-navigation gating, and don't rename it: the poetic labels are loved; when a flow confuses, restructure the flow. The ring interleaves two radii past 9 trees (deterministic formula in `check-in.ts`; `--ring-count` feeds pill sizing).
 10. **Focus sessions live in `core/focus-session.service.ts`**, not in the timer page: cross-route, adopts the open IndexedDB session row on reload, one-time 🌸 cue at planned time (toast + tab-title suffix), never auto-ends, never alarms. The timer page is a thin view over it.
@@ -36,9 +36,9 @@ src/app/
     auth/     auth-types.ts (AuthUser/AuthError/PASSWORD_POLICY) · auth-provider.ts (seam token)
               mock-auth.provider.ts (offline Cognito twin, code 123456) · cognito-auth.provider.ts (lazy amplify + pool checklist)
               auth.service.ts (signals facade, fail-open hydrate) · auth.guard.ts (authRequiredGate, inert until requireAuth)
-    api/      contracts.ts (NORMATIVE backend contract: RodemapApi + shapes + paths + error codes)
+    api/      contracts.ts (NORMATIVE backend contract: RoadmapApi + shapes + paths + error codes)
               api-client.ts (seam token) · mock-api.ts (executable spec) · http-api.ts (fetch + bearer + retry)
-              mock-cloud.ts (rodemap2u-mockcloud IDB) · mock-seed.ts (demo family: rocio/nico/val/ambar)
+              mock-cloud.ts (roadmap2u-mockcloud IDB) · mock-seed.ts (demo family: rocio/nico/val/ambar)
     i18n/     es.ts (Dict source) · en.ts · i18n.service.ts (signal lang, fill() templating)
     theme/    theme.service.ts (data-theme attr; ?theme= session override)
     motion.service.ts · time.ts (date-only helpers) · boot.service.ts (init + demo seed) · update.service.ts (SW toast)
@@ -67,7 +67,7 @@ src/app/
   shared/ui/  toast.service.ts
 
 infra/          THE REAL BACKEND (own npm workspace — never in the Angular build graph):
-  lib/rodemap-stack.ts   CDK: Cognito pool (per the adapter checklist) + DynamoDB `rodemap` (2 GSIs, TTL, PITR)
+  lib/roadmap-stack.ts   CDK: Cognito pool (per the adapter checklist) + DynamoDB `roadmap` (2 GSIs, TTL, PITR)
                          + HTTP API (JWT authorizer on idTokens, CORS for Pages+localhost) + outputs = APP_CONFIG strings
   lambda/       router.ts (route table mirrors API_PATHS 1:1 — parity-tested) · handlers/ (me·family·friends·forests·sync,
                 authz matrix from the table, LWW conditional puts) · post-confirmation.ts — ALL import contracts.ts via @app alias
@@ -76,6 +76,7 @@ infra/          THE REAL BACKEND (own npm workspace — never in the Angular bui
 
 ### Data model semantics (`core/db/schema.ts`)
 
+- **Naming history (2026-07-06): the app was renamed RodeMap2U → RoadMap2U.** Every STORAGE-IDENTITY literal keeps the OLD spelling forever: IndexedDB `rodemap2u` + `rodemap2u-mockcloud`, BroadcastChannels `rodemap2u-db`/`rodemap2u-auth`, localStorage `rm2u.mock.idToken`, and the backup envelope id `app: 'rodemap2u'` (validator AND every producer — backup.service, mock-api.exportChild, infra family.exportChild). Renaming any of them orphans real forests/sessions/backups. They are invisible to users; a "cleanup" of these names is a data-loss bug, not a cleanup.
 - Every record extends `SyncBase { id (uuid), createdAt, updatedAt, rev, deletedAt }`. `rev`+`updatedAt` pre-commit to last-writer-wins sync per `core/api/contracts.ts` (`POST /sync/push` accepts iff `incoming.rev > stored.rev`): outbound rides `onLocalWrite` (`broadcast.ts`), inbound lands through `RecordsRepo.applyExternal()` — the same hook BroadcastChannel uses today. The sync ENGINE ships with the «conectar mi bosque» phase.
 - `archivedAt` (user-facing, recoverable) ≠ `deletedAt` (sync tombstone, permanent). Queries filter tombstones in exactly one place (`RecordsRepo.all`).
 - **Gentle dates are date-only strings** `'YYYY-MM-DD'`, compared lexicographically against local `today()` (`core/time.ts`). **NEVER** `new Date('YYYY-MM-DD')` — it parses UTC and shifts a day.
@@ -110,7 +111,7 @@ infra/          THE REAL BACKEND (own npm workspace — never in the Angular bui
 
 ```bash
 npm ci && npm start        # Node ≥ 24.15 (26.x recommended)
-npm run build              # prod build → dist/rodemap2u/browser
+npm run build              # prod build → dist/roadmap2u/browser
 cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + template, zero AWS needed
 ```
 
@@ -121,7 +122,7 @@ cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + templat
 
 ## Deploy (GitHub Pages)
 
-- Push to `main` → `.github/workflows/deploy.yml` (build with `--base-href /RodeMap2U/` — **exact casing**, copy `index.html→404.html`, `.nojekyll`, upload, deploy with an in-run 90s retry).
+- Push to `main` → `.github/workflows/deploy.yml` (build with `--base-href /RoadMap2U/` — **exact casing**, copy `index.html→404.html`, `.nojekyll`, upload, deploy with an in-run 90s retry).
 - SW registration MUST stay relative (`'ngsw-worker.js'`); a leading slash breaks under the subpath. Manifest `start_url`/`scope` are `./`.
 - **Version tag**: pre-launch semver in `core/version.ts` — `'0.0.N · <date> — <release name>'`, bumped on every notable deploy (rendered twice in Settings).
 - **Pages flake playbook** (encountered repeatedly): `deploy-pages` fails with "Deployment failed, try again later" while status is operational. Reruns reuse the deployment id (= commit SHA) and keep failing — **push a fresh (empty) commit instead**. If no run appears after a push at all (dropped webhook), `workflow_dispatch` the workflow. Deep links returning HTTP 404 with the app body is expected Pages SPA behavior, not a bug.
@@ -134,4 +135,4 @@ cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + templat
 
 ## Docs to keep in sync when features change
 
-`docs/manual-usuario.md` (source of the Word handout — regenerate with `pandoc docs/manual-usuario.md -o Manual_RodeMap2U.docx --toc --toc-depth=2`) and the in-app guide dictionaries (`guide` section in `es.ts`/`en.ts`).
+`docs/manual-usuario.md` (source of the Word handout — regenerate with `pandoc docs/manual-usuario.md -o Manual_RoadMap2U.docx --toc --toc-depth=2`) and the in-app guide dictionaries (`guide` section in `es.ts`/`en.ts`).

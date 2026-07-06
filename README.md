@@ -1,10 +1,10 @@
-# RodeMap2U 🌱
+# RoadMap2U 🌱
 
 **A goal map that grows like a tree — built for neurodivergent minds.**
 
 Goals are branches. Achieved ones bloom. Missed deadlines are never failures: they become **branch points** where new alternative paths grow. Every session opens with one gentle question: **"¿Dónde sientes que estás?"** (*Where do you feel you are?*) — and the journey continues from wherever you actually are.
 
-**Live:** https://toydrum.github.io/RodeMap2U/
+**Live:** https://toydrum.github.io/RoadMap2U/
 
 ## Principles
 
@@ -26,8 +26,8 @@ npm start          # dev server (SW disabled in dev)
 npm run build      # production build into dist/
 
 # Test the real PWA (service worker needs the subpath):
-mkdir -p /tmp/pwa/RodeMap2U && cp -r dist/rodemap2u/browser/* /tmp/pwa/RodeMap2U/
-npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RodeMap2U/
+mkdir -p /tmp/pwa/RoadMap2U && cp -r dist/roadmap2u/browser/* /tmp/pwa/RoadMap2U/
+npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RoadMap2U/
 ```
 
 ## Structure

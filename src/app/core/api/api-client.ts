@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { RodemapApi } from './contracts';
+import { RoadmapApi } from './contracts';
 
 /**
  * The data seam. Same shape as the backend contract; two implementations
@@ -8,6 +8,6 @@ import { RodemapApi } from './contracts';
  * Feature services inject API_CLIENT — nothing outside core/api touches
  * fetch or endpoint paths.
  */
-export type ApiClient = RodemapApi;
+export type ApiClient = RoadmapApi;
 
 export const API_CLIENT = new InjectionToken<ApiClient>('API_CLIENT');

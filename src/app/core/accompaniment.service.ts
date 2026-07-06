@@ -141,7 +141,7 @@ export class AccompanimentService {
         const reg = await navigator.serviceWorker?.getRegistration();
         await reg?.showNotification(question, {
           body: t.body,
-          tag: 'rodemap-whisper',
+          tag: 'roadmap-whisper',
           silent: true,
           icon: 'icons/icon-192x192.png',
           badge: 'icons/icon-96x96.png',

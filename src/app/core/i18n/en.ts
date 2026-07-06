@@ -3,7 +3,7 @@ import { Dict } from './es';
 /** English UI copy — must mirror ES exactly; the compiler enforces it. */
 export const EN: Dict = {
   app: {
-    name: 'RodeMap2U',
+    name: 'RoadMap2U',
     tagline: 'Your route grows with you',
   },
   common: {

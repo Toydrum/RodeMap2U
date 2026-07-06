@@ -1,5 +1,5 @@
 /**
- * RodeMap2U data model — local-first, sync-ready.
+ * RoadMap2U data model — local-first, sync-ready.
  *
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
@@ -11,6 +11,14 @@
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
 export const SCHEMA_VERSION = 3;
 export const DB_VERSION = 1;
+/**
+ * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U, but
+ * every STORAGE-IDENTITY literal keeps the historical spelling FOREVER:
+ * this DB name, `rodemap2u-mockcloud`, the `rodemap2u-db`/`rodemap2u-auth`
+ * BroadcastChannels, the `rm2u.mock.idToken` key and the ExportEnvelope
+ * `app: 'rodemap2u'` id. Renaming any of them would orphan real users'
+ * forests, sessions or backups. They are invisible to users — leave them.
+ */
 export const DB_NAME = 'rodemap2u';
 
 /** Every synced record. IDs from crypto.randomUUID(). Timestamps epoch ms. */

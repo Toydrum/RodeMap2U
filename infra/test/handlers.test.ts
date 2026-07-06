@@ -30,7 +30,7 @@ function deps(): Deps {
   return {
     ddb: DynamoDBDocumentClient.from(new DynamoDBClient({})),
     cognito: new CognitoIdentityProviderClient({}) as Deps['cognito'],
-    table: 'rodemap',
+    table: 'roadmap',
     userPoolId: 'pool-1',
     now: () => NOW,
   };

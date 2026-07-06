@@ -29,16 +29,16 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build -- --base-href /RodeMap2U/
+        run: npm run build -- --base-href /RoadMap2U/
 
       - name: SPA fallback + disable Jekyll
         run: |
-          cp dist/rodemap2u/browser/index.html dist/rodemap2u/browser/404.html
-          touch dist/rodemap2u/browser/.nojekyll
+          cp dist/roadmap2u/browser/index.html dist/roadmap2u/browser/404.html
+          touch dist/roadmap2u/browser/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/rodemap2u/browser
+          path: dist/roadmap2u/browser
 
   deploy:
     needs: build

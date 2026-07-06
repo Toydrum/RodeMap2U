@@ -1,7 +1,7 @@
 const plan = {
   metas: [
     {
-      title: "RodeMap2U",
+      title: "RoadMap2U",
       features: [
         {
           feature: "Goals questionary",

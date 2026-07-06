@@ -5,7 +5,7 @@
  */
 export const ES = {
   app: {
-    name: 'RodeMap2U',
+    name: 'RoadMap2U',
     tagline: 'Tu ruta crece contigo',
   },
   common: {

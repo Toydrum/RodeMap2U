@@ -1,5 +1,5 @@
 ---
-title: "RodeMap2U — Manual de uso"
+title: "RoadMap2U — Manual de uso"
 subtitle: "Tu ruta crece contigo 🌱"
 author: "Héctor Coronado"
 date: "Julio 2026"
@@ -9,7 +9,7 @@ toc-title: "Contenido"
 
 # Bienvenida y bienvenido a tu bosque
 
-**RodeMap2U** es un mapa de metas que crece como un árbol. No es una lista de tareas: es un lugar donde tus objetivos se plantan, crecen, florecen — y cuando algo no sale como lo planeaste, **no se marca como fracaso**: se convierte en un punto desde donde brotan caminos nuevos.
+**RoadMap2U** es un mapa de metas que crece como un árbol. No es una lista de tareas: es un lugar donde tus objetivos se plantan, crecen, florecen — y cuando algo no sale como lo planeaste, **no se marca como fracaso**: se convierte en un punto desde donde brotan caminos nuevos.
 
 Está pensada especialmente para mentes neurodivergentes (TDAH, autismo, y cualquier cerebro que crezca en espiral y no en línea recta). Por eso:
 
@@ -18,13 +18,13 @@ Está pensada especialmente para mentes neurodivergentes (TDAH, autismo, y cualq
 - **Nada se borra jamás.** Lo que ya no quieres ver se guarda en el archivo, recuperable siempre.
 - **Todo es tuyo.** Tus datos viven únicamente en tu dispositivo. Nada sale de ahí sin ti.
 
-**Dirección de la app:** `https://toydrum.github.io/RodeMap2U/`
+**Dirección de la app:** `https://toydrum.github.io/RoadMap2U/`
 
 ---
 
 # 1. Instalar la app (opcional pero recomendado)
 
-RodeMap2U es una *PWA* (aplicación web instalable): funciona en el navegador, pero puedes instalarla como una app normal y usarla **sin internet**.
+RoadMap2U es una *PWA* (aplicación web instalable): funciona en el navegador, pero puedes instalarla como una app normal y usarla **sin internet**.
 
 ## En Android (Chrome o Edge)
 
@@ -189,7 +189,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
 # 7. Cuando una fecha ya pasó
 
-Esto es el corazón de RodeMap2U. Si le pusiste fecha amable a una rama y ese día llegó y pasó, **no pasa nada malo**. La app te lo cuenta así:
+Esto es el corazón de RoadMap2U. Si le pusiste fecha amable a una rama y ese día llegó y pasó, **no pasa nada malo**. La app te lo cuenta así:
 
 > 🍂 **Esta fecha ya pasó — y tú sigues aquí.**
 > *Respira. Las fechas son brújulas, no jueces. Partamos de donde estás.*
@@ -319,13 +319,13 @@ Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en 
 Nada. La app no cuenta días, no rompe rachas (no existen) y no te reclama. Cuando vuelvas, te preguntará dónde sientes que estás — y partirán de ahí.
 
 **¿"Fallé" una meta?**
-En RodeMap2U ninguna meta falla: las fechas que pasan se transforman en conversaciones, y las metas que ya no van pueden brotar en caminos nuevos o descansar en el archivo. El árbol solo sabe crecer.
+En RoadMap2U ninguna meta falla: las fechas que pasan se transforman en conversaciones, y las metas que ya no van pueden brotar en caminos nuevos o descansar en el archivo. El árbol solo sabe crecer.
 
 **¿Puedo borrar algo definitivamente?**
 Casi nunca hace falta: ramas y árboles se guardan en el archivo (🗃 en la cabecera de cada árbol), recuperables siempre desde Ajustes. Si de verdad quieres borrar un árbol para siempre, esa opción existe **solo dentro del archivo** — y antes de hacerlo la app descarga automáticamente un respaldo completo de tu bosque, por si algún día lo extrañas.
 
 **¿La fecha amable me va a mandar notificaciones?**
-No. RodeMap2U nunca envía notificaciones. Las fechas solo abren una conversación suave cuando tú entras a la app.
+No. RoadMap2U nunca envía notificaciones. Las fechas solo abren una conversación suave cuando tú entras a la app.
 
 **¿Funciona sin internet?**
 Sí — instalada como app, funciona completa sin conexión.

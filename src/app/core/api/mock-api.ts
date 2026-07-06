@@ -159,7 +159,7 @@ export class MockApi implements ApiClient {
     const of = <T>(store: string): T[] =>
       records.filter((r) => r.store === store).map((r) => r.record as T);
     return {
-      app: 'rodemap2u',
+      app: 'rodemap2u', // historical envelope id — see schema.ts naming note
       schemaVersion: SCHEMA_VERSION,
       exportedAt: new Date().toISOString(),
       data: {

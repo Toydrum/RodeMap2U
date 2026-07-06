@@ -1,4 +1,4 @@
-# Connecting RodeMap2U to AWS — the go-live runbook
+# Connecting RoadMap2U to AWS — the go-live runbook
 
 Audience: the agent (or human) who will flip the app from the on-device mock
 cloud to real AWS. Everything AWS-shaped in the client is already built and
@@ -44,7 +44,7 @@ export const APP_CONFIG = Object.freeze({
   is unchanged.
 - Signing in/out NEVER mutates local forest data (verify-auth asserts it).
 - No OAuth/Hosted UI anywhere → **no callback/redirect URLs to register**,
-  and the GitHub Pages `/RodeMap2U/` subpath + 404.html quirk is irrelevant.
+  and the GitHub Pages `/RoadMap2U/` subpath + 404.html quirk is irrelevant.
 
 ## 2. Stage 1 — connect identity (possible today)
 
@@ -60,7 +60,7 @@ Console or CLI; the settings below are NORMATIVE (they mirror the checklist in
 
 ```bash
 aws cognito-idp create-user-pool \
-  --pool-name rodemap-users \
+  --pool-name roadmap-users \
   --policies "PasswordPolicy={MinimumLength=8,RequireUppercase=true,RequireLowercase=true,RequireNumbers=true,RequireSymbols=false}" \
   --auto-verified-attributes email \
   --account-recovery-setting "RecoveryMechanisms=[{Priority=1,Name=verified_email}]" \
@@ -89,7 +89,7 @@ Rules encoded there — do not deviate:
 ```bash
 aws cognito-idp create-user-pool-client \
   --user-pool-id <POOL_ID> \
-  --client-name rodemap-web \
+  --client-name roadmap-web \
   --no-generate-secret \
   --explicit-auth-flows ALLOW_USER_SRP_AUTH ALLOW_REFRESH_TOKEN_AUTH \
   --prevent-user-existence-errors ENABLED \
@@ -111,7 +111,7 @@ aws cognito-idp create-user-pool-client \
 1. Edit `src/app/core/config.ts`: `region`, `userPoolId`, `userPoolClientId`,
    `backend: 'aws'`. Leave `apiBaseUrl: ''` and `requireAuth: false`.
 2. `npx ng build` → confirm the lazy-chunk gate:
-   `Select-String dist/rodemap2u/browser/main-*.js -Pattern 'cognito-idp|amazonaws\.com'`
+   `Select-String dist/roadmap2u/browser/main-*.js -Pattern 'cognito-idp|amazonaws\.com'`
    must return nothing.
 3. **Manual smoke against the real pool** (`tools/verify-auth.mjs` is
    mock-only — the demo family and the `123456` code do not exist on AWS):
@@ -152,9 +152,9 @@ was already created by hand in Stage 1, either import it or let the stack own a
 fresh one and re-create the test users. What the stack contains (spec in
 `backend-contract.md`):
 
-1. **DynamoDB** table `rodemap` (single-table, on-demand, TTL on `ttl`, GSI1 +
+1. **DynamoDB** table `roadmap` (single-table, on-demand, TTL on `ttl`, GSI1 +
    GSI2 — key schema in contract §6).
-2. **Router Lambda** implementing `RodemapApi` (`src/app/core/api/contracts.ts`
+2. **Router Lambda** implementing `RoadmapApi` (`src/app/core/api/contracts.ts`
    is imported by the Lambda via tsconfig path alias — one source of truth) +
    a PostConfirmation trigger writing the profile item and `custom:accountType`.
 3. **HTTP API** (API Gateway v2) with a **JWT authorizer**:

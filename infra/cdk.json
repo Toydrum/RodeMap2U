@@ -1,5 +1,5 @@
 {
-  "app": "npx tsx bin/rodemap.ts",
+  "app": "npx tsx bin/roadmap.ts",
   "watch": {
     "include": ["bin/**", "lib/**", "lambda/**"],
     "exclude": ["node_modules", "cdk.out"]

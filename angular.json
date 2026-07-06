@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "rodemap2u": {
+    "roadmap2u": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -65,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "rodemap2u:build:production"
+              "buildTarget": "roadmap2u:build:production"
             },
             "development": {
-              "buildTarget": "rodemap2u:build:development"
+              "buildTarget": "roadmap2u:build:development"
             }
           },
           "defaultConfiguration": "development"

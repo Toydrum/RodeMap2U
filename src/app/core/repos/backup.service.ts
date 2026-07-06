@@ -31,7 +31,7 @@ export class BackupService {
     };
   }
 
-  async download(filenamePrefix = 'rodemap2u-backup'): Promise<void> {
+  async download(filenamePrefix = 'roadmap2u-backup'): Promise<void> {
     const envelope = await this.buildEnvelope();
     const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -49,14 +49,14 @@ export class BackupService {
    */
   async importReplace(json: string): Promise<void> {
     const envelope = JSON.parse(json) as ExportEnvelope;
-    if (envelope.app !== 'rodemap2u') throw new Error('not a RodeMap2U backup');
+    if (envelope.app !== 'rodemap2u') throw new Error('not a RoadMap2U backup');
     if (typeof envelope.schemaVersion !== 'number' || envelope.schemaVersion > SCHEMA_VERSION) {
       throw new Error('backup from a newer app version');
     }
     // (When SCHEMA_VERSION grows, run the same data-migration pipeline used
     // at DB open against envelope.data before writing.)
 
-    await this.download('rodemap2u-pre-import');
+    await this.download('roadmap2u-pre-import');
 
     await Promise.all([clear('trees'), clear('nodes'), clear('checkins'), clear('sessions')]);
     await Promise.all([

@@ -14,7 +14,7 @@ import { CheckIn, Tree, TreeNode, TimerSession } from '@app/db/schema';
 import { AccountType, GuardianLinkKind, SyncStore } from '@app/api/contracts';
 
 /**
- * Single-table access layer for `rodemap` — key builders + item shapes per
+ * Single-table access layer for `roadmap` — key builders + item shapes per
  * docs/backend-contract.md §6. Handlers receive everything through `Deps` so
  * tests can inject mocked clients and a frozen clock.
  */
@@ -34,7 +34,7 @@ export function realDeps(): Deps {
   return {
     ddb,
     cognito: new CognitoIdentityProviderClient({}),
-    table: process.env['TABLE_NAME'] ?? 'rodemap',
+    table: process.env['TABLE_NAME'] ?? 'roadmap',
     userPoolId: process.env['USER_POOL_ID'] ?? '',
     now: () => Date.now(),
   };

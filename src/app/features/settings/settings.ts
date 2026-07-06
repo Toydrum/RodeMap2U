@@ -136,7 +136,7 @@ export class SettingsPage {
   protected async deleteForever(): Promise<void> {
     const tree = this.deleting();
     if (!tree) return;
-    await this.backup.download('rodemap2u-pre-delete');
+    await this.backup.download('roadmap2u-pre-delete');
     const treeNodes = this.nodes.all().filter((n) => n.treeId === tree.id);
     await this.nodes.tombstoneMany(treeNodes);
     await this.trees.tombstone(tree);

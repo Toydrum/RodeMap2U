@@ -141,7 +141,7 @@ export class FamilyService {
     return (
       (await this.run(async () => {
         const envelope = await this.api.exportChild(userId);
-        this.download(`rodemap2u-${username}-respaldo.json`, envelope);
+        this.download(`roadmap2u-${username}-respaldo.json`, envelope);
         await this.api.deleteChild(userId);
         await this.refresh();
         return true;
@@ -153,7 +153,7 @@ export class FamilyService {
     return (
       (await this.run(async () => {
         const envelope = await this.api.exportChild(userId);
-        this.download(`rodemap2u-${username}-respaldo.json`, envelope);
+        this.download(`roadmap2u-${username}-respaldo.json`, envelope);
         return true;
       })) ?? false
     );

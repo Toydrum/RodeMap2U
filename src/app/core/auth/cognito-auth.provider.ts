@@ -16,7 +16,7 @@ import { APP_CONFIG } from '../config';
  *     (guardian-created minors have none — their guardian is recovery).
  *   · App client WITHOUT a client secret; ALLOW_USER_SRP_AUTH enabled.
  *     No Hosted UI, no OAuth flows (custom UI — immune to the GH Pages
- *     /RodeMap2U/ subpath + 404.html fallback).
+ *     /RoadMap2U/ subpath + 404.html fallback).
  *   · Verification and recovery by CODE, never emailed links.
  *   · Password policy = PASSWORD_POLICY (auth-types.ts) — align the pool to
  *     the const, not the other way around.

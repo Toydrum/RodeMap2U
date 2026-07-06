@@ -15,12 +15,12 @@ import { PASSWORD_POLICY } from '@app/auth/auth-types';
 const here = dirname(fileURLToPath(import.meta.url));
 
 /**
- * The whole RodeMap2U backend — implements docs/backend-contract.md verbatim.
+ * The whole RoadMap2U backend — implements docs/backend-contract.md verbatim.
  * `cdk deploy` prints the exact APP_CONFIG.aws strings as outputs; pasting
  * them into src/app/core/config.ts and flipping backend to 'aws' IS the
  * client migration (runbook: docs/aws-connect.md).
  */
-export class RodemapStack extends Stack {
+export class RoadmapStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -34,7 +34,7 @@ export class RodemapStack extends Stack {
     });
 
     const pool = new cognito.UserPool(this, 'Users', {
-      userPoolName: 'rodemap-users',
+      userPoolName: 'roadmap-users',
       selfSignUpEnabled: true, // adults; minors are born via AdminCreateUser
       signInAliases: { username: true, email: true },
       signInCaseSensitive: false,
@@ -61,7 +61,7 @@ export class RodemapStack extends Stack {
     });
 
     const webClient = pool.addClient('Web', {
-      userPoolClientName: 'rodemap-web',
+      userPoolClientName: 'roadmap-web',
       generateSecret: false, // browser SPA
       authFlows: { userSrp: true }, // SRP only — no USER_PASSWORD, no OAuth
       preventUserExistenceErrors: true, // no account-enumeration oracle
@@ -70,7 +70,7 @@ export class RodemapStack extends Stack {
 
     // ── Data — single table per backend-contract.md §6 ─────────────────────
     const table = new dynamodb.Table(this, 'Table', {
-      tableName: 'rodemap',
+      tableName: 'roadmap',
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -120,7 +120,7 @@ export class RodemapStack extends Stack {
 
     // ── HTTP API — JWT authorizer validates ID tokens (aud = client id) ────
     const api = new HttpApi(this, 'Api', {
-      apiName: 'rodemap-api',
+      apiName: 'roadmap-api',
       corsPreflight: {
         // Missing CORS is the #1 mock-works-but-AWS-doesn't failure — see
         // docs/aws-connect.md §3. Origins: prod Pages + dev servers.

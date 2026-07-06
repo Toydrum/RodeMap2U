@@ -221,7 +221,7 @@ export const LIMITS = Object.freeze({
 
 // ── The API surface ─────────────────────────────────────────────────────────
 
-export interface RodemapApi {
+export interface RoadmapApi {
   // me
   getMe(): Promise<MeResponse>;
   patchMe(patch: { displayName?: string }): Promise<UserProfile>;

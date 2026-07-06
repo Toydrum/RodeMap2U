@@ -1,4 +1,4 @@
-# RodeMap2U — Backend Contract (Cognito + API Gateway + Lambda + DynamoDB)
+# RoadMap2U — Backend Contract (Cognito + API Gateway + Lambda + DynamoDB)
 
 **Normative types: [`src/app/core/api/contracts.ts`](../src/app/core/api/contracts.ts).** This document explains the semantics; the TypeScript file is the single source of shapes, paths, error codes and limits. Three implementations type against it: the on-device mock (`core/api/mock-api.ts` — the *executable spec*), the client transport (`core/api/http-api.ts`), and the Lambda router (`infra/`, when it lands). If a shape needs to change, change `contracts.ts` first and let the compiler surface every consequence.
 
@@ -13,7 +13,7 @@ Owner decisions baked in (2026-07-06): login becomes **mandatory at AWS go-live*
 3. **No discovery.** No user search, no public profiles, no username-availability endpoint (only `USERNAME_TAKEN` on create). Codes are the only introduction. Denied forest reads return `NOT_FOUND`, never `FORBIDDEN` — no existence oracle.
 4. **Privacy boundaries are server-side.** Stripping (`note`/`trigger`/`targetDate`) happens in the Lambda, not the client. Check-ins, sessions and settings are NEVER served to another user, ever.
 5. **No-shame mechanics.** Friend declines are silent; requests expire quietly (14 days); nothing notifies rejection.
-6. **The mock is the spec.** Every rule here is enforced by `mock-api.ts` against the on-device `rodemap2u-mockcloud` DB with deterministic fixtures (`mock-seed.ts`). If mock and doc disagree, fix one — before go-live they must agree.
+6. **The mock is the spec.** Every rule here is enforced by `mock-api.ts` against the on-device `roadmap2u-mockcloud` DB with deterministic fixtures (`mock-seed.ts`). If mock and doc disagree, fix one — before go-live they must agree.
 
 ## 2. Identity — Cognito user pool
 
@@ -78,7 +78,7 @@ REST under `${apiBaseUrl}/v1`, JSON, `Authorization: Bearer <Cognito idToken>` (
 - The server validates only `SyncBase` shape + the store enum and stores records opaquely → additive schema evolution (the `trigger`/`flow` precedent) needs zero backend change. A push with `schemaVersion` NEWER than the server understands → `SYNC_TOO_OLD` (client asks user to update the app... the server, actually — the error names the direction for the client copy).
 - Settings are device preferences (no `rev`) — **not synced**.
 
-## 6. DynamoDB — single table `rodemap`
+## 6. DynamoDB — single table `roadmap`
 
 On-demand billing, TTL enabled, 2 GSIs, item-per-record (a tree-document would fight the 400 KB item limit and break per-record LWW).
 
@@ -105,7 +105,7 @@ Access patterns: me = GetItem + two link queries · my minors = GSI1 · forest v
 
 ## 8. Mock parity
 
-`mock-api.ts` + `mock-auth.provider.ts` enforce everything above on-device: same codes, same caps, same LWW, same strip rules. Deterministic by doctrine (rule 4): confirmation code `123456`, fixed demo passwords, `hash()`-derived latencies (250–400 ms). Demo family (`mock-seed.ts`): **rocio** (adult guardian, `Bosque123`) · **nico** (created-minor, social off, temp `Semilla1!` → NEW_PASSWORD_REQUIRED) · **val** (minor, social on, friends with Ámbar) · **ambar** (adult, the lush visitable forest, `Bosque123`). "Restablecer la nube de prueba" (Settings, mock mode only) wipes `rodemap2u-mockcloud`; it reseeds on next use. Determinism is a MOCK property — the real backend uses crypto RNG for codes/passwords.
+`mock-api.ts` + `mock-auth.provider.ts` enforce everything above on-device: same codes, same caps, same LWW, same strip rules. Deterministic by doctrine (rule 4): confirmation code `123456`, fixed demo passwords, `hash()`-derived latencies (250–400 ms). Demo family (`mock-seed.ts`): **rocio** (adult guardian, `Bosque123`) · **nico** (created-minor, social off, temp `Semilla1!` → NEW_PASSWORD_REQUIRED) · **val** (minor, social on, friends with Ámbar) · **ambar** (adult, the lush visitable forest, `Bosque123`). "Restablecer la nube de prueba" (Settings, mock mode only) wipes `roadmap2u-mockcloud`; it reseeds on next use. Determinism is a MOCK property — the real backend uses crypto RNG for codes/passwords.
 
 ## 9. Rollout
 
