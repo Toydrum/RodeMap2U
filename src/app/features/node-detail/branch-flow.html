@@ -12,6 +12,18 @@
           {{ suggestionLabel(key) }}
         </button>
       }
+      <!-- The user's own quick paths — saved from any typed path below -->
+      @for (chip of customChips(); track chip) {
+        <span class="chip suggestion custom">
+          <button type="button" class="chip-apply" (click)="applyCustom(chip)">{{ chip }}</button>
+          <button
+            type="button"
+            class="chip-x"
+            (click)="removeChip(chip)"
+            [attr.aria-label]="i18n.fill(i18n.t().branchFlow.removeChip, { text: chip })"
+          >✕</button>
+        </span>
+      }
     </div>
 
     @for (alt of alternatives(); track $index) {
@@ -26,6 +38,15 @@
           [attr.autofocus]="$index === 0 ? '' : null"
           [attr.aria-label]="i18n.t().branchFlow.altPlaceholder + ' ' + ($index + 1)"
         >
+        @if (canSaveChip(alt)) {
+          <button
+            type="button"
+            class="save-chip"
+            (click)="saveChip(alt)"
+            [attr.aria-label]="i18n.fill(i18n.t().branchFlow.saveChip, { text: alt.trim() })"
+            [title]="i18n.fill(i18n.t().branchFlow.saveChip, { text: alt.trim() })"
+          >☆</button>
+        }
       </div>
     }
 

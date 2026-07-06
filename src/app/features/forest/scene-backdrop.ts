@@ -183,7 +183,7 @@ export class SceneBackdrop {
   protected readonly farMeadowBottom = computed(() => `calc(${this.mountainsBottom()} - 46px)`);
 
   /** Tiny distant groves dotting the far hills (fixed-seed). */
-  protected readonly farFlora = Array.from({ length: 9 }, (_, i) => {
+  protected readonly farFlora = Array.from({ length: 14 }, (_, i) => {
     const h = (i * 2654435761) >>> 0;
     return { x: 30 + (h % 940), y: 34 + ((h >> 6) % 22), s: 0.5 + ((h >> 3) % 55) / 100 };
   });
@@ -194,11 +194,11 @@ export class SceneBackdrop {
   /** Wild mid-distance flora (fixed-seed): trees, pines, shrubs, grass, daisies. */
   protected readonly midFlora = (() => {
     const kinds: [string, number][] = [
-      ['tree', 8],
-      ['pine', 5],
-      ['bush', 9],
-      ['grass', 18],
-      ['daisy', 10],
+      ['tree', 14],
+      ['pine', 9],
+      ['bush', 12],
+      ['grass', 20],
+      ['daisy', 11],
     ];
     const out: { kind: string; x: number; y: number; s: number; flip: boolean }[] = [];
     for (const [kind, count] of kinds) {
@@ -226,7 +226,7 @@ export class SceneBackdrop {
     return out.sort((a, b) => a.y - b.y);
   })();
 
-  protected readonly treelineXs = [40, 120, 210, 330, 420, 505, 610, 700, 800, 890, 960];
+  protected readonly treelineXs = [40, 85, 120, 210, 275, 330, 420, 465, 505, 560, 610, 700, 755, 800, 890, 925, 960];
 
   protected readonly farthestD =
     'M -20 150 L 110 92 L 240 132 L 400 76 L 545 128 L 690 86 L 830 134 L 1020 96 L 1020 150 Z';

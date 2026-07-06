@@ -1,13 +1,17 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
+import { SettingsService } from '../../core/repos/settings.service';
 import { TreeNode } from '../../core/db/schema';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 
 /** Cap on alternative paths — visible in the UI as a counter, never silent. */
 const MAX_PATHS = 5;
+
+/** Cap on the user's own quick chips — a hand, not a hoard. */
+const MAX_CHIPS = 6;
 
 /**
  * The transformation moment: a goal whose moment passed becomes a branch
@@ -27,7 +31,11 @@ export class BranchFlow {
   protected readonly i18n = inject(I18nService);
   private readonly nodes = inject(NodesRepo);
   private readonly trees = inject(TreesRepo);
+  private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
+
+  /** The user's own quick paths — saved once, reused on every ramificación. */
+  protected readonly customChips = computed(() => this.settings.settings().customBranchChips);
 
   protected readonly alternatives = signal<string[]>(['']);
   protected readonly maxPaths = MAX_PATHS;
@@ -72,6 +80,34 @@ export class BranchFlow {
 
   protected setAlt(index: number, value: string): void {
     this.alternatives.update((alts) => alts.map((a, i) => (i === index ? value : a)));
+  }
+
+  /** A custom chip fills the first empty slot verbatim (the user's words). */
+  protected applyCustom(text: string): void {
+    this.alternatives.update((alts) => {
+      const emptyIdx = alts.findIndex((a) => !a.trim());
+      if (emptyIdx !== -1) return alts.map((a, i) => (i === emptyIdx ? text : a));
+      if (alts.length < MAX_PATHS) return [...alts, text];
+      return alts;
+    });
+  }
+
+  /** Can this typed path still be kept as a chip? */
+  protected canSaveChip(text: string): boolean {
+    const t = text.trim();
+    return t.length >= 3 && !this.customChips().includes(t) && this.customChips().length < MAX_CHIPS;
+  }
+
+  protected async saveChip(text: string): Promise<void> {
+    const t = text.trim();
+    if (!this.canSaveChip(t)) return;
+    await this.settings.patch({ customBranchChips: [...this.customChips(), t] });
+  }
+
+  protected async removeChip(text: string): Promise<void> {
+    await this.settings.patch({
+      customBranchChips: this.customChips().filter((c) => c !== text),
+    });
   }
 
   protected addAlt(): void {

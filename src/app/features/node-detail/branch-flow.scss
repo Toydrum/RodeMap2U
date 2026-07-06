@@ -43,6 +43,65 @@
     }
   }
 
+  /* The user's own chips — golden-tinted, with a quiet ✕ to let them go. */
+  .chip.custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0;
+    border-color: color-mix(in srgb, var(--status-branched) 55%, var(--border-strong));
+
+    .chip-apply {
+      border: none;
+      background: none;
+      color: inherit;
+      font: inherit;
+      padding: 0.32rem 0.15rem 0.32rem 0.6rem;
+      cursor: pointer;
+      max-width: 11rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chip-x {
+      border: none;
+      background: none;
+      color: var(--text-faint);
+      font-size: 0.7rem;
+      padding: 0.32rem 0.5rem 0.32rem 0.15rem;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--text);
+      }
+    }
+  }
+
+  /* Keep a typed path as a chip — the little star beside its field. */
+  .field {
+    position: relative;
+
+    .save-chip {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: none;
+      color: var(--status-branched);
+      font-size: 1.05rem;
+      min-width: 34px;
+      min-height: 34px;
+      cursor: pointer;
+      border-radius: 8px;
+
+      &:hover {
+        background: color-mix(in srgb, var(--status-branched) 12%, transparent);
+      }
+    }
+  }
+
   .suggest-label {
     font-size: 0.88rem;
     font-weight: 700;

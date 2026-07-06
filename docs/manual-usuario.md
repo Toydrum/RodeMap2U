@@ -212,7 +212,7 @@ Si eliges transformar, se abre **"Un buen lugar para brotar"**: *estás aquí, y
 - 🤝 **Con alguien** — acompañarte de alguien.
 - 😴 **Descansar un tiempo** — retomarla cuando respires.
 
-Tocas una idea y se escribe sola (editable); puedes abrir hasta **cinco caminos** — el contador te dice cuántos llevas, y **con uno basta**. Al confirmar **"Que crezcan"**:
+Tocas una idea y se escribe sola (editable); puedes abrir hasta **cinco caminos** — el contador te dice cuántos llevas, y **con uno basta**. ¿Hay caminos que usas seguido? Junto a cada camino escrito aparece una **estrellita ☆**: tócala y se guarda como **tu propio chip** (dorado, hasta 6) — en la próxima ramificación estará ahí para rellenarse de un toque, y su ✕ lo suelta cuando ya no lo quieras. Al confirmar **"Que crezcan"**:
 
 - Tu meta original se convierte en un **nudo dorado** del árbol: no se borra, no se tacha. Queda como el lugar donde tu ruta se abrió.
 - Los caminos nuevos brotan de ese nudo como ramitas doradas.

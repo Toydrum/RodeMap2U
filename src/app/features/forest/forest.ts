@@ -404,8 +404,10 @@ export class ForestPage {
     }
     const bankPx = (260 - (best.y + best.half)) * scale; // water's near edge, from the scene bottom
     const plotsH = Math.min(400, 0.5 * h);
-    // Trunk base sits ~66px (scaled) above the plot's foot; plots rest ~16px up.
-    return Math.max(4, ((bankPx - 26 - 66 * treeScale) / plotsH) * 100);
+    // Trunk base sits ~66px (scaled) above the plot's foot; the extra margin
+    // absorbs the plot-internal offsets that shift with scale — better a
+    // step further from the water than one toe in it.
+    return Math.max(4, ((bankPx - 44 - 66 * treeScale) / plotsH) * 100);
   }
 
   /** Where the i-th tree of this clearing stands: its anchor plus the tree's

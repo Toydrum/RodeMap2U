@@ -131,6 +131,8 @@ export interface Settings {
   lastWhisperAt: number | null;
   /** "Prefiero empezar en blanco" — hides the starter saplings for good. */
   startersHidden: boolean;
+  /** The user's own quick-path chips for the branch flow (max 6). */
+  customBranchChips: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -148,6 +150,7 @@ export const DEFAULT_SETTINGS: Settings = {
   whisperRhythm: 'sometimes',
   lastWhisperAt: null,
   startersHidden: false,
+  customBranchChips: [],
 };
 
 /** Versioned backup file format. */

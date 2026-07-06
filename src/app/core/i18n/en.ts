@@ -272,6 +272,8 @@ export const EN: Dict = {
     addAlt: 'Another path',
     altCount: '({count} of {max})',
     altsFull: 'Five paths ready — one is enough 🌿',
+    saveChip: 'Keep "{text}" as a chip for future branchings',
+    removeChip: 'Remove the "{text}" chip',
     confirm: 'Let them grow',
     celebrate: 'The tree kept growing 🌱',
   },

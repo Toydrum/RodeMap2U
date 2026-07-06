@@ -79,7 +79,8 @@ const xs = steps.map((s) => s.x);
 const spread = Math.max(...xs) - Math.min(...xs);
 const ys = steps.map((s) => s.y).sort((a, b) => b - a);
 const gaps = ys.slice(0, -1).map((y, i) => y - ys[i + 1]);
-const gapsOk = gaps.every((g) => g > 12 && g < 80);
+// Screen-space gaps scale with the fit zoom (CHAIN_H 46 ± 16 jitter, k ≤ ~1.2).
+const gapsOk = gaps.every((g) => g > 12 && g < 95);
 const labels = await page.evaluate(() =>
   [...document.querySelectorAll('g.node .title')].map((t) => t.textContent.trim()).filter(Boolean),
 );

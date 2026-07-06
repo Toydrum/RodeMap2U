@@ -267,15 +267,27 @@ export class TreeCanvas {
         isLeaf: tip(leader),
       });
 
-      const sides = normal.filter((c) => c !== leader);
+      // Real-tree fork order: the FARTHEST-reaching side limb leaves LOWEST
+      // (it needs the longest run), short twigs fork higher up — sorted by
+      // horizontal reach so ribbons never cross into parallel-rail tangles.
+      const sides = normal
+        .filter((c) => c !== leader)
+        .sort((a, b) => Math.abs(b.x - parent.x) - Math.abs(a.x - parent.x));
+      // Crowded forks spread over a wider window and slim their collars so
+      // the crotch never welds into one wooden blob.
+      const tMax = sides.length >= 4 ? Math.min(0.92, f.forkTMax + 0.12) : f.forkTMax;
+      const span = tMax - f.forkTMin;
+      const collarMul = sides.length >= 4 ? 0.78 : 0.9;
       sides.forEach((c, i) => {
         const h = hash(c.node.id + ':fork');
-        const span = f.forkTMax - f.forkTMin;
-        const t = f.forkTMin + span * ((i + 0.3 + (h % 41) / 100) / Math.max(1, sides.length));
+        const t = f.forkTMin + span * ((i + 0.35 + (h % 31) / 120) / Math.max(1, sides.length));
         const start = edgePointAt(parent, leader, leaderGeom, t);
-        const geom = edgeGeometry(start, c, wood.bow, { upBias: f.upBias, bowMul: f.bowMul });
+        const geom = edgeGeometry(start, c, wood.bow, {
+          upBias: Math.max(0.1, Math.min(0.9, f.upBias + ((h >> 5) % 21) / 100 - 0.1)),
+          bowMul: f.bowMul,
+        });
         // A limb may flare at its collar but never outgrow the wood it forks from.
-        const collar = 0.9 * ribbonWidthAt(leaderW0, leaderW1, t);
+        const collar = collarMul * ribbonWidthAt(leaderW0, leaderW1, t);
         plan.set(c.node.id, {
           start,
           geom,

@@ -274,6 +274,8 @@ export const ES = {
     addAlt: 'Otro camino',
     altCount: '({count} de {max})',
     altsFull: 'Cinco caminos listos — con uno basta 🌿',
+    saveChip: 'Guardar «{text}» como chip para próximas ramificaciones',
+    removeChip: 'Quitar el chip «{text}»',
     confirm: 'Que crezcan',
     celebrate: 'El árbol siguió creciendo 🌱',
   },
