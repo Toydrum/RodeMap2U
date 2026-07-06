@@ -5,6 +5,8 @@
  * cloud (`core/api/mock-cloud.ts`) and the app never touches the network.
  * Go-live day: deploy `infra/` (CDK stack outputs print these exact strings),
  * paste them below, flip `backend` to 'aws', bump the version, push.
+ * STEP-BY-STEP RUNBOOK (incl. connecting identity alone, possible today):
+ * docs/aws-connect.md.
  *
  * `requireAuth` stays false until AFTER the connect-my-forest flow ships
  * (owner decision 2026-07-06: login becomes mandatory at AWS go-live, not

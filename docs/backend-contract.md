@@ -118,3 +118,5 @@ Access patterns: me = GetItem + two link queries · my minors = GSI1 · forest v
 | **AWS go-live** | `infra/`: `cdk deploy` → paste stack outputs into `core/config.ts` → `backend: 'aws'` → verify auth battery against the real pool → **flip `requireAuth: true`** (first mandatory sign-in adopts the local forest via the connect flow) | all of it |
 
 `infra/` (CDK, own workspace) implements this contract verbatim: Cognito pool per §2, table per §6, HTTP API + JWT authorizer + one router Lambda per §5/§7, handlers importing `contracts.ts` via tsconfig path alias. Verification without AWS: `cdk synth` + vitest with mocked DynamoDB (`aws-sdk-client-mock`) covering authz denials, LWW pushes, LAST_GUARDIAN, code expiry.
+
+**The execution runbook lives in [`aws-connect.md`](./aws-connect.md)** — exact pool/app-client CLI commands, CORS requirements, the two-stage connect (identity alone works before the API exists), verification gates and rollback. This document is the WHAT; that one is the HOW.
