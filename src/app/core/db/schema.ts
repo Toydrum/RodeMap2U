@@ -106,6 +106,16 @@ export type ThemeName = 'organic' | 'terminal';
 export type MotionPref = 'system' | 'on' | 'off';
 export type TextSize = 'md' | 'lg' | 'xl';
 
+/**
+ * The `meta` store is key-value; its known keys:
+ *   'settings'      — the Settings singleton below (exported in backups).
+ *   'auth.identity' — device session snapshot (core/auth/auth-types.ts).
+ *   'account.link'  — which account owns this device's forest (future
+ *                     «conectar mi bosque» phase).
+ * Auth keys are deliberately NOT part of ExportEnvelope: backups are shared
+ * files, and identity is device state, not forest data.
+ */
+
 /** Singleton — lives in the `meta` store under key 'settings'. */
 export interface Settings {
   lang: Lang;

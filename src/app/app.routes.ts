@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Injectable, inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { SettingsService } from './core/repos/settings.service';
+import { authRequiredGate } from './core/auth/auth.guard';
 
 const CHECK_IN_COOLDOWN_MS = 30 * 60 * 1000;
 
@@ -25,46 +26,60 @@ const checkInGate: CanActivateFn = () => {
   return fresh ? true : inject(Router).createUrlTree(['/check-in']);
 };
 
+// authRequiredGate guards every route EXCEPT /account. It is inert until
+// APP_CONFIG.requireAuth flips true at AWS go-live — see core/auth/auth.guard.ts.
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'ahora' },
   {
     path: 'check-in',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/check-in/check-in').then((m) => m.CheckInPage),
     title: 'RodeMap2U',
   },
   {
+    path: 'account',
+    loadComponent: () => import('./features/account/account').then((m) => m.AccountPage),
+    title: 'RodeMap2U — Cuenta',
+  },
+  {
     path: 'ahora',
-    canActivate: [checkInGate],
+    canActivate: [authRequiredGate, checkInGate],
     loadComponent: () => import('./features/ahora/ahora').then((m) => m.AhoraPage),
     title: 'RodeMap2U — Ahora',
   },
   {
     path: 'forest',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/forest/forest').then((m) => m.ForestPage),
     title: 'RodeMap2U — Mi bosque',
   },
   {
     path: 'tree/:id',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/forest/tree-view').then((m) => m.TreeViewPage),
     title: 'RodeMap2U',
   },
   {
     path: 'timer',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/timer/timer').then((m) => m.TimerPage),
     title: 'RodeMap2U — Enfoque',
   },
   {
     path: 'settings',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/settings/settings').then((m) => m.SettingsPage),
     title: 'RodeMap2U — Ajustes',
   },
   {
     path: 'guide',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/guide/guide').then((m) => m.GuidePage),
     title: 'RodeMap2U — Guía',
   },
   {
     path: 'trail',
+    canActivate: [authRequiredGate],
     loadComponent: () => import('./features/trail/trail').then((m) => m.TrailPage),
     title: 'RodeMap2U — Huellas',
   },

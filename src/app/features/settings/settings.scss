@@ -138,6 +138,22 @@
   margin: 0.5rem 0;
 }
 
+.account-chip {
+  text-decoration: none;
+
+  .account-role {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+  }
+}
+
+.mock-row .label {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  max-width: 32ch;
+}
+
 .import {
   position: relative;
   overflow: hidden;

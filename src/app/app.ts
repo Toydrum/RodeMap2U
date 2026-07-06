@@ -27,8 +27,12 @@ export class App {
     initialValue: this.router.url,
   });
 
-  /** The check-in is a full-screen ritual — no tab bar there. */
-  protected readonly showTabs = computed(() => !this.url().startsWith('/check-in'));
+  /** Full-screen rituals (check-in, account) hide the tab bar. A third such
+   *  route is the cue to move this onto route data instead of prefixes. */
+  protected readonly showTabs = computed(() => {
+    const url = this.url();
+    return !url.startsWith('/check-in') && !url.startsWith('/account');
+  });
 
   /** The traveling perch: the companion follows a live session everywhere
    *  EXCEPT the two surfaces that already hold their own bird. */

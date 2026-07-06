@@ -12,6 +12,9 @@ import { AccompanimentService } from '../../core/accompaniment.service';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 import { APP_VERSION } from '../../core/version';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
+import { AuthService } from '../../core/auth/auth.service';
+import { APP_CONFIG } from '../../core/config';
+import { resetMockCloud } from '../../core/api/mock-cloud';
 
 @Component({
   selector: 'app-settings',
@@ -59,8 +62,18 @@ export class SettingsPage {
   protected readonly settings = inject(SettingsService);
   protected readonly theme = inject(ThemeService);
   protected readonly trees = inject(TreesRepo);
+  protected readonly auth = inject(AuthService);
+  protected readonly isMock = APP_CONFIG.backend === 'mock';
   private readonly backup = inject(BackupService);
   private readonly toast = inject(ToastService);
+
+  /** Rehearsal mode only: wipe the practice cloud; it reseeds on next use.
+   *  Also signs out — the session's user may no longer exist afterwards. */
+  protected async resetMockCloud(): Promise<void> {
+    await this.auth.signOut();
+    await resetMockCloud();
+    this.toast.show({ message: this.i18n.t().settings.mockResetDone });
+  }
 
   protected readonly importing = signal(false);
   /** Tree pending permanent deletion (confirm sheet open). */

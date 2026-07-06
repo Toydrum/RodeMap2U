@@ -427,6 +427,14 @@
   transform-origin: 50% 100%;
   transition: left 0.35s ease, bottom 0.35s ease, transform 0.3s ease;
 
+  /* Earned-size crowns can shade a neighbor's corner 🗃 — the plot you're
+     reaching for steps forward. !important beats the inline painter's-order
+     z-index from slotFor. */
+  &:hover,
+  &:focus-within {
+    z-index: 200 !important;
+  }
+
   app-mini-tree {
     position: relative;
     z-index: 1;

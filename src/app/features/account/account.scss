@@ -1,0 +1,193 @@
+// The account ritual wears the check-in's clothes: grid-centered stage on a
+// tinted sky, everything else built from the global .card/.btn/.field set.
+.ritual {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 1.4rem;
+  background:
+    radial-gradient(900px 420px at 50% 118%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 70%),
+    var(--bg);
+}
+
+.stage {
+  width: min(480px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: stage-in 0.35s ease both;
+
+  h1 {
+    font-size: clamp(1.4rem, 5vw, 1.9rem);
+  }
+
+  .sub {
+    color: var(--text-dim);
+    margin-bottom: 1.4rem;
+  }
+}
+
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.logo {
+  margin-bottom: 0.4rem;
+}
+
+.step-back {
+  align-self: flex-start;
+  margin-bottom: 0.4rem;
+}
+
+.big {
+  padding: 0.85rem 1.6rem;
+  font-size: 1.05rem;
+}
+
+.doors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: min(300px, 100%);
+  margin-bottom: 1.4rem;
+
+  .btn {
+    width: 100%;
+  }
+}
+
+.auth-form {
+  width: 100%;
+  text-align: left;
+
+  .field > span {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .btn[type='submit'] {
+    width: 100%;
+    margin-top: 0.4rem;
+  }
+}
+
+.code-input {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  margin: 0.3rem 0 0.8rem;
+}
+
+.notice {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-achieved) 14%, var(--surface));
+  border: 1.5px dashed color-mix(in srgb, var(--status-achieved) 45%, transparent);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.error-line {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-resting) 16%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--status-resting) 45%, transparent);
+  color: var(--text);
+  font-size: 0.9rem;
+  margin: 0 0 0.9rem;
+}
+
+.demo-note {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  margin: 0.15rem 0;
+}
+
+.profile-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1.1rem;
+
+  .who-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .who-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .who-detail {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .who-role {
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.6rem;
+
+  .hint {
+    margin: 0;
+  }
+}
+
+.danger {
+  color: color-mix(in srgb, var(--status-resting) 70%, var(--text));
+}
+
+.danger-card {
+  width: 100%;
+  padding: 1.1rem 1.2rem;
+  border-color: color-mix(in srgb, var(--status-resting) 50%, var(--border));
+
+  h2 {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+  }
+
+  p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+  }
+}
+
+.danger-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+
+  .danger-cta {
+    background: color-mix(in srgb, var(--status-resting) 55%, var(--primary));
+  }
+}

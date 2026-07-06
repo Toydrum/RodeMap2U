@@ -1,0 +1,380 @@
+<div class="ritual">
+  @switch (step()) {
+    @case ('welcome') {
+      <section class="stage" aria-live="polite">
+        <img class="logo" src="icons/logo.svg" alt="" width="64" height="64" />
+        <h1>{{ i18n.t().account.welcomeTitle }}</h1>
+        <p class="sub">{{ i18n.t().account.welcomeBody }}</p>
+
+        <div class="doors">
+          <button type="button" class="btn btn-primary big" (click)="go('signIn')">
+            {{ i18n.t().account.signInDoor }}
+          </button>
+          <button type="button" class="btn btn-soft big" (click)="go('create')">
+            {{ i18n.t().account.createDoor }}
+          </button>
+        </div>
+
+        @if (isMock) {
+          <p class="demo-note">🧪 {{ i18n.t().account.mockNote }}</p>
+          <p class="demo-note">{{ i18n.t().account.mockUsers }}</p>
+        }
+      </section>
+    }
+
+    @case ('signIn') {
+      <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('welcome')">
+          ← {{ i18n.t().common.back }}
+        </button>
+        <h1>{{ i18n.t().account.signInTitle }}</h1>
+
+        @if (notice()) {
+          <p class="notice">{{ notice() }}</p>
+        }
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doSignIn()">
+          <label class="field">
+            <span>{{ i18n.t().account.username }}</span>
+            <input
+              type="text"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              [value]="username()"
+              (input)="username.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.password }}</span>
+            <input
+              type="password"
+              autocomplete="current-password"
+              [value]="password()"
+              (input)="password.set($any($event.target).value)"
+            />
+          </label>
+
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.signInCta }}
+          </button>
+        </form>
+
+        <button type="button" class="btn btn-ghost" (click)="go('forgot')">
+          {{ i18n.t().account.forgotLink }}
+        </button>
+      </section>
+    }
+
+    @case ('create') {
+      <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('welcome')">
+          ← {{ i18n.t().common.back }}
+        </button>
+        <h1>{{ i18n.t().account.createTitle }}</h1>
+        <p class="sub">{{ i18n.t().account.createHint }}</p>
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doCreate()">
+          <label class="field">
+            <span>{{ i18n.t().account.username }}</span>
+            <input
+              type="text"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              [value]="username()"
+              (input)="username.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.displayName }}</span>
+            <input
+              type="text"
+              autocomplete="name"
+              [value]="displayName()"
+              (input)="displayName.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.email }}</span>
+            <input
+              type="email"
+              autocomplete="email"
+              [value]="email()"
+              (input)="email.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.passwordNew }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [attr.minlength]="minLength"
+              [value]="password()"
+              (input)="password.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.passwordRepeat }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [value]="password2()"
+              (input)="password2.set($any($event.target).value)"
+            />
+          </label>
+          <p class="hint">{{ i18n.t().account.passwordHint }}</p>
+
+          @if (localError()) {
+            <p class="error-line" role="alert">{{ localError() }}</p>
+          }
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.createCta }}
+          </button>
+        </form>
+      </section>
+    }
+
+    @case ('confirmCode') {
+      <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('welcome')">
+          ← {{ i18n.t().common.back }}
+        </button>
+        <h1>{{ i18n.t().account.codeTitle }}</h1>
+        <p class="sub">
+          @if (auth.deliveryHint(); as hint) {
+            {{ i18n.fill(i18n.t().account.codeBody, { hint }) }}
+          } @else {
+            {{ i18n.t().account.codeBodyNoHint }}
+          }
+        </p>
+
+        @if (notice()) {
+          <p class="notice">{{ notice() }}</p>
+        }
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doConfirmCode()">
+          <label class="field">
+            <span>{{ i18n.t().account.codeLabel }}</span>
+            <input
+              class="code-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              [value]="code()"
+              (input)="code.set($any($event.target).value)"
+            />
+          </label>
+
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.codeCta }}
+          </button>
+        </form>
+
+        <button type="button" class="btn btn-ghost" (click)="doResend()" [disabled]="auth.busy()">
+          {{ i18n.t().account.resend }}
+        </button>
+      </section>
+    }
+
+    @case ('newPassword') {
+      <section class="stage" aria-live="polite">
+        <h1>{{ i18n.t().account.newPasswordTitle }}</h1>
+        <p class="sub">{{ i18n.t().account.newPasswordBody }}</p>
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doNewPassword()">
+          <label class="field">
+            <span>{{ i18n.t().account.passwordNew }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [value]="password()"
+              (input)="password.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.passwordRepeat }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [value]="password2()"
+              (input)="password2.set($any($event.target).value)"
+            />
+          </label>
+          <p class="hint">{{ i18n.t().account.passwordHint }}</p>
+
+          @if (localError()) {
+            <p class="error-line" role="alert">{{ localError() }}</p>
+          }
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.newPasswordCta }}
+          </button>
+        </form>
+      </section>
+    }
+
+    @case ('forgot') {
+      <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('signIn')">
+          ← {{ i18n.t().common.back }}
+        </button>
+        <h1>{{ i18n.t().account.forgotTitle }}</h1>
+        <p class="sub">{{ i18n.t().account.forgotBody }}</p>
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doForgot()">
+          <label class="field">
+            <span>{{ i18n.t().account.username }}</span>
+            <input
+              type="text"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              [value]="username()"
+              (input)="username.set($any($event.target).value)"
+            />
+          </label>
+
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.forgotCta }}
+          </button>
+        </form>
+
+        <p class="hint">{{ i18n.t().account.forgotNoEmail }}</p>
+      </section>
+    }
+
+    @case ('forgotCode') {
+      <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('forgot')">
+          ← {{ i18n.t().common.back }}
+        </button>
+        <h1>{{ i18n.t().account.forgotCodeTitle }}</h1>
+        <p class="sub">
+          @if (auth.deliveryHint(); as hint) {
+            {{ i18n.fill(i18n.t().account.codeBody, { hint }) }}
+          } @else {
+            {{ i18n.t().account.codeBodyNoHint }}
+          }
+        </p>
+
+        <form class="auth-form" (submit)="$event.preventDefault(); doForgotConfirm()">
+          <label class="field">
+            <span>{{ i18n.t().account.codeLabel }}</span>
+            <input
+              class="code-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              [value]="code()"
+              (input)="code.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.passwordNew }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [value]="password()"
+              (input)="password.set($any($event.target).value)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ i18n.t().account.passwordRepeat }}</span>
+            <input
+              type="password"
+              autocomplete="new-password"
+              [value]="password2()"
+              (input)="password2.set($any($event.target).value)"
+            />
+          </label>
+          <p class="hint">{{ i18n.t().account.passwordHint }}</p>
+
+          @if (localError()) {
+            <p class="error-line" role="alert">{{ localError() }}</p>
+          }
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
+            {{ auth.busy() ? i18n.t().common.loading : i18n.t().account.forgotCodeCta }}
+          </button>
+        </form>
+      </section>
+    }
+
+    @case ('profile') {
+      <section class="stage" aria-live="polite">
+        <h1>{{ i18n.t().account.profileTitle }}</h1>
+
+        @if (auth.user(); as user) {
+          <div class="card profile-card">
+            <span class="who-label">{{ i18n.t().account.signedInAs }}</span>
+            <span class="who-name">{{ user.displayName || user.username }}</span>
+            <span class="who-detail">&#64;{{ user.username }}</span>
+            <span class="who-role">
+              {{ user.accountType === 'minor' ? i18n.t().account.roleMinor : i18n.t().account.roleAdult }}
+            </span>
+          </div>
+        }
+
+        @if (auth.sessionStale()) {
+          <p class="hint">{{ i18n.t().account.sessionStale }}</p>
+        }
+
+        <div class="profile-actions">
+          <button type="button" class="btn btn-soft" (click)="doSignOut()" [disabled]="auth.busy()">
+            {{ i18n.t().account.signOutCta }}
+          </button>
+          <p class="hint">{{ i18n.t().account.signOutHint }}</p>
+
+          <a class="btn btn-ghost" routerLink="/forest">{{ i18n.t().common.goForest }}</a>
+        </div>
+
+        @if (!confirmingDelete()) {
+          <button type="button" class="btn btn-ghost danger" (click)="confirmingDelete.set(true)">
+            {{ i18n.t().account.deleteCta }}
+          </button>
+        } @else {
+          <div class="card danger-card">
+            <h2>{{ i18n.t().account.deleteTitle }}</h2>
+            <p>{{ i18n.t().account.deleteBody }}</p>
+            @if (errorText()) {
+              <p class="error-line" role="alert">{{ errorText() }}</p>
+            }
+            <div class="danger-actions">
+              <button type="button" class="btn btn-soft" (click)="confirmingDelete.set(false)">
+                {{ i18n.t().common.cancel }}
+              </button>
+              <button type="button" class="btn btn-primary danger-cta" (click)="doDelete()" [disabled]="auth.busy()">
+                {{ i18n.t().account.deleteConfirm }}
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

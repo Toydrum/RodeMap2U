@@ -3,8 +3,8 @@ import { StoreName } from './idb';
 /**
  * Cross-tab record refresh. Every mutation posts {store, ids}; other tabs
  * re-read those records and apply them if the incoming rev is newer.
- * This same "apply an external record" path is where Supabase sync plugs
- * into in v2.
+ * Cloud sync rides the same two rails: outbound via onLocalWrite (below),
+ * inbound via RecordsRepo.applyExternal — see core/api/contracts.ts.
  */
 
 export interface DbChangeMessage {
@@ -17,7 +17,19 @@ const CHANNEL_NAME = 'rodemap2u-db';
 const channel: BroadcastChannel | null =
   typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
 
+type LocalWriteHandler = (message: DbChangeMessage) => void;
+
+/** BroadcastChannel never echoes to the posting tab — this registry is how
+ *  THIS tab observes its own writes (the sync engine's push trigger). */
+const localHandlers = new Set<LocalWriteHandler>();
+
+export function onLocalWrite(handler: LocalWriteHandler): () => void {
+  localHandlers.add(handler);
+  return () => localHandlers.delete(handler);
+}
+
 export function broadcastChange(message: DbChangeMessage): void {
+  for (const handler of localHandlers) handler(message);
   channel?.postMessage(message);
 }
 

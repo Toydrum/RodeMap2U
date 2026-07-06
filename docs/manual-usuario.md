@@ -266,6 +266,14 @@ Si los enciendes, de vez en cuando la app te hace una **pregunta suave**: *"¿D�
 - Si estás dentro de la app aparecen como avisito suave; si la app está de fondo, como notificación. **Viven mientras la app esté abierta** (aunque sea en otra pestaña) — con la app totalmente cerrada, el bosque duerme.
 - **El segundo tiempo** 🍃: un ratito después de la pregunta — la contestes o la dejes ir — llega UNA sola oferta chiquita: *"Si traes tantita pila: «sacar la guitarra del estuche» — chiquito a propósito"*, con su botón de **2 minutitos** que arranca ahí mismo. Es un pasito de poca energía elegido a propósito (el más hoja de tus ramas vivas). Una vez, descartable, y jamás se repite ni aparece si ya estás en sesión.
 
+## Cuenta 🗝
+
+La sección **Cuenta** es la puerta a algo que apenas está germinando: **una llave para tu bosque**. Con ella, más adelante, tu bosque podrá viajar contigo entre dispositivos y abrirse a tu familia y a tus amistades — solo a quien tú elijas, y siempre sabrás quién puede verlo.
+
+- Hoy la llave funciona en **modo ensayo**: puedes crear una cuenta y entrar, pero la "nube" todavía es de práctica y vive dentro de tu propio dispositivo. Nada viaja a internet.
+- Entrar o salir de tu cuenta **jamás toca tus árboles**: tu bosque local sigue intacto, exactamente donde estaba.
+- Las cuentas de peques no se crean solas: las creará su familia, con su propio nombre de usuario y sin necesidad de correo (eso llega en una versión próxima).
+
 ## Tus datos
 
 - **Exportar mi copia**: descarga un archivo con todo tu bosque (árboles, ramas, check-ins, sesiones y ajustes). Hazlo seguido — es tu respaldo.
@@ -281,8 +289,9 @@ Aquí viven los árboles que guardaste fuera de la vista (con el botón 🗃 en 
 
 # 10. Tu privacidad
 
-- **Todo vive en tu dispositivo.** RodeMap2U no tiene servidor, ni cuentas, ni nube. Nadie —ni siquiera quien hizo la app— puede ver tus metas, tus climas ni tus notas.
-- Por lo mismo, **tus datos no viajan solos entre dispositivos**: si quieres pasar tu bosque del teléfono a la computadora, usa *Exportar* en uno e *Importar* en el otro.
+- **Tu bosque vive en tu dispositivo** y nada viaja sin ti. Hoy nadie —ni siquiera quien hizo la app— puede ver tus metas, tus climas ni tus notas.
+- **Estamos preparando cuentas** para familias y amistades: cuando conectes la tuya, tu bosque podrá respaldarse y abrirse **solo a quien tú elijas** — y la app siempre te dirá quién puede verlo. Tus sentimientos, check-ins y notitas seguirán siendo solo tuyos. Sin anuncios, sin rastreo, nunca.
+- Mientras tanto, **tus datos no viajan solos entre dispositivos**: si quieres pasar tu bosque del teléfono a la computadora, usa *Exportar* en uno e *Importar* en el otro.
 - Consejo de cuidado: **exporta tu copia de vez en cuando**, especialmente en iPhone/iPad (el sistema puede limpiar datos de sitios poco visitados si la app no está instalada).
 
 ---
@@ -330,6 +339,7 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **La tablita** 📋 | La lista de ramas del árbol: un toque ubica, dos toques abren |
 | **Los claros** | Las "páginas" del prado; las flechitas ‹ › pasean entre ellos |
 | **El porte** | La especie de tu árbol según su color: roble, acacia o esbelto |
+| **La llave** 🗝 | Tu cuenta (en Ajustes → Cuenta): hoy en modo ensayo, mañana el puente a familia y amistades |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |
 | **Archivo** | Donde descansa lo que no quieres ver — nada se borra |

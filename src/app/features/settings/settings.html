@@ -141,6 +141,33 @@
     }
   </section>
 
+  <!-- Account -->
+  <section class="card block">
+    <h2>{{ i18n.t().settings.account }}</h2>
+    @if (auth.user(); as user) {
+      <div class="row">
+        <span class="label">{{ i18n.t().settings.accountSignedInAs }}</span>
+        <a class="chip opt account-chip" routerLink="/account">
+          🗝 {{ user.displayName || user.username }}
+          <span class="account-role">
+            {{ user.accountType === 'minor' ? i18n.t().account.roleMinor : i18n.t().account.roleAdult }}
+          </span>
+        </a>
+      </div>
+    } @else {
+      <p class="hint">{{ i18n.t().settings.accountGuestHint }}</p>
+      <a class="btn btn-soft" routerLink="/account">🗝 {{ i18n.t().settings.accountOpen }}</a>
+    }
+    @if (isMock) {
+      <div class="row mock-row">
+        <span class="label">{{ i18n.t().settings.mockResetHint }}</span>
+        <button type="button" class="chip opt" (click)="resetMockCloud()">
+          🧪 {{ i18n.t().settings.mockReset }}
+        </button>
+      </div>
+    }
+  </section>
+
   <!-- Data -->
   <section class="card block">
     <h2>{{ i18n.t().settings.data }}</h2>
