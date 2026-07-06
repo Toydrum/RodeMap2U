@@ -46,8 +46,8 @@ await page.fill('.auth-form input[type="password"]', 'Bosque123');
 await page.locator('.auth-form button[type=submit]').click();
 await page.locator('h1', { hasText: 'Tu cuenta' }).waitFor({ timeout: 6000 });
 
-const localNodesBefore = (await idbAll('rodemap2u', 'nodes')).length;
-const localTreesBefore = (await idbAll('rodemap2u', 'trees')).length;
+const localNodesBefore = (await idbAll('roadmap2u', 'nodes')).length;
+const localTreesBefore = (await idbAll('roadmap2u', 'trees')).length;
 
 // A — familia → Nico's sheet → "Entrar a su bosque" → his garden's doorway.
 await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle' });
@@ -79,7 +79,7 @@ await page.locator('#root-title').fill('Timbre nuevo');
 await page.locator('form.sheet button[type=submit]').click();
 await page.waitForTimeout(900);
 await page.locator('form.sheet button', { hasText: 'Listo' }).click();
-const cloudRecords = await idbAll('rodemap2u-mockcloud', 'records');
+const cloudRecords = await idbAll('roadmap2u-mockcloud', 'records');
 const planted = cloudRecords.find(
   (r) => r.ownerId === 'mock-child' && r.store === 'nodes' && r.record?.title === 'Timbre nuevo',
 );
@@ -107,7 +107,7 @@ let statusWrote = false;
 if (await bloomChip.count()) {
   await bloomChip.first().click();
   await page.waitForTimeout(900);
-  const cloudAfter = await idbAll('rodemap2u-mockcloud', 'records');
+  const cloudAfter = await idbAll('roadmap2u-mockcloud', 'records');
   statusWrote =
     cloudAfter.find(
       (r) => r.ownerId === 'mock-child' && r.record?.title === 'Timbre nuevo',
@@ -116,8 +116,8 @@ if (await bloomChip.count()) {
 console.log(`E node sheet: no-⏳=${sheetFocusBtn === 0} bloom-wrote-cloud=${statusWrote} | OK=${sheetFocusBtn === 0 && statusWrote}`);
 
 // F — INTEGRITY: the visitor's local IndexedDB never gained a record.
-const localNodesAfter = (await idbAll('rodemap2u', 'nodes')).length;
-const localTreesAfter = (await idbAll('rodemap2u', 'trees')).length;
+const localNodesAfter = (await idbAll('roadmap2u', 'nodes')).length;
+const localTreesAfter = (await idbAll('roadmap2u', 'trees')).length;
 const okF = localNodesAfter === localNodesBefore && localTreesAfter === localTreesBefore;
 console.log(
   `F local integrity: nodes ${localNodesBefore}→${localNodesAfter} trees ${localTreesBefore}→${localTreesAfter} | OK=${okF}`,

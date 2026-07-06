@@ -1,4 +1,4 @@
-import { DB_NAME, DB_VERSION } from './schema';
+import { DB_NAME, DB_VERSION, LEGACY_DB_NAME } from './schema';
 
 /**
  * Minimal promise wrapper over IndexedDB — the only six operations this app
@@ -55,11 +55,64 @@ export function openDb(): Promise<IDBDatabase> {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      // One-time adoption of the pre-rename database (see schema.ts naming
+      // note): copy, never move — the legacy DB stays as a safety net.
+      void migrateLegacyIfNeeded(request.result).finally(() => resolve(request.result));
+    };
     request.onerror = () => reject(request.error);
     request.onblocked = () => reject(new Error('IndexedDB open blocked by another tab'));
   });
   return dbPromise;
+}
+
+const ALL_STORES: StoreName[] = ['trees', 'nodes', 'checkins', 'sessions', 'meta'];
+
+/**
+ * If this (new-name) DB is empty and the pre-rename DB exists with data,
+ * copy every store across once. Fail-open: any hiccup leaves the app running
+ * on the new DB, and the untouched legacy DB retries on the next boot.
+ */
+async function migrateLegacyIfNeeded(db: IDBDatabase): Promise<void> {
+  try {
+    const treeCount = await requestToPromise(
+      db.transaction('trees', 'readonly').objectStore('trees').count(),
+    );
+    const metaCount = await requestToPromise(
+      db.transaction('meta', 'readonly').objectStore('meta').count(),
+    );
+    if (treeCount > 0 || metaCount > 0) return; // already lived-in
+
+    // Never CREATE the legacy DB just to look inside it.
+    if (typeof indexedDB.databases === 'function') {
+      const existing = await indexedDB.databases();
+      if (!existing.some((d) => d.name === LEGACY_DB_NAME)) return;
+    }
+
+    const legacy = await new Promise<IDBDatabase | null>((resolve) => {
+      const open = indexedDB.open(LEGACY_DB_NAME);
+      open.onsuccess = () => resolve(open.result);
+      open.onerror = () => resolve(null);
+    });
+    if (!legacy) return;
+    try {
+      for (const store of ALL_STORES) {
+        if (!legacy.objectStoreNames.contains(store)) continue;
+        const rows = await requestToPromise<unknown[]>(
+          legacy.transaction(store, 'readonly').objectStore(store).getAll(),
+        );
+        if (!rows.length) continue;
+        const tx = db.transaction(store, 'readwrite');
+        const target = tx.objectStore(store);
+        for (const row of rows) target.put(row);
+        await txDone(tx);
+      }
+    } finally {
+      legacy.close();
+    }
+  } catch {
+    // Empty start beats a blocked boot; the legacy copy is still intact.
+  }
 }
 
 function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {

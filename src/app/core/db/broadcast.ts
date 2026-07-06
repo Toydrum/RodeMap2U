@@ -12,7 +12,7 @@ export interface DbChangeMessage {
   ids: string[];
 }
 
-const CHANNEL_NAME = 'rodemap2u-db';
+const CHANNEL_NAME = 'roadmap2u-db';
 
 const channel: BroadcastChannel | null =
   typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;

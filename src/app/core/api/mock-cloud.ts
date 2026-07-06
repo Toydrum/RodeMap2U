@@ -10,7 +10,10 @@ import { GuardianLinkKind, SyncStore, UserProfile } from './contracts';
  * the app treats it exactly like a remote backend behind the seams.
  */
 
-export const MOCK_DB_NAME = 'rodemap2u-mockcloud';
+// Renamed with the app (2026-07-06) WITHOUT migration by design: this is the
+// practice cloud — it reseeds the demo family on first open, and Settings has
+// a reset button for exactly this kind of fresh start.
+export const MOCK_DB_NAME = 'roadmap2u-mockcloud';
 const MOCK_DB_VERSION = 1;
 
 export type MockStore =

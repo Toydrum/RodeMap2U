@@ -24,7 +24,7 @@ export class BackupService {
       getAll<TimerSession>('sessions'),
     ]);
     return {
-      app: 'rodemap2u',
+      app: 'roadmap2u',
       schemaVersion: SCHEMA_VERSION,
       exportedAt: new Date().toISOString(),
       data: { trees, nodes, checkins, sessions, settings: this.settings.settings() },
@@ -49,7 +49,11 @@ export class BackupService {
    */
   async importReplace(json: string): Promise<void> {
     const envelope = JSON.parse(json) as ExportEnvelope;
-    if (envelope.app !== 'rodemap2u') throw new Error('not a RoadMap2U backup');
+    // 'rodemap2u' is the pre-rename envelope id — accepted FOREVER so every
+    // backup ever downloaded keeps importing (naming note in schema.ts).
+    if (envelope.app !== 'roadmap2u' && envelope.app !== 'rodemap2u') {
+      throw new Error('not a RoadMap2U backup');
+    }
     if (typeof envelope.schemaVersion !== 'number' || envelope.schemaVersion > SCHEMA_VERSION) {
       throw new Error('backup from a newer app version');
     }

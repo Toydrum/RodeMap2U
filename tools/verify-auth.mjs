@@ -18,7 +18,7 @@ const idbGet = (store, key) =>
   page.evaluate(
     ([s, k]) =>
       new Promise((resolve, reject) => {
-        const open = indexedDB.open('rodemap2u', 1);
+        const open = indexedDB.open('roadmap2u', 1);
         open.onsuccess = () => {
           const db = open.result;
           const os = db.transaction(s, 'readonly').objectStore(s);

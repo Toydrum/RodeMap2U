@@ -8,7 +8,7 @@ const latestCheckin = (page) =>
   page.evaluate(
     () =>
       new Promise((res) => {
-        const req = indexedDB.open('rodemap2u');
+        const req = indexedDB.open('roadmap2u');
         req.onsuccess = () => {
           const tx = req.result.transaction('checkins', 'readonly');
           const all = tx.objectStore('checkins').getAll();

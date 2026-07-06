@@ -25,7 +25,7 @@ import { get, put } from '../db/idb';
 
 export type AuthFlowResult = 'done' | 'confirmSignUp' | 'newPasswordRequired' | 'error';
 
-const AUTH_CHANNEL = 'rodemap2u-auth';
+const AUTH_CHANNEL = 'roadmap2u-auth';
 const VALIDATE_DELAY_MS = 4000;
 
 @Injectable({ providedIn: 'root' })

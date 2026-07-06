@@ -12,14 +12,17 @@
 export const SCHEMA_VERSION = 3;
 export const DB_VERSION = 1;
 /**
- * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U, but
- * every STORAGE-IDENTITY literal keeps the historical spelling FOREVER:
- * this DB name, `rodemap2u-mockcloud`, the `rodemap2u-db`/`rodemap2u-auth`
- * BroadcastChannels, the `rm2u.mock.idToken` key and the ExportEnvelope
- * `app: 'rodemap2u'` id. Renaming any of them would orphan real users'
- * forests, sessions or backups. They are invisible to users — leave them.
+ * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
+ * storage identifiers moved with it. Two legacy literals remain FOREVER:
+ *   · LEGACY_DB_NAME — devices that used the app before the rename hold their
+ *     forest under it; openDb() copies it into DB_NAME once (copy, not move —
+ *     the old DB stays untouched as a safety net).
+ *   · ExportEnvelope accepts app 'rodemap2u' on import — every backup ever
+ *     downloaded keeps importing (backup.service.ts).
+ * The `rm2u.*` localStorage prefix stays as-is: it abbreviates RoadMap2U too.
  */
-export const DB_NAME = 'rodemap2u';
+export const DB_NAME = 'roadmap2u';
+export const LEGACY_DB_NAME = 'rodemap2u';
 
 /** Every synced record. IDs from crypto.randomUUID(). Timestamps epoch ms. */
 export interface SyncBase {
@@ -173,9 +176,9 @@ export const DEFAULT_SETTINGS: Settings = {
   customBranchChips: [],
 };
 
-/** Versioned backup file format. */
+/** Versioned backup file format. 'rodemap2u' = pre-rename id, import-only. */
 export interface ExportEnvelope {
-  app: 'rodemap2u';
+  app: 'roadmap2u' | 'rodemap2u';
   schemaVersion: number;
   exportedAt: string;
   data: {
