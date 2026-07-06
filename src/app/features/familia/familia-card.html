@@ -122,6 +122,10 @@
           <h2>{{ s.link.user.displayName }}</h2>
           <p class="fam-handle">&#64;{{ s.link.user.username }}</p>
 
+          <button type="button" class="btn btn-primary enter-forest" (click)="enterForest(s.link)">
+            🌳 {{ i18n.t().familia.enterForest }}
+          </button>
+
           @if (s.link.kind === 'created') {
             <form class="fam-form" (submit)="$event.preventDefault(); doRename(s.link)">
               <label class="field">

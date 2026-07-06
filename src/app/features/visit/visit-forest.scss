@@ -1,0 +1,64 @@
+.visita {
+  padding-top: 1rem;
+}
+
+.back {
+  margin-bottom: 0.4rem;
+}
+
+.visita-head {
+  margin-bottom: 1.1rem;
+
+  h1 {
+    margin: 0 0 0.2rem;
+  }
+
+  .hint {
+    color: var(--text-dim);
+    margin: 0;
+  }
+}
+
+.visita-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.9rem;
+}
+
+.visita-plot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.9rem 0.7rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+
+  app-mini-tree {
+    width: 82%;
+  }
+}
+
+.visita-name {
+  font-weight: 700;
+  text-align: center;
+}
+
+.visita-count {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
+.error-line {
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-resting) 16%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--status-resting) 45%, transparent);
+  font-size: 0.9rem;
+}

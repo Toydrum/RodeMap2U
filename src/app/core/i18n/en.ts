@@ -449,6 +449,7 @@ export const EN: Dict = {
     acceptLabel: 'Code',
     acceptSubmit: 'Link',
     acceptOk: 'Link created 🌿',
+    enterForest: 'Enter their forest',
     unlinkCta: 'Stop caring for this account',
     unlinkMineCta: 'Release link',
     unlinkTitle: 'Stop caring for {name}?',
@@ -479,6 +480,14 @@ export const EN: Dict = {
       server: 'The cloud stumbled. Try again in a moment.',
       unknown: 'Something didn’t work. Try again in a moment.',
     },
+  },
+  visita: {
+    title: '{name}’s garden',
+    editableHint:
+      'You are tending their garden: whatever you plant or arrange here lives in their forest, not yours.',
+    readOnlyHint: 'You are visiting: look with care, move nothing.',
+    emptyForest: 'Their forest has no trees yet.',
+    treeChip: '{name}’s garden',
   },
   guide: {
     title: 'How to use the app',

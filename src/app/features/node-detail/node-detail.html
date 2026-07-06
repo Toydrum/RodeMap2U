@@ -157,7 +157,9 @@
       @if (!isCurrent()) {
         <button type="button" class="btn btn-soft" (click)="setHere()">📍 {{ i18n.t().node.setCurrent }}</button>
       }
-      <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
+      @if (!visiting) {
+        <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
+      }
       <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(true)">🗃 {{ i18n.t().node.archive }}</button>
     </div>
     <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>

@@ -283,6 +283,14 @@ Con sesión iniciada, en Ajustes aparece la sección **Familia**:
 - **Quien es cuidado siempre lo sabe**: su sección Familia nombra a quienes pueden ver su bosque, con la regla completa a la vista: *tu familia puede ver tu bosque y plantar contigo — y tú puedes ver el suyo; tus sentimientos, tus check-ins y tu clima siguen siendo solo tuyos*.
 - Una cuenta de peque no puede quedarse sin nadie: **el último vínculo de cuidado no se puede soltar** — primero invita a otro adulto, o borra la cuenta con su respaldo.
 
+### Entrar a su bosque 🌳 (el jardín a cuatro manos)
+
+Desde la hojita de cada peque, **«Entrar a su bosque»** te lleva a su jardín para ayudarle a organizarlo: ves sus árboles, entras a cualquiera, y ahí tienes las mismas herramientas de siempre — plantar ramitas, sembrar varias a la vez, cambiar estados, ramificar, ordenar pasitos, la tablita completa.
+
+- **Todo lo que hagas ahí vive en SU bosque**, nunca en el tuyo: tus árboles no se enteran.
+- Su cielo se queda **neutral**: su clima interno es suyo. Y las sesiones de enfoque no se ofrecen en jardín ajeno — acompañar no es cronometrar.
+- La visibilidad es **mutua**: quien es cuidado también puede asomarse a tu bosque (solo mirar, sin mover nada, y sin tus notitas ni fechas).
+
 ## Tus datos
 
 - **Exportar mi copia**: descarga un archivo con todo tu bosque (árboles, ramas, check-ins, sesiones y ajustes). Hazlo seguido — es tu respaldo.

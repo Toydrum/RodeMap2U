@@ -14,6 +14,7 @@ import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { NodeDetail } from '../node-detail/node-detail';
 import { DateReview } from '../check-in/date-review';
+import { VisitSession } from '../../core/visit/visit-session';
 
 @Component({
   selector: 'app-tree-view',
@@ -30,12 +31,21 @@ export class TreeViewPage {
   protected readonly nodes = inject(NodesRepo);
   private readonly router = inject(Router);
 
+  /** Present only under /visit/:userId — the page then works on SOMEONE
+   *  ELSE'S forest (route-scoped repos): session/archive affordances hide,
+   *  the sky stays neutral (their feelings are private), back goes home. */
+  protected readonly visit = inject(VisitSession, { optional: true });
+
   protected readonly tree = computed(() => this.trees.byId().get(this.id()) ?? null);
+
+  protected readonly backLink = computed(() =>
+    this.visit ? ['/visit', this.visit.userId()] : ['/forest'],
+  );
 
   private readonly checkins = inject(CheckinsRepo);
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;
-  protected readonly mood = computed<Feeling | null>(
-    () => this.moodOverride ?? this.checkins.latest()?.feeling ?? null,
+  protected readonly mood = computed<Feeling | null>(() =>
+    this.visit ? null : (this.moodOverride ?? this.checkins.latest()?.feeling ?? null),
   );
 
   protected readonly openNode = signal<TreeNode | null>(null);
@@ -133,7 +143,9 @@ export class TreeViewPage {
     const count = this.plantedCount();
     const firstId = this.burstFirstId;
     this.planting.set(null);
-    if (count >= 6 && firstId && !this.burstInvited && !this.focus.active()) {
+    // Never on a visit: a session would be the VISITOR'S, on a node that
+    // lives in someone else's forest.
+    if (count >= 6 && firstId && !this.burstInvited && !this.visit && !this.focus.active()) {
       this.burstInvited = true;
       this.toast.show({
         message: this.i18n.t().sow.burstInvite,
@@ -203,7 +215,7 @@ export class TreeViewPage {
   }
 
   protected notFoundGoHome(): void {
-    void this.router.navigate(['/forest']);
+    void this.router.navigate(this.backLink());
   }
 
   /** "Delete" the compass way: the tree rests in the archive, recoverable. */

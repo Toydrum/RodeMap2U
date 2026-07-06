@@ -3,6 +3,18 @@ import { Injectable, inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { SettingsService } from './core/repos/settings.service';
 import { authRequiredGate } from './core/auth/auth.guard';
+import { VisitSession } from './core/visit/visit-session';
+import { VisitNodesRepo, VisitTreesRepo } from './core/visit/visit-repos';
+import { TreesRepo } from './core/repos/trees.repo';
+import { NodesRepo } from './core/repos/nodes.repo';
+
+/** Loads the visited forest before the subtree paints (idempotent per user). */
+const visitGate: CanActivateFn = (route) => {
+  const userId = route.paramMap.get('userId') ?? '';
+  return inject(VisitSession)
+    .load(userId)
+    .then(() => true);
+};
 
 const CHECK_IN_COOLDOWN_MS = 30 * 60 * 1000;
 
@@ -64,6 +76,32 @@ export const routes: Routes = [
     canActivate: [authRequiredGate],
     loadComponent: () => import('./features/timer/timer').then((m) => m.TimerPage),
     title: 'RodeMap2U — Enfoque',
+  },
+  {
+    // Someone else's forest: route-scoped repos shadow the real ones, so the
+    // whole tree toolkit reads/writes the VISITED forest (cloud write-through)
+    // and never the visitor's local IndexedDB. See core/visit/.
+    path: 'visit/:userId',
+    canActivate: [authRequiredGate, visitGate],
+    providers: [
+      VisitSession,
+      VisitTreesRepo,
+      VisitNodesRepo,
+      { provide: TreesRepo, useExisting: VisitTreesRepo },
+      { provide: NodesRepo, useExisting: VisitNodesRepo },
+    ],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/visit/visit-forest').then((m) => m.VisitForestPage),
+        title: 'RodeMap2U — De visita',
+      },
+      {
+        path: 'tree/:id',
+        loadComponent: () => import('./features/forest/tree-view').then((m) => m.TreeViewPage),
+        title: 'RodeMap2U — De visita',
+      },
+    ],
   },
   {
     path: 'settings',

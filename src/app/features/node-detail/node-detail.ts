@@ -9,6 +9,7 @@ import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
+import { VisitSession } from '../../core/visit/visit-session';
 
 const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'resting', 'achieved'];
 
@@ -31,6 +32,8 @@ export class NodeDetail {
   private readonly toast = inject(ToastService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
+  /** Sessions are the visitor's own — never offered inside someone else's forest. */
+  protected readonly visiting = inject(VisitSession, { optional: true }) !== null;
   protected readonly branching = signal(false);
   protected readonly stepTitle = signal('');
   /** Briefly spotlights the next step after a bloom ("¿Siguiente paso?"). */

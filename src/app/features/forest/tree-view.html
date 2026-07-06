@@ -1,30 +1,36 @@
 @if (tree(); as t) {
   <div class="view">
     <header class="bar">
-      <a routerLink="/forest" class="btn btn-ghost back">← {{ i18n.t().common.back }}</a>
+      <a [routerLink]="backLink()" class="btn btn-ghost back">← {{ i18n.t().common.back }}</a>
       <div class="title-wrap">
         <h1 [style.color]="'var(--accent-' + t.accent + ')'">{{ t.name }}</h1>
         <span class="tree-stats">
+          @if (visit?.owner(); as owner) {
+            <span class="visit-chip">🌿 {{ i18n.fill(i18n.t().visita.treeChip, { name: owner.displayName }) }}</span>
+            ·
+          }
           {{ i18n.plural(branchCount(), i18n.t().forest.branches) }}
           @if (bloomCount()) {
             · {{ bloomCount() }} 🌸
           }
         </span>
       </div>
-      <a
-        class="btn btn-ghost tree-focus"
-        [routerLink]="['/timer']"
-        [queryParams]="t.currentNodeId ? { node: t.currentNodeId } : {}"
-        [attr.aria-label]="i18n.t().tree.focusLink"
-        [title]="i18n.t().tree.focusLink"
-      >⏳</a>
-      <button
-        type="button"
-        class="btn btn-ghost tree-archive"
-        (click)="archiving.set(true)"
-        [attr.aria-label]="i18n.t().tree.archiveAction"
-        [title]="i18n.t().tree.archiveAction"
-      >🗃</button>
+      @if (!visit) {
+        <a
+          class="btn btn-ghost tree-focus"
+          [routerLink]="['/timer']"
+          [queryParams]="t.currentNodeId ? { node: t.currentNodeId } : {}"
+          [attr.aria-label]="i18n.t().tree.focusLink"
+          [title]="i18n.t().tree.focusLink"
+        >⏳</a>
+        <button
+          type="button"
+          class="btn btn-ghost tree-archive"
+          (click)="archiving.set(true)"
+          [attr.aria-label]="i18n.t().tree.archiveAction"
+          [title]="i18n.t().tree.archiveAction"
+        >🗃</button>
+      }
       <button
         type="button"
         class="btn btn-ghost tree-outline-toggle"

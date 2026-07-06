@@ -451,6 +451,7 @@ export const ES = {
     acceptLabel: 'Código',
     acceptSubmit: 'Vincular',
     acceptOk: 'Vínculo creado 🌿',
+    enterForest: 'Entrar a su bosque',
     unlinkCta: 'Dejar de cuidar esta cuenta',
     unlinkMineCta: 'Soltar vínculo',
     unlinkTitle: '¿Dejar de cuidar a {name}?',
@@ -481,6 +482,14 @@ export const ES = {
       server: 'La nube tuvo un tropiezo. Intenta de nuevo en un momento.',
       unknown: 'Algo no salió. Intenta de nuevo en un momento.',
     },
+  },
+  visita: {
+    title: 'El jardín de {name}',
+    editableHint:
+      'Estás cuidando su jardín: lo que plantes o acomodes aquí vive en su bosque, no en el tuyo.',
+    readOnlyHint: 'Estás de visita: puedes mirar con cariño, sin mover nada.',
+    emptyForest: 'Su bosque aún no tiene árboles.',
+    treeChip: 'jardín de {name}',
   },
   guide: {
     title: 'Cómo usar la app',

@@ -1,0 +1,34 @@
+<div class="container page visita">
+  <a routerLink="/settings" class="btn btn-ghost back">← {{ i18n.t().common.back }}</a>
+
+  @if (visit.owner(); as owner) {
+    <header class="visita-head">
+      <h1>{{ i18n.fill(i18n.t().visita.title, { name: owner.displayName }) }}</h1>
+      <p class="hint">
+        {{ visit.editable() ? i18n.t().visita.editableHint : i18n.t().visita.readOnlyHint }}
+      </p>
+    </header>
+
+    @if (trees.active().length) {
+      <div class="visita-grid">
+        @for (tree of trees.active(); track tree.id) {
+          <a class="visita-plot card" [routerLink]="['tree', tree.id]">
+            <app-mini-tree [tree]="tree" />
+            <span class="visita-name" [style.color]="'var(--accent-' + tree.accent + ')'">
+              {{ tree.name }}
+            </span>
+            <span class="visita-count">
+              {{ i18n.plural(branchCountOf(tree.id), i18n.t().forest.branches) }}
+            </span>
+          </a>
+        }
+      </div>
+    } @else if (!visit.loading()) {
+      <p class="hint">{{ i18n.t().visita.emptyForest }}</p>
+    }
+  } @else if (visit.loading()) {
+    <p class="hint">{{ i18n.t().common.loading }}</p>
+  } @else if (errorText()) {
+    <p class="error-line" role="alert">{{ errorText() }}</p>
+  }
+</div>

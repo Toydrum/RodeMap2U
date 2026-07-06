@@ -45,9 +45,17 @@ src/app/
   features/
     account/    account.ts (full-screen auth ritual: welcome→signIn/create→code→newPassword→profile)
     familia/    familia-card.ts (Settings section, signed-in only: create-minor w/ once-only temp password,
-                per-child admin sheet, coGuardian + linkExisting invites, code redemption, guardians view
-                w/ the honest visibility disclosure; consumes core/family.service.ts — signals over GET /me,
-                meta 'family.me' stale-while-revalidate, export-first deleteChild)
+                per-child admin sheet + «Entrar a su bosque», coGuardian + linkExisting invites, code
+                redemption, guardians view w/ the honest visibility disclosure; consumes
+                core/family.service.ts — signals over GET /me, meta 'family.me' SWR, export-first deleteChild)
+    visit/      visit-forest.ts (thin doorway: banner + MiniTree cards). The tree itself REUSES TreeViewPage
+                under /visit/:userId — core/visit/ route-scoped repos (VisitTreesRepo/VisitNodesRepo shadow
+                the real ones via route providers) reroute the WHOLE write funnel to POST /users/:id/sync/push
+                (rev-LWW, guardian-only), so plant/branch/steps/date-review work on the KID'S cloud forest and
+                never touch the visitor's IndexedDB (verify-visita F asserts 0→0). Visit gates in tree-view/
+                node-detail via optional inject(VisitSession): neutral sky (feelings are private), no ⏳/🗃
+                header, no session offers. Stripped (read-only) visits throw FORBIDDEN on writes — the
+                affordance-hiding pass for friend visits lands with «amigos y visitas».
     ahora/      ahora.ts (HOME: thread card + ONE suggested pasito + session companion card) · suggest.ts (PURE ranker + thread resolver)
     check-in/   check-in.ts (ritual: weather → where → note → [date-review] → CIRCLE of trees) · date-review.ts
     forest/     forest.ts (meadow scene) · mini-tree.ts (real data miniatures) · tree-view.ts · tree-canvas.ts

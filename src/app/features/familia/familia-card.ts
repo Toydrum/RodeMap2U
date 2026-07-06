@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { FamilyService } from '../../core/family.service';
@@ -36,6 +37,13 @@ export class FamiliaCard {
   protected readonly auth = inject(AuthService);
   protected readonly fam = inject(FamilyService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
+
+  /** Into their garden — the whole tree toolkit, on their cloud forest. */
+  protected enterForest(link: FamilyLinkView): void {
+    this.close();
+    void this.router.navigate(['/visit', link.user.userId]);
+  }
 
   protected readonly sheet = signal<Sheet>(null);
 

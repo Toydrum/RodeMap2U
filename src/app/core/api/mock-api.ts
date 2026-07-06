@@ -344,19 +344,98 @@ export class MockApi implements ApiClient {
     return this.notYet('amigos y visitas');
   }
 
-  // ── forests & sync (phases «conectar mi bosque» / «amigos y visitas») ────
+  // ── forests & sync ────────────────────────────────────────────────────────
 
-  getForest(_userId: string): Promise<ForestSnapshot> {
-    return this.notYet('amigos y visitas');
+  /** Detail per the matrix: guardians get FULL nodes (co-gardening), family-up
+   *  and friends get the STRIPPED view, strangers get 404 (no oracle). */
+  async getForest(userId: string): Promise<ForestSnapshot> {
+    await simLatency('api.getForest');
+    const caller = await this.caller();
+    let detail: ForestSnapshot['detail'] | null = null;
+    let includeSocial = false;
+    if (caller.userId === userId || (await this.linkBetween(caller.userId, userId))) {
+      detail = 'full';
+      includeSocial = caller.userId !== userId;
+    } else if (await this.linkBetween(userId, caller.userId)) {
+      detail = 'stripped'; // family visibility is mutual — minor sees guardian
+    } else {
+      const friends = (await mockGetAll<MockFriendshipRow>('friendships')).some(
+        (f) =>
+          (f.userA === caller.userId && f.userB === userId) ||
+          (f.userB === caller.userId && f.userA === userId),
+      );
+      const target = await mockGet<MockUserRow>('users', userId);
+      if (friends && caller.socialEnabled && target?.socialEnabled) detail = 'stripped';
+    }
+    if (!detail) throw new ApiError('NOT_FOUND');
+    const owner = await mockGet<MockUserRow>('users', userId);
+    if (!owner) throw new ApiError('NOT_FOUND');
+
+    const records = (await mockGetAll<MockRecordRow>('records')).filter(
+      (r) => r.ownerId === userId,
+    );
+    const trees = records
+      .filter((r) => r.store === 'trees')
+      .map((r) => r.record as Tree)
+      .filter((t) => !t.deletedAt && !t.archivedAt);
+    const liveTreeIds = new Set(trees.map((t) => t.id));
+    const nodes = records
+      .filter((r) => r.store === 'nodes')
+      .map((r) => r.record as TreeNode)
+      .filter((n) => !n.deletedAt && !n.archivedAt && liveTreeIds.has(n.treeId))
+      .map((n) => (detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null }));
+
+    return {
+      owner: this.publicOf(owner, includeSocial),
+      detail,
+      trees,
+      nodes,
+      fetchedAt: Date.now(),
+    };
   }
+
   getSyncChanges(_cursor?: string): Promise<SyncChangesResponse> {
     return this.notYet('conectar mi bosque');
   }
   pushSync(_req: SyncPushRequest): Promise<SyncPushResponse> {
     return this.notYet('conectar mi bosque');
   }
-  pushSyncFor(_userId: string, _req: SyncPushRequest): Promise<SyncPushResponse> {
-    return this.notYet('conectar mi bosque');
+
+  /** Guardian write-through (co-gardening): same rev-LWW law as own pushes;
+   *  records land in the minor's cloud store. */
+  async pushSyncFor(userId: string, req: SyncPushRequest): Promise<SyncPushResponse> {
+    await simLatency('api.pushSyncFor');
+    const caller = await this.caller();
+    const link = await this.linkBetween(caller.userId, userId);
+    if (!link) throw new ApiError('NOT_FOUND');
+    if (!Array.isArray(req.records)) throw new ApiError('VALIDATION');
+    if (req.records.length > LIMITS.syncPushMax) throw new ApiError('LIMIT_EXCEEDED');
+
+    const applied: string[] = [];
+    const rejected: { id: string; reason: 'STALE_REV' }[] = [];
+    const serverRecords: SyncPushResponse['serverRecords'] = [];
+    const syncedAt = Date.now();
+    for (const entry of req.records) {
+      const record = entry.record;
+      const key = `${userId}|${entry.store}|${record.id}`;
+      const stored = await mockGet<MockRecordRow>('records', key);
+      if (stored && (stored.record.rev ?? 0) >= record.rev) {
+        rejected.push({ id: record.id, reason: 'STALE_REV' });
+        serverRecords.push({ store: stored.store, record: stored.record });
+        continue;
+      }
+      const seq = await mockNextSeq('changeSeq');
+      await mockPut('records', {
+        key,
+        ownerId: userId,
+        store: entry.store,
+        record,
+        seq,
+        syncedAt,
+      } satisfies MockRecordRow);
+      applied.push(record.id);
+    }
+    return { applied, rejected, serverRecords };
   }
 
   // ── internals ─────────────────────────────────────────────────────────────
@@ -379,6 +458,16 @@ export class MockApi implements ApiClient {
       accountType: user.accountType,
       socialEnabled: user.socialEnabled,
       createdAt: user.createdAt,
+    };
+  }
+
+  private publicOf(user: MockUserRow, includeSocial: boolean): PublicProfile {
+    return {
+      userId: user.userId,
+      username: user.username,
+      displayName: user.displayName,
+      accountType: user.accountType,
+      ...(includeSocial ? { socialEnabled: user.socialEnabled } : {}),
     };
   }
 
