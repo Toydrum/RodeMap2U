@@ -170,11 +170,15 @@ console.log(`G dry feet @1700px: wet-trunks=[${wet.join(' ')}] | OK=${wet.length
   const page2 = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page2.goto(`${BASE}/forest?seed=demo`, { waitUntil: 'networkidle' });
   await page2.waitForTimeout(700);
+  // Measure the PAINTED tree (svg content bbox), not the plot box — the
+  // internal fit cap is what makes size honest (a tall skinny sapling must
+  // never out-render a worked crown).
   const sizes = await page2.evaluate(() =>
-    [...document.querySelectorAll('.plot')].map((p) => ({
-      id: p.dataset.treeId,
-      h: Math.round(p.getBoundingClientRect().height),
-    })),
+    [...document.querySelectorAll('.plot')].map((p) => {
+      const svg = p.querySelector('svg.mini');
+      const scale = svg.getBoundingClientRect().width / 140;
+      return { id: p.dataset.treeId, h: Math.round(svg.getBBox().height * scale) };
+    }),
   );
   const guitar = sizes.find((s) => s.id === 'demo-guitar')?.h ?? 0; // 8 branches · 2 blooms
   const idea = sizes.find((s) => s.id === 'demo-seedling')?.h ?? 0; // 1 branch

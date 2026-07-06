@@ -169,7 +169,13 @@ export class MiniTree {
     const spanH = Math.max(layout.height, 70);
     // Baby trees get a taller stem so they read as saplings, never as blocks.
     const trunkRoom = layout.points.length <= 2 ? 46 : 26;
-    const s = Math.min(0.68, (W - PAD * 2) / spanW, (H - PAD * 2 - trunkRoom) / (spanH + trunkRoom));
+    // SIZE IS EARNED here too: a sparse tree may not fill its box — the fit
+    // cap grows with content (blooms weigh double), so a tall skinny sapling
+    // can never render bigger than a worked, bloomed crown.
+    const content =
+      layout.points.length + 2 * layout.points.filter((p) => p.node.status === 'achieved').length;
+    const cap = Math.min(0.68, 0.18 + 0.1 * Math.sqrt(content));
+    const s = Math.min(cap, (W - PAD * 2) / spanW, (H - PAD * 2 - trunkRoom) / (spanH + trunkRoom));
     // Wood reads too wispy at miniature scale — thicken beyond linear.
     const wBoost = 1.6;
     const centerX = layout.minX + layout.width / 2;
