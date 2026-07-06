@@ -410,19 +410,30 @@ export class ForestPage {
     return Math.max(4, ((bankPx - 44 - 66 * treeScale) / plotsH) * 100);
   }
 
+  /** A tree EARNS its size: branches + blooms (double weight) grow the plot —
+   *  the meadow itself tells you which areas carry the most work. Bounded,
+   *  saturating (√), and capped tighter in crowded clearings so every
+   *  neighbor's heart stays tappable. */
+  private growthFor(treeId: string): number {
+    const content = this.countFor(treeId) + 2 * this.bloomsFor(treeId);
+    const cap = this.pageTrees().length >= 5 ? 1.12 : 1.22;
+    return Math.min(cap, Math.max(0.78, 0.72 + 0.13 * Math.sqrt(content)));
+  }
+
   /** Where the i-th tree of this clearing stands: its anchor plus the tree's
    *  own small deterministic wobble — natural sprouts, never a stamped grid. */
   protected slotFor(i: number, tree: Tree): { x: number; b: number; s: number; z: number } {
     const n = Math.min(this.pageTrees().length, ForestPage.ARRANGEMENTS.length - 1);
     const anchor = ForestPage.ARRANGEMENTS[Math.max(1, n)][Math.min(i, n - 1)] ?? { x: 50, b: 10 };
     const h = hash(tree.id + ':meadow');
+    const growth = this.growthFor(tree.id);
     const x = Math.min(89, Math.max(11, anchor.x + ((h % 7) - 3)));
     let b = Math.max(2, anchor.b + (((h >> 4) % 5) - 2));
-    let s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+    let s = Math.round((1.02 - (b / 40) * 0.2) * growth * 100) / 100;
     // Back rows hug the near bank — nobody ever stands in the water.
     if (this.hasStream() && b > 16) {
       b = Math.min(b, this.bankLimitPct(x, s));
-      s = Math.round((1.02 - (b / 40) * 0.2) * 100) / 100;
+      s = Math.round((1.02 - (b / 40) * 0.2) * growth * 100) / 100;
     }
     return { x, b, s, z: 10 + Math.round(40 - b) };
   }

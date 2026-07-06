@@ -165,5 +165,31 @@ const wet = await page.evaluate(() => {
 });
 console.log(`G dry feet @1700px: wet-trunks=[${wet.join(' ')}] | OK=${wet.length === 0}`);
 
+// H — earned size: a worked tree stands visibly taller than a fresh sprout.
+{
+  const page2 = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  await page2.goto(`${BASE}/forest?seed=demo`, { waitUntil: 'networkidle' });
+  await page2.waitForTimeout(700);
+  const sizes = await page2.evaluate(() =>
+    [...document.querySelectorAll('.plot')].map((p) => ({
+      id: p.dataset.treeId,
+      h: Math.round(p.getBoundingClientRect().height),
+    })),
+  );
+  const guitar = sizes.find((s) => s.id === 'demo-guitar')?.h ?? 0; // 8 branches · 2 blooms
+  const idea = sizes.find((s) => s.id === 'demo-seedling')?.h ?? 0; // 1 branch
+  const hearts = await page2.evaluate(() =>
+    [...document.querySelectorAll('.plot')].every((p) => {
+      const r = p.getBoundingClientRect();
+      const el = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+      return el?.closest('[data-tree-id]') === p;
+    }),
+  );
+  console.log(
+    `H earned size: guitarra(8r·2🌸)=${guitar}px vs idea(1r)=${idea}px ratio=${(guitar / idea).toFixed(2)} hearts=${hearts} | OK=${guitar > idea * 1.25 && hearts}`,
+  );
+  await page2.close();
+}
+
 await browser.close();
 console.log('meadow done');

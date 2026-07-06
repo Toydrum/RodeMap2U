@@ -103,6 +103,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 ## Leer tu bosque de un vistazo
 
 - **Cada árbol se dibuja con su forma real**: un árbol con muchas ramas y logros se ve frondoso y con flores; uno recién plantado es un brotecito. El crecimiento se *ve*.
+- **Y su tamaño se gana**: entre más ramas y florecimientos 🌸 carga un árbol, más grande se planta en el prado (las flores pesan doble). De un vistazo sabes cuál área trae más trabajo — sin números, sin listas: puro bosque.
 - **Cada color es una especie con su porte**: unos crecen como **roble** redondo y denso, otros como **acacia** de copas planas con aire entre ellas, otros **esbeltos** hacia el cielo. Todos comparten lo esencial de un árbol de verdad: un tronco continuo que serpentea hasta la copa, ramas que se desprenden de él a distintas alturas y **se engrosan según lo que cargan**, y follaje que se junta en las puntas.
 - **Tus árboles brotan repartidos por el prado** — cada uno en su lugarcito, con su propia variación natural, siempre con los pies en el pasto (los de atrás, junto a la orilla del arroyo, se ven más pequeñitos — **nunca dentro del agua**). Cuando ya no caben en un claro, aparecen las **flechitas ‹ ›** y los puntitos: tu bosque se organiza en **claros** y las flechas te pasean entre ellos. Al plantar un árbol nuevo, el prado te lleva a su claro.
 - Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
