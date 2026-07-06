@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["../src/app/core/*"]
+    }
+  },
+  "include": ["bin/**/*", "lib/**/*", "lambda/**/*", "test/**/*", "../src/app/core/api/contracts.ts", "../src/app/core/auth/auth-types.ts", "../src/app/core/db/schema.ts"]
+}

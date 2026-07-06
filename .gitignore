@@ -11,6 +11,10 @@
 npm-debug.log
 yarn-error.log
 
+# Infra workspace (own node_modules + CDK synth output)
+/infra/node_modules
+/infra/cdk.out
+
 # IDEs and editors
 .idea/
 .project

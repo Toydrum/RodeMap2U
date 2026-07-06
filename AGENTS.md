@@ -53,6 +53,13 @@ src/app/
     timer/      timer.ts (thin view over FocusSessionService) · companion-bird.ts (single-player body double)
     settings/ · guide/ (in-app manual) · trail/ ("Tus huellas": check-ins + branch notes + sleeping branches, deep-links via /tree/:id?node=)
   shared/ui/  toast.service.ts
+
+infra/          THE REAL BACKEND (own npm workspace — never in the Angular build graph):
+  lib/rodemap-stack.ts   CDK: Cognito pool (per the adapter checklist) + DynamoDB `rodemap` (2 GSIs, TTL, PITR)
+                         + HTTP API (JWT authorizer on idTokens, CORS for Pages+localhost) + outputs = APP_CONFIG strings
+  lambda/       router.ts (route table mirrors API_PATHS 1:1 — parity-tested) · handlers/ (me·family·friends·forests·sync,
+                authz matrix from the table, LWW conditional puts) · post-confirmation.ts — ALL import contracts.ts via @app alias
+  test/         vitest + aws-sdk-client-mock (16 tests). Verify: `cd infra && npm test && npx cdk synth` — NO AWS account needed
 ```
 
 ### Data model semantics (`core/db/schema.ts`)
@@ -92,6 +99,7 @@ src/app/
 ```bash
 npm ci && npm start        # Node ≥ 24.15 (26.x recommended)
 npm run build              # prod build → dist/rodemap2u/browser
+cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + template, zero AWS needed
 ```
 
 - **Demo data**: `?seed=demo` on an EMPTY store loads a showcase forest with FIXED ids (`demo-guitar`, `demo-health` — has a yesterday-dated branch for the review flow, `demo-work`, `demo-seedling`). Routes like `/tree/demo-guitar?seed=demo` are stable. Never touches real data.

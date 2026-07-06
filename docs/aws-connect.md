@@ -11,8 +11,8 @@ this file is HOW to stand it up and wire it.
 | Piece | Status | What connecting takes |
 |---|---|---|
 | Client auth (Cognito adapter, `/account` ritual) | ✅ shipped 0.0.48, dormant | **Stage 1 below — possible TODAY** with just a user pool (paste 3 strings) |
-| Client API transport (`http-api.ts`, all 26 ops) | ✅ shipped 0.0.48, dormant | Stage 2 — needs the deployed API (`infra/` track) |
-| Backend (DynamoDB + Lambda router + HTTP API) | ⏳ `infra/` CDK track, pending | `cdk deploy` once it lands (or manual per §3) |
+| Client API transport (`http-api.ts`, all 26 ops) | ✅ shipped 0.0.48, dormant | Stage 2 — needs the deployed API |
+| Backend (Cognito pool + DynamoDB + Lambda router + HTTP API) | ✅ **implemented in `infra/`** (CDK; `cdk synth` + 16 vitest green), awaiting an AWS account | `cd infra && npx cdk deploy` → paste the 4 outputs (§3) |
 | Mandatory login (`requireAuth`) | wired, inert | §4 — flip ONLY after the «conectar mi bosque» phase ships |
 
 The entire flip lives in **`src/app/core/config.ts`**. No other file changes.
@@ -130,12 +130,27 @@ Notes for this stage:
   table maps it, but if a tester hits mysterious sign-in failures, check the
   clock first.
 
-## 3. Stage 2 — connect the API (needs the `infra/` track)
+## 3. Stage 2 — connect the API (`infra/` is ready to deploy)
 
 The client transport is already complete (`core/api/http-api.ts`: bearer
-idToken, one 401 forceRefresh retry, 250 ms/1 s backoff, offline fast-fail).
-What must exist on AWS — implemented by the `infra/` CDK app (pending), specified
-end-to-end in `backend-contract.md`:
+idToken, one 401 forceRefresh retry, 250 ms/1 s backoff, offline fast-fail),
+and the backend is **implemented in `infra/`** (CDK app + router Lambda that
+imports `contracts.ts` directly — one source of truth; verified without AWS by
+`npm test` (16 vitest incl. route↔API_PATHS parity, LWW, LAST_GUARDIAN, code
+expiry, strip-vs-full) and `npx cdk synth`). The preferred path:
+
+```bash
+cd infra
+npm ci
+npx cdk bootstrap   # once per AWS account+region
+npx cdk deploy      # prints ConfigRegion / ConfigUserPoolId / ConfigUserPoolClientId / ConfigApiBaseUrl
+```
+
+Paste the four outputs into `APP_CONFIG.aws` (`apiBaseUrl` = the invoke URL
+**without** `/v1`), set `backend: 'aws'`, rebuild, smoke per §2.3. If the pool
+was already created by hand in Stage 1, either import it or let the stack own a
+fresh one and re-create the test users. What the stack contains (spec in
+`backend-contract.md`):
 
 1. **DynamoDB** table `rodemap` (single-table, on-demand, TTL on `ttl`, GSI1 +
    GSI2 — key schema in contract §6).
@@ -159,11 +174,9 @@ end-to-end in `backend-contract.md`:
    Missing CORS is the #1 "it works in mock but not on AWS" failure — the
    browser blocks the response and `http-api.ts` reports `offline`.
 
-Once `infra/` exists: `cd infra && npm ci && npx cdk bootstrap && npx cdk deploy`
-→ the stack outputs print the exact `APP_CONFIG.aws` values → paste
-`apiBaseUrl` (invoke URL **without** `/v1`) into `config.ts`. If you build the
-backend by hand instead, treat contract §5–§7 as the acceptance spec and run
-the mock (`mock-api.ts`) side-by-side as the reference implementation.
+If you ever rebuild the backend by hand instead of deploying `infra/`, treat
+contract §5–§7 as the acceptance spec and run the mock (`mock-api.ts`)
+side-by-side as the reference implementation.
 
 ## 4. Mandatory login (`requireAuth: true`)
 
