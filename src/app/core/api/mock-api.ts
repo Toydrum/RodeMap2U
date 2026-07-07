@@ -394,11 +394,28 @@ export class MockApi implements ApiClient {
     };
   }
 
-  getSyncChanges(_cursor?: string): Promise<SyncChangesResponse> {
-    return this.notYet('conectar mi bosque');
+  /** Own change feed, ordered by server receive order (`seq`); the cursor is
+   *  the last seq seen, opaque to the client. */
+  async getSyncChanges(cursor?: string): Promise<SyncChangesResponse> {
+    await simLatency('api.getSyncChanges');
+    const caller = await this.caller();
+    const after = cursor ? Number(cursor) || 0 : 0;
+    const page = 200;
+    const mine = (await mockGetAll<MockRecordRow>('records'))
+      .filter((r) => r.ownerId === caller.userId && r.seq > after)
+      .sort((a, b) => a.seq - b.seq);
+    const slice = mine.slice(0, page);
+    return {
+      changes: slice.map((r) => ({ store: r.store, record: r.record })),
+      cursor: slice.length ? String(slice[slice.length - 1].seq) : (cursor ?? '0'),
+      more: mine.length > page,
+    };
   }
-  pushSync(_req: SyncPushRequest): Promise<SyncPushResponse> {
-    return this.notYet('conectar mi bosque');
+
+  async pushSync(req: SyncPushRequest): Promise<SyncPushResponse> {
+    await simLatency('api.pushSync');
+    const caller = await this.caller();
+    return this.pushInto(caller.userId, req);
   }
 
   /** Guardian write-through (co-gardening): same rev-LWW law as own pushes;
@@ -408,6 +425,12 @@ export class MockApi implements ApiClient {
     const caller = await this.caller();
     const link = await this.linkBetween(caller.userId, userId);
     if (!link) throw new ApiError('NOT_FOUND');
+    return this.pushInto(userId, req);
+  }
+
+  /** Shared LWW write loop — accept iff incoming.rev > stored.rev, otherwise
+   *  reject STALE_REV and hand back the stored winner. */
+  private async pushInto(ownerId: string, req: SyncPushRequest): Promise<SyncPushResponse> {
     if (!Array.isArray(req.records)) throw new ApiError('VALIDATION');
     if (req.records.length > LIMITS.syncPushMax) throw new ApiError('LIMIT_EXCEEDED');
 
@@ -417,7 +440,7 @@ export class MockApi implements ApiClient {
     const syncedAt = Date.now();
     for (const entry of req.records) {
       const record = entry.record;
-      const key = `${userId}|${entry.store}|${record.id}`;
+      const key = `${ownerId}|${entry.store}|${record.id}`;
       const stored = await mockGet<MockRecordRow>('records', key);
       if (stored && (stored.record.rev ?? 0) >= record.rev) {
         rejected.push({ id: record.id, reason: 'STALE_REV' });
@@ -427,7 +450,7 @@ export class MockApi implements ApiClient {
       const seq = await mockNextSeq('changeSeq');
       await mockPut('records', {
         key,
-        ownerId: userId,
+        ownerId,
         store: entry.store,
         record,
         seq,

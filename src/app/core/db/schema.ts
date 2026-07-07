@@ -123,10 +123,12 @@ export type TextSize = 'md' | 'lg' | 'xl';
  *   'auth.identity' — device session snapshot (core/auth/auth-types.ts).
  *   'family.me'     — cached GET /me for instant offline paint
  *                     (core/family.service.ts, stale-while-revalidate).
- *   'account.link'  — which account owns this device's forest (future
- *                     «conectar mi bosque» phase).
- * Auth keys are deliberately NOT part of ExportEnvelope: backups are shared
- * files, and identity is device state, not forest data.
+ *   'account.link'  — which account this device's forest travels with
+ *                     (core/sync/sync.service.ts; null accountId = unlinked).
+ *   'sync.state'    — push watermark + pull cursor + lastSyncAt
+ *                     (core/sync/sync.service.ts bookkeeping).
+ * Auth/sync keys are deliberately NOT part of ExportEnvelope: backups are
+ * shared files, and identity/link state is device state, not forest data.
  */
 
 /** Singleton — lives in the `meta` store under key 'settings'. */

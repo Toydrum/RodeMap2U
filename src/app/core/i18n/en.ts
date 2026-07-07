@@ -489,6 +489,25 @@ export const EN: Dict = {
     emptyForest: 'Their forest has no trees yet.',
     treeChip: '{name}’s garden',
   },
+  nube: {
+    title: 'My forest in the cloud',
+    offHint:
+      'Your forest lives only on this device. Connect it and it will travel with your account — and your family can tend it with you.',
+    connectCta: 'Connect my forest',
+    connectOk: 'Your forest now travels with you ☁️🌿',
+    syncing: 'Syncing…',
+    connectedAs: 'Connected to this account',
+    lastSync: 'Last sync: {time}',
+    neverSynced: 'Not synced yet',
+    syncNowCta: 'Sync now',
+    disconnectCta: 'Disconnect',
+    disconnectHint: 'Disconnecting only releases the link — your local forest is untouched.',
+    disconnectOk: 'The link was released. Your forest is still here, intact. 🍃',
+    offlineHint: 'No connection right now — it will sync when it returns.',
+    mismatchTitle: 'This forest is linked to another account',
+    mismatchBody:
+      'The device was connected with another key. You can disconnect it; if you then connect with the current account, this local forest will travel with it.',
+  },
   guide: {
     title: 'How to use the app',
     intro: 'A short walk through your forest. No rush — nothing runs here.',

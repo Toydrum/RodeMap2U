@@ -18,6 +18,7 @@ import { MockAuthProvider } from './core/auth/mock-auth.provider';
 import { API_CLIENT } from './core/api/api-client';
 import { HttpApi } from './core/api/http-api';
 import { MockApi } from './core/api/mock-api';
+import { SyncService } from './core/sync/sync.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,6 +40,8 @@ export const appConfig: ApplicationConfig = {
     },
     // Parallel to BootService.init(): one meta read, no network — fail-open.
     provideAppInitializer(() => inject(AuthService).hydrate()),
+    // Same doctrine: two meta reads; the first pull fires seconds AFTER boot.
+    provideAppInitializer(() => inject(SyncService).init()),
     provideRouter(
       routes,
       withComponentInputBinding(),

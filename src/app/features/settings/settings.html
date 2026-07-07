@@ -173,6 +173,56 @@
     <app-familia-card />
   }
 
+  <!-- Cloud sync (signed-in only) -->
+  @if (auth.user()) {
+    <section class="card block nube">
+      <h2>{{ i18n.t().nube.title }}</h2>
+
+      @switch (sync.phase()) {
+        @case ('off') {
+          <p class="hint">{{ i18n.t().nube.offHint }}</p>
+          <button type="button" class="btn btn-primary" (click)="doConnect()">
+            ☁️ {{ i18n.t().nube.connectCta }}
+          </button>
+        }
+        @case ('syncing') {
+          <p class="hint">🌿 {{ i18n.t().nube.syncing }}</p>
+        }
+        @case ('mismatch') {
+          <p class="nube-mismatch">
+            <strong>{{ i18n.t().nube.mismatchTitle }}</strong><br />
+            {{ i18n.t().nube.mismatchBody }}
+          </p>
+          <button type="button" class="btn btn-soft" (click)="doDisconnect()">
+            {{ i18n.t().nube.disconnectCta }}
+          </button>
+        }
+        @default {
+          <div class="row">
+            <span class="label">
+              ✅ {{ i18n.t().nube.connectedAs }}
+              <span class="hint nube-last">{{ lastSyncText() }}</span>
+            </span>
+            <div class="opts">
+              <button type="button" class="chip opt" (click)="doSyncNow()">
+                🔄 {{ i18n.t().nube.syncNowCta }}
+              </button>
+              <button type="button" class="chip opt" (click)="doDisconnect()">
+                {{ i18n.t().nube.disconnectCta }}
+              </button>
+            </div>
+          </div>
+          @if (sync.phase() === 'offline') {
+            <p class="hint">{{ i18n.t().nube.offlineHint }}</p>
+          } @else if (sync.phase() === 'error' && sync.lastError(); as code) {
+            <p class="hint">{{ i18n.t().familia.errors[code] }}</p>
+          }
+          <p class="hint">{{ i18n.t().nube.disconnectHint }}</p>
+        }
+      }
+    </section>
+  }
+
   <!-- Data -->
   <section class="card block">
     <h2>{{ i18n.t().settings.data }}</h2>

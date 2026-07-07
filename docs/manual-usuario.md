@@ -283,6 +283,17 @@ Con sesión iniciada, en Ajustes aparece la sección **Familia**:
 - **Quien es cuidado siempre lo sabe**: su sección Familia nombra a quienes pueden ver su bosque, con la regla completa a la vista: *tu familia puede ver tu bosque y plantar contigo — y tú puedes ver el suyo; tus sentimientos, tus check-ins y tu clima siguen siendo solo tuyos*.
 - Una cuenta de peque no puede quedarse sin nadie: **el último vínculo de cuidado no se puede soltar** — primero invita a otro adulto, o borra la cuenta con su respaldo.
 
+### Mi bosque en la nube ☁️
+
+Con sesión iniciada, la sección **«Mi bosque en la nube»** te ofrece **Conectar mi bosque**: tu bosque sube a tu cuenta y, desde entonces, cada cambio viaja solo (unos segundos después de cada edición, y al abrir la app). Todo es **opcional y explícito** — sin conectar, nada sale de tu dispositivo, como siempre.
+
+- **Conectar** hace las dos direcciones: sube lo que este dispositivo tiene y baja lo que tu cuenta ya guarde (por ejemplo, ramas que tu familia plantó cuidando tu jardín).
+- **Desconectar** solo suelta el enlace — tu bosque local no se toca.
+- Si el dispositivo quedó enlazado a **otra cuenta**, la app te lo dice y pausa la sincronización hasta que decidas.
+- Sin conexión no pasa nada malo: se sincroniza cuando vuelva.
+
+> 🧪 En el **modo ensayo** actual la "nube" vive en tu propio dispositivo (es de práctica). Ojo: conectar con una cuenta demo también **baja su bosque de ejemplo** y se mezcla con el tuyo — pruébalo sabiendo eso, o exporta tu copia antes. Con AWS real, conectar en un segundo dispositivo traerá tu bosque de verdad.
+
 ### Entrar a su bosque 🌳 (el jardín a cuatro manos)
 
 Desde la hojita de cada peque, **«Entrar a su bosque»** te lleva a su jardín para ayudarle a organizarlo: ves sus árboles, entras a cualquiera, y ahí tienes las mismas herramientas de siempre — plantar ramitas, sembrar varias a la vez, cambiar estados, ramificar, ordenar pasitos, la tablita completa.

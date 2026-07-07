@@ -16,6 +16,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { APP_CONFIG } from '../../core/config';
 import { resetMockCloud } from '../../core/api/mock-cloud';
 import { FamiliaCard } from '../familia/familia-card';
+import { SyncService } from '../../core/sync/sync.service';
 
 @Component({
   selector: 'app-settings',
@@ -64,9 +65,33 @@ export class SettingsPage {
   protected readonly theme = inject(ThemeService);
   protected readonly trees = inject(TreesRepo);
   protected readonly auth = inject(AuthService);
+  protected readonly sync = inject(SyncService);
   protected readonly isMock = APP_CONFIG.backend === 'mock';
   private readonly backup = inject(BackupService);
   private readonly toast = inject(ToastService);
+
+  protected async doConnect(): Promise<void> {
+    if (await this.sync.connect()) {
+      this.toast.show({ message: this.i18n.t().nube.connectOk });
+    }
+  }
+
+  protected async doSyncNow(): Promise<void> {
+    await this.sync.syncNow();
+  }
+
+  protected async doDisconnect(): Promise<void> {
+    await this.sync.disconnect();
+    this.toast.show({ message: this.i18n.t().nube.disconnectOk });
+  }
+
+  protected lastSyncText(): string {
+    const at = this.sync.lastSyncAt();
+    if (!at) return this.i18n.t().nube.neverSynced;
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const time = new Date(at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    return this.i18n.fill(this.i18n.t().nube.lastSync, { time });
+  }
 
   /** Rehearsal mode only: wipe the practice cloud; it reseeds on next use.
    *  Also signs out — the session's user may no longer exist afterwards. */

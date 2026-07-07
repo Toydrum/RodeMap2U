@@ -93,7 +93,9 @@ export interface AuthIdentitySnapshot {
 
 export interface AccountLinkSnapshot {
   key: typeof META_ACCOUNT_LINK;
-  accountId: string;
+  /** null = explicitly disconnected (the row outlives the link on purpose). */
+  accountId: string | null;
   linkedAt: number;
+  /** When the first full push completed — null until the connect finishes. */
   uploadedAt: number | null;
 }

@@ -491,6 +491,25 @@ export const ES = {
     emptyForest: 'Su bosque aún no tiene árboles.',
     treeChip: 'jardín de {name}',
   },
+  nube: {
+    title: 'Mi bosque en la nube',
+    offHint:
+      'Tu bosque vive solo en este dispositivo. Si lo conectas, viajará con tu cuenta — y tu familia podrá cuidarlo contigo.',
+    connectCta: 'Conectar mi bosque',
+    connectOk: 'Tu bosque ya viaja contigo ☁️🌿',
+    syncing: 'Sincronizando…',
+    connectedAs: 'Conectado a esta cuenta',
+    lastSync: 'Última sincronización: {time}',
+    neverSynced: 'Aún sin sincronizar',
+    syncNowCta: 'Sincronizar ahora',
+    disconnectCta: 'Desconectar',
+    disconnectHint: 'Desconectar solo suelta el enlace — tu bosque local no se toca.',
+    disconnectOk: 'El enlace se soltó. Tu bosque sigue aquí, intacto. 🍃',
+    offlineHint: 'Sin conexión ahora — se sincronizará cuando vuelva.',
+    mismatchTitle: 'Este bosque está enlazado a otra cuenta',
+    mismatchBody:
+      'El dispositivo quedó conectado con otra llave. Puedes desconectarlo; si luego lo conectas con la cuenta actual, este bosque local viajará con ella.',
+  },
   guide: {
     title: 'Cómo usar la app',
     intro: 'Un paseo corto por tu bosque. Sin prisa — aquí nada corre.',

@@ -36,6 +36,7 @@ src/app/
     auth/     auth-types.ts (AuthUser/AuthError/PASSWORD_POLICY) · auth-provider.ts (seam token)
               mock-auth.provider.ts (offline Cognito twin, code 123456) · cognito-auth.provider.ts (lazy amplify + pool checklist)
               auth.service.ts (signals facade, fail-open hydrate) · auth.guard.ts (authRequiredGate, inert until requireAuth)
+    sync/     sync.service.ts («conectar mi bosque»: opt-in watermark push + cursor pull, account.link + sync.state meta)
     api/      contracts.ts (NORMATIVE backend contract: RoadmapApi + shapes + paths + error codes)
               api-client.ts (seam token) · mock-api.ts (executable spec) · http-api.ts (fetch + bearer + retry)
               mock-cloud.ts (roadmap2u-mockcloud IDB) · mock-seed.ts (demo family: rocio/nico/val/ambar)
@@ -129,7 +130,7 @@ cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + templat
 
 ## Deliberately NOT built (do not "fix" these)
 
-- No event-log store, no merge-import, no dirty/sync flags — the sync engine (watermark push over `onLocalWrite`, cursor pull into `applyExternal`) belongs to the «conectar mi bosque» phase; don't half-build it earlier. The auth/API seams and the mock cloud DO exist now (`core/auth/`, `core/api/`); family UI, friends, visits and co-gardening arrive in their named phases (`docs/backend-contract.md` §rollout).
+- No event-log store, no merge-import, no per-record dirty flags — **the sync engine IS built** (`core/sync/sync.service.ts`, 0.0.53) and it deliberately needs none of those: outbound is a WATERMARK scan (`updatedAt > watermark`, incl. tombstones/archived) triggered by `onLocalWrite` (debounced) + boot; inbound walks the server cursor into LWW-guarded disk puts + `RecordsRepo.applyExternal`; re-pushing is idempotent by contract (STALE_REV + server winner), so every edge self-heals. Strictly OPT-IN via `account.link` (`connect()` = full push then pull; `disconnect()` never touches local data; mismatched account ⇒ sync off + banner). The `applyingRemote` flag stops pull→push echo; pulls re-broadcast per store for other tabs. Friends/visits UI for non-family arrives with the «amigos» phase (`docs/backend-contract.md` §rollout).
 - No priority fields (executive-function tax for this audience).
 - No push notifications, streaks, or usage nudges. The former "stale-branch nudge" deferral was resolved in v32 as the **pull-based** `/trail` "Ramas dormidas" section (30 days, dateless seed/growing LEAVES only, `resting` exempt, no day counters, renders only when non-empty) — do not convert it into a push notification or a forest-side badge.
 
