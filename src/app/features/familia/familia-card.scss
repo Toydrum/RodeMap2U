@@ -1,5 +1,10 @@
-// The familia section leans on the global .card/.btn/.chip/.field set; only
-// the row layout, the once-only password plate and the sheet innards are ours.
+// The familia section leans on the global .card/.btn/.chip/.field set (incl.
+// .card.block, global BECAUSE encapsulation — see styles.scss); only the row
+// layout, the once-only password plate and the sheet innards are ours.
+:host {
+  display: block;
+}
+
 .familia {
   h2 {
     margin-top: 0;

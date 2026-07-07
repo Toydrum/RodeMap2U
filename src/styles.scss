@@ -219,6 +219,18 @@ select {
   box-shadow: var(--shadow);
 }
 
+/* A settings-style card section — GLOBAL because child components (familia,
+   amigos) render their own sections and encapsulated styles can't reach them. */
+.card.block {
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.1rem;
+
+  h2 {
+    font-size: 1.02rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

@@ -40,15 +40,9 @@
   }
 }
 
-.block {
-  padding: 1.2rem 1.3rem;
-  margin-bottom: 1.1rem;
-
-  h2 {
-    font-size: 1.02rem;
-    margin-bottom: 0.8rem;
-  }
-}
+// .card.block moved to styles.scss: the familia/amigos child components render
+// their own card sections and Angular's style encapsulation kept this from
+// reaching them (they shipped border-only, content flush to the edges).
 
 .row {
   display: flex;
