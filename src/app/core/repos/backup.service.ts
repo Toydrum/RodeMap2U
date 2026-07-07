@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { CheckIn, ExportEnvelope, SCHEMA_VERSION, Settings, TimerSession, Tree, TreeNode } from '../db/schema';
 import { clear, getAll, putMany } from '../db/idb';
+import { broadcastChange } from '../db/broadcast';
+import { SyncService } from '../sync/sync.service';
 import { TreesRepo } from './trees.repo';
 import { NodesRepo } from './nodes.repo';
 import { CheckinsRepo } from './checkins.repo';
@@ -14,6 +16,7 @@ export class BackupService {
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly settings = inject(SettingsService);
+  private readonly sync = inject(SyncService);
 
   async buildEnvelope(): Promise<ExportEnvelope> {
     // Read from disk (includes tombstones — a backup is a full copy).
@@ -75,5 +78,17 @@ export class BackupService {
     this.checkins.resetTo(envelope.data.checkins ?? []);
     this.sessions.resetTo(envelope.data.sessions ?? []);
     if (envelope.data.settings) await this.settings.patch(envelope.data.settings);
+
+    // Other tabs re-read what the import replaced (same rail as every write).
+    broadcastChange({ store: 'trees', ids: (envelope.data.trees ?? []).map((r) => r.id) });
+    broadcastChange({ store: 'nodes', ids: (envelope.data.nodes ?? []).map((r) => r.id) });
+    broadcastChange({ store: 'checkins', ids: (envelope.data.checkins ?? []).map((r) => r.id) });
+    broadcastChange({ store: 'sessions', ids: (envelope.data.sessions ?? []).map((r) => r.id) });
+
+    // An explicit restore must WIN over the cloud — without this, the next
+    // pull silently resurrects whatever the backup rolled back (cloud revs
+    // are higher than the restored ones). Persistent flag: covers offline
+    // imports and import-before-connect too.
+    await this.sync.noteRestore();
   }
 }

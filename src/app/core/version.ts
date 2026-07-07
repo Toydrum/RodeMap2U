@@ -1,3 +1,3 @@
 /** Human-readable build tag, shown in Settings. Bump on notable deploys so
  *  anyone can tell at a glance which version their service worker is serving. */
-export const APP_VERSION = '0.0.55 · 7 jul 2026 — un respiro entre tarjetas';
+export const APP_VERSION = '0.0.56 · 7 jul 2026 — la restauración manda';

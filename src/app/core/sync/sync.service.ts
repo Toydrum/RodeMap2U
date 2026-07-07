@@ -49,6 +49,8 @@ interface SyncStateSnapshot {
   /** Opaque server cursor — the change feed resumes after it. */
   cursor: string;
   lastSyncAt: number | null;
+  /** A backup was restored: the next sync must run the restore-wins pass. */
+  forcePending?: boolean;
 }
 
 export type SyncPhase = 'off' | 'mismatch' | 'idle' | 'syncing' | 'offline' | 'error';
@@ -86,6 +88,7 @@ export class SyncService {
 
   private watermark = 0;
   private cursor = '0';
+  private forcePending = false;
   private pushTimer: ReturnType<typeof setTimeout> | null = null;
   /** Suppresses the local-write echo while a pull applies remote records. */
   private applyingRemote = false;
@@ -104,6 +107,7 @@ export class SyncService {
       if (state) {
         this.watermark = state.watermark ?? 0;
         this.cursor = state.cursor ?? '0';
+        this.forcePending = state.forcePending ?? false;
         this.lastSyncAtSignal.set(state.lastSyncAt ?? null);
       }
     } catch {
@@ -165,7 +169,13 @@ export class SyncService {
     this.busySignal.set(true);
     this.lastErrorSignal.set(null);
     try {
-      await this.pushDirty();
+      if (this.forcePending) {
+        this.watermark = 0; // a restore pushes EVERYTHING, and it wins
+        await this.pushForceWins();
+        this.forcePending = false;
+      } else {
+        await this.pushDirty();
+      }
       await this.pullChanges();
       this.lastSyncAtSignal.set(Date.now());
       await this.persistState();
@@ -176,6 +186,18 @@ export class SyncService {
     } finally {
       this.busySignal.set(false);
     }
+  }
+
+  /** Called by BackupService after an import-replace. An EXPLICIT restore
+   *  must prevail over the cloud — otherwise the next pull silently undoes it
+   *  (the cloud's higher revs win LWW). The flag persists, so an offline (or
+   *  not-yet-connected) import still gets its restore-wins pass on the next
+   *  successful sync or connect. */
+  async noteRestore(): Promise<void> {
+    this.forcePending = true;
+    this.watermark = 0;
+    await this.persistState();
+    void this.syncNow(); // guards inside handle off/mismatch/offline
   }
 
   // ── outbound ──────────────────────────────────────────────────────────────
@@ -205,6 +227,49 @@ export class SyncService {
       });
       // The server's winners correct us immediately (rev-LWW).
       for (const winner of result.serverRecords) await this.acceptRemote(winner);
+    }
+    this.watermark = captureAt;
+  }
+
+  /** The restore-wins pass: push everything; when the cloud out-revs a record
+   *  (STALE_REV), re-stamp the local copy just PAST the cloud winner and push
+   *  again — per-record restore-wins. Records the backup never knew (created
+   *  elsewhere after the export) still flow back in on the pull: LWW is
+   *  per-record, a restore is not a cloud wipe. */
+  private async pushForceWins(): Promise<void> {
+    const captureAt = Date.now();
+    const dirty: SyncRecord[] = [
+      ...this.gather('trees', this.trees),
+      ...this.gather('nodes', this.nodes),
+      ...this.gather('checkins', this.checkins),
+      ...this.gather('sessions', this.sessions),
+    ];
+    for (let i = 0; i < dirty.length; i += PUSH_CHUNK) {
+      const chunk = dirty.slice(i, i + PUSH_CHUNK);
+      const result = await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: chunk });
+      if (!result.rejected.length) continue;
+      const winnerRevs = new Map(result.serverRecords.map((w) => [w.record.id, w.record.rev]));
+      const retry: SyncRecord[] = [];
+      for (const rejection of result.rejected) {
+        const entry = chunk.find((c) => c.record.id === rejection.id);
+        if (!entry) continue;
+        const cloudRev = winnerRevs.get(rejection.id) ?? entry.record.rev;
+        const stamped = {
+          ...entry.record,
+          rev: Math.max(entry.record.rev, cloudRev) + 1,
+          updatedAt: Date.now(),
+        };
+        try {
+          await put(entry.store, stamped);
+        } catch {
+          /* memory-only session */
+        }
+        this.repoOf(entry.store).applyExternal(stamped as never);
+        retry.push({ store: entry.store, record: stamped });
+      }
+      if (retry.length) {
+        await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: retry });
+      }
     }
     this.watermark = captureAt;
   }
@@ -290,6 +355,7 @@ export class SyncService {
         watermark: this.watermark,
         cursor: this.cursor,
         lastSyncAt: this.lastSyncAtSignal(),
+        forcePending: this.forcePending,
       } satisfies SyncStateSnapshot);
     } catch {
       /* memory-only session */
