@@ -307,41 +307,150 @@ export class MockApi implements ApiClient {
     await mockDelete('codes', code);
   }
 
-  listChildFriends(_userId: string): Promise<FriendsResponse> {
-    return this.notYet('amigos y visitas');
-  }
-  removeChildFriendship(_userId: string, _friendshipId: string): Promise<void> {
-    return this.notYet('amigos y visitas');
-  }
-  cancelChildRequest(_userId: string, _requestId: string): Promise<void> {
-    return this.notYet('amigos y visitas');
+  /** Guardian oversight — same list the minor sees; removal, never initiation. */
+  async listChildFriends(userId: string): Promise<FriendsResponse> {
+    await simLatency('api.listChildFriends');
+    const caller = await this.caller();
+    if (!(await this.linkBetween(caller.userId, userId))) throw new ApiError('NOT_FOUND');
+    return this.friendsOf(userId);
   }
 
-  // ── friends (phase «amigos y visitas») ────────────────────────────────────
+  async removeChildFriendship(userId: string, friendshipId: string): Promise<void> {
+    await simLatency('api.removeChildFriendship');
+    const caller = await this.caller();
+    if (!(await this.linkBetween(caller.userId, userId))) throw new ApiError('NOT_FOUND');
+    await this.removeFriendshipAs(userId, friendshipId);
+  }
 
-  getFriends(): Promise<FriendsResponse> {
-    return this.notYet('amigos y visitas');
+  async cancelChildRequest(userId: string, requestId: string): Promise<void> {
+    await simLatency('api.cancelChildRequest');
+    const caller = await this.caller();
+    if (!(await this.linkBetween(caller.userId, userId))) throw new ApiError('NOT_FOUND');
+    const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
+    if (!request || request.fromId !== userId) throw new ApiError('NOT_FOUND');
+    await mockDelete('friendRequests', requestId);
   }
-  getFriendCode(): Promise<CodeGrant> {
-    return this.notYet('amigos y visitas');
+
+  // ── friends ───────────────────────────────────────────────────────────────
+
+  async getFriends(): Promise<FriendsResponse> {
+    await simLatency('api.getFriends');
+    const caller = await this.caller();
+    this.requireSocial(caller);
+    return this.friendsOf(caller.userId);
   }
-  rotateFriendCode(): Promise<CodeGrant> {
-    return this.notYet('amigos y visitas');
+
+  async getFriendCode(): Promise<CodeGrant> {
+    await simLatency('api.getFriendCode');
+    const caller = await this.caller();
+    this.requireSocial(caller);
+    const now = Date.now();
+    const existing = (await mockGetAll<MockCodeRow>('codes')).find(
+      (c) => c.kind === 'friend' && c.userId === caller.userId && c.expiresAt > now,
+    );
+    if (existing) return { code: existing.code, expiresAt: existing.expiresAt };
+    return this.mintFriendCode(caller.userId);
   }
-  createFriendRequest(_code: string): Promise<FriendRequestView> {
-    return this.notYet('amigos y visitas');
+
+  async rotateFriendCode(): Promise<CodeGrant> {
+    await simLatency('api.rotateFriendCode');
+    const caller = await this.caller();
+    this.requireSocial(caller);
+    return this.mintFriendCode(caller.userId);
   }
-  acceptFriendRequest(_requestId: string): Promise<FriendView> {
-    return this.notYet('amigos y visitas');
+
+  async createFriendRequest(rawCode: string): Promise<FriendRequestView> {
+    await simLatency('api.createFriendRequest');
+    const caller = await this.caller();
+    this.requireSocial(caller);
+    const code = rawCode?.trim().toUpperCase().replace(/-/g, '');
+    if (!code) throw new ApiError('VALIDATION', 'code required');
+
+    // Code-guessing brake: every redemption attempt counts (rolling hour).
+    const bucket = Math.floor(Date.now() / 3_600_000);
+    const attempts = await mockNextSeq(`rate:${caller.userId}:${bucket}`);
+    if (attempts > LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+
+    const grant = await mockGet<MockCodeRow>('codes', code);
+    if (!grant || grant.kind !== 'friend') throw new ApiError('CODE_INVALID');
+    if (grant.expiresAt <= Date.now()) throw new ApiError('CODE_EXPIRED');
+    if (grant.userId === caller.userId) throw new ApiError('VALIDATION', 'that is your own code');
+
+    const target = await mockGet<MockUserRow>('users', grant.userId);
+    if (!target || !target.socialEnabled) throw new ApiError('CODE_INVALID');
+    if (await this.friendshipBetween(caller.userId, grant.userId)) {
+      throw new ApiError('CONFLICT', 'already friends');
+    }
+    const already = (await mockGetAll<MockFriendRequestRow>('friendRequests')).find(
+      (r) => r.fromId === caller.userId && r.toId === grant.userId && r.expiresAt > Date.now(),
+    );
+    if (already) throw new ApiError('CONFLICT', 'request already pending');
+    const mine = (await mockGetAll<MockFriendshipRow>('friendships')).filter(
+      (f) => f.userA === caller.userId || f.userB === caller.userId,
+    );
+    if (mine.length >= LIMITS.maxFriends) throw new ApiError('LIMIT_EXCEEDED');
+
+    const now = Date.now();
+    const requestId = `freq-${await mockNextSeq('reqseq')}`;
+    const request: MockFriendRequestRow = {
+      requestId,
+      fromId: caller.userId,
+      toId: grant.userId,
+      createdAt: now,
+      expiresAt: now + 14 * 24 * 3600 * 1000,
+    };
+    await mockPut('friendRequests', request);
+    return {
+      requestId,
+      user: this.publicOf(target, false),
+      createdAt: now,
+      expiresAt: request.expiresAt,
+    };
   }
-  declineFriendRequest(_requestId: string): Promise<void> {
-    return this.notYet('amigos y visitas');
+
+  async acceptFriendRequest(requestId: string): Promise<FriendView> {
+    await simLatency('api.acceptFriendRequest');
+    const caller = await this.caller();
+    this.requireSocial(caller);
+    const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
+    if (!request || request.toId !== caller.userId || request.expiresAt <= Date.now()) {
+      throw new ApiError('NOT_FOUND');
+    }
+    const other = await mockGet<MockUserRow>('users', request.fromId);
+    if (!other) throw new ApiError('NOT_FOUND');
+    const [a, b] = [caller.userId, request.fromId].sort();
+    const friendship: MockFriendshipRow = {
+      friendshipId: `${a}~${b}`,
+      userA: a,
+      userB: b,
+      createdAt: Date.now(),
+    };
+    await mockPut('friendships', friendship);
+    await mockDelete('friendRequests', requestId);
+    return { friendshipId: friendship.friendshipId, user: this.publicOf(other, false), since: friendship.createdAt };
   }
-  cancelFriendRequest(_requestId: string): Promise<void> {
-    return this.notYet('amigos y visitas');
+
+  /** Silent by design — the requester's pending item simply disappears. */
+  async declineFriendRequest(requestId: string): Promise<void> {
+    await simLatency('api.declineFriendRequest');
+    const caller = await this.caller();
+    const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
+    if (!request || request.toId !== caller.userId) throw new ApiError('NOT_FOUND');
+    await mockDelete('friendRequests', requestId);
   }
-  removeFriend(_friendshipId: string): Promise<void> {
-    return this.notYet('amigos y visitas');
+
+  async cancelFriendRequest(requestId: string): Promise<void> {
+    await simLatency('api.cancelFriendRequest');
+    const caller = await this.caller();
+    const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
+    if (!request || request.fromId !== caller.userId) throw new ApiError('NOT_FOUND');
+    await mockDelete('friendRequests', requestId);
+  }
+
+  async removeFriend(friendshipId: string): Promise<void> {
+    await simLatency('api.removeFriend');
+    const caller = await this.caller();
+    await this.removeFriendshipAs(caller.userId, friendshipId);
   }
 
   // ── forests & sync ────────────────────────────────────────────────────────
@@ -512,8 +621,74 @@ export class MockApi implements ApiClient {
     return { linkId: link.linkId, kind: link.kind, user, createdAt: link.createdAt };
   }
 
-  private notYet(phase: string): Promise<never> {
-    throw new ApiError('unknown', `mock endpoint arrives with phase «${phase}»`);
+  // ── friends internals ─────────────────────────────────────────────────────
+
+  private requireSocial(user: MockUserRow): void {
+    if (!user.socialEnabled) throw new ApiError('FORBIDDEN', 'social features are off');
+  }
+
+  private async friendshipBetween(a: string, b: string): Promise<MockFriendshipRow | null> {
+    const rows = await mockGetAll<MockFriendshipRow>('friendships');
+    return (
+      rows.find(
+        (f) => (f.userA === a && f.userB === b) || (f.userA === b && f.userB === a),
+      ) ?? null
+    );
+  }
+
+  private async friendsOf(userId: string): Promise<FriendsResponse> {
+    const now = Date.now();
+    const friendships = (await mockGetAll<MockFriendshipRow>('friendships')).filter(
+      (f) => f.userA === userId || f.userB === userId,
+    );
+    const requests = (await mockGetAll<MockFriendRequestRow>('friendRequests')).filter(
+      (r) => r.expiresAt > now,
+    );
+    const friends: FriendView[] = [];
+    for (const f of friendships) {
+      const otherId = f.userA === userId ? f.userB : f.userA;
+      const other = await mockGet<MockUserRow>('users', otherId);
+      if (!other) continue;
+      friends.push({ friendshipId: f.friendshipId, user: this.publicOf(other, false), since: f.createdAt });
+    }
+    const incoming: FriendRequestView[] = [];
+    for (const r of requests.filter((r) => r.toId === userId)) {
+      const other = await mockGet<MockUserRow>('users', r.fromId);
+      if (!other) continue;
+      incoming.push({ requestId: r.requestId, user: this.publicOf(other, false), createdAt: r.createdAt, expiresAt: r.expiresAt });
+    }
+    const outgoing: FriendRequestView[] = [];
+    for (const r of requests.filter((r) => r.fromId === userId)) {
+      const other = await mockGet<MockUserRow>('users', r.toId);
+      if (!other) continue;
+      outgoing.push({ requestId: r.requestId, user: this.publicOf(other, false), createdAt: r.createdAt, expiresAt: r.expiresAt });
+    }
+    return { friends, incoming, outgoing };
+  }
+
+  /** `asUserId` must be one side of the edge (self-removal or guardian oversight). */
+  private async removeFriendshipAs(asUserId: string, friendshipId: string): Promise<void> {
+    const row = await mockGet<MockFriendshipRow>('friendships', friendshipId);
+    if (!row || (row.userA !== asUserId && row.userB !== asUserId)) {
+      throw new ApiError('NOT_FOUND');
+    }
+    await mockDelete('friendships', friendshipId);
+  }
+
+  private async mintFriendCode(userId: string): Promise<CodeGrant> {
+    for (const code of await mockGetAll<MockCodeRow>('codes')) {
+      if (code.kind === 'friend' && code.userId === userId) await mockDelete('codes', code.code);
+    }
+    const code = await this.mintCode();
+    const expiresAt = Date.now() + 7 * 24 * 3600 * 1000;
+    await mockPut('codes', {
+      code,
+      kind: 'friend',
+      userId,
+      minorId: null,
+      expiresAt,
+    } satisfies MockCodeRow);
+    return { code, expiresAt };
   }
 
   // ── family internals ──────────────────────────────────────────────────────

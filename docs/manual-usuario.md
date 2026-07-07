@@ -294,6 +294,16 @@ Con sesión iniciada, la sección **«Mi bosque en la nube»** te ofrece **Conec
 
 > 🧪 En el **modo ensayo** actual la "nube" vive en tu propio dispositivo (es de práctica). Ojo: conectar con una cuenta demo también **baja su bosque de ejemplo** y se mezcla con el tuyo — pruébalo sabiendo eso, o exporta tu copia antes. Con AWS real, conectar en un segundo dispositivo traerá tu bosque de verdad.
 
+### Amistades 👥
+
+Para cuentas con **amigos y visitas** activado (personas adultas siempre; peques cuando su familia lo enciende), la sección **Amistades** funciona así:
+
+- **Tu código de amistad** es la única puerta: no hay búsqueda de personas ni perfiles públicos. Compártelo fuera de la app con quien tú elijas (vale 7 días, y puedes cambiarlo cuando quieras).
+- Quien canjea un código **envía una solicitud** — la amistad solo nace cuando la otra persona la **acepta**. Decir «Ahora no» es **silencioso**: la solicitud simplemente se desvanece, sin avisos ni vergüenzas.
+- Una amistad te deja **visitar su bosque** (y a esa persona el tuyo): solo mirar — sin notitas, ni fechas, ni clima, y sin poder mover nada.
+- **Soltar** una amistad también es silencioso, y los bosques quedan como están.
+- En las cuentas de peques, su familia ve **la misma lista de amistades** que el peque (transparencia total) y puede soltar vínculos — nunca iniciarlos por su cuenta.
+
 ### Entrar a su bosque 🌳 (el jardín a cuatro manos)
 
 Desde la hojita de cada peque, **«Entrar a su bosque»** te lleva a su jardín para ayudarle a organizarlo: ves sus árboles, entras a cualquiera, y ahí tienes las mismas herramientas de siempre — plantar ramitas, sembrar varias a la vez, cambiar estados, ramificar, ordenar pasitos, la tablita completa.

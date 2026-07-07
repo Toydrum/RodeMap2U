@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { FamilyService } from '../../core/family.service';
-import { CodeGrant, FamilyLinkView, UserProfile } from '../../core/api/contracts';
+import { CodeGrant, FamilyLinkView, FriendsResponse, UserProfile } from '../../core/api/contracts';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { ToastService } from '../../shared/ui/toast.service';
 
@@ -16,6 +16,7 @@ type Sheet =
   | { kind: 'accept' }
   | { kind: 'unlink'; link: FamilyLinkView; mineSide: boolean }
   | { kind: 'delete'; link: FamilyLinkView }
+  | { kind: 'childFriends'; link: FamilyLinkView; data: FriendsResponse | null }
   | null;
 
 /**
@@ -43,6 +44,25 @@ export class FamiliaCard {
   protected enterForest(link: FamilyLinkView): void {
     this.close();
     void this.router.navigate(['/visit', link.user.userId]);
+  }
+
+  /** Oversight, never initiation — and the minor sees the very same list. */
+  protected async openChildFriends(link: FamilyLinkView): Promise<void> {
+    this.sheet.set({ kind: 'childFriends', link, data: null });
+    const data = await this.fam.listChildFriends(link.user.userId);
+    this.sheet.set({ kind: 'childFriends', link, data });
+  }
+
+  protected async removeChildFriend(link: FamilyLinkView, friendshipId: string): Promise<void> {
+    if (await this.fam.removeChildFriendship(link.user.userId, friendshipId)) {
+      await this.openChildFriends(link);
+    }
+  }
+
+  protected async cancelChildRequest(link: FamilyLinkView, requestId: string): Promise<void> {
+    if (await this.fam.cancelChildRequest(link.user.userId, requestId)) {
+      await this.openChildFriends(link);
+    }
   }
 
   protected readonly sheet = signal<Sheet>(null);

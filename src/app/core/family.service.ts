@@ -6,6 +6,7 @@ import {
   CodeGrant,
   CreateChildResponse,
   FamilyInviteRequest,
+  FriendsResponse,
   MeResponse,
 } from './api/contracts';
 import { AuthService } from './auth/auth.service';
@@ -161,6 +162,30 @@ export class FamilyService {
 
   async createInvite(req: FamilyInviteRequest): Promise<CodeGrant | null> {
     return this.run(() => this.api.createFamilyInvite(req));
+  }
+
+  // ── guardian oversight of a minor's friendships (transparent to the minor) ─
+
+  async listChildFriends(userId: string): Promise<FriendsResponse | null> {
+    return this.run(() => this.api.listChildFriends(userId));
+  }
+
+  async removeChildFriendship(userId: string, friendshipId: string): Promise<boolean> {
+    return (
+      (await this.run(async () => {
+        await this.api.removeChildFriendship(userId, friendshipId);
+        return true;
+      })) ?? false
+    );
+  }
+
+  async cancelChildRequest(userId: string, requestId: string): Promise<boolean> {
+    return (
+      (await this.run(async () => {
+        await this.api.cancelChildRequest(userId, requestId);
+        return true;
+      })) ?? false
+    );
   }
 
   async acceptInvite(code: string): Promise<boolean> {

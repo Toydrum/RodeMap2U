@@ -170,6 +170,12 @@
             </div>
           }
 
+          @if (s.link.user.socialEnabled) {
+            <button type="button" class="btn btn-soft" (click)="openChildFriends(s.link)" [disabled]="fam.loading()">
+              👥 {{ i18n.t().familia.childFriendsCta }}
+            </button>
+          }
+
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
           }
@@ -186,6 +192,47 @@
           </div>
           <button type="button" class="btn btn-ghost" (click)="close()">
             {{ i18n.t().common.close }}
+          </button>
+        }
+
+        @case ('childFriends') {
+          <h2>{{ i18n.fill(i18n.t().familia.childFriendsTitle, { name: s.link.user.displayName }) }}</h2>
+          <p class="confirm-body">{{ i18n.t().familia.childFriendsHint }}</p>
+          @if (s.data; as data) {
+            @if (data.friends.length) {
+              @for (friend of data.friends; track friend.friendshipId) {
+                <div class="fam-row">
+                  <span class="fam-who">
+                    <span class="fam-name">{{ friend.user.displayName }}</span>
+                    <span class="fam-handle">&#64;{{ friend.user.username }}</span>
+                  </span>
+                  <button type="button" class="chip opt" (click)="removeChildFriend(s.link, friend.friendshipId)" [disabled]="fam.loading()">
+                    {{ i18n.t().familia.childFriendRemove }}
+                  </button>
+                </div>
+              }
+            } @else {
+              <p class="hint">{{ i18n.t().familia.childFriendsEmpty }}</p>
+            }
+            @for (request of data.outgoing; track request.requestId) {
+              <div class="fam-row">
+                <span class="fam-who">
+                  <span class="fam-name">{{ request.user.displayName }}</span>
+                  <span class="fam-handle">{{ i18n.t().familia.childRequestPending }}</span>
+                </span>
+                <button type="button" class="chip opt" (click)="cancelChildRequest(s.link, request.requestId)" [disabled]="fam.loading()">
+                  {{ i18n.t().common.cancel }}
+                </button>
+              </div>
+            }
+          } @else {
+            <p class="hint">{{ i18n.t().common.loading }}</p>
+          }
+          @if (errorText()) {
+            <p class="error-line" role="alert">{{ errorText() }}</p>
+          }
+          <button type="button" class="btn btn-ghost" (click)="openChild(s.link)">
+            ← {{ i18n.t().common.back }}
           </button>
         }
 

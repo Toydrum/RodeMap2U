@@ -1,0 +1,132 @@
+.amigos {
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.amigos-kicker {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3rem;
+}
+
+.amigos-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.amigos-code {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-achieved) 12%, var(--surface));
+  border: 1.5px dashed color-mix(in srgb, var(--status-achieved) 45%, transparent);
+  user-select: all;
+}
+
+.amigos-redeem {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.7rem 0;
+
+  .code-entry {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+}
+
+.amigos-group {
+  margin: 0.8rem 0 0.2rem;
+}
+
+.amigos-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.amigos-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.amigos-name {
+  font-weight: 700;
+}
+
+.amigos-handle {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.amigos-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.error-line {
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-resting) 16%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--status-resting) 45%, transparent);
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(20, 26, 18, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.confirm {
+  width: min(440px, 100%);
+  padding: 1.5rem;
+  text-align: center;
+
+  .confirm-icon {
+    font-size: 2rem;
+  }
+
+  .confirm-body {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+}

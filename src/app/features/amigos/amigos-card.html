@@ -1,0 +1,131 @@
+@if (socialOn()) {
+  <section class="card block amigos">
+    <h2>{{ i18n.t().amigos.title }}</h2>
+
+    <!-- My shareable code — the ONLY introduction there is -->
+    @if (myCode(); as grant) {
+      <div class="amigos-code-row">
+        <span>
+          <span class="amigos-kicker">{{ i18n.t().amigos.myCode }}</span>
+          <span class="amigos-code">{{ prettyCode(grant.code) }}</span>
+        </span>
+        <button type="button" class="chip opt" (click)="doRotate()" [disabled]="loading()">
+          ♻️ {{ i18n.t().amigos.rotateCta }}
+        </button>
+      </div>
+      <p class="hint">{{ i18n.t().amigos.codeHint }}</p>
+    }
+
+    <!-- Redeem someone else's code -->
+    <form class="amigos-redeem" (submit)="$event.preventDefault(); doRedeem()">
+      <input
+        class="code-entry"
+        type="text"
+        autocapitalize="characters"
+        spellcheck="false"
+        [placeholder]="i18n.t().amigos.redeemPlaceholder"
+        [value]="redeemCode()"
+        (input)="redeemCode.set($any($event.target).value)"
+      />
+      <button type="submit" class="btn btn-soft" [disabled]="loading() || !redeemCode().trim()">
+        {{ i18n.t().amigos.redeemCta }}
+      </button>
+    </form>
+
+    @if (errorText()) {
+      <p class="error-line" role="alert">{{ errorText() }}</p>
+    }
+
+    @if (friends(); as f) {
+      @if (f.incoming.length) {
+        <div class="amigos-group">
+          <span class="amigos-kicker">{{ i18n.t().amigos.incomingTitle }}</span>
+          @for (request of f.incoming; track request.requestId) {
+            <div class="amigos-row">
+              <span class="amigos-who">
+                <span class="amigos-name">{{ request.user.displayName }}</span>
+                <span class="amigos-handle">&#64;{{ request.user.username }}</span>
+              </span>
+              <span class="amigos-actions">
+                <button type="button" class="chip opt" (click)="doAccept(request.requestId)" [disabled]="loading()">
+                  🌿 {{ i18n.t().amigos.acceptCta }}
+                </button>
+                <button type="button" class="chip opt" (click)="doDecline(request.requestId)" [disabled]="loading()">
+                  {{ i18n.t().amigos.declineCta }}
+                </button>
+              </span>
+            </div>
+          }
+        </div>
+      }
+
+      @if (f.outgoing.length) {
+        <div class="amigos-group">
+          <span class="amigos-kicker">{{ i18n.t().amigos.outgoingTitle }}</span>
+          @for (request of f.outgoing; track request.requestId) {
+            <div class="amigos-row">
+              <span class="amigos-who">
+                <span class="amigos-name">{{ request.user.displayName }}</span>
+                <span class="amigos-handle">&#64;{{ request.user.username }}</span>
+              </span>
+              <button type="button" class="chip opt" (click)="doCancel(request.requestId)" [disabled]="loading()">
+                {{ i18n.t().amigos.cancelCta }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="amigos-group">
+        <span class="amigos-kicker">{{ i18n.t().amigos.friendsTitle }}</span>
+        @if (f.friends.length) {
+          @for (friend of f.friends; track friend.friendshipId) {
+            <div class="amigos-row">
+              <span class="amigos-who">
+                <span class="amigos-name">{{ friend.user.displayName }}</span>
+                <span class="amigos-handle">&#64;{{ friend.user.username }}</span>
+              </span>
+              <span class="amigos-actions">
+                <button type="button" class="chip opt" (click)="visit(friend)">
+                  🌳 {{ i18n.t().amigos.visitCta }}
+                </button>
+                <button type="button" class="chip opt" (click)="removing.set(friend)">
+                  {{ i18n.t().amigos.removeCta }}
+                </button>
+              </span>
+            </div>
+          }
+        } @else {
+          <p class="hint">{{ i18n.t().amigos.empty }}</p>
+        }
+      </div>
+    } @else if (loading()) {
+      <p class="hint">{{ i18n.t().common.loading }}</p>
+    }
+  </section>
+
+  @if (removing(); as friend) {
+    <div class="confirm-backdrop" (click)="removing.set(null)">
+      <div
+        class="confirm card"
+        appSheet
+        (sheetClose)="removing.set(null)"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+      >
+        <span class="confirm-icon" aria-hidden="true">🍃</span>
+        <h2>{{ i18n.fill(i18n.t().amigos.removeTitle, { name: friend.user.displayName }) }}</h2>
+        <p class="confirm-body">{{ i18n.t().amigos.removeBody }}</p>
+        <div class="row">
+          <button type="button" class="btn btn-primary" (click)="removing.set(null)">
+            {{ i18n.t().common.cancel }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="doRemove(friend)" [disabled]="loading()">
+            {{ i18n.t().amigos.removeConfirm }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

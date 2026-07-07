@@ -39,12 +39,14 @@
         [title]="i18n.t().tree.outlineToggle"
         [attr.aria-expanded]="outlineOpen()"
       >📋</button>
-      <button type="button" class="btn btn-primary plant" (click)="openPlanting(null)">
-        + {{ i18n.t().tree.plant }}
-      </button>
+      @if (canEdit()) {
+        <button type="button" class="btn btn-primary plant" (click)="openPlanting(null)">
+          + {{ i18n.t().tree.plant }}
+        </button>
+      }
     </header>
 
-    @if (pendingReviews().length && !reviewing()) {
+    @if (canEdit() && pendingReviews().length && !reviewing()) {
       <button type="button" class="review-banner" (click)="reviewing.set(true)">
         🍂 {{ i18n.t().tree.dateReviewBanner }} — <strong>{{ i18n.t().tree.reviewNow }}</strong>
       </button>
@@ -63,9 +65,11 @@
         <div class="empty-tree">
           <span aria-hidden="true">🌱</span>
           <p>{{ i18n.t().tree.emptyTree }}</p>
-          <button type="button" class="btn btn-primary" (click)="openPlanting(null)">
-            {{ i18n.t().tree.plant }}
-          </button>
+          @if (canEdit()) {
+            <button type="button" class="btn btn-primary" (click)="openPlanting(null)">
+              {{ i18n.t().tree.plant }}
+            </button>
+          }
         </div>
       }
       <app-weather-front [mood]="mood()" />

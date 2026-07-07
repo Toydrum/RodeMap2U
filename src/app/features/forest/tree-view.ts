@@ -42,6 +42,10 @@ export class TreeViewPage {
     this.visit ? ['/visit', this.visit.userId()] : ['/forest'],
   );
 
+  /** Friend visits are look-only: taps locate, nothing plants, no sheets.
+   *  Guardians (editable visits) and the owner keep the whole toolkit. */
+  protected readonly canEdit = computed(() => !this.visit || this.visit.editable());
+
   private readonly checkins = inject(CheckinsRepo);
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;
   protected readonly mood = computed<Feeling | null>(() =>
@@ -56,7 +60,7 @@ export class TreeViewPage {
 
   constructor() {
     effect(() => {
-      if (!this.pendingOpenId) return;
+      if (!this.pendingOpenId || !this.canEdit()) return;
       const node = this.nodes.byId().get(this.pendingOpenId) as TreeNode | undefined;
       if (!node || node.treeId !== this.id()) return;
       this.pendingOpenId = null;
@@ -93,6 +97,10 @@ export class TreeViewPage {
   );
 
   protected onNodeOpened(node: TreeNode): void {
+    if (!this.canEdit()) {
+      this.canvas()?.focusNode(node.id); // look-only visit: locate, never open
+      return;
+    }
     this.openNode.set(node);
   }
 
@@ -108,8 +116,12 @@ export class TreeViewPage {
     if (window.innerWidth < 700) this.outlineOpen.set(false);
   }
 
-  /** Second tap on the same row: open its sheet. */
+  /** Second tap on the same row: open its sheet (locate-only on look-only visits). */
   protected outlineOpenNode(node: TreeNode): void {
+    if (!this.canEdit()) {
+      this.locateNode(node);
+      return;
+    }
     this.openNode.set(node);
     if (window.innerWidth < 980) this.outlineOpen.set(false);
   }
@@ -130,6 +142,7 @@ export class TreeViewPage {
   }
 
   protected openPlanting(parent: TreeNode | null): void {
+    if (!this.canEdit()) return; // canvas "+" bud on a look-only visit
     this.plantedCount.set(0);
     this.newTitle.set('');
     this.sowText.set('');

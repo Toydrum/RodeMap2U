@@ -16,11 +16,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { APP_CONFIG } from '../../core/config';
 import { resetMockCloud } from '../../core/api/mock-cloud';
 import { FamiliaCard } from '../familia/familia-card';
+import { AmigosCard } from '../amigos/amigos-card';
 import { SyncService } from '../../core/sync/sync.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink, SheetDirective, FamiliaCard],
+  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

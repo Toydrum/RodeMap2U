@@ -49,6 +49,11 @@ src/app/
                 per-child admin sheet + «Entrar a su bosque», coGuardian + linkExisting invites, code
                 redemption, guardians view w/ the honest visibility disclosure; consumes
                 core/family.service.ts — signals over GET /me, meta 'family.me' SWR, export-first deleteChild)
+    amigos/     amigos-card.ts (Settings section, social-enabled only: friend code = the ONLY introduction,
+                mutual-consent requests, SILENT declines, remove-confirm, visit entry; guardian oversight of a
+                minor's friendships lives in the familia child sheet — same list the minor sees, removal never
+                initiation). Friend visits are LOOK-ONLY: tree-view's canEdit() gates plant/review/node-sheet;
+                taps and tablita locate instead of opening.
     visit/      visit-forest.ts (thin doorway: banner + MiniTree cards). The tree itself REUSES TreeViewPage
                 under /visit/:userId — core/visit/ route-scoped repos (VisitTreesRepo/VisitNodesRepo shadow
                 the real ones via route providers) reroute the WHOLE write funnel to POST /users/:id/sync/push
