@@ -54,6 +54,40 @@
   }
 }
 
+/* Phone header: one flex row can't hold back + title + 3 tools + plant —
+   the title collapsed to zero width and the plant button clipped off-screen.
+   Two rows instead: the tree's name on top, every control reachable below. */
+@media (max-width: 560px) {
+  .bar {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0.55rem 0.75rem;
+
+    .title-wrap {
+      order: -1;
+      flex: 0 0 100%;
+    }
+
+    .back {
+      margin-right: auto;
+      padding: 0.4rem 0.55rem;
+    }
+
+    .plant {
+      padding: 0.4rem 0.7rem;
+      font-size: 0.85rem;
+    }
+
+    .tree-archive,
+    .tree-focus,
+    .tree-outline-toggle {
+      min-width: 40px;
+      min-height: 40px;
+      padding: 0.3rem 0.35rem;
+    }
+  }
+}
+
 /* Session-scoped celebration while the plant sheet stays open. */
 .planted-flash {
   font-size: 0.85rem;

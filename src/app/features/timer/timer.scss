@@ -14,13 +14,16 @@
   margin: 0.4rem 0 1.2rem;
 }
 
-/* Pick a branch to focus on — horizontal, scrollable, no wrap surprises. */
+/* Pick a branch to focus on — WRAPPED so every chip stays visible and
+   tappable. (It was a horizontal scroll strip: phones cut chips mid-word with
+   no hint that more existed, which reads as a broken layout.) */
 .pick-node {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   max-width: 100%;
-  overflow-x: auto;
   padding: 0.15rem 0.15rem 0.4rem;
   margin: 0.4rem 0 0.9rem;
 
@@ -32,11 +35,30 @@
 
   .chip {
     flex: 0 0 auto;
-    max-width: 14rem;
+    /* inline-block, not the global inline-flex: ellipsis only truncates
+       inline TEXT — a flex container hard-clips mid-letter instead. */
+    display: inline-block;
+    max-width: min(14rem, 86vw);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
+  }
+
+  /* Phone: label on its own line, then chips in elastic PAIRS — a full-width
+     stack of nine pushed the dial below the fold. */
+  @media (max-width: 480px) {
+    .pick-label {
+      flex: 1 0 100%;
+      text-align: center;
+    }
+
+    .chip {
+      flex: 1 1 40%;
+      max-width: 48vw;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.6rem;
+    }
   }
 
   /* Which tree the branch belongs to — a naked "Sub 2" says nothing. */

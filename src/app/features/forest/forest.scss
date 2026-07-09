@@ -76,6 +76,32 @@
     }
   }
 
+  /* Phone: the actions used to wrap ad-hoc (plant stranded on its own line).
+     Explicit rows instead — brand · the rose with its whole enchanted label ·
+     paw + plant together on the right. */
+  @media (max-width: 560px) {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+    padding-top: 1rem;
+
+    .brand {
+      flex: 0 0 100%;
+    }
+
+    .head-actions {
+      flex: 0 0 100%;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: 0.5rem;
+
+      .checkin-btn {
+        order: -1;
+        flex: 0 0 100%;
+        justify-content: flex-start;
+      }
+    }
+  }
+
   .checkin-btn {
     display: inline-flex;
     align-items: center;
@@ -574,6 +600,34 @@
 
   &:hover .sign {
     border-color: var(--plot-accent, var(--primary));
+  }
+}
+
+/* Touch has no hover to reveal the quiet 🗃 — keep it quiet but findable. */
+@media (hover: none) {
+  .plot .plot-archive {
+    opacity: 0.55;
+  }
+}
+
+/* Phone meadow: four anchored plots in 390px — slimmer plots and signs keep
+   neighboring name plates from stacking on top of each other. */
+@media (max-width: 480px) {
+  .plot {
+    width: clamp(118px, 30vw, 140px);
+
+    .sign {
+      padding: 0.32rem 0.55rem 0.38rem;
+
+      .name {
+        max-width: 104px;
+        font-size: 0.85rem;
+      }
+
+      .caption {
+        font-size: 0.66rem;
+      }
+    }
   }
 }
 

@@ -39,12 +39,15 @@
 
 .amigos-redeem {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0.7rem 0;
 
   .code-entry {
     flex: 1;
-    min-width: 0;
+    /* Room for a full ABCD-1234 code (and its placeholder) before wrapping —
+       on narrow phones the send button drops below instead of squeezing it. */
+    min-width: 12.5rem;
     padding: 0.6rem 0.8rem;
     border-radius: var(--radius-sm);
     border: 1.5px solid var(--border-strong);
