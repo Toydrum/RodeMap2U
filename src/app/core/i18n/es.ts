@@ -66,6 +66,8 @@ export const ES = {
     todayEditAria: 'Cambiar mis ramas de hoy',
     reasonToday: 'La elegiste para hoy 🌅',
     reasonTrigger: '🧶 «{trigger}»',
+    reasonSunlit: 'La tienes a pleno sol ☀️',
+    shadeAside: 'Anda a la sombra — solo si te llama 🌳',
   },
   whispers: {
     q1: '¿Dónde sientes que estás ahorita?',
@@ -179,6 +181,16 @@ export const ES = {
     achieved: 'Floreció 🌸',
     branched: 'De aquí nacieron nuevos caminos',
   },
+  light: {
+    sunlit: 'A pleno sol',
+    steady: 'A su ritmo',
+    shade: 'A la sombra',
+  },
+  lightHint: {
+    sunlit: 'El sol la mira primero — Ahora la tendrá presente.',
+    steady: 'Crece a su ritmo, como todo el bosque.',
+    shade: 'Descansa del sol una temporada — sigue viva, solo cede el turno.',
+  },
   tree: {
     center: 'Centrarme',
     zoomIn: 'Acercar',
@@ -190,6 +202,9 @@ export const ES = {
     outlineHint: 'Toca una para ubicarla en el mapa; tócala otra vez para abrir su hoja.',
     outlineExpand: 'Abrir las sub-ramas de «{title}»',
     outlineCollapse: 'Cerrar las sub-ramas de «{title}»',
+    lightLens: 'Ver por luz',
+    lightLensHint: 'Viendo por luz — el árbol no se mueve. Toca el iconito para cambiar la luz de una rama.',
+    lightCycle: 'Cambiar la luz de «{title}»',
     dateReviewBanner: 'Hay fechas que quieren platicar contigo',
     reviewNow: 'Verlas',
     archiveAction: 'Guardar árbol en el archivo',
@@ -214,6 +229,7 @@ export const ES = {
     triggerLabel: 'Ramita cuando-entonces',
     triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
     triggerHint: 'Tu propio plan «cuando pase X, toco esta rama». Ahora te lo recordará — jamás con alarmas.',
+    lightLabel: '¿Cuánta luz le toca?',
     steps: 'Pasitos',
     addStep: 'Agregar un pasito',
     stepPlaceholder: 'Un pasito chiquito desde aquí…',
@@ -559,7 +575,7 @@ export const ES = {
       {
         icon: '🧶',
         title: 'Ahora — tu hilo',
-        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Si quieres, elige hasta tres «ramas de hoy» 🌅 — mañana se sueltan solas, sin arrastres ni cuentas. Y si a una rama le escribes su «cuando-entonces» 🧶 («cuando me sirva el café…»), Ahora te lo recordará con tus propias palabras — jamás con alarmas. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña — y si te vas a pasear por la app, se va contigo en su perchita flotante. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
+        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Si quieres, elige hasta tres «ramas de hoy» 🌅 — mañana se sueltan solas, sin arrastres ni cuentas. Y si a una rama le escribes su «cuando-entonces» 🧶 («cuando me sirva el café…»), Ahora te lo recordará con tus propias palabras — jamás con alarmas. Las ramas que pusiste «a pleno sol» ☀️ también le importan a Ahora: van justo después de tus ramas de hoy y tus cuando-entonces — tu ahora explícito siempre manda sobre la luz. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña — y si te vas a pasear por la app, se va contigo en su perchita flotante. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
       },
       {
         icon: '🌳',
@@ -569,7 +585,7 @@ export const ES = {
       {
         icon: '🌿',
         title: 'Las ramas y sus estados',
-        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. En árboles grandes, el botón 📋 abre «la tablita»: la lista de todas tus ramas — un toque ubica la rama en el mapa, dos toques abren su hoja. Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol: pasa el puntero por ella y una cartita te la muestra ahí mismo. Todas se releen juntas en «Tus huellas», donde también asoman las ramas dormidas — las que llevan una temporada quietecitas, por si un día quieres despertarlas. ¿Y si ramificaste y te arrepientes enseguida? Mientras los brotes sigan recién sembrados, la hoja de esa rama ofrece «La rama vuelve a crecer».',
+        body: 'Cada meta es una rama. Puede estar como Semilla (una idea esperando), Creciendo (en movimiento), Descansando (pausa a propósito — descansar también es parte), Florecida 🌸 (¡lo lograste!) o Ramificada (un nudo dorado del que nacieron caminos nuevos). No existe "fallida" — el árbol solo sabe crecer. Además del estado, cada rama viva tiene su LUZ ☀️: en su hoja eliges si está «A pleno sol» (el sol la mira primero — Ahora la tendrá presente, su nombre se lee un poquito más grande y un rayito la acompaña), «A su ritmo» (como todo el bosque) o «A la sombra» (sigue viva, solo cede el turno — la sombra es un buen lugar, no un castigo). La luz se queda hasta que tú la muevas; tus ramas de hoy 🌅 se sueltan solas mañana. En árboles grandes, el botón 📋 abre «la tablita»: la lista de todas tus ramas — un toque ubica la rama en el mapa, dos toques abren su hoja; su solecito ☀️ activa «Ver por luz» para acomodar la lista y cambiar la luz de varias ramas de corrido (tu árbol no se mueve — es solo la lista). Si una rama guarda una notita tuya, una hojita de papel la marca en el árbol: pasa el puntero por ella y una cartita te la muestra ahí mismo. Todas se releen juntas en «Tus huellas», donde también asoman las ramas dormidas — las que llevan una temporada quietecitas, por si un día quieres despertarlas. ¿Y si ramificaste y te arrepientes enseguida? Mientras los brotes sigan recién sembrados, la hoja de esa rama ofrece «La rama vuelve a crecer».',
       },
       {
         icon: '🌱',
@@ -607,6 +623,7 @@ export const ES = {
     skipToContent: 'Saltar al contenido',
     mainNav: 'Navegación',
     treeCanvas: 'Mapa del árbol. Usa las flechas para moverte entre ramas.',
+    light: { sunlit: 'a pleno sol', shade: 'a la sombra' },
     nodeLabel: '{title} — {status}',
     withChildren: { one: '{count} rama', many: '{count} ramas' },
     feelingGroup: '¿Cómo está tu clima interno?',

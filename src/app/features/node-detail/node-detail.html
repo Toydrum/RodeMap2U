@@ -55,6 +55,27 @@
       </div>
     }
 
+    <!-- «La luz»: which branch the sun looks at first — orientation, never
+         a demand. Only live branches hold light; the value is never required. -->
+    @if (node().status === 'seed' || node().status === 'growing') {
+      <div class="field light-field">
+        <label>☀️ {{ i18n.t().node.lightLabel }}</label>
+        <div class="status-row light-row" role="group" [attr.aria-label]="i18n.t().node.lightLabel">
+          @for (light of lights; track light) {
+            <button
+              type="button"
+              class="chip pick"
+              [class.selected]="currentLight() === light"
+              (click)="setLight(light)"
+            >
+              {{ lightIcons[light] }} {{ i18n.t().light[light] }}
+            </button>
+          }
+        </div>
+        <span class="hint">{{ i18n.t().lightHint[currentLight()] }}</span>
+      </div>
+    }
+
     <!-- Gentle date -->
     <div class="field">
       <label for="nd-date">{{ i18n.t().node.dateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>

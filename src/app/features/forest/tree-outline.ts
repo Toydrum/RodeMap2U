@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { Tree, TreeNode } from '../../core/db/schema';
+import { NodePriority, Tree, TreeNode, lightRank } from '../../core/db/schema';
 
 interface OutlineRow {
   node: TreeNode;
@@ -29,6 +29,17 @@ const AUTO_COLLAPSE_AT = 12;
   template: `
     <div class="head">
       <h2>{{ i18n.t().tree.outlineTitle }}</h2>
+      @if (editable()) {
+        <button
+          type="button"
+          class="btn btn-ghost lens"
+          [class.lens-on]="lightLens()"
+          (click)="lightLens.set(!lightLens())"
+          [attr.aria-pressed]="lightLens()"
+          [attr.aria-label]="i18n.t().tree.lightLens"
+          [title]="i18n.t().tree.lightLens"
+        >☀️</button>
+      }
       <button
         type="button"
         class="btn btn-ghost close"
@@ -36,7 +47,7 @@ const AUTO_COLLAPSE_AT = 12;
         [attr.aria-label]="i18n.t().common.close"
       >✕</button>
     </div>
-    <p class="outline-hint">{{ i18n.t().tree.outlineHint }}</p>
+    <p class="outline-hint">{{ lightLens() ? i18n.t().tree.lightLensHint : i18n.t().tree.outlineHint }}</p>
     <ul>
       @for (row of rows(); track row.node.id) {
         <li class="line" [style.padding-left.px]="4 + row.depth * 14">
@@ -65,6 +76,9 @@ const AUTO_COLLAPSE_AT = 12;
               <span class="idx">{{ row.index }}.</span>
             }
             <span class="name" [class.done]="row.node.status === 'achieved'">{{ row.node.title }}</span>
+            @if (isSunlit(row.node)) {
+              <span class="sun-badge" aria-hidden="true">☀️</span>
+            }
             @if (row.isCollapsed && row.hiddenCount) {
               <span class="hidden-count">({{ row.hiddenCount }})</span>
             }
@@ -72,6 +86,15 @@ const AUTO_COLLAPSE_AT = 12;
               <span class="pin" aria-hidden="true">📍</span>
             }
           </button>
+          @if (lightLens() && isLive(row.node)) {
+            <button
+              type="button"
+              class="light-cycle"
+              (click)="cycleLight(row.node)"
+              [attr.aria-label]="i18n.fill(i18n.t().tree.lightCycle, { title: row.node.title })"
+              [title]="i18n.t().light[lightOf(row.node)]"
+            >{{ lightIcon(row.node) }}</button>
+          }
         </li>
       }
     </ul>
@@ -194,8 +217,40 @@ const AUTO_COLLAPSE_AT = 12;
         font-size: 0.74rem;
       }
 
+      .sun-badge {
+        font-size: 0.72rem;
+      }
+
       .pin {
         font-size: 0.8rem;
+      }
+    }
+
+    .head .lens {
+      min-height: 36px;
+      min-width: 36px;
+      padding: 0.2rem;
+      opacity: 0.55;
+
+      &.lens-on {
+        opacity: 1;
+        background: color-mix(in srgb, var(--status-branched) 18%, transparent);
+        border-radius: 8px;
+      }
+    }
+
+    .light-cycle {
+      flex: none;
+      min-width: 34px;
+      min-height: 34px;
+      border: none;
+      background: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 8px;
+
+      &:hover {
+        background: color-mix(in srgb, var(--primary) 10%, transparent);
       }
     }
   `,
@@ -203,6 +258,8 @@ const AUTO_COLLAPSE_AT = 12;
 export class TreeOutline {
   readonly tree = input.required<Tree>();
   readonly focusedId = input<string | null>(null);
+  /** Look-only visits get no light controls (the visit funnel blocks writes anyway). */
+  readonly editable = input<boolean>(true);
   readonly locate = output<TreeNode>();
   readonly open = output<TreeNode>();
   readonly closed = output<void>();
@@ -210,6 +267,11 @@ export class TreeOutline {
   protected readonly i18n = inject(I18nService);
   private readonly nodes = inject(NodesRepo);
   private readonly lastTap = signal<string | null>(null);
+
+  /** «Ver por luz» — session-scoped like the folds: a lens, not state. It
+   *  re-sorts THIS LIST only; the tree's shape never moves (priority never
+   *  writes `order`). */
+  protected readonly lightLens = signal(false);
 
   /** Folded rows. Session-scoped on purpose — the tablita is a lens, not state. */
   private readonly collapsed = signal<ReadonlySet<string>>(new Set());
@@ -262,11 +324,50 @@ export class TreeOutline {
       });
       if (isCollapsed) return;
       const ordered = node.flow === 'steps';
-      kids.forEach((child, i) => walk(child, depth + 1, ordered ? i + 1 : null));
+      // The light lens re-sorts sibling groups (sun → steady → shade), but
+      // NEVER inside an ordered path — 1./2./3. must not lie.
+      const shown =
+        this.lightLens() && !ordered
+          ? [...kids].sort((a, b) => lightRank(a) - lightRank(b) || a.order - b.order)
+          : kids;
+      shown.forEach((child, i) => walk(child, depth + 1, ordered ? i + 1 : null));
     };
     for (const root of this.nodes.rootsOf(this.tree().id)) walk(root, 0, null);
     return out;
   });
+
+  // ── «la luz» helpers ───────────────────────────────────────────────────
+
+  protected isLive(node: TreeNode): boolean {
+    return node.status === 'seed' || node.status === 'growing';
+  }
+
+  /** The badge honors the ask: sun shows, shade deliberately doesn't (it
+   *  asked for less attention — the honest response is to give it less). */
+  protected isSunlit(node: TreeNode): boolean {
+    return node.priority === 'sunlit' && this.isLive(node);
+  }
+
+  protected lightOf(node: TreeNode): 'sunlit' | 'steady' | 'shade' {
+    const p = node.priority;
+    return p === 'sunlit' || p === 'shade' ? p : 'steady';
+  }
+
+  protected lightIcon(node: TreeNode): string {
+    const light = this.lightOf(node);
+    return light === 'sunlit' ? '☀️' : light === 'shade' ? '🌳' : '🌿';
+  }
+
+  /** ritmo → sol → sombra → ritmo. Writes through NodesRepo.update — on a
+   *  guardian visit that's the shadowed repo, i.e. the kid's cloud forest. */
+  protected async cycleLight(node: TreeNode): Promise<void> {
+    const next: Record<string, NodePriority | null> = {
+      steady: 'sunlit',
+      sunlit: 'shade',
+      shade: null,
+    };
+    await this.nodes.update(node, { priority: next[this.lightOf(node)] });
+  }
 
   protected toggle(node: TreeNode): void {
     this.collapsed.update((set) => {

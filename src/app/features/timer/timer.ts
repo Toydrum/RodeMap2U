@@ -8,7 +8,7 @@ import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService } from '../../shared/ui/toast.service';
-import { AccentToken, TreeNode } from '../../core/db/schema';
+import { AccentToken, TreeNode, lightRank } from '../../core/db/schema';
 import { BirdState, CompanionBird, birdStateFrom } from './companion-bird';
 import { suggestNext } from '../ahora/suggest';
 
@@ -52,7 +52,8 @@ export class TimerPage {
   /** `?node=` seeds the picker; the chips can override it. */
   protected readonly pickedNodeId = linkedSignal<string | null>(() => this.node() ?? null);
 
-  /** Same spirit as the check-in candidates: living branches, current first. */
+  /** Same spirit as the check-in candidates: living branches, current first,
+   *  then by light — a sunlit branch never gets cut by four fresher ones. */
   protected readonly nodeChoices = computed<NodeChoice[]>(() => {
     const currentIds = new Set(
       this.trees.active().map((t) => t.currentNodeId).filter(Boolean),
@@ -61,13 +62,15 @@ export class TimerPage {
     for (const tree of this.trees.active()) {
       const picks = (this.nodes.byTree().get(tree.id) ?? [])
         .filter((n) => n.status === 'growing' || n.status === 'seed')
-        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .sort((a, b) => lightRank(a) - lightRank(b) || b.updatedAt - a.updatedAt)
         .slice(0, 4);
       for (const node of picks) {
         out.push({ node, accent: tree.accent, treeName: tree.name, isCurrent: currentIds.has(node.id) });
       }
     }
-    return out.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent)).slice(0, 8);
+    return out
+      .sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent) || lightRank(a.node) - lightRank(b.node))
+      .slice(0, 8);
   });
 
   protected readonly linkedNode = computed<TreeNode | null>(() => {

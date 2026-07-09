@@ -4,7 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
-import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
+import { NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BranchFlow } from './branch-flow';
@@ -12,6 +12,11 @@ import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { VisitSession } from '../../core/visit/visit-session';
 
 const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'resting', 'achieved'];
+
+/** UI positions of the «luz» picker — 'steady' is the unstored default. */
+export type LightChoice = 'sunlit' | 'steady' | 'shade';
+const LIGHTS: LightChoice[] = ['sunlit', 'steady', 'shade'];
+const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '🌿', shade: '🌳' };
 
 @Component({
   selector: 'app-node-detail',
@@ -32,6 +37,8 @@ export class NodeDetail {
   private readonly toast = inject(ToastService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
+  protected readonly lights = LIGHTS;
+  protected readonly lightIcons = LIGHT_ICONS;
   /** Sessions are the visitor's own — never offered inside someone else's forest. */
   protected readonly visiting = inject(VisitSession, { optional: true }) !== null;
   protected readonly branching = signal(false);
@@ -113,6 +120,19 @@ export class NodeDetail {
 
   protected async setStatus(status: NodeStatus): Promise<void> {
     if (status !== this.node().status) await this.nodes.setStatus(this.node(), status);
+  }
+
+  /** «La luz» lives only on live branches (seed/growing) — a stale value on
+   *  an achieved/resting record persists silently and stays inert. */
+  protected readonly currentLight = computed<LightChoice>(() => {
+    const p = this.node().priority;
+    return p === 'sunlit' || p === 'shade' ? p : 'steady';
+  });
+
+  protected async setLight(light: LightChoice): Promise<void> {
+    if (light === this.currentLight()) return;
+    const priority: NodePriority | null = light === 'steady' ? null : light;
+    await this.nodes.update(this.node(), { priority });
   }
 
   protected async addStep(): Promise<void> {

@@ -1,4 +1,4 @@
-import { CheckIn, TimerSession, Tree, TreeNode } from '../../core/db/schema';
+import { CheckIn, TimerSession, Tree, TreeNode, lightRank } from '../../core/db/schema';
 import { hash } from '../forest/tree-layout';
 
 /**
@@ -15,6 +15,7 @@ import { hash } from '../forest/tree-layout';
 export type SuggestKind =
   | 'today'
   | 'trigger'
+  | 'sunlit'
   | 'step-of-current'
   | 'step-in-order'
   | 'current'
@@ -112,10 +113,12 @@ export function resolveThread(
 /** Priority-ordered candidate pool, deduped, capped. Buckets:
  *  P0 today's chosen intentions (in the user's own order),
  *  P0.5 branches carrying a "cuando-entonces" (the user's own if-then plan
- *  — re-presenting it IS the mechanism), P1 pasitos of the thread node
+ *  — re-presenting it IS the mechanism), P0.75 «a pleno sol» branches (the
+ *  user's standing light — BELOW their explicit now, above everything
+ *  ambient; it biases, never tyrannizes), P1 pasitos of the thread node
  *  (tiny + concrete beats abstract), P2 the thread node itself,
- *  P3 momentum (sessions in the last 7 days), P4 freshest growing,
- *  P5 freshest seeds. */
+ *  P3 momentum (sessions in the last 7 days — shaded branches yield here),
+ *  P4 freshest growing, P5 freshest seeds (shade sorts last, never out). */
 export function suggestionPool(
   activeTrees: Tree[],
   nodesByTree: ReadonlyMap<string, TreeNode[]>,
@@ -146,6 +149,8 @@ export function suggestionPool(
   const all = activeTrees.flatMap((t) => nodesByTree.get(t.id) ?? []);
   for (const node of all.filter((n) => n.trigger?.trim()).sort(byFresh)) add(node, 'trigger');
 
+  for (const node of all.filter((n) => n.priority === 'sunlit').sort(byFresh)) add(node, 'sunlit');
+
   const thread = resolveThread(activeTrees, nodesById, sessions, checkins);
   if (thread) {
     // Order-asc children mean the earliest open pasito surfaces first — on a
@@ -161,11 +166,24 @@ export function suggestionPool(
     .sort((a, b) => b.endedAt! - a.endedAt!);
   for (const s of recent) {
     const node = nodesById.get(s.nodeId!);
-    if (node && !node.deletedAt && !node.archivedAt && node.status === 'growing') add(node, 'recent');
+    // Shaded branches yield the momentum echo — you shaded it AFTER working
+    // on it; respect that. (Deliberate paths — today/trigger/thread — never
+    // check the shade: you went there on purpose.)
+    if (
+      node &&
+      !node.deletedAt &&
+      !node.archivedAt &&
+      node.status === 'growing' &&
+      node.priority !== 'shade'
+    ) {
+      add(node, 'recent');
+    }
   }
 
-  for (const node of all.filter((n) => n.status === 'growing').sort(byFresh)) add(node, 'fresh-growing');
-  for (const node of all.filter((n) => n.status === 'seed').sort(byFresh)) add(node, 'fresh-seed');
+  // Ambient buckets: shade sorts LAST, never out — "Otra idea" still reaches it.
+  const byLightThenFresh = (a: TreeNode, b: TreeNode) => lightRank(a) - lightRank(b) || byFresh(a, b);
+  for (const node of all.filter((n) => n.status === 'growing').sort(byLightThenFresh)) add(node, 'fresh-growing');
+  for (const node of all.filter((n) => n.status === 'seed').sort(byLightThenFresh)) add(node, 'fresh-seed');
 
   return pool.slice(0, POOL_CAP);
 }

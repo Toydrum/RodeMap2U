@@ -85,6 +85,9 @@
         <span class="kicker">{{ i18n.t().ahora.nextKicker }}</span>
         <h2 class="next-title">{{ s.node.title }}</h2>
         <p class="reason">{{ reasonText(s) }}</p>
+        @if (shadeAside(s); as aside) {
+          <p class="shade-aside">{{ aside }}</p>
+        }
         @if (firstThen(s); as ft) {
           <p class="first-then">{{ ft }}</p>
         }
@@ -141,7 +144,7 @@
             [style.border-color]="'var(--accent-' + choice.s.tree.accent + ')'"
             [title]="choice.s.tree.name"
             (click)="toggleToday(choice.s.node.id)"
-          >{{ choice.s.node.title }}</button>
+          >@if (choice.s.node.priority === 'sunlit') {☀️ }{{ choice.s.node.title }}</button>
         }
       </div>
       <div class="row">

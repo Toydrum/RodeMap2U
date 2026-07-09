@@ -27,7 +27,7 @@
           [style.border-color]="'var(--accent-' + choice.accent + ')'"
           [title]="choice.treeName + ' · ' + choice.node.title"
           (click)="pickedNodeId.set(choice.node.id)"
-        >@if (choice.isCurrent) {📍 }<span class="chip-tree">{{ choice.treeName }} ·</span> {{ choice.node.title }}</button>
+        >@if (choice.isCurrent) {📍 }@if (choice.node.priority === 'sunlit') {☀️ }<span class="chip-tree">{{ choice.treeName }} ·</span> {{ choice.node.title }}</button>
       }
     </div>
   }

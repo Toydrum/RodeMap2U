@@ -101,6 +101,14 @@ h1 {
     color: var(--text-dim);
   }
 
+  /* The quiet shade aside — its own class on purpose: scripts and tests
+     select `.reason` strictly, and this line is an aside, not the reason. */
+  .shade-aside {
+    margin: -0.5rem 0 0.9rem;
+    font-size: 0.84rem;
+    color: var(--text-faint);
+  }
+
   /* First→then on ordered paths: what comes after this step. */
   .first-then {
     margin: -0.5rem 0 0.9rem;

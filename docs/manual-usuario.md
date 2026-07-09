@@ -75,7 +75,7 @@ Tu notita, además, **sí llega a su destino**: la próxima vez que hagas check-
 Al abrirla encuentras, en este orden:
 
 - **"Ibas aquí"** — tu hilo: la rama donde estuviste la última vez, con su arbolito y cuándo fue ("Ayer estuviste aquí 22 min 🌱"). Tocarla te lleva directo a esa rama en su árbol.
-- **UNA sugerencia — nunca una lista.** "¿Y si seguimos por aquí?" te ofrece un solo pasito, y siempre te dice **por qué** ("Un pasito chiquito de «Mi primera canción»"). Si ese no te llama, **"Otra idea"** te muestra otro camino con calma — y tu bosque completo sigue a un toque en **"Ver mi bosque"**. La app sugiere; **tú decides siempre**.
+- **UNA sugerencia — nunca una lista.** "¿Y si seguimos por aquí?" te ofrece un solo pasito, y siempre te dice **por qué** ("Un pasito chiquito de «Mi primera canción»"). Si ese no te llama, **"Otra idea"** te muestra otro camino con calma — y tu bosque completo sigue a un toque en **"Ver mi bosque"**. La app sugiere; **tú decides siempre**. Las ramas que pusiste **«a pleno sol»** ☀️ van al frente de las ideas — justo después de tus ramas de hoy y tus cuando-entonces (tu ahora explícito siempre manda) — y las que están **«a la sombra»** ceden el turno sin desaparecer.
 - **Dos puertas para entrar**: **"Tocarla 2 minutitos"** (la puerta más chiquita que existe — empieza ahí mismo, y si te quedas más, mejor) o **"Una sesión"** completa en el temporizador.
 - **🌅 Tus ramas de hoy** *(opcional)*: elige hasta **tres** ramas para el día con "Elegir mis ramas de hoy". Aparecen como fichitas arriba y la sugerencia las respeta ("La elegiste para hoy 🌅"). **Mañana se sueltan solas** — sin arrastres, sin cuentas de cumplidas/no cumplidas: hoy es hoy.
 - **🧶 Cuando-entonces**: si a una rama le escribiste su ramita cuando-entonces (ver sección 6), Ahora te la recuerda **con tus propias palabras** — "🧶 «Cuando me sirva el café de la mañana»" — y esa rama pasa al frente de la fila. Es la técnica con más evidencia para arrancar en TDAH: tú escribes el plan, la app solo te lo vuelve a poner enfrente. Jamás con alarmas.
@@ -172,6 +172,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
 - **Título** — qué quieres que crezca ahí.
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
+- **☀️ ¿Cuánta luz le toca?** *(solo en ramas vivas)* — la luz de una rama: **«A pleno sol»** (el sol la mira primero: Ahora la tendrá presente, su nombre se lee un poquito más grande en el árbol y un rayito la acompaña), **«A su ritmo»** (como todo el bosque) o **«A la sombra»** (sigue viva, solo cede el turno cuando la app susurra ideas — la sombra es un buen lugar, no un castigo). La luz **se queda hasta que tú la muevas** — a diferencia de tus ramas de hoy 🌅, que se sueltan solas mañana. En la **tablita** 📋 hay un solecito que activa **«Ver por luz»**: acomoda la lista por luz y te deja cambiar la de varias ramas de corrido — tu árbol no se mueve, es solo la lista.
 - **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
 - **🧶 Ramita cuando-entonces** *(opcional)* — tu propio plan "cuando pase X, toco esta rama": *"Cuando me sirva el café de la mañana…"*. La app nunca lo interpreta ni lo agenda — solo te lo vuelve a mostrar en Ahora y en las tarjetitas del check-in, con tus palabras. Escribir el plan una vez es lo que hace la magia.
 - **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.
@@ -372,6 +373,7 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Ahora / El hilo** | La pantalla que te recibe: dónde ibas + un solo pasito sugerido |
 | **Ramas de hoy** 🌅 | Hasta 3 ramas que eliges para el día; mañana se sueltan solas |
 | **Cuando-entonces** 🧶 | Tu plan "cuando pase X, toco esta rama" — la app solo te lo recuerda |
+| **Luz** ☀️ | Cuánta atención pide una rama: a pleno sol, a su ritmo o a la sombra — se queda hasta que tú la muevas |
 | **Pasos en orden** | Pasitos numerados (paso 1 → 2 → …); la rama florece como caminito |
 | **Varios a la vez** | Sembrar muchas ramitas de un jalón: una por línea, sangría = hija |
 | **La tablita** 📋 | La lista de ramas del árbol: un toque ubica, dos toques abren |

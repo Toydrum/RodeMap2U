@@ -81,6 +81,7 @@ function node(id: string, treeId: string): TreeNode {
     status: 'growing',
     order: 10,
     targetDate: '2026-08-01',
+    priority: 'sunlit',
     achievedAt: null,
     branchedAt: null,
     origin: 'planned',
@@ -144,6 +145,7 @@ describe('getForest — permissions matrix', () => {
     expect(snapshot.detail).toBe('full');
     expect((snapshot.nodes[0] as TreeNode).note).toBe('private words');
     expect((snapshot.nodes[0] as TreeNode).targetDate).toBe('2026-08-01');
+    expect((snapshot.nodes[0] as TreeNode).priority).toBe('sunlit'); // guardians see the light
   });
 
   it('friend gets the STRIPPED view', async () => {
@@ -156,6 +158,7 @@ describe('getForest — permissions matrix', () => {
     expect(first.note).toBe('');
     expect(first.trigger).toBeNull();
     expect(first.targetDate).toBeNull();
+    expect(first.priority).toBeNull(); // «la luz» is private — never travels to friends
   });
 
   it('friend visits are blocked when social is off on either side', async () => {

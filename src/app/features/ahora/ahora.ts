@@ -140,6 +140,8 @@ export class AhoraPage {
         return t.reasonToday;
       case 'trigger':
         return this.i18n.fill(t.reasonTrigger, { trigger: s.node.trigger ?? '' });
+      case 'sunlit':
+        return t.reasonSunlit;
       case 'step-of-current':
         return this.i18n.fill(t.reasonStepOfCurrent, { title: s.parent?.title ?? '' });
       case 'step-in-order':
@@ -153,6 +155,15 @@ export class AhoraPage {
       case 'fresh-seed':
         return this.i18n.fill(t.reasonFreshSeed, { tree: s.tree.name });
     }
+  }
+
+  /** A shaded branch may still surface AMBIENTLY (deep "Otra idea" cycle,
+   *  tiny forest) — one quiet aside prevents "why suggest what I shaded",
+   *  judging nothing. Deliberate paths (today/twig/thread/steps) stay clean:
+   *  you went there on purpose. */
+  protected shadeAside(s: Suggestion): string | null {
+    const ambient = s.kind === 'recent' || s.kind === 'fresh-growing' || s.kind === 'fresh-seed';
+    return ambient && s.node.priority === 'shade' ? this.i18n.t().ahora.shadeAside : null;
   }
 
   /** First→then in tree language: on an ordered path, say what follows —

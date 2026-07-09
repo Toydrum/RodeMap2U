@@ -64,6 +64,8 @@ export const EN: Dict = {
     todayEditAria: 'Change my branches for today',
     reasonToday: 'You chose it for today 🌅',
     reasonTrigger: '🧶 "{trigger}"',
+    reasonSunlit: 'You have it in full sun ☀️',
+    shadeAside: 'It sits in the shade — only if it calls you 🌳',
   },
   whispers: {
     q1: 'Where do you feel you are right now?',
@@ -177,6 +179,16 @@ export const EN: Dict = {
     achieved: 'It bloomed 🌸',
     branched: 'New paths were born here',
   },
+  light: {
+    sunlit: 'In full sun',
+    steady: 'At its own pace',
+    shade: 'In the shade',
+  },
+  lightHint: {
+    sunlit: 'The sun looks here first — Now will keep it in mind.',
+    steady: 'Growing at its own pace, like the whole forest.',
+    shade: 'Resting from the sun for a season — still alive, just letting others go first.',
+  },
   tree: {
     center: 'Center me',
     zoomIn: 'Zoom in',
@@ -188,6 +200,9 @@ export const EN: Dict = {
     outlineHint: 'Tap one to locate it on the map; tap it again to open its sheet.',
     outlineExpand: 'Open the sub-branches of "{title}"',
     outlineCollapse: 'Close the sub-branches of "{title}"',
+    lightLens: 'View by light',
+    lightLensHint: 'Viewing by light — your tree stays put. Tap the little icon to change a branch’s light.',
+    lightCycle: 'Change the light on "{title}"',
     dateReviewBanner: 'Some dates would like a word with you',
     reviewNow: 'See them',
     archiveAction: 'Move tree to the archive',
@@ -212,6 +227,7 @@ export const EN: Dict = {
     triggerLabel: 'When-then twig',
     triggerPlaceholder: 'When I pour my morning coffee…',
     triggerHint: 'Your own "when X happens, I touch this branch" plan. Now will remind you — never with alarms.',
+    lightLabel: 'How much light does it get?',
     steps: 'Small steps',
     addStep: 'Add a small step',
     stepPlaceholder: 'One tiny step from here…',
@@ -557,7 +573,7 @@ export const EN: Dict = {
       {
         icon: '🧶',
         title: 'Now — your thread',
-        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. If you like, choose up to three "branches for today" 🌅 — tomorrow they let go on their own, no carryover, no counts. And if you write a branch its "when-then" 🧶 ("when I pour my coffee…"), Now will remind you in your own words — never with alarms. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company — and if you wander around the app, it travels with you on its little floating perch. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
+        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. If you like, choose up to three "branches for today" 🌅 — tomorrow they let go on their own, no carryover, no counts. And if you write a branch its "when-then" 🧶 ("when I pour my coffee…"), Now will remind you in your own words — never with alarms. The branches you set "in full sun" ☀️ matter to Now too: they come right after your branches for today and your when-thens — your explicit now always outranks the standing light. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company — and if you wander around the app, it travels with you on its little floating perch. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
       },
       {
         icon: '🌳',
@@ -567,7 +583,7 @@ export const EN: Dict = {
       {
         icon: '🌿',
         title: 'Branches and their states',
-        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. On big trees, the 📋 button opens "the little table": a list of all your branches — one tap locates a branch on the map, two taps open its sheet. If a branch keeps one of your little notes, a small paper leaf marks it on the tree: hover over it and a little letter shows it right there. They can all be reread together in "Your footprints", where the sleeping branches also peek out — the ones that have been still for a season, in case you ever want to wake them. Branched and regretted it right away? While the sprouts are still freshly sown, that branch\'s sheet offers "The branch grows on".',
+        body: 'Each goal is a branch. It can be a Seed (an idea waiting), Growing (in motion), Resting (a pause on purpose — resting is part of it too), Bloomed 🌸 (you did it!) or Branched (a golden knot where new paths were born). There is no "failed" — the tree only knows how to grow. Beyond its state, every living branch has its LIGHT ☀️: in its sheet you choose "In full sun" (the sun looks here first — Now keeps it in mind, its name reads a little larger and a tiny ray keeps it company), "At its own pace" (like the whole forest) or "In the shade" (still alive, just letting others go first — the shade is a good place, never a punishment). The light stays until you move it; your branches for today 🌅 let go on their own tomorrow. On big trees, the 📋 button opens "the little table": a list of all your branches — one tap locates a branch on the map, two taps open its sheet; its little sun ☀️ turns on "View by light" to arrange the list and change several branches\' light in a row (your tree stays put — it is only the list). If a branch keeps one of your little notes, a small paper leaf marks it on the tree: hover over it and a little letter shows it right there. They can all be reread together in "Your footprints", where the sleeping branches also peek out — the ones that have been still for a season, in case you ever want to wake them. Branched and regretted it right away? While the sprouts are still freshly sown, that branch\'s sheet offers "The branch grows on".',
       },
       {
         icon: '🌱',
@@ -605,6 +621,7 @@ export const EN: Dict = {
     skipToContent: 'Skip to content',
     mainNav: 'Navigation',
     treeCanvas: 'Tree map. Use the arrow keys to move between branches.',
+    light: { sunlit: 'in full sun', shade: 'in the shade' },
     nodeLabel: '{title} — {status}',
     withChildren: { one: '{count} branch', many: '{count} branches' },
     feelingGroup: "How's your inner weather?",

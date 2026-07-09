@@ -80,6 +80,7 @@
           <app-tree-outline
             [tree]="t"
             [focusedId]="outlineFocusId()"
+            [editable]="canEdit()"
             (locate)="locateNode($event)"
             (open)="outlineOpenNode($event)"
             (closed)="outlineOpen.set(false)"

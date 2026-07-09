@@ -75,7 +75,9 @@ export const DEMO_NODES: TreeNode[] = [
   }),
   node('demo-g-weekend', 'demo-guitar', 'demo-g-daily', 'Sesión larga los sábados', 'seed', 20, { origin: 'branch' }),
   node('demo-g-first-song', 'demo-guitar', 'demo-g-chords', 'Mi primera canción completa', 'growing', 10),
-  node('demo-g-record', 'demo-guitar', 'demo-g-first-song', 'Grabarme y escucharme', 'seed', 10),
+  node('demo-g-record', 'demo-guitar', 'demo-g-first-song', 'Grabarme y escucharme', 'seed', 10, {
+    priority: 'shade', // «a la sombra» fixture — yields the ambient turn
+  }),
 
   // Health tree — gentler, smaller
   node('demo-h-root', 'demo-health', null, 'Sentirme mejor', 'growing', 10),
@@ -89,6 +91,7 @@ export const DEMO_NODES: TreeNode[] = [
   node('demo-w-idea', 'demo-work', 'demo-w-root', 'Aterrizar la idea en una página', 'growing', 10, {
     createdAt: now - 45 * day,
     updatedAt: now - 45 * day,
+    priority: 'sunlit', // «a pleno sol» fixture — standing light, below twigs
   }),
 
   // Single-branch baby tree (sapling rendering check)

@@ -507,7 +507,9 @@ export class MockApi implements ApiClient {
       .filter((r) => r.store === 'nodes')
       .map((r) => r.record as TreeNode)
       .filter((n) => !n.deletedAt && !n.archivedAt && liveTreeIds.has(n.treeId))
-      .map((n) => (detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null }));
+      .map((n) =>
+        detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null, priority: null },
+      );
 
     return {
       owner: this.publicOf(owner, includeSocial),

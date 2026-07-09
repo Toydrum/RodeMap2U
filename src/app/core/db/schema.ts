@@ -4,12 +4,14 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v3: additive TreeNode.flow (optional — absent ≡ 'free'; 'steps' marks an
- *  ordered path of pasitos). Same policy as v2: no migration pass, older
- *  backups import cleanly, newer backups are refused by older apps.
+/** v4: additive TreeNode.priority («la luz» — optional; absent ≡ steady
+ *  default). Same policy as v2/v3: no migration pass, older backups import
+ *  cleanly, newer backups are refused by older apps.
+ *  v3: additive TreeNode.flow (optional — absent ≡ 'free'; 'steps' marks an
+ *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 export const DB_VERSION = 1;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -64,6 +66,24 @@ export interface Tree extends SyncBase {
  */
 export type NodeStatus = 'seed' | 'growing' | 'resting' | 'achieved' | 'branched';
 
+/**
+ * «La luz» — per-branch priority as light, never as rank (owner override of
+ * the former "no priority fields" rule; guardrails in AGENTS.md).
+ * sunlit: the sun looks here first (Ahora keeps it in mind).
+ * shade: resting from the sun a season — alive, just yielding the ambient
+ * turn (NOT 'resting': shade mutes resurfacing, resting pauses the branch).
+ * Absent ≡ the steady default («a su ritmo») — no record ever stores it.
+ */
+export type NodePriority = 'sunlit' | 'shade';
+
+/** Total light order for calm sorts: sun first, steady, then shade.
+ *  Shared by the ranker, the tablita lens, the timer picker and date-review. */
+export function lightRank(node: { priority?: NodePriority | null }): 0 | 1 | 2 {
+  if (node.priority === 'sunlit') return 0;
+  if (node.priority === 'shade') return 2;
+  return 1;
+}
+
 export interface TreeNode extends SyncBase {
   treeId: string;
   /** null = the tree's root node. */
@@ -90,6 +110,10 @@ export interface TreeNode extends SyncBase {
    *  parallel fan. Optional: records born before v3 lack it (undefined ≡ 'free').
    *  Never forced — the toggle lives in the node sheet. */
   flow?: 'free' | 'steps';
+  /** «La luz» (see NodePriority). Optional: records born before v4 lack it
+   *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
+   *  is the forever-default; `null` clears an earlier choice. */
+  priority?: NodePriority | null;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */

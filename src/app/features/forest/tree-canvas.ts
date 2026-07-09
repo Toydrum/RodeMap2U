@@ -534,6 +534,15 @@ export class TreeCanvas {
     return out;
   });
 
+  /** «La luz» drawn on the canvas — only live branches hold light; a stale
+   *  value on an achieved/resting record stays visually inert. */
+  protected lightOf(point: LayoutPoint): 'sunlit' | 'steady' | 'shade' {
+    const status = point.node.status;
+    if (status !== 'seed' && status !== 'growing') return 'steady';
+    const p = point.node.priority;
+    return p === 'sunlit' || p === 'shade' ? p : 'steady';
+  }
+
   /** The label field: every branch name, wrapped and packed ONCE per layout
    *  change — never per zoom, never per focus. Visibility is therefore
    *  identical at every k by construction (tree-labels.ts owns the law). */
@@ -541,10 +550,11 @@ export class TreeCanvas {
     const inputs = labelInputsFrom(this.layout().points, {
       currentNodeId: this.tree().currentNodeId,
       labeledChainIds: this.nextStepIds(),
-      // Release-2 hook («la luz»): sunlit branches will read slightly larger.
-      // The packer reserves the width, so emphasis can never cause overlap.
-      emphasisOf: () => 1,
-      leadGlyphOf: () => 0,
+      // «La luz»: sunlit titles read slightly larger (the owner's typographic
+      // hierarchy, upward only). The packer reserves the width — emphasis can
+      // never cause overlap — plus room for the rayito glyph.
+      emphasisOf: (p) => (this.lightOf(p) === 'sunlit' ? 1.12 : 1),
+      leadGlyphOf: (p) => (this.lightOf(p) === 'sunlit' ? 10 : 0),
     });
     return packLabels(inputs);
   });
@@ -588,6 +598,8 @@ export class TreeCanvas {
       status: t.status[point.node.status],
     });
     if (children) label += `, ${this.i18n.plural(children, t.a11y.withChildren)}`;
+    const light = this.lightOf(point);
+    if (light !== 'steady') label += `, ${t.a11y.light[light]}`;
     return label;
   }
 

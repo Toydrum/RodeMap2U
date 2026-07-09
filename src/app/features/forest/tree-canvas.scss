@@ -335,6 +335,91 @@
   stroke-width: 6px;
 }
 
+/* ------------------------------------------------------------- «la luz» */
+
+/* Warm pooled light behind a sunlit node. Breathes slowly (8s — deliberately
+   non-harmonic with the here-halo's rhythm); reduce-motion holds it still. */
+.sun-glow-core {
+  stop-color: #ffe9b8;
+  stop-opacity: 0.55;
+}
+
+.sun-glow-mid {
+  stop-color: #ffe2a4;
+  stop-opacity: 0.28;
+}
+
+.sun-glow-edge {
+  stop-color: #ffe2a4;
+  stop-opacity: 0;
+}
+
+[data-theme='terminal'] .sun-glow-core {
+  stop-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  stop-opacity: 0.4;
+}
+
+[data-theme='terminal'] .sun-glow-mid {
+  stop-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  stop-opacity: 0.18;
+}
+
+[data-theme='terminal'] .sun-glow-edge {
+  stop-color: transparent;
+  stop-opacity: 0;
+}
+
+.light-halo {
+  opacity: 0.62;
+  animation: sun-breathe 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sun-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.74;
+  }
+}
+
+:host-context(.reduce-motion) .light-halo {
+  animation: none;
+  opacity: 0.6;
+}
+
+/* The rayito beside a sunlit title — a non-color cue (colorblind-safe). */
+.rayito {
+  stroke: color-mix(in srgb, #d9a842 78%, var(--text));
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  fill: none;
+
+  circle {
+    fill: color-mix(in srgb, #d9a842 78%, var(--text));
+    stroke: none;
+  }
+}
+
+/* «A la sombra»: two quiet leaves lending shade — added, never dimming. */
+.sombrilla .shade-leaf {
+  fill: color-mix(in srgb, var(--accent-pine) 52%, var(--surface-2));
+  opacity: 0.4;
+
+  &.far {
+    opacity: 0.28;
+  }
+}
+
+[data-theme='terminal'] .sombrilla .shade-leaf {
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
 /* The "+" bud — plant a branch right here */
 .plant-bud {
   cursor: pointer;

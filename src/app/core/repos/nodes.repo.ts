@@ -1,5 +1,5 @@
 import { Injectable, computed } from '@angular/core';
-import { NodeStatus, TreeNode, newSyncBase, stamp } from '../db/schema';
+import { NodeStatus, TreeNode, lightRank, newSyncBase, stamp } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
 import { isPast } from '../time';
@@ -40,15 +40,23 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     return map;
   });
 
-  /** Nodes whose gentle date has passed and is still unhandled. */
+  /** Nodes whose gentle date has passed and is still unhandled — sunlit
+   *  conversations first, then oldest date, deterministic tail. */
   readonly needsDateReview = computed(() =>
-    this.visible().filter(
-      (n) =>
-        n.targetDate !== null &&
-        isPast(n.targetDate) &&
-        n.status !== 'achieved' &&
-        n.status !== 'branched',
-    ),
+    this.visible()
+      .filter(
+        (n) =>
+          n.targetDate !== null &&
+          isPast(n.targetDate) &&
+          n.status !== 'achieved' &&
+          n.status !== 'branched',
+      )
+      .sort(
+        (a, b) =>
+          lightRank(a) - lightRank(b) ||
+          (a.targetDate ?? '').localeCompare(b.targetDate ?? '') ||
+          a.id.localeCompare(b.id),
+      ),
   );
 
   childrenOf(node: TreeNode): TreeNode[] {
@@ -92,7 +100,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
 
   async update(
     node: TreeNode,
-    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow'>>,
+    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow' | 'priority'>>,
   ): Promise<TreeNode> {
     return this.save({ ...node, ...patch });
   }
