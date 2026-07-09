@@ -1,4 +1,5 @@
 import { computed, signal } from '@angular/core';
+import { lwwBeats } from '../api/contracts';
 import { SyncBase, stamp } from '../db/schema';
 import { StoreName, get, getAll, put, putMany } from '../db/idb';
 import { broadcastChange } from '../db/broadcast';
@@ -83,10 +84,12 @@ export abstract class RecordsRepo<T extends SyncBase> {
     }
   }
 
-  /** Accept an externally-produced record iff it is newer (rev LWW). */
+  /** Accept an externally-produced record unless ours strictly beats it
+   *  (shared LWW law). Exact ties land the incoming copy: external records
+   *  are server/disk truth, and the contract gives ties to the server. */
   applyExternal(record: T): void {
     const current = this.records().get(record.id);
-    if (current && current.rev >= record.rev) return;
+    if (current && lwwBeats(current, record)) return;
     this.applyLocal(record);
   }
 

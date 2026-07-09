@@ -57,15 +57,19 @@ async function pushInto(ctx: Ctx, ownerId: string, req: SyncPushRequest): Promis
       store: entry.store,
       record: entry.record,
       rev: record.rev,
+      updatedAt: record.updatedAt,
       syncedAt,
     };
     try {
+      // contracts.lwwBeats as a condition expression: rev first, updatedAt
+      // breaks equal revs, exact ties keep the stored copy (reject).
       await ctx.deps.ddb.send(
         new PutCommand({
           TableName: ctx.deps.table,
           Item: item,
-          ConditionExpression: 'attribute_not_exists(pk) OR rev < :rev',
-          ExpressionAttributeValues: { ':rev': record.rev },
+          ConditionExpression:
+            'attribute_not_exists(pk) OR rev < :rev OR (rev = :rev AND updatedAt < :updatedAt)',
+          ExpressionAttributeValues: { ':rev': record.rev, ':updatedAt': record.updatedAt },
         }),
       );
       applied.push(record.id);

@@ -68,45 +68,84 @@ export function openDb(): Promise<IDBDatabase> {
 
 const ALL_STORES: StoreName[] = ['trees', 'nodes', 'checkins', 'sessions', 'meta'];
 
+/** Meta sentinel: present ⇔ the legacy question is settled for this device. */
+const MIGRATED_KEY = 'legacy.migratedAt';
+
+function sealMigration(db: IDBDatabase, how: string): Promise<void> {
+  const tx = db.transaction('meta', 'readwrite');
+  tx.objectStore('meta').put({ key: MIGRATED_KEY, at: Date.now(), how });
+  return txDone(tx);
+}
+
 /**
  * If this (new-name) DB is empty and the pre-rename DB exists with data,
- * copy every store across once. Fail-open: any hiccup leaves the app running
- * on the new DB, and the untouched legacy DB retries on the next boot.
+ * copy every store across once. Copied rows and the sentinel land in ONE
+ * transaction, so a partial migration cannot exist: either everything landed
+ * (sentinel present) or nothing did and the copy retries next boot.
+ * Fail-open: any hiccup leaves the app running on the new DB, and the
+ * untouched legacy DB stays as the safety net.
  */
 async function migrateLegacyIfNeeded(db: IDBDatabase): Promise<void> {
   try {
+    const marker = await requestToPromise(
+      db.transaction('meta', 'readonly').objectStore('meta').get(MIGRATED_KEY),
+    );
+    if (marker) return;
+
     const treeCount = await requestToPromise(
       db.transaction('trees', 'readonly').objectStore('trees').count(),
     );
     const metaCount = await requestToPromise(
       db.transaction('meta', 'readonly').objectStore('meta').count(),
     );
-    if (treeCount > 0 || metaCount > 0) return; // already lived-in
-
-    // Never CREATE the legacy DB just to look inside it.
-    if (typeof indexedDB.databases === 'function') {
-      const existing = await indexedDB.databases();
-      if (!existing.some((d) => d.name === LEGACY_DB_NAME)) return;
+    if (treeCount > 0 || metaCount > 0) {
+      // Lived-in from before the sentinel existed (or simply a fresh device
+      // that already wrote data) — never copy OVER it; just settle the question.
+      await sealMigration(db, 'lived-in');
+      return;
     }
 
+    // Never CREATE the legacy DB just to look inside it.
+    let probeCreated = false;
+    if (typeof indexedDB.databases === 'function') {
+      const existing = await indexedDB.databases();
+      if (!existing.some((d) => d.name === LEGACY_DB_NAME)) {
+        await sealMigration(db, 'no-legacy');
+        return;
+      }
+    }
     const legacy = await new Promise<IDBDatabase | null>((resolve) => {
       const open = indexedDB.open(LEGACY_DB_NAME);
+      open.onupgradeneeded = () => {
+        // Firing means the DB did not exist (browsers without databases(),
+        // e.g. Firefox) — abort the versionchange so no phantom DB is left.
+        probeCreated = true;
+        open.transaction?.abort();
+      };
       open.onsuccess = () => resolve(open.result);
       open.onerror = () => resolve(null);
     });
-    if (!legacy) return;
+    if (!legacy) {
+      // Settled only when we KNOW there is nothing to migrate; a transient
+      // open error on a real legacy DB must retry next boot.
+      if (probeCreated) await sealMigration(db, 'no-legacy');
+      return;
+    }
     try {
+      const rows: Partial<Record<StoreName, unknown[]>> = {};
       for (const store of ALL_STORES) {
         if (!legacy.objectStoreNames.contains(store)) continue;
-        const rows = await requestToPromise<unknown[]>(
+        rows[store] = await requestToPromise<unknown[]>(
           legacy.transaction(store, 'readonly').objectStore(store).getAll(),
         );
-        if (!rows.length) continue;
-        const tx = db.transaction(store, 'readwrite');
-        const target = tx.objectStore(store);
-        for (const row of rows) target.put(row);
-        await txDone(tx);
       }
+      const tx = db.transaction(ALL_STORES, 'readwrite');
+      for (const store of ALL_STORES) {
+        const target = tx.objectStore(store);
+        for (const row of rows[store] ?? []) target.put(row);
+      }
+      tx.objectStore('meta').put({ key: MIGRATED_KEY, at: Date.now(), how: 'copied' });
+      await txDone(tx);
     } finally {
       legacy.close();
     }
@@ -164,6 +203,14 @@ export async function putMany<T>(store: StoreName, values: T[]): Promise<void> {
   const tx = db.transaction(store, 'readwrite');
   const objectStore = tx.objectStore(store);
   for (const value of values) objectStore.put(value);
+  return txDone(tx);
+}
+
+/** Remove one row (meta cleanup: cache invalidation, practice-cloud reset). */
+export async function del(store: StoreName, key: string): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction(store, 'readwrite');
+  tx.objectStore(store).delete(key);
   return txDone(tx);
 }
 

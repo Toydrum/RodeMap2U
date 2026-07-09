@@ -242,24 +242,31 @@ describe('family', () => {
 // ── Friend codes ─────────────────────────────────────────────────────────────
 
 describe('friend requests', () => {
+  // The brake is read-first, bump-on-BAD-attempt (contract law: successful
+  // redemptions never count).
+  const RATE_KEY = K.rate('val', Math.floor(NOW / 3_600_000));
   function stubRate(count: number): void {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: { count } });
+    ddbMock
+      .on(GetCommand, { TableName: 'roadmap', Key: { pk: RATE_KEY.pk, sk: RATE_KEY.sk } })
+      .resolves({ Item: { ...RATE_KEY, count, ttl: 0 } });
   }
 
-  it('expired codes answer CODE_EXPIRED', async () => {
-    stubRate(1);
+  it('expired codes answer CODE_EXPIRED and count as a bad attempt', async () => {
     ddbMock
       .on(GetCommand)
       .resolves({ Item: { code: 'MBRD2468', kind: 'friend', userId: 'ambar', expiresAt: NOW - 1, ttl: 0 } });
+    stubRate(1);
+    ddbMock.on(UpdateCommand).resolves({});
     await expect(
       createFriendRequest(ctxOf(profile('val', { accountType: 'minor', socialEnabled: true })), {
         code: 'MBRD2468',
       }),
     ).rejects.toMatchObject({ code: 'CODE_EXPIRED' });
+    expect(ddbMock.commandCalls(UpdateCommand).length).toBe(1); // the bump
   });
 
-  it('the 6th bad redemption in an hour is RATE_LIMITED', async () => {
-    stubRate(6);
+  it('the attempt after 5 bad redemptions in an hour is RATE_LIMITED', async () => {
+    stubRate(5);
     await expect(
       createFriendRequest(ctxOf(profile('val', { socialEnabled: true })), { code: 'WRONGONE' }),
     ).rejects.toMatchObject({ code: 'RATE_LIMITED' });

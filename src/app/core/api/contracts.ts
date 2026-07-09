@@ -152,8 +152,24 @@ export interface SyncPushRequest {
 }
 
 /**
+ * THE one LWW ordering, shared verbatim by every implementation (client
+ * repos, mock cloud, DynamoDB condition expression): higher rev wins; equal
+ * revs fall to updatedAt. An EXACT tie (same rev AND same updatedAt) goes to
+ * the copy the server already stores — servers reject the push and hand back
+ * the stored winner, while clients ACCEPT server records on exact ties. Every
+ * replica therefore converges on one copy instead of each keeping its own.
+ */
+export function lwwBeats(
+  incoming: { rev: number; updatedAt: number },
+  stored: { rev: number; updatedAt: number },
+): boolean {
+  if (incoming.rev !== stored.rev) return incoming.rev > stored.rev;
+  return incoming.updatedAt > stored.updatedAt;
+}
+
+/**
  * Per-record LWW, same law as RecordsRepo.applyExternal: the server accepts a
- * record iff incoming.rev > stored.rev, otherwise rejects STALE_REV and
+ * record iff `lwwBeats(incoming, stored)`, otherwise rejects STALE_REV and
  * returns its winner in `serverRecords` so the client can converge.
  * Tombstones travel as ordinary records (deletedAt set) — never deletes.
  */
@@ -215,7 +231,8 @@ export const LIMITS = Object.freeze({
   maxGuardiansPerMinor: 2,
   maxChildrenPerGuardian: 8,
   syncPushMax: 100,
-  /** Bad code redemptions per hour before RATE_LIMITED. */
+  /** BAD code redemptions (invalid/expired) per hour before RATE_LIMITED —
+   *  successful redemptions never count toward the brake. */
   codeAttemptsPerHour: 5,
 });
 
@@ -247,7 +264,12 @@ export interface RoadmapApi {
   getFriends(): Promise<FriendsResponse>;
   getFriendCode(): Promise<CodeGrant>;
   rotateFriendCode(): Promise<CodeGrant>;
+  /** A second request while one is already pending to the same person is
+   *  CONFLICT — implementations must make the duplicate impossible even under
+   *  a double-submit race (deterministic key or conditional write). */
   createFriendRequest(code: string): Promise<FriendRequestView>;
+  /** `maxFriends` is enforced at request time AND here — requests can sit for
+   *  days, so either side may have reached the cap since. */
   acceptFriendRequest(requestId: string): Promise<FriendView>;
   declineFriendRequest(requestId: string): Promise<void>;
   cancelFriendRequest(requestId: string): Promise<void>;

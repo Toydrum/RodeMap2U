@@ -24,6 +24,7 @@
         autocapitalize="characters"
         spellcheck="false"
         [placeholder]="i18n.t().amigos.redeemPlaceholder"
+        [attr.aria-label]="i18n.t().amigos.redeemPlaceholder"
         [value]="redeemCode()"
         (input)="redeemCode.set($any($event.target).value)"
       />

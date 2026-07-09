@@ -194,8 +194,10 @@ export async function mockNextSeq(counter: string): Promise<number> {
   return next;
 }
 
-/** "Restablecer la nube de prueba" — wipe and reseed on next use. */
-export async function resetMockCloud(): Promise<void> {
+/** "Restablecer la nube de prueba" — wipe and reseed on next use.
+ *  'blocked' = another tab still holds the DB open; the delete happens once
+ *  it lets go — the caller must say so instead of pretending it already did. */
+export async function resetMockCloud(): Promise<'done' | 'blocked'> {
   if (mockDbPromise) {
     try {
       (await mockDbPromise).close();
@@ -204,11 +206,11 @@ export async function resetMockCloud(): Promise<void> {
     }
     mockDbPromise = null;
   }
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<'done' | 'blocked'>((resolve, reject) => {
     const request = indexedDB.deleteDatabase(MOCK_DB_NAME);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => resolve('done');
     request.onerror = () => reject(request.error);
-    request.onblocked = () => resolve(); // deletes once other tabs let go
+    request.onblocked = () => resolve('blocked');
   });
 }
 

@@ -1,6 +1,6 @@
-﻿import { randomUUID } from 'node:crypto';
-import {
+﻿import {
   ApiError,
+  ApiErrorCode,
   CodeGrant,
   FriendRequestView,
   FriendView,
@@ -15,6 +15,7 @@ import {
   FriendRequestItem,
   K,
   ProfileItem,
+  PutCommand,
   RateItem,
   TransactWriteCommand,
   UpdateCommand,
@@ -112,22 +113,25 @@ export async function rotateFriendCode(ctx: Ctx): Promise<CodeGrant> {
   return mintFriendCode(ctx);
 }
 
-/** 5 bad redemptions per rolling hour → RATE_LIMITED (code-guessing brake). */
-async function bumpRateLimit(ctx: Ctx): Promise<void> {
+/** Code-guessing brake: 5 BAD redemptions per rolling hour → RATE_LIMITED.
+ *  Read-first, bump-on-failure — successful redemptions never count. */
+async function readRateCount(ctx: Ctx): Promise<number> {
   const bucket = Math.floor(ctx.deps.now() / 3_600_000);
-  const key = K.rate(ctx.callerId, bucket);
-  const out = await ctx.deps.ddb.send(
+  const item = await getItem<RateItem>(ctx.deps, K.rate(ctx.callerId, bucket));
+  return item?.count ?? 0;
+}
+
+async function bumpBadAttempt(ctx: Ctx): Promise<void> {
+  const bucket = Math.floor(ctx.deps.now() / 3_600_000);
+  await ctx.deps.ddb.send(
     new UpdateCommand({
       TableName: ctx.deps.table,
-      Key: key,
+      Key: K.rate(ctx.callerId, bucket),
       UpdateExpression: 'ADD #c :one SET #ttl = :ttl',
       ExpressionAttributeNames: { '#c': 'count', '#ttl': 'ttl' },
       ExpressionAttributeValues: { ':one': 1, ':ttl': Math.ceil(ctx.deps.now() / 1000) + 7200 },
-      ReturnValues: 'UPDATED_NEW',
     }),
   );
-  const count = ((out.Attributes as RateItem | undefined)?.count ?? 0) as number;
-  if (count > LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
 }
 
 export async function createFriendRequest(ctx: Ctx, body: { code?: string }): Promise<FriendRequestView> {
@@ -135,14 +139,19 @@ export async function createFriendRequest(ctx: Ctx, body: { code?: string }): Pr
   const code = body.code?.trim().toUpperCase().replace(/-/g, '');
   if (!code) throw new ApiError('VALIDATION', 'code required');
 
-  await bumpRateLimit(ctx);
+  if ((await readRateCount(ctx)) >= LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+  const badAttempt = async (errorCode: ApiErrorCode, message?: string): Promise<never> => {
+    await bumpBadAttempt(ctx);
+    throw new ApiError(errorCode, message);
+  };
+
   const grant = await getItem<CodeItem>(ctx.deps, K.codeF(code));
-  if (!grant || grant.kind !== 'friend') throw new ApiError('CODE_INVALID');
-  if (grant.expiresAt <= ctx.deps.now()) throw new ApiError('CODE_EXPIRED');
+  if (!grant || grant.kind !== 'friend') return badAttempt('CODE_INVALID');
+  if (grant.expiresAt <= ctx.deps.now()) return badAttempt('CODE_EXPIRED');
   if (grant.userId === ctx.callerId) throw new ApiError('VALIDATION', 'that is your own code');
 
   const target = await profileOf(ctx.deps, grant.userId);
-  if (!target || !target.socialEnabled) throw new ApiError('CODE_INVALID');
+  if (!target || !target.socialEnabled) return badAttempt('CODE_INVALID');
   if (await friendshipBetween(ctx.deps, ctx.callerId, grant.userId)) {
     throw new ApiError('CONFLICT', 'already friends');
   }
@@ -150,7 +159,10 @@ export async function createFriendRequest(ctx: Ctx, body: { code?: string }): Pr
   if (myFriends.length >= LIMITS.maxFriends) throw new ApiError('LIMIT_EXCEEDED');
 
   const now = ctx.deps.now();
-  const requestId = randomUUID();
+  // Deterministic per direction: a double-submit (or a race across devices)
+  // maps to the SAME item, and the conditional put turns the duplicate into
+  // CONFLICT — no TOCTOU window. Expired leftovers may be overwritten.
+  const requestId = `freq-${ctx.callerId}~${grant.userId}`;
   const item: FriendRequestItem = {
     ...K.freq(grant.userId, requestId),
     gsi1pk: K.user(ctx.callerId),
@@ -162,7 +174,19 @@ export async function createFriendRequest(ctx: Ctx, body: { code?: string }): Pr
     expiresAt: now + REQUEST_TTL_MS,
     ttl: Math.ceil((now + REQUEST_TTL_MS) / 1000),
   };
-  await putItem(ctx.deps, item as unknown as Record<string, unknown>);
+  try {
+    await ctx.deps.ddb.send(
+      new PutCommand({
+        TableName: ctx.deps.table,
+        Item: item,
+        ConditionExpression: 'attribute_not_exists(pk) OR expiresAt <= :now',
+        ExpressionAttributeValues: { ':now': now },
+      }),
+    );
+  } catch (error) {
+    if ((error as { name?: string })?.name !== 'ConditionalCheckFailedException') throw error;
+    throw new ApiError('CONFLICT', 'request already pending');
+  }
   return { requestId, user: toPublic(target, false), createdAt: now, expiresAt: item.expiresAt };
 }
 
@@ -177,6 +201,16 @@ export async function acceptFriendRequest(ctx: Ctx, requestId: string): Promise<
   const request = await findIncoming(ctx, requestId);
   const other = await profileOf(ctx.deps, request.fromId);
   if (!other) throw new ApiError('NOT_FOUND');
+
+  // The cap holds on BOTH ends at accept time too — requests sit for days,
+  // and either side may have filled up since the request was sent.
+  const [mine, theirs] = await Promise.all([
+    queryPrefix<FriendItem>(ctx.deps, K.user(ctx.callerId), 'FRIEND#'),
+    queryPrefix<FriendItem>(ctx.deps, K.user(request.fromId), 'FRIEND#'),
+  ]);
+  if (mine.length >= LIMITS.maxFriends || theirs.length >= LIMITS.maxFriends) {
+    throw new ApiError('LIMIT_EXCEEDED');
+  }
 
   const friendshipId = composite.friendshipId(ctx.callerId, request.fromId);
   const now = ctx.deps.now();

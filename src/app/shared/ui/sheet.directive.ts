@@ -45,6 +45,10 @@ export class SheetDirective implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.captureOpener();
     SheetDirective.stack.push(this);
+    // Lock the page behind the first open sheet: wheel/touch past the sheet's
+    // end must not scroll the background (the user would land far from where
+    // they were on close). The sheet's own overflow keeps scrolling fine.
+    if (SheetDirective.stack.length === 1) document.body.style.overflow = 'hidden';
   }
 
   protected onEscape(ev: Event): void {
@@ -74,6 +78,7 @@ export class SheetDirective implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     SheetDirective.stack = SheetDirective.stack.filter((s) => s !== this);
+    if (!SheetDirective.stack.length) document.body.style.overflow = '';
     // Element, not HTMLElement: tree nodes are focusable SVG <g> elements.
     if (this.prevFocus instanceof Element && this.prevFocus.isConnected) {
       (this.prevFocus as HTMLElement).focus?.();

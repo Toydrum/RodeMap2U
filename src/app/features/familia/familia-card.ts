@@ -48,24 +48,42 @@ export class FamiliaCard {
 
   /** Oversight, never initiation — and the minor sees the very same list. */
   protected async openChildFriends(link: FamilyLinkView): Promise<void> {
-    this.sheet.set({ kind: 'childFriends', link, data: null });
+    const epoch = this.openSheet({ kind: 'childFriends', link, data: null });
     const data = await this.fam.listChildFriends(link.user.userId);
-    this.sheet.set({ kind: 'childFriends', link, data });
+    this.setSheetLater(epoch, { kind: 'childFriends', link, data });
   }
 
   protected async removeChildFriend(link: FamilyLinkView, friendshipId: string): Promise<void> {
-    if (await this.fam.removeChildFriendship(link.user.userId, friendshipId)) {
+    const epoch = this.sheetEpoch;
+    if ((await this.fam.removeChildFriendship(link.user.userId, friendshipId)) && this.sheetEpoch === epoch) {
       await this.openChildFriends(link);
     }
   }
 
   protected async cancelChildRequest(link: FamilyLinkView, requestId: string): Promise<void> {
-    if (await this.fam.cancelChildRequest(link.user.userId, requestId)) {
+    const epoch = this.sheetEpoch;
+    if ((await this.fam.cancelChildRequest(link.user.userId, requestId)) && this.sheetEpoch === epoch) {
       await this.openChildFriends(link);
     }
   }
 
   protected readonly sheet = signal<Sheet>(null);
+
+  /** Bumped on every explicit open/close. Async completions may only touch
+   *  the sheet if nothing was dismissed or replaced while they were in
+   *  flight — a late reveal would re-expose a temp password or invite code
+   *  the user already put away (zombie-sheet guard, audit #7). */
+  private sheetEpoch = 0;
+
+  private openSheet(sheet: Sheet): number {
+    this.sheetEpoch++;
+    this.sheet.set(sheet);
+    return this.sheetEpoch;
+  }
+
+  private setSheetLater(epoch: number, sheet: Sheet): void {
+    if (this.sheetEpoch === epoch) this.sheet.set(sheet);
+  }
 
   protected readonly newUsername = signal('');
   protected readonly newDisplayName = signal('');
@@ -83,13 +101,14 @@ export class FamiliaCard {
     effect(() => {
       if (this.auth.status() === 'guest') {
         this.fam.clear();
-        this.sheet.set(null);
+        this.close();
       }
     });
     if (this.auth.user()) void this.fam.open();
   }
 
   protected close(): void {
+    this.sheetEpoch++;
     this.sheet.set(null);
   }
 
@@ -98,43 +117,52 @@ export class FamiliaCard {
   protected openCreate(): void {
     this.newUsername.set('');
     this.newDisplayName.set('');
-    this.sheet.set({ kind: 'create' });
+    this.openSheet({ kind: 'create' });
   }
 
   protected async submitCreate(): Promise<void> {
+    const epoch = this.sheetEpoch;
     const result = await this.fam.createChild(
       this.newUsername().trim(),
       this.newDisplayName().trim(),
     );
-    if (result) this.sheet.set({ kind: 'created', ...result });
+    if (result) this.setSheetLater(epoch, { kind: 'created', ...result });
   }
 
   // ── per-child admin ───────────────────────────────────────────────────────
 
   protected openChild(link: FamilyLinkView): void {
     this.renameValue.set(link.user.displayName);
-    this.sheet.set({ kind: 'child', link });
+    this.openSheet({ kind: 'child', link });
   }
 
   protected async doRename(link: FamilyLinkView): Promise<void> {
     const name = this.renameValue().trim();
     if (!name || name === link.user.displayName) return;
+    const epoch = this.sheetEpoch;
     if (await this.fam.renameChild(link.user.userId, name)) {
       this.toast.show({ message: this.i18n.t().common.done });
-      this.close();
+      if (this.sheetEpoch === epoch) this.close();
     }
   }
 
   protected async toggleSocial(link: FamilyLinkView): Promise<void> {
-    await this.fam.setChildSocial(link.user.userId, !link.user.socialEnabled);
-    // Keep the sheet open with fresh data so the switch reflects reality.
-    const updated = this.fam.minors().find((l) => l.linkId === link.linkId);
-    if (updated) this.sheet.set({ kind: 'child', link: updated });
+    const epoch = this.sheetEpoch;
+    // Paint from the SERVER's answer (audit #10): a failed refresh must not
+    // show — and on the next tap re-flip — the stale pre-toggle value.
+    const profile = await this.fam.setChildSocial(link.user.userId, !link.user.socialEnabled);
+    if (!profile) return;
+    const updated: FamilyLinkView = {
+      ...link,
+      user: { ...link.user, socialEnabled: profile.socialEnabled },
+    };
+    this.setSheetLater(epoch, { kind: 'child', link: updated });
   }
 
   protected async doReset(link: FamilyLinkView): Promise<void> {
+    const epoch = this.sheetEpoch;
     const result = await this.fam.resetChildPassword(link.user.userId);
-    if (result) this.sheet.set({ kind: 'reset', link, tempPassword: result.tempPassword });
+    if (result) this.setSheetLater(epoch, { kind: 'reset', link, tempPassword: result.tempPassword });
   }
 
   protected async doExport(link: FamilyLinkView): Promise<void> {
@@ -144,50 +172,55 @@ export class FamiliaCard {
   }
 
   protected async doInviteCo(link: FamilyLinkView): Promise<void> {
+    const epoch = this.sheetEpoch;
     const grant = await this.fam.createInvite({ kind: 'coGuardian', minorId: link.user.userId });
-    if (grant) this.sheet.set({ kind: 'invite', flavor: 'coGuardian', grant });
+    if (grant) this.setSheetLater(epoch, { kind: 'invite', flavor: 'coGuardian', grant });
   }
 
   protected confirmUnlink(link: FamilyLinkView, mineSide: boolean): void {
-    this.sheet.set({ kind: 'unlink', link, mineSide });
+    this.openSheet({ kind: 'unlink', link, mineSide });
   }
 
   protected async doUnlink(link: FamilyLinkView): Promise<void> {
+    const epoch = this.sheetEpoch;
     if (await this.fam.unlink(link.linkId)) {
       this.toast.show({ message: this.i18n.t().familia.unlinkOk });
-      this.close();
+      if (this.sheetEpoch === epoch) this.close();
     }
   }
 
   protected confirmDelete(link: FamilyLinkView): void {
-    this.sheet.set({ kind: 'delete', link });
+    this.openSheet({ kind: 'delete', link });
   }
 
   protected async doDelete(link: FamilyLinkView): Promise<void> {
+    const epoch = this.sheetEpoch;
     if (await this.fam.deleteChild(link.user.userId, link.user.username)) {
       this.toast.show({
         message: this.i18n.fill(this.i18n.t().familia.deleteOk, { name: link.user.displayName }),
       });
-      this.close();
+      if (this.sheetEpoch === epoch) this.close();
     }
   }
 
   // ── invites & redemption ──────────────────────────────────────────────────
 
   protected async doInviteExisting(): Promise<void> {
+    const epoch = this.sheetEpoch;
     const grant = await this.fam.createInvite({ kind: 'linkExisting' });
-    if (grant) this.sheet.set({ kind: 'invite', flavor: 'linkExisting', grant });
+    if (grant) this.setSheetLater(epoch, { kind: 'invite', flavor: 'linkExisting', grant });
   }
 
   protected openAccept(): void {
     this.acceptCode.set('');
-    this.sheet.set({ kind: 'accept' });
+    this.openSheet({ kind: 'accept' });
   }
 
   protected async submitAccept(): Promise<void> {
+    const epoch = this.sheetEpoch;
     if (await this.fam.acceptInvite(this.acceptCode().trim())) {
       this.toast.show({ message: this.i18n.t().familia.acceptOk });
-      this.close();
+      if (this.sheetEpoch === epoch) this.close();
     }
   }
 

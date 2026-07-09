@@ -136,6 +136,9 @@ export class AmigosCard {
   }
 
   private async run(operation: () => Promise<void>): Promise<void> {
+    // Synchronous re-entry guard: under zoneless, [disabled] repaints one
+    // render late — a double-click lands here twice before the first await.
+    if (this.loading()) return;
     this.loading.set(true);
     this.lastError.set(null);
     try {

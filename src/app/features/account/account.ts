@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -56,6 +56,13 @@ export class AccountPage {
 
   constructor() {
     if (this.auth.status() === 'signedIn') this.step.set('profile');
+    // A cross-tab sign-out must not leave THIS tab on the profile step with
+    // sign-out/delete buttons a guest can see.
+    effect(() => {
+      if (this.auth.status() === 'guest' && this.step() === 'profile') {
+        this.step.set('welcome');
+      }
+    });
   }
 
   protected readonly errorText = computed(() => {
@@ -174,7 +181,8 @@ export class AccountPage {
     this.password2.set('');
     this.code.set('');
     const target = this.volver();
-    if (target && target.startsWith('/')) {
+    // '//' is protocol-relative — it would escape the origin.
+    if (target && target.startsWith('/') && !target.startsWith('//')) {
       void this.router.navigateByUrl(target);
       return;
     }

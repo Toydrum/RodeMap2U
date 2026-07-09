@@ -72,7 +72,7 @@ REST under `${apiBaseUrl}/v1`, JSON, `Authorization: Bearer <Cognito idToken>` (
 **Errors:** envelope `{ error: { code, message } }`; `code ∈ ApiErrorCode` (SCREAMING codes on the wire; lowercase `offline|server|unknown` are client-minted). `message` is for developers — the client maps codes to i18n copy.
 
 **Sync semantics:**
-- Push: per record, accept iff `incoming.rev > stored.rev` (DynamoDB conditional write); else reject `{id, reason:'STALE_REV'}` AND return the stored winner in `serverRecords` so the client converges via `applyExternal`.
+- Push: per record, accept iff `lwwBeats(incoming, stored)` — the ONE ordering in `contracts.ts`: higher `rev` wins, equal revs fall to `updatedAt`, exact ties keep the STORED copy (DynamoDB conditional write); else reject `{id, reason:'STALE_REV'}` AND return the stored winner in `serverRecords`. Clients accept server records on exact ties (`applyExternal`), so every replica converges on one copy.
 - Tombstones (`deletedAt` set) travel as ordinary records; the server never physically deletes records (account deletion purges the whole partition).
 - Change feed ordered by **server receive time** (`syncedAt`), exposed as an opaque `cursor`; page ≤ 200, `more` flag. Client clocks are never trusted for ordering.
 - The server validates only `SyncBase` shape + the store enum and stores records opaquely → additive schema evolution (the `trigger`/`flow` precedent) needs zero backend change. A push with `schemaVersion` NEWER than the server understands → `SYNC_TOO_OLD` (client asks user to update the app... the server, actually — the error names the direction for the client copy).
@@ -93,13 +93,13 @@ On-demand billing, TTL enabled, 2 GSIs, item-per-record (a tree-document would f
 | GuardianInvite | `CODE#G#<code>` | `CODE` | — | — | issuerId, kind, minorId?; TTL 72 h |
 | Record | `USER#<owner>` | `REC#<store>#<id>` | — | `USER#<owner>` / `CHG#<syncedAt>#<id>` | full client record + server `syncedAt`; store ∈ trees\|nodes\|checkins\|sessions |
 
-Access patterns: me = GetItem + two link queries · my minors = GSI1 · forest visit = two Queries (`begins_with REC#trees#` / `REC#nodes#`) + Lambda filter/strip · change feed = GSI2 Query after cursor · push = conditional PutItem per record (`attribute_not_exists(pk) OR rev < :incoming`) · username uniqueness & friendship mirroring = TransactWriteItems. Null SyncBase fields stored as absent attributes.
+Access patterns: me = GetItem + two link queries · my minors = GSI1 · forest visit = two Queries (`begins_with REC#trees#` / `REC#nodes#`) + Lambda filter/strip · change feed = GSI2 Query after cursor · push = conditional PutItem per record (`attribute_not_exists(pk) OR rev < :rev OR (rev = :rev AND updatedAt < :updatedAt)` — `lwwBeats` as a condition; the Record item mirrors `updatedAt` top-level for it) · username uniqueness & friendship mirroring = TransactWriteItems. Null SyncBase fields stored as absent attributes.
 
 ## 7. Lambda authz rules (per group)
 
 - **Every route:** JWT authorizer already verified the token; resolve `callerId = claims.sub`; load caller profile (404-shaped `UNAUTHENTICATED` if missing — deleted account with live token).
 - **/family/children/:id/***: require an ACTIVE GuardianLink (caller = guardian, :id = minor). Identity-admin routes (`reset-password`, `PATCH socialEnabled`, `DELETE child`) additionally require `kind === 'created'`. `DELETE /family/links/:linkId`: caller must be that link's guardian; refuse `LAST_GUARDIAN` when it is a `created` minor's last link.
-- **/friends/***: require caller `socialEnabled` (adults always). Redemption rate-limited (5 bad/hour → `RATE_LIMITED`). Accept requires being the request's `toId`; cancel its `fromId`.
+- **/friends/***: require caller `socialEnabled` (adults always). Redemption rate-limited (5 BAD attempts/hour → `RATE_LIMITED`; read-first, bump only on invalid/expired codes — successes never count). A second pending request to the same person is `CONFLICT`, race-proof via a per-direction deterministic requestId + conditional put. `maxFriends` is enforced at request time AND at accept (either side may have filled up while the request sat). Accept requires being the request's `toId`; cancel its `fromId`.
 - **GET /users/:id/forest**: relationship lookup → `full` (guardian→minor), `stripped` (minor→guardian, friend↔friend), else `NOT_FOUND`. Friend visits additionally require `socialEnabled` on BOTH sides.
 - **POST /users/:id/sync/push**: require GuardianLink guardian→:id (either kind). Same LWW law as own-push; records land in the minor's partition.
 

@@ -1,6 +1,6 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { API_CLIENT } from '../api/api-client';
-import { ApiError, ApiErrorCode, SyncRecord, SyncStore } from '../api/contracts';
+import { ApiError, ApiErrorCode, SyncRecord, SyncStore, lwwBeats } from '../api/contracts';
 import {
   CheckIn,
   SCHEMA_VERSION,
@@ -51,6 +51,10 @@ interface SyncStateSnapshot {
   lastSyncAt: number | null;
   /** A backup was restored: the next sync must run the restore-wins pass. */
   forcePending?: boolean;
+  /** Ids written since the last settled push — the clock-proof half of the
+   *  outbound scan (a backward clock jump makes updatedAt lie to the
+   *  watermark; explicit bookkeeping cannot be lied to). */
+  dirty?: Partial<Record<SyncStore, string[]>>;
 }
 
 export type SyncPhase = 'off' | 'mismatch' | 'idle' | 'syncing' | 'offline' | 'error';
@@ -89,10 +93,25 @@ export class SyncService {
   private watermark = 0;
   private cursor = '0';
   private forcePending = false;
+  /** Per-store ids awaiting a settled push — see SyncStateSnapshot.dirty. */
+  private readonly dirtyIds = new Map<SyncStore, Set<string>>();
   private pushTimer: ReturnType<typeof setTimeout> | null = null;
   /** Suppresses the local-write echo while a pull applies remote records. */
   private applyingRemote = false;
   private initialized = false;
+
+  constructor() {
+    // Signing in AFTER boot (the boot timer has long fired by then) must
+    // resume syncing on its own — otherwise the ✅ card lies until the next
+    // local write. Same for clearing a mismatch by switching accounts.
+    let prev: SyncPhase | null = null;
+    effect(() => {
+      const phase = this.phase();
+      const was = prev;
+      prev = phase;
+      if (phase === 'idle' && (was === 'off' || was === 'mismatch')) this.schedulePush();
+    });
+  }
 
   /** App initializer — meta reads only, zero network, fail-open. */
   async init(): Promise<void> {
@@ -109,13 +128,25 @@ export class SyncService {
         this.cursor = state.cursor ?? '0';
         this.forcePending = state.forcePending ?? false;
         this.lastSyncAtSignal.set(state.lastSyncAt ?? null);
+        for (const [store, ids] of Object.entries(state.dirty ?? {})) {
+          this.dirtyIds.set(store as SyncStore, new Set(ids));
+        }
       }
     } catch {
       /* memory-only session — sync stays off */
     }
 
-    onLocalWrite(() => {
-      if (this.applyingRemote || this.phase() === 'off' || this.phase() === 'mismatch') return;
+    onLocalWrite((message) => {
+      if (this.applyingRemote) return;
+      // Mark ALWAYS (even signed out): if the clock jumped backward these
+      // writes are invisible to the watermark, and the dirty set is what
+      // still gets them pushed after the next sign-in.
+      if (message.store !== 'meta') {
+        const set = this.dirtyIds.get(message.store) ?? new Set<string>();
+        for (const id of message.ids) set.add(id);
+        this.dirtyIds.set(message.store, set);
+      }
+      if (this.phase() === 'off' || this.phase() === 'mismatch') return;
       this.schedulePush();
     });
     if (typeof window !== 'undefined') {
@@ -210,23 +241,17 @@ export class SyncService {
     }, PUSH_DEBOUNCE_MS);
   }
 
-  /** Watermark scan: everything written after the last successful push —
-   *  including tombstones and archived records (a backup-grade copy). */
+  /** Watermark scan + dirty set: everything written after the last successful
+   *  push — including tombstones and archived records (a backup-grade copy). */
   private async pushDirty(): Promise<void> {
     const captureAt = Date.now();
-    const dirty: SyncRecord[] = [
-      ...this.gather('trees', this.trees),
-      ...this.gather('nodes', this.nodes),
-      ...this.gather('checkins', this.checkins),
-      ...this.gather('sessions', this.sessions),
-    ];
+    const dirty = this.gatherAll();
     for (let i = 0; i < dirty.length; i += PUSH_CHUNK) {
-      const result = await this.api.pushSync({
-        schemaVersion: SCHEMA_VERSION,
-        records: dirty.slice(i, i + PUSH_CHUNK),
-      });
+      const chunk = dirty.slice(i, i + PUSH_CHUNK);
+      const result = await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: chunk });
       // The server's winners correct us immediately (rev-LWW).
       for (const winner of result.serverRecords) await this.acceptRemote(winner);
+      this.settleDirty(chunk);
     }
     this.watermark = captureAt;
   }
@@ -238,12 +263,7 @@ export class SyncService {
    *  per-record, a restore is not a cloud wipe. */
   private async pushForceWins(): Promise<void> {
     const captureAt = Date.now();
-    const dirty: SyncRecord[] = [
-      ...this.gather('trees', this.trees),
-      ...this.gather('nodes', this.nodes),
-      ...this.gather('checkins', this.checkins),
-      ...this.gather('sessions', this.sessions),
-    ];
+    const dirty = this.gatherAll();
     for (let i = 0; i < dirty.length; i += PUSH_CHUNK) {
       const chunk = dirty.slice(i, i + PUSH_CHUNK);
       const result = await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: chunk });
@@ -270,18 +290,41 @@ export class SyncService {
       if (retry.length) {
         await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: retry });
       }
+      this.settleDirty(chunk);
+      this.settleDirty(retry);
     }
     this.watermark = captureAt;
   }
 
+  private gatherAll(): SyncRecord[] {
+    return [
+      ...this.gather('trees', this.trees),
+      ...this.gather('nodes', this.nodes),
+      ...this.gather('checkins', this.checkins),
+      ...this.gather('sessions', this.sessions),
+    ];
+  }
+
   private gather<T extends SyncBase>(store: SyncStore, repo: RecordsRepo<T>): SyncRecord[] {
     const out: SyncRecord[] = [];
+    const dirty = this.dirtyIds.get(store);
     for (const record of repo.byId().values()) {
-      if (record.updatedAt > this.watermark) {
+      if (record.updatedAt > this.watermark || dirty?.has(record.id)) {
         out.push({ store, record: record as unknown as Tree | TreeNode | CheckIn | TimerSession });
       }
     }
     return out;
+  }
+
+  /** Un-mark what a push settled. A record re-written DURING the push has a
+   *  higher rev than the copy we sent — it stays marked for the next pass. */
+  private settleDirty(pushed: SyncRecord[]): void {
+    for (const entry of pushed) {
+      const set = this.dirtyIds.get(entry.store);
+      if (!set?.has(entry.record.id)) continue;
+      const current = this.repoOf(entry.store).byId().get(entry.record.id);
+      if (!current || current.rev === entry.record.rev) set.delete(entry.record.id);
+    }
   }
 
   // ── inbound ───────────────────────────────────────────────────────────────
@@ -309,18 +352,22 @@ export class SyncService {
     }
   }
 
-  /** LWW-guarded landing: disk first, then memory — returns true if applied. */
+  /** LWW-guarded landing: disk first, then memory — returns true if applied.
+   *  Shared law (contracts.lwwBeats): exact ties go to the server's copy, so
+   *  two replicas that stamped the same rev converge instead of diverging. */
   private async acceptRemote(change: SyncRecord): Promise<boolean> {
     const repo = this.repoOf(change.store);
     const incoming = change.record;
     const current = repo.byId().get(incoming.id);
-    if (current && current.rev >= incoming.rev) return false;
+    if (current && lwwBeats(current, incoming)) return false;
     try {
       await put(change.store, incoming);
     } catch {
       /* memory-only session still benefits from the in-memory apply */
     }
     repo.applyExternal(incoming as never);
+    // The server's copy IS our copy now — nothing left to push for this id.
+    this.dirtyIds.get(change.store)?.delete(incoming.id);
     return true;
   }
 
@@ -356,9 +403,25 @@ export class SyncService {
         cursor: this.cursor,
         lastSyncAt: this.lastSyncAtSignal(),
         forcePending: this.forcePending,
+        dirty: Object.fromEntries(
+          [...this.dirtyIds].filter(([, ids]) => ids.size).map(([store, ids]) => [store, [...ids]]),
+        ),
       } satisfies SyncStateSnapshot);
     } catch {
       /* memory-only session */
     }
+  }
+
+  /** Practice-cloud reset (Settings): the device bookkeeping must reset WITH
+   *  the cloud — a kept cursor against a reseeded feed silently skips records,
+   *  and a kept link points at an account that no longer exists. */
+  async forgetEverything(): Promise<void> {
+    await this.disconnect();
+    this.watermark = 0;
+    this.cursor = '0';
+    this.forcePending = false;
+    this.dirtyIds.clear();
+    this.lastSyncAtSignal.set(null);
+    await this.persistState();
   }
 }

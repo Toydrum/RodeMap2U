@@ -1,6 +1,7 @@
 import { ApiClient } from './api-client';
 import {
   ApiError,
+  ApiErrorCode,
   CodeGrant,
   CreateChildRequest,
   CreateChildResponse,
@@ -17,6 +18,7 @@ import {
   SyncPushRequest,
   SyncPushResponse,
   UserProfile,
+  lwwBeats,
 } from './contracts';
 import { CheckIn, ExportEnvelope, SCHEMA_VERSION, TimerSession, Tree, TreeNode } from '../db/schema';
 import { AuthProvider } from '../auth/auth-provider';
@@ -366,18 +368,24 @@ export class MockApi implements ApiClient {
     const code = rawCode?.trim().toUpperCase().replace(/-/g, '');
     if (!code) throw new ApiError('VALIDATION', 'code required');
 
-    // Code-guessing brake: every redemption attempt counts (rolling hour).
+    // Code-guessing brake: only BAD redemptions count (contract law — five
+    // valid requests in an hour must never lock out the sixth).
     const bucket = Math.floor(Date.now() / 3_600_000);
-    const attempts = await mockNextSeq(`rate:${caller.userId}:${bucket}`);
-    if (attempts > LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+    const rateKey = `rate:${caller.userId}:${bucket}`;
+    const attempts = (await mockGet<{ key: string; value: number }>('kv', rateKey))?.value ?? 0;
+    if (attempts >= LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+    const badAttempt = async (errorCode: ApiErrorCode, message?: string): Promise<never> => {
+      await mockNextSeq(rateKey);
+      throw new ApiError(errorCode, message);
+    };
 
     const grant = await mockGet<MockCodeRow>('codes', code);
-    if (!grant || grant.kind !== 'friend') throw new ApiError('CODE_INVALID');
-    if (grant.expiresAt <= Date.now()) throw new ApiError('CODE_EXPIRED');
+    if (!grant || grant.kind !== 'friend') return badAttempt('CODE_INVALID');
+    if (grant.expiresAt <= Date.now()) return badAttempt('CODE_EXPIRED');
     if (grant.userId === caller.userId) throw new ApiError('VALIDATION', 'that is your own code');
 
     const target = await mockGet<MockUserRow>('users', grant.userId);
-    if (!target || !target.socialEnabled) throw new ApiError('CODE_INVALID');
+    if (!target || !target.socialEnabled) return badAttempt('CODE_INVALID');
     if (await this.friendshipBetween(caller.userId, grant.userId)) {
       throw new ApiError('CONFLICT', 'already friends');
     }
@@ -418,6 +426,13 @@ export class MockApi implements ApiClient {
     }
     const other = await mockGet<MockUserRow>('users', request.fromId);
     if (!other) throw new ApiError('NOT_FOUND');
+    // The cap holds on BOTH ends at accept time too — requests sit for days,
+    // and either side may have filled up since the request was sent.
+    const edges = await mockGetAll<MockFriendshipRow>('friendships');
+    const countOf = (id: string) => edges.filter((f) => f.userA === id || f.userB === id).length;
+    if (countOf(caller.userId) >= LIMITS.maxFriends || countOf(request.fromId) >= LIMITS.maxFriends) {
+      throw new ApiError('LIMIT_EXCEEDED');
+    }
     const [a, b] = [caller.userId, request.fromId].sort();
     const friendship: MockFriendshipRow = {
       friendshipId: `${a}~${b}`,
@@ -537,8 +552,9 @@ export class MockApi implements ApiClient {
     return this.pushInto(userId, req);
   }
 
-  /** Shared LWW write loop — accept iff incoming.rev > stored.rev, otherwise
-   *  reject STALE_REV and hand back the stored winner. */
+  /** Shared LWW write loop — accept iff `lwwBeats(incoming, stored)` (the
+   *  contract's one ordering: rev, then updatedAt; exact ties keep the stored
+   *  copy), otherwise reject STALE_REV and hand back the stored winner. */
   private async pushInto(ownerId: string, req: SyncPushRequest): Promise<SyncPushResponse> {
     if (!Array.isArray(req.records)) throw new ApiError('VALIDATION');
     if (req.records.length > LIMITS.syncPushMax) throw new ApiError('LIMIT_EXCEEDED');
@@ -551,7 +567,7 @@ export class MockApi implements ApiClient {
       const record = entry.record;
       const key = `${ownerId}|${entry.store}|${record.id}`;
       const stored = await mockGet<MockRecordRow>('records', key);
-      if (stored && (stored.record.rev ?? 0) >= record.rev) {
+      if (stored && !lwwBeats(record, stored.record)) {
         rejected.push({ id: record.id, reason: 'STALE_REV' });
         serverRecords.push({ store: stored.store, record: stored.record });
         continue;

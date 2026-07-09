@@ -231,6 +231,20 @@ select {
   }
 }
 
+/* Sheets scroll inside themselves, never chain into the page (global for the
+   same reason as .card.block — sheet markup lives in child components). The
+   background page itself is locked by SheetDirective while any sheet is open. */
+.confirm-backdrop,
+.confirm.card {
+  overscroll-behavior: contain;
+}
+
+/* A placeholder that doesn't fit its input (narrow phones) fades out with an
+   honest ellipsis instead of a hard cut. */
+input::placeholder {
+  text-overflow: ellipsis;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

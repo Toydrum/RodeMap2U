@@ -30,5 +30,8 @@
     <p class="hint">{{ i18n.t().common.loading }}</p>
   } @else if (errorText()) {
     <p class="error-line" role="alert">{{ errorText() }}</p>
+    @if (visit.error() === 'UNAUTHENTICATED') {
+      <a class="btn btn-primary" routerLink="/account">{{ i18n.t().visita.goSignIn }}</a>
+    }
   }
 </div>

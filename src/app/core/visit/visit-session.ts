@@ -32,10 +32,25 @@ export class VisitSession {
   readonly editable = () => this.detailSignal() === 'full';
 
   async load(userId: string): Promise<void> {
-    if (this.userIdSignal() === userId && this.ownerSignal()) return;
+    // Route re-entry to the same forest (the injector survives): paint the
+    // snapshot we already hold, but ALWAYS revalidate in the background — a
+    // branch planted from another tab/device since the last visit must show
+    // up without a full reload.
+    if (this.userIdSignal() === userId && this.ownerSignal()) {
+      void this.refetch(userId);
+      return;
+    }
     this.userIdSignal.set(userId);
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
+    try {
+      await this.refetch(userId);
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  private async refetch(userId: string): Promise<void> {
     try {
       const snapshot = await this.api.getForest(userId);
       this.ownerSignal.set(snapshot.owner);
@@ -46,8 +61,6 @@ export class VisitSession {
       this.nodes.resetTo(snapshot.nodes);
     } catch (error) {
       this.errorSignal.set(error instanceof ApiError ? error.code : 'unknown');
-    } finally {
-      this.loadingSignal.set(false);
     }
   }
 }

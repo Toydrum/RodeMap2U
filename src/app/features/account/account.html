@@ -192,6 +192,9 @@
 
     @case ('newPassword') {
       <section class="stage" aria-live="polite">
+        <button type="button" class="btn btn-ghost step-back" (click)="go('signIn')">
+          ← {{ i18n.t().common.back }}
+        </button>
         <h1>{{ i18n.t().account.newPasswordTitle }}</h1>
         <p class="sub">{{ i18n.t().account.newPasswordBody }}</p>
 
@@ -342,6 +345,9 @@
 
         @if (auth.sessionStale()) {
           <p class="hint">{{ i18n.t().account.sessionStale }}</p>
+          <button type="button" class="btn btn-soft" (click)="go('signIn')">
+            {{ i18n.t().account.signInCta }}
+          </button>
         }
 
         <div class="profile-actions">

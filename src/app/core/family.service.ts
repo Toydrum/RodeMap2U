@@ -8,9 +8,10 @@ import {
   FamilyInviteRequest,
   FriendsResponse,
   MeResponse,
+  UserProfile,
 } from './api/contracts';
 import { AuthService } from './auth/auth.service';
-import { get, put } from './db/idb';
+import { del, get, put } from './db/idb';
 
 /**
  * The family facade — signals over GET /me and the family operations.
@@ -93,6 +94,18 @@ export class FamilyService {
     this.lastErrorSignal.set(null);
   }
 
+  /** Practice-cloud reset: the cached snapshot must go WITH the cloud — the
+   *  reseeded accounts share ids with the wiped ones, so a kept cache would
+   *  paint a family that no longer exists. */
+  async clearCache(): Promise<void> {
+    this.clear();
+    try {
+      await del('meta', META_FAMILY_ME);
+    } catch {
+      /* memory-only session */
+    }
+  }
+
   // ── operations (each returns a value for the sheet, then refreshes) ───────
 
   async createChild(username: string, displayName: string): Promise<CreateChildResponse | null> {
@@ -117,14 +130,14 @@ export class FamilyService {
     );
   }
 
-  async setChildSocial(userId: string, socialEnabled: boolean): Promise<boolean> {
-    return (
-      (await this.run(async () => {
-        await this.api.patchChild(userId, { socialEnabled });
-        await this.refresh();
-        return true;
-      })) ?? false
-    );
+  /** Returns the SERVER's answer so the caller paints truth — a failed
+   *  refresh must never resurrect the pre-toggle value on the switch. */
+  async setChildSocial(userId: string, socialEnabled: boolean): Promise<UserProfile | null> {
+    return this.run(async () => {
+      const profile = await this.api.patchChild(userId, { socialEnabled });
+      await this.refresh();
+      return profile;
+    });
   }
 
   async unlink(linkId: string): Promise<boolean> {

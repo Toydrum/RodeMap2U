@@ -125,8 +125,10 @@ export type TextSize = 'md' | 'lg' | 'xl';
  *                     (core/family.service.ts, stale-while-revalidate).
  *   'account.link'  — which account this device's forest travels with
  *                     (core/sync/sync.service.ts; null accountId = unlinked).
- *   'sync.state'    — push watermark + pull cursor + lastSyncAt
+ *   'sync.state'    — push watermark + pull cursor + lastSyncAt + dirty ids
  *                     (core/sync/sync.service.ts bookkeeping).
+ *   'legacy.migratedAt' — the pre-rename DB question is settled for this
+ *                     device (core/db/idb.ts, written WITH the copied rows).
  * Auth/sync keys are deliberately NOT part of ExportEnvelope: backups are
  * shared files, and identity/link state is device state, not forest data.
  */

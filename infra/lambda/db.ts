@@ -110,6 +110,9 @@ export interface RecordItem {
   store: SyncStore;
   record: Tree | TreeNode | CheckIn | TimerSession;
   rev: number;
+  /** Mirrors record.updatedAt — the LWW tiebreak lives in the condition
+   *  expression, and DynamoDB can only compare top-level attributes. */
+  updatedAt: number;
   syncedAt: number;
 }
 

@@ -18,6 +18,7 @@ import { resetMockCloud } from '../../core/api/mock-cloud';
 import { FamiliaCard } from '../familia/familia-card';
 import { AmigosCard } from '../amigos/amigos-card';
 import { SyncService } from '../../core/sync/sync.service';
+import { FamilyService } from '../../core/family.service';
 
 @Component({
   selector: 'app-settings',
@@ -67,6 +68,7 @@ export class SettingsPage {
   protected readonly trees = inject(TreesRepo);
   protected readonly auth = inject(AuthService);
   protected readonly sync = inject(SyncService);
+  private readonly fam = inject(FamilyService);
   protected readonly isMock = APP_CONFIG.backend === 'mock';
   private readonly backup = inject(BackupService);
   private readonly toast = inject(ToastService);
@@ -95,11 +97,20 @@ export class SettingsPage {
   }
 
   /** Rehearsal mode only: wipe the practice cloud; it reseeds on next use.
-   *  Also signs out — the session's user may no longer exist afterwards. */
+   *  Also signs out — the session's user may no longer exist afterwards —
+   *  and resets the device-side bookkeeping (link, cursor, family cache):
+   *  kept against a reseeded cloud they'd skip records or paint ghosts. */
   protected async resetMockCloud(): Promise<void> {
     await this.auth.signOut();
-    await resetMockCloud();
-    this.toast.show({ message: this.i18n.t().settings.mockResetDone });
+    await this.sync.forgetEverything();
+    await this.fam.clearCache();
+    const result = await resetMockCloud();
+    this.toast.show({
+      message:
+        result === 'blocked'
+          ? this.i18n.t().settings.mockResetBlocked
+          : this.i18n.t().settings.mockResetDone,
+    });
   }
 
   protected readonly importing = signal(false);
