@@ -49,3 +49,7 @@ Thumbs.db
 
 # Verify-script screenshot debris (scripts run with unset SHOT_DIR)
 /undefined/
+
+# verify-script screenshot debris (written to the repo root by tools/verify-*.mjs)
+/ring-*.png
+/tap-*.png
