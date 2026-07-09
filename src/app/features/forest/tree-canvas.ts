@@ -29,6 +29,7 @@ import {
 import { FlowerSpec, flowerFor } from './flora';
 import { TreeForm, formFor } from './tree-forms';
 import { FlowerGlyph } from './flower';
+import { CHAR_W, LABEL_BASELINE, LabelBlock, labelInputsFrom, packLabels, wrapTitle } from './tree-labels';
 
 interface LeafDecoration {
   x: number;
@@ -533,81 +534,39 @@ export class TreeCanvas {
     return out;
   });
 
-  protected showLabel(point: LayoutPoint): boolean {
-    // Focused and current places always speak their name.
-    if (this.focusedId() === point.node.id) return true;
-    if (this.tree().currentNodeId === point.node.id) return true;
-    // Chain links stay quiet except the NEXT step — a path, not label soup.
-    if (point.chain) return this.nextStepIds().has(point.node.id);
-    return this.k() >= 0.55;
-  }
-
-  /** Deterministic horizontal nudge so sibling labels stop stacking. */
-  protected labelX(point: LayoutPoint): number {
-    if (point.depth === 0) return 0;
-    return (hash(point.node.id + ':lx') % 21) - 10;
-  }
-
-  protected labelText(point: LayoutPoint): string {
-    return this.labelShelf().get(point.node.id)?.text ?? this.truncate(point.node.title, 20);
-  }
-
-  /** Alternate label offsets so close siblings don't collide. */
-  /** Collision-aware labels: sweep each depth left→right and drop every
-   *  name onto the first of three shelves where it fits without crashing
-   *  its neighbor — long names stack instead of overlapping. */
-  private readonly labelShelf = computed(() => {
-    const placed = new Map<string, { shelf: number; text: string }>();
-    // Group by VISUAL row band (lift included): staggered rows get their own
-    // shelves instead of fighting nodes that merely share a depth number.
-    const byBand = new Map<number, LayoutPoint[]>();
-    for (const p of this.layout().points) {
-      const band = Math.round(-(p.rowY ?? -p.depth * LEVEL_H) / 24);
-      const group = byBand.get(band) ?? [];
-      group.push(p);
-      byBand.set(band, group);
-    }
-    const GAP = 16;
-    for (const group of byBand.values()) {
-      // Chain links manage their own (mostly silent) labels — see showLabel.
-      const swept = group.filter((p) => !p.chain);
-      group.length = 0;
-      group.push(...swept);
-      const sorted = [...group].sort(
-        (a, b) => a.x + this.labelX(a) - (b.x + this.labelX(b)),
-      );
-      const lastEnd = [-Infinity, -Infinity, -Infinity];
-      for (const p of sorted) {
-        const cx = p.x + this.labelX(p);
-        let text = this.truncate(p.node.title, 20);
-        let width = text.length * 8.1 + 14;
-        let shelf = lastEnd.findIndex((end) => cx - width / 2 > end + GAP);
-        if (shelf === -1) {
-          // Crowded stretch: shrink this one name until it fits somewhere.
-          text = this.truncate(p.node.title, 9);
-          width = text.length * 8.1 + 14;
-          shelf = lastEnd.findIndex((end) => cx - width / 2 > end + GAP);
-        }
-        if (shelf === -1) {
-          // Truly saturated: better a quiet node (name lives in its sheet)
-          // than label soup — except your place and your focus, which speak.
-          if (this.tree().currentNodeId === p.node.id || this.focusedId() === p.node.id) {
-            shelf = lastEnd.indexOf(Math.min(...lastEnd));
-          } else {
-            placed.set(p.node.id, { shelf: 0, text: '' });
-            continue;
-          }
-        }
-        lastEnd[shelf] = cx + width / 2;
-        placed.set(p.node.id, { shelf, text });
-      }
-    }
-    return placed;
+  /** The label field: every branch name, wrapped and packed ONCE per layout
+   *  change — never per zoom, never per focus. Visibility is therefore
+   *  identical at every k by construction (tree-labels.ts owns the law). */
+  private readonly labelField = computed(() => {
+    const inputs = labelInputsFrom(this.layout().points, {
+      currentNodeId: this.tree().currentNodeId,
+      labeledChainIds: this.nextStepIds(),
+      // Release-2 hook («la luz»): sunlit branches will read slightly larger.
+      // The packer reserves the width, so emphasis can never cause overlap.
+      emphasisOf: () => 1,
+      leadGlyphOf: () => 0,
+    });
+    return packLabels(inputs);
   });
 
-  private truncate(title: string, max: number): string {
-    return title.length > max ? title.slice(0, max - 1).trimEnd() + '…' : title;
+  protected labelFor(point: LayoutPoint): LabelBlock | undefined {
+    return this.labelField().get(point.node.id);
   }
+
+  /** Focused node's FULL name as an overlay cartouche painted on top —
+   *  tabbing must never reflow the packed field. Covers silent chain links
+   *  too (focus always speaks, like it always has). */
+  protected readonly focusTag = computed(() => {
+    const id = this.focusedId();
+    if (!id) return null;
+    const point = this.layout().byId.get(id);
+    if (!point) return null;
+    const factor = 1.15;
+    const maxChars = Math.max(8, Math.floor(180 / (CHAR_W * factor)));
+    const { lines } = wrapTitle(point.node.title, maxChars, 6);
+    const row = point.rowY ?? -point.depth * LEVEL_H;
+    return { point, lines, factor, yRel: row + LABEL_BASELINE - point.y };
+  });
 
   /** The growing sapling leans along its limb's incoming direction —
    *  tempered toward the sky (phototropism), never lying flat. Reads the
@@ -619,15 +578,6 @@ export class TreeCanvas {
     const deg = (Math.atan2(point.y - plan.geom.c2y, point.x - plan.geom.c2x) * 180) / Math.PI + 90;
     const normalized = ((deg + 180) % 360) - 180;
     return Math.max(-70, Math.min(70, normalized * 0.8));
-  }
-
-  protected labelY(point: LayoutPoint): number {
-    // Anchor labels to the node's VISUAL row (lift included, jitter canceled)
-    // so a name always sits right under its own branch — never drifting to
-    // some nominal depth line far below a lifted crown.
-    const row = point.rowY ?? -point.depth * LEVEL_H;
-    const jitter = point.y - row;
-    return 27 + (this.labelShelf().get(point.node.id)?.shelf ?? 0) * 21 - jitter;
   }
 
   protected nodeLabel(point: LayoutPoint): string {

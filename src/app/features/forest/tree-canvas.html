@@ -249,11 +249,27 @@
           </g>
         }
 
-        <!-- Title tag -->
-        @if (showLabel(point) && labelText(point)) {
-          <g class="tag" aria-hidden="true">
-            <text class="title" [attr.x]="labelX(point)" [attr.y]="labelY(point)" text-anchor="middle">{{ labelText(point) }}</text>
-          </g>
+        <!-- Title tag: multi-line, packed globally — never hidden by zoom or
+             crowding, never colliding (tree-labels.ts). The focused node's
+             packed label yields to the full cartouche painted on top. -->
+        @if (labelFor(point); as block) {
+          @if (focusedId() !== point.node.id) {
+            <g class="tag" aria-hidden="true">
+              <text
+                class="title"
+                text-anchor="middle"
+                [style.font-size.px]="12.5 * block.factor"
+                [attr.y]="block.y0 - point.y"
+              >
+                @for (line of block.lines; track $index) {
+                  <tspan [attr.x]="block.cx - point.x" [attr.dy]="$index === 0 ? 0 : '1.08em'">{{ line }}</tspan>
+                }
+                @if (block.tail) {
+                  <tspan class="fade-tail">{{ block.tail }}</tspan>
+                }
+              </text>
+            </g>
+          }
         }
 
         <!-- "+" bud: plant a branch right here (focused node only) -->
@@ -273,6 +289,27 @@
             <path d="M -5.5 0 H 5.5 M 0 -5.5 V 5.5" class="bud-plus" />
           </g>
         }
+      </g>
+    }
+
+    <!-- Focused name — the FULL title, painted last (on top). Tabbing shows
+         it here instead of reflowing the packed label field. -->
+    @if (focusTag(); as tag) {
+      <g
+        class="tag focus-tag"
+        aria-hidden="true"
+        [attr.transform]="'translate(' + tag.point.x + ' ' + tag.point.y + ')'"
+      >
+        <text
+          class="title"
+          text-anchor="middle"
+          [style.font-size.px]="12.5 * tag.factor"
+          [attr.y]="tag.yRel"
+        >
+          @for (line of tag.lines; track $index) {
+            <tspan x="0" [attr.dy]="$index === 0 ? 0 : '1.08em'">{{ line }}</tspan>
+          }
+        </text>
       </g>
     }
   </g>
