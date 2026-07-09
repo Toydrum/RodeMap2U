@@ -164,11 +164,15 @@ export class TreeCanvas {
     return layoutTree(roots, (n) => this.nodes.childrenOf(n));
   });
 
-  /** This tree's flower species (shape + colors from its accent). */
-  protected readonly species = computed<FlowerSpec>(() => flowerFor(this.tree().accent));
+  /** This tree's flower species (color family from its accent, cousin
+   *  silhouette from its id — same accent, sibling blooms). */
+  protected readonly species = computed<FlowerSpec>(() =>
+    flowerFor(this.tree().accent, this.tree().id),
+  );
 
-  /** This tree's silhouette personality — "cada árbol su porte". */
-  protected readonly form = computed<TreeForm>(() => formFor(this.tree().accent));
+  /** This tree's silhouette personality — "cada árbol su porte": the accent
+   *  picks the family, the id makes it an individual (form-dial jitter). */
+  protected readonly form = computed<TreeForm>(() => formFor(this.tree().accent, this.tree().id));
 
   protected readonly roots = computed(() => this.layout().points.filter((p) => p.parent === null));
 
@@ -252,10 +256,19 @@ export class TreeCanvas {
       let leader = normal[0];
       for (const c of normal) if ((c.mass ?? 1) > (leader.mass ?? 1)) leader = c;
 
-      const parentHand: 1 | -1 = hash(parent.node.id) % 2 === 0 ? 1 : -1;
+      // zigzag habit (birch): the leader hand alternates by depth instead of
+      // by hash — the trunk kinks side to side on its way up.
+      const zigzag = f.habit === 'zigzag';
+      const parentHand: 1 | -1 = zigzag
+        ? parent.depth % 2 === 0
+          ? 1
+          : -1
+        : hash(parent.node.id) % 2 === 0
+          ? 1
+          : -1;
       const leaderGeom = edgeGeometry(parent, leader, wood.bow, {
         upBias: Math.min(0.95, f.upBias + 0.5 * f.leaderBias),
-        bowMul: f.bowMul * (1 - f.leaderBias),
+        bowMul: f.bowMul * (1 - f.leaderBias) * (zigzag ? 1.25 : 1),
         hand: (parentHand * -1) as 1 | -1,
       });
       const leaderW0 = width(parent) * 0.98;
@@ -278,14 +291,29 @@ export class TreeCanvas {
       // the crotch never welds into one wooden blob.
       const tMax = sides.length >= 4 ? Math.min(0.92, f.forkTMax + 0.12) : f.forkTMax;
       const span = tMax - f.forkTMin;
-      const collarMul = sides.length >= 4 ? 0.78 : 0.9;
+      const tiered = f.habit === 'tiered';
+      const collarMul = (sides.length >= 4 ? 0.78 : 0.9) * (tiered ? 0.8 : 1);
       sides.forEach((c, i) => {
         const h = hash(c.node.id + ':fork');
         const t = f.forkTMin + span * ((i + 0.35 + (h % 31) / 120) / Math.max(1, sides.length));
         const start = edgePointAt(parent, leader, leaderGeom, t);
+        // Habits bend the ARRIVAL only (positions untouched):
+        // weeping — tip limbs hang (negative upBias, the willow's fall);
+        // tiered — side limbs sweep out-and-slightly-down (conifer shelves).
+        let b = f.upBias + ((h >> 5) % 21) / 100 - 0.1;
+        let lo = 0.1;
+        let hi = 0.9;
+        if (f.habit === 'weeping' && tip(c)) {
+          b -= 0.55;
+          lo = -0.35;
+        } else if (tiered) {
+          b -= 0.9;
+          lo = -0.18;
+          hi = 0.08;
+        }
         const geom = edgeGeometry(start, c, wood.bow, {
-          upBias: Math.max(0.1, Math.min(0.9, f.upBias + ((h >> 5) % 21) / 100 - 0.1)),
-          bowMul: f.bowMul,
+          upBias: Math.max(lo, Math.min(hi, b)),
+          bowMul: f.bowMul * (tiered ? 0.6 : 1),
         });
         // A limb may flare at its collar but never outgrow the wood it forks from.
         const collar = collarMul * ribbonWidthAt(leaderW0, leaderW1, t);
@@ -320,17 +348,22 @@ export class TreeCanvas {
       }),
   );
 
-  /** Each tree grows its own wood: sinuosity, girth and bark family. */
+  /** Each tree grows its own wood: sinuosity, girth and bark family.
+   *  Birch identity: a pale wash mixed over whichever family it drew. */
   protected readonly wood = computed(() => {
     const h = hash(this.tree().id + ':wood');
+    const family = [
+      'var(--rm-bark)',
+      'color-mix(in srgb, var(--rm-bark) 68%, #4a3826)',
+      'color-mix(in srgb, var(--rm-bark) 72%, #94815f)',
+    ][h % 3];
     return {
       bow: 0.85 + (h % 46) / 100,
       girth: 0.88 + ((h >> 5) % 28) / 100,
-      barkBase: [
-        'var(--rm-bark)',
-        'color-mix(in srgb, var(--rm-bark) 68%, #4a3826)',
-        'color-mix(in srgb, var(--rm-bark) 72%, #94815f)',
-      ][h % 3],
+      barkBase:
+        this.form().barkTint === 'pale'
+          ? `color-mix(in srgb, ${family} 42%, #e8e2d2)`
+          : family,
     };
   });
 
@@ -432,13 +465,16 @@ export class TreeCanvas {
     const count = f.padCount[0] + (h % (f.padCount[1] - f.padCount[0] + 1));
     const tLo = status === 'growing' ? 0.6 : 0.82;
     const tHi = status === 'growing' ? 0.78 : 0.98;
+    // Weeping tips hang — their foliage gathers BELOW the tip, like a
+    // willow's curtain, instead of crowning above it.
+    const droop = f.habit === 'weeping' ? 1 : -1;
     const pads: PadDecoration[] = [];
     for (let i = 0; i < count; i++) {
       const hi = hash(point.node.id + ':pad:' + i);
       const t = tLo + ((i + (hi % 30) / 100) / count) * (tHi - tLo);
       const at = edgePointAt(start, point, geometry, Math.min(0.99, t));
       const x = at.x + (((hi >> 3) % (f.padSpread * 2 + 1)) - f.padSpread);
-      const y = at.y - ((hi >> 6) % Math.max(2, Math.round(f.padSpread * 0.8)));
+      const y = at.y + droop * ((hi >> 6) % Math.max(2, Math.round(f.padSpread * 0.8)));
       // The growing sapling glyph must stay visible through its crown.
       if (status === 'growing' && Math.hypot(x - point.x, y - point.y) < 18) continue;
       pads.push({

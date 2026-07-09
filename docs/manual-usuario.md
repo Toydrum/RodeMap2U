@@ -104,7 +104,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 
 - **Cada árbol se dibuja con su forma real**: un árbol con muchas ramas y logros se ve frondoso y con flores; uno recién plantado es un brotecito. El crecimiento se *ve*.
 - **Y su tamaño se gana**: entre más ramas y florecimientos 🌸 carga un árbol, más grande se planta en el prado (las flores pesan doble). De un vistazo sabes cuál área trae más trabajo — sin números, sin listas: puro bosque.
-- **Cada color es una especie con su porte**: unos crecen como **roble** redondo y denso, otros como **acacia** de copas planas con aire entre ellas, otros **esbeltos** hacia el cielo. Todos comparten lo esencial de un árbol de verdad: un tronco continuo que serpentea hasta la copa, ramas que se desprenden de él a distintas alturas y **se engrosan según lo que cargan**, y follaje que se junta en las puntas.
+- **Cada color es una especie con su porte**: **roble** redondo y denso, **acacia** de copas planas con aire entre ellas, **esbeltos** hacia el cielo, **sauce llorón** que deja caer sus puntas, **abedul** pálido que zigzaguea al subir y **conífera** de ramas en pisos. Todos comparten lo esencial de un árbol de verdad: un tronco continuo que serpentea hasta la copa, ramas que se desprenden de él a distintas alturas y **se engrosan según lo que cargan**, y follaje que se junta en las puntas. Y ni dos árboles del mismo color son idénticos — cada uno trae su propio porte y su propia variante de flor (hay ocho formas de flor en el bosque).
 - **Tus árboles brotan repartidos por el prado** — cada uno en su lugarcito, con su propia variación natural, siempre con los pies en el pasto (los de atrás, junto a la orilla del arroyo, se ven más pequeñitos — **nunca dentro del agua**). Cuando ya no caben en un claro, aparecen las **flechitas ‹ ›** y los puntitos: tu bosque se organiza en **claros** y las flechas te pasean entre ellos. Al plantar un árbol nuevo, el prado te lleva a su claro.
 - Bajo cada árbol hay un **letrerito** con su nombre y su cuenta: cuántas ramas tiene y cuántas han florecido (🌸).
 - **Cuando juntas tres árboles o más, aparece un arroyo** cruzando tu pradera.
@@ -378,7 +378,7 @@ Sí: planta un árbol por cada una. Con tres o más, el arroyo aparece en tu bos
 | **Varios a la vez** | Sembrar muchas ramitas de un jalón: una por línea, sangría = hija |
 | **La tablita** 📋 | La lista de ramas del árbol: un toque ubica, dos toques abren |
 | **Los claros** | Las "páginas" del prado; las flechitas ‹ › pasean entre ellos |
-| **El porte** | La especie de tu árbol según su color: roble, acacia o esbelto |
+| **El porte** | La especie de tu árbol según su color: roble, acacia, esbelto, sauce, abedul o conífera |
 | **La llave** 🗝 | Tu cuenta (en Ajustes → Cuenta): hoy en modo ensayo, mañana el puente a familia y amistades |
 | **El pajarito** | Tu compañero de sesión — solo está ahí, contigo; no mide nada |
 | **Estás aquí** | Tu posición actual en un árbol (el halo que respira) |

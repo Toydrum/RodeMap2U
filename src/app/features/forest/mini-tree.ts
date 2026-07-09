@@ -150,7 +150,9 @@ const PAD = 12;
 export class MiniTree {
   readonly tree = input.required<Tree>();
 
-  protected readonly species = computed<FlowerSpec>(() => flowerFor(this.tree().accent));
+  protected readonly species = computed<FlowerSpec>(() =>
+    flowerFor(this.tree().accent, this.tree().id),
+  );
 
   protected readonly W = W;
   protected readonly H = H;
@@ -193,7 +195,7 @@ export class MiniTree {
     for (const p of layout.points) {
       if (p.parent) scaled.get(p.node.id)!.parent = scaled.get(p.parent.node.id)!;
     }
-    const form = formFor(this.tree().accent);
+    const form = formFor(this.tree().accent, this.tree().id);
 
     const branches: MiniBranch[] = [];
     const dots: MiniDot[] = [];
@@ -225,11 +227,20 @@ export class MiniTree {
           wTop,
         );
       } else {
-        const geometry = edgeGeometry(sp.parent, sp, s * 0.9, {
-          upBias: form.upBias,
-          bowMul: form.bowMul,
-        });
         const isLeaf = this.nodes.childrenOf(p.node).length === 0;
+        // Habit echoes — the mini keeps the big tree's soul: willows hang
+        // their tips, birches kink by depth, conifers sweep their shelves.
+        const habitUp =
+          form.habit === 'weeping' && isLeaf
+            ? Math.max(-0.3, form.upBias - 0.5)
+            : form.habit === 'tiered' && isLeaf
+              ? -0.1
+              : form.upBias;
+        const geometry = edgeGeometry(sp.parent, sp, s * 0.9, {
+          upBias: habitUp,
+          bowMul: form.bowMul,
+          ...(form.habit === 'zigzag' ? { hand: (p.depth % 2 === 0 ? 1 : -1) as 1 | -1 } : {}),
+        });
         const w0 = Math.max(2.8, widthForMass(sp.parent.mass ?? 1, form.girthMul) * 0.82 * s * wBoost);
         const w1 = Math.max(1.8, widthForMass(sp.mass ?? 1, form.girthMul) * (isLeaf ? 0.45 : 0.9) * s * wBoost);
         branches.push({
@@ -260,14 +271,18 @@ export class MiniTree {
         // Tip pads — the crown's volume, per the tree's porte.
         if (isLeaf && p.node.status !== 'resting') {
           const hp = hashAngle(p.node.id + ':mpad');
-          const padN = form.id === 'acacia' ? 2 : form.id === 'oak' ? 2 : 1;
+          const flat = form.id === 'acacia' || form.id === 'conifer';
+          const round = form.id === 'oak' || form.id === 'willow';
+          const padN = flat || round ? 2 : 1;
+          // Willows drape their tuft BELOW the tip — the curtain, miniaturized.
+          const droop = form.habit === 'weeping' ? 1 : -1;
           for (let i = 0; i < padN; i++) {
             dots.push({
               x: sp.x + ((hashAngle(p.node.id + ':mpad:' + i) % 9) - 4),
-              y: sp.y - 2 - i * 3,
+              y: sp.y + droop * (2 + i * 3),
               kind: 'pad',
               angle: (hp % 25) - 12,
-              size: form.id === 'acacia' ? 6.5 : form.id === 'oak' ? 4.8 : 3.6,
+              size: flat ? 6.5 : round ? 4.8 : 3.6,
             });
           }
         }
@@ -287,7 +302,11 @@ export class MiniTree {
 
   private woodFill(point: LayoutPoint): string {
     const barkPct = Math.max(30, 92 - point.depth * 16);
-    const base = `color-mix(in srgb, var(--rm-bark, #6f5640) ${barkPct}%, var(--rm-twig, #7f9a63))`;
+    let base = `color-mix(in srgb, var(--rm-bark, #6f5640) ${barkPct}%, var(--rm-twig, #7f9a63))`;
+    // Birch echo: the pale wash reads in the meadow too.
+    if (formFor(this.tree().accent, this.tree().id).barkTint === 'pale') {
+      base = `color-mix(in srgb, ${base} 42%, #e8e2d2)`;
+    }
     return point.node.origin === 'branch'
       ? `color-mix(in srgb, ${base} 72%, var(--status-branched))`
       : base;

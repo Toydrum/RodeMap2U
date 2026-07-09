@@ -145,7 +145,7 @@ export class ForestPage {
         x: 30 + (h % 940),
         y: 196 + ((h >> 8) % 52),
         scale: 0.42 + ((h >> 4) % 20) / 100,
-        spec: flowerFor(tree?.accent ?? 'rose'),
+        spec: flowerFor(tree?.accent ?? 'rose', node.treeId),
         sway: -8 + (h % 17),
       };
     });
