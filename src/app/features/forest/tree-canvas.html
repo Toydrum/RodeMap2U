@@ -171,9 +171,18 @@
              to the NEAREST node, so discs can never swallow a neighbor. -->
         <circle class="hit" [attr.r]="hitRadius()" fill="transparent" />
 
-        <!-- «A pleno sol»: warm light pooled under everything else -->
+        <!-- «A pleno sol»: a REAL sun — bright pooled light + defined rays,
+             pooled under everything else. Unmissable on purpose (ADHD-first). -->
         @if (lightOf(point) === 'sunlit') {
-          <circle class="light-halo" r="26" fill="url(#sun-glow)" aria-hidden="true" />
+          <circle class="light-halo" r="40" fill="url(#sun-glow)" aria-hidden="true" />
+          <g class="sun-rays" aria-hidden="true">
+            @for (angle of [0, 45, 90, 135, 180, 225, 270, 315]; track angle) {
+              <path
+                d="M 0 -28 L 2.6 -39 L -2.6 -39 Z"
+                [attr.transform]="'rotate(' + angle + ')'"
+              />
+            }
+          </g>
         }
 
         <!-- Focus ring (drawn — SVG has no native outline) -->
@@ -208,48 +217,59 @@
             </g>
           }
           @case ('growing') {
-            <!-- A little sapling: growing means already becoming a tree.
-                 It leans along the limb it sprouts from. -->
+            <!-- El capullo: the tree's own flower, still closed as a bell —
+                 it will OPEN into the species bloom when the branch achieves.
+                 Leans along the limb it grows from, like a real bud. -->
             <g
-              class="glyph sapling"
-              [style.color]="statusColor(point.node)"
-              [attr.transform]="'rotate(' + saplingAngle(point) + ')'"
+              class="glyph capullo"
+              [attr.transform]="'rotate(' + saplingAngle(point) + ')' + glyphScale(point)"
             >
-              <path class="sap-trunk" d="M -2 8 C -1.4 2 -0.9 -3 0 -8.5 C 0.9 -3 1.6 2 2.2 8 Z" />
-              <path class="sap-stem" d="M 0 -7 C -4 -10.5 -7 -12.5 -9.5 -13.5" />
-              <path class="sap-stem" d="M 0 -8.5 C 0.6 -13 0.9 -16.5 1 -19.5" />
-              <path class="sap-stem" d="M 0 -7 C 4 -10 7 -11.5 9.5 -12" />
-              <g transform="translate(-9.5 -13.5) rotate(-42)">
-                <path d="M 0 0 Q 4.4 -4.4 0 -8.8 Q -4.4 -4.4 0 0 Z" fill="currentColor" />
-              </g>
-              <g transform="translate(1 -19.5) rotate(2)">
-                <path d="M 0 0 Q 4.8 -4.8 0 -9.6 Q -4.8 -4.8 0 0 Z" fill="currentColor" />
-              </g>
-              <g transform="translate(9.5 -12) rotate(44)">
-                <path d="M 0 0 Q 4.4 -4.4 0 -8.8 Q -4.4 -4.4 0 0 Z" fill="currentColor" opacity="0.82" />
-              </g>
-              <g transform="translate(-4.5 -8.5) rotate(-72) scale(0.72)">
-                <path d="M 0 0 Q 4.4 -4.4 0 -8.8 Q -4.4 -4.4 0 0 Z" fill="currentColor" opacity="0.75" />
-              </g>
-              <g transform="translate(5 -8) rotate(70) scale(0.68)">
-                <path d="M 0 0 Q 4.4 -4.4 0 -8.8 Q -4.4 -4.4 0 0 Z" fill="currentColor" opacity="0.7" />
+              <path class="capullo-stem" d="M 0 8 C 0.3 5 0.4 3 0.3 1" />
+              <g transform="translate(0 1)">
+                <path
+                  class="capullo-body"
+                  d="M 0 2 C -5.2 -3.5 -4.6 -11.5 0 -14 C 4.6 -11.5 5.2 -3.5 0 2 Z"
+                  [attr.fill]="species().petal"
+                  [attr.stroke]="species().petalEdge"
+                  stroke-width="0.8"
+                />
+                <path
+                  class="capullo-seam"
+                  d="M 0 -13 C 0.8 -8 0.8 -3 0 1"
+                  fill="none"
+                  [attr.stroke]="species().petalEdge"
+                  stroke-width="0.7"
+                  opacity="0.55"
+                />
+                <ellipse cx="0" cy="1" rx="1.7" ry="1.1" [attr.fill]="species().heart" opacity="0.9" />
+                <path class="capullo-sepal" d="M 0 2 Q -4.6 0 -5.6 -4.6 Q -1.6 -2.8 0 0.6 Z" />
+                <path class="capullo-sepal" d="M 0 2 Q 4.6 0 5.6 -4.6 Q 1.6 -2.8 0 0.6 Z" />
               </g>
             </g>
           }
           @default {
-            <g class="glyph seed" [style.color]="statusColor(point.node)">
-              <circle r="5.5" fill="currentColor" />
-              <path d="M 0 -5 Q 1.5 -10 5 -11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <g class="glyph seed" [attr.transform]="glyphScale(point) || null">
+              <circle r="5.5" [attr.fill]="species().petalEdge" />
+              <path
+                d="M 0 -5 Q 1.5 -10 5 -11"
+                fill="none"
+                [attr.stroke]="species().petalEdge"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
             </g>
           }
         }
 
-        <!-- «A la sombra»: two leaves lending shade — an ADDED kindness,
-             never a dimming (upper-left; the paper note owns upper-right) -->
+        <!-- «A la sombra»: a clearly visible leaf canopy ARCHED over the
+             node — an ADDED kindness, never a dimming of the branch. The
+             paper note keeps its spot at (13,-21); the parasol arcs higher. -->
         @if (lightOf(point) === 'shade') {
-          <g class="sombrilla" transform="translate(-14 -19)" aria-hidden="true">
-            <path class="shade-leaf" d="M 0 0 Q 5.5 -5.5 0 -11 Q -5.5 -5.5 0 0 Z" transform="rotate(-38)" />
-            <path class="shade-leaf far" d="M 0 0 Q 4.6 -4.6 0 -9.2 Q -4.6 -4.6 0 0 Z" transform="translate(6 -3) rotate(-10)" />
+          <g class="sombrilla" transform="translate(0 -24)" aria-hidden="true">
+            <path class="shade-leaf" d="M 0 0 Q 7 -7 0 -14 Q -7 -7 0 0 Z" transform="translate(-13 2) rotate(-52)" />
+            <path class="shade-leaf mid" d="M 0 0 Q 7.6 -7.6 0 -15.2 Q -7.6 -7.6 0 0 Z" transform="translate(-4 -2) rotate(-18)" />
+            <path class="shade-leaf mid" d="M 0 0 Q 7.6 -7.6 0 -15.2 Q -7.6 -7.6 0 0 Z" transform="translate(5 -2) rotate(16)" />
+            <path class="shade-leaf far" d="M 0 0 Q 7 -7 0 -14 Q -7 -7 0 0 Z" transform="translate(14 2) rotate(50)" />
           </g>
         }
 
@@ -277,10 +297,22 @@
         @if (labelFor(point); as block) {
           @if (focusedId() !== point.node.id) {
             <g class="tag" aria-hidden="true">
+              @if (pillFor(point, block); as pill) {
+                <rect
+                  class="label-pill"
+                  [class.sun]="pill.kind === 'sun'"
+                  [class.shade]="pill.kind === 'shade'"
+                  [attr.x]="pill.x"
+                  [attr.y]="pill.y"
+                  [attr.width]="pill.w"
+                  [attr.height]="pill.h"
+                  rx="8"
+                />
+              }
               @if (lightOf(point) === 'sunlit') {
                 <g
                   class="rayito"
-                  [attr.transform]="'translate(' + (block.cx - point.x - block.width / 2 + 3) + ' ' + (block.y0 - point.y - 4) + ')'"
+                  [attr.transform]="'translate(' + (block.cx - point.x - block.width / 2 + 4) + ' ' + (block.y0 - point.y - 4) + ')'"
                 >
                   <path d="M 0 -5.4 V -2.4 M 3.8 -3.8 L 1.7 -1.7 M 5.4 0 H 2.4 M 3.8 3.8 L 1.7 1.7 M 0 5.4 V 2.4 M -3.8 3.8 L -1.7 1.7 M -5.4 0 H -2.4 M -3.8 -3.8 L -1.7 -1.7" />
                   <circle r="1.3" />
@@ -288,6 +320,9 @@
               }
               <text
                 class="title"
+                [class.in-pill]="pillFor(point, block) !== null"
+                [class.in-sun]="lightOf(point) === 'sunlit'"
+                [class.in-shade]="lightOf(point) === 'shade'"
                 text-anchor="middle"
                 [style.font-size.px]="12.5 * block.factor"
                 [attr.y]="block.y0 - point.y"

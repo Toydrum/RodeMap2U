@@ -275,7 +275,10 @@ await fam.waitForTimeout(700);
 await fam.locator('.visita-plot').first().click();
 await fam.waitForTimeout(1400);
 const friendSuns = await fam.evaluate(
-  () => document.querySelectorAll('.light-halo, .rayito, .sun-badge').length,
+  () =>
+    document.querySelectorAll(
+      '.light-halo, .rayito, .sun-badge, .label-pill, .sun-rays, .sign-sun, .sombrilla',
+    ).length,
 );
 await fam.locator('.tree-outline-toggle').click();
 await fam.waitForTimeout(400);
@@ -285,6 +288,43 @@ console.log(
   `H strip: guardian-lens=${guardianLens > 0} guardian-cycles=${guardianCycles} friend-suns=${friendSuns} friend-lens=${friendLens} | OK=${okH}`,
 );
 await fam.close();
+
+// ── J: 0.0.62 robust visuals — sun package, shade package, sign, capullo ───
+await page.goto(`${BASE}/tree/demo-work?seed=demo`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1400);
+const sunVisuals = await page.evaluate(() => ({
+  halo: document.querySelectorAll('.light-halo').length,
+  rays: document.querySelectorAll('.sun-rays').length,
+  sunPill: document.querySelectorAll('.label-pill.sun').length,
+  capullo: document.querySelectorAll('.glyph.capullo').length,
+  haloR: document.querySelector('.light-halo')?.getAttribute('r'),
+}));
+const okJ1 =
+  sunVisuals.halo > 0 &&
+  sunVisuals.rays > 0 &&
+  sunVisuals.sunPill > 0 &&
+  sunVisuals.capullo > 0 &&
+  sunVisuals.haloR === '40';
+console.log(
+  `J1 sun package: halo=${sunVisuals.halo} rays=${sunVisuals.rays} pill=${sunVisuals.sunPill} capullo=${sunVisuals.capullo} r=${sunVisuals.haloR} | OK=${okJ1}`,
+);
+
+await page.goto(`${BASE}/tree/demo-guitar`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1400);
+const shadeVisuals = await page.evaluate(() => ({
+  parasolLeaves: document.querySelectorAll('.sombrilla .shade-leaf').length,
+  shadePill: document.querySelectorAll('.label-pill.shade').length,
+}));
+const okJ2 = shadeVisuals.parasolLeaves >= 4 && shadeVisuals.shadePill > 0;
+console.log(
+  `J2 shade package: parasol-leaves=${shadeVisuals.parasolLeaves} pill=${shadeVisuals.shadePill} | OK=${okJ2}`,
+);
+
+await page.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1200);
+const signSuns = await page.locator('.sign-sun').count();
+const okJ3 = signSuns > 0; // demo-work holds the sunlit fixture
+console.log(`J3 meadow sign: sign-suns=${signSuns} | OK=${okJ3}`);
 
 // ── I: timer — the sunlit chip leads with ☀️ ────────────────────────────────
 await page.goto(`${BASE}/timer`, { waitUntil: 'networkidle' });

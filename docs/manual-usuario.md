@@ -145,10 +145,10 @@ Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo an
 
 | Estado | Se ve como | Significa |
 |---|---|---|
-| **Semilla** | Un puntito con brote | Una idea esperando su momento |
-| **Creciendo** | Brote con hojas | En movimiento |
-| **Descansando** | Hoja recostada | Pausa a propósito — descansar también es parte |
-| **Florecida** | Flor rosa 🌸 | ¡Floreció! |
+| **Semilla** | Un puntito del color de la flor de su árbol | Una idea esperando su momento |
+| **Creciendo** | Un **capullo**: la flor de su árbol, aún cerrada como campanita | En movimiento — se abrirá al florecer |
+| **Descansando** | Hoja recostada (lavanda) | Pausa a propósito — descansar también es parte |
+| **Florecida** | La flor de su especie, abierta 🌸 | ¡Floreció! |
 | **Ramificada** | Nudo dorado | De aquí nacieron caminos nuevos |
 
 > 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia. Para empezar esa transformación tienes dos caminos: el chip dorado **"🌿 Ramificar…"** al final de la fila de estados, o el botón **"Brotar ramitas nuevas"** — ambos abren el mismo ritual.
@@ -172,7 +172,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 
 - **Título** — qué quieres que crezca ahí.
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
-- **☀️ ¿Cuánta luz le toca?** *(solo en ramas vivas)* — la luz de una rama: **«A pleno sol»** (el sol la mira primero: Ahora la tendrá presente, su nombre se lee un poquito más grande en el árbol y un rayito la acompaña), **«A su ritmo»** (como todo el bosque) o **«A la sombra»** (sigue viva, solo cede el turno cuando la app susurra ideas — la sombra es un buen lugar, no un castigo). La luz **se queda hasta que tú la muevas** — a diferencia de tus ramas de hoy 🌅, que se sueltan solas mañana. En la **tablita** 📋 hay un solecito que activa **«Ver por luz»**: acomoda la lista por luz y te deja cambiar la de varias ramas de corrido — tu árbol no se mueve, es solo la lista.
+- **☀️ ¿Cuánta luz le toca?** *(solo en ramas vivas)* — la luz de una rama: **«A pleno sol»** es imposible de perder en el árbol: un **sol de verdad con rayos brilla detrás del nodo**, su capullo crece, su **nombre viaja sobre una pastilla dorada**, Ahora la tiene presente y su letrero en el prado gana un solecito. **«A su ritmo»** crece como todo el bosque. **«A la sombra»** lleva un **dosel de hojas** sobre el nodo y su nombre en **pastilla gris-verde** — sigue viva, solo cede el turno cuando la app susurra ideas (la sombra es un buen lugar, no un castigo). La luz **se queda hasta que tú la muevas** — a diferencia de tus ramas de hoy 🌅, que se sueltan solas mañana. En la **tablita** 📋 hay un solecito que activa **«Ver por luz»**: acomoda la lista por luz y te deja cambiar la de varias ramas de corrido — tu árbol no se mueve, es solo la lista.
 - **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
 - **🧶 Ramita cuando-entonces** *(opcional)* — tu propio plan "cuando pase X, toco esta rama": *"Cuando me sirva el café de la mañana…"*. La app nunca lo interpreta ni lo agenda — solo te lo vuelve a mostrar en Ahora y en las tarjetitas del check-in, con tus palabras. Escribir el plan una vez es lo que hace la magia.
 - **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.

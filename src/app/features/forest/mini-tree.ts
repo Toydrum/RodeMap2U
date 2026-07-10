@@ -64,7 +64,16 @@ const PAD = 12;
               <circle r="1.7" class="knot-core" />
             </g>
           } @else if (dot.kind === 'bud') {
-            <circle [attr.cx]="dot.x" [attr.cy]="dot.y" r="2.1" class="bud" />
+            <!-- The capullo, miniaturized: the species' closed flower -->
+            <circle
+              [attr.cx]="dot.x"
+              [attr.cy]="dot.y"
+              r="2.1"
+              class="bud"
+              [attr.fill]="species().petal"
+              [attr.stroke]="species().petalEdge"
+              stroke-width="0.5"
+            />
           } @else if (dot.kind === 'leaf') {
             <path
               class="branch-leaf"
@@ -112,9 +121,8 @@ const PAD = 12;
     .heart {
       fill: var(--status-branched);
     }
-    .bud {
-      fill: var(--status-growing);
-    }
+    /* .bud fill/stroke arrive inline (species colors) — no rule here, a
+       stylesheet fill would override the presentation attributes. */
     .branch-leaf {
       fill: color-mix(in srgb, var(--status-growing) 78%, var(--surface, #fdfbf3));
       opacity: 0.9;

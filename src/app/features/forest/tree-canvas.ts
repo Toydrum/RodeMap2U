@@ -29,7 +29,15 @@ import {
 import { FlowerSpec, flowerFor } from './flora';
 import { TreeForm, formFor } from './tree-forms';
 import { FlowerGlyph } from './flower';
-import { CHAR_W, LABEL_BASELINE, LabelBlock, labelInputsFrom, packLabels, wrapTitle } from './tree-labels';
+import {
+  CHAR_W,
+  LABEL_BASELINE,
+  LINE_H as LABEL_LINE_H,
+  LabelBlock,
+  labelInputsFrom,
+  packLabels,
+  wrapTitle,
+} from './tree-labels';
 
 interface LeafDecoration {
   x: number;
@@ -253,8 +261,20 @@ export class TreeCanvas {
       }
       if (!normal.length) continue;
 
-      let leader = normal[0];
-      for (const c of normal) if ((c.mass ?? 1) > (leader.mass ?? 1)) leader = c;
+      // LEADER choice (0.0.62 — the left-lean fix). Mass still carries the
+      // trunk when a subtree is CLEARLY heavier (>15% over every rival — the
+      // da Vinci story stands). Near-ties go to the most CENTRAL child, so
+      // the trunk continues UPWARD instead of diving into the leftmost slot
+      // (the old `>` on tied masses always kept normal[0] — every fresh fork
+      // leaned left, every tree repeated one silhouette). Exact central ties
+      // break by per-tree hash: same structure, different tree, different —
+      // but equally plausible — leader.
+      const maxMass = Math.max(...normal.map((c) => c.mass ?? 1));
+      const contenders = normal.filter((c) => (c.mass ?? 1) >= maxMass * 0.85);
+      const centrality = (c: LayoutPoint) => Math.abs(c.x - parent.x);
+      const minCentrality = Math.min(...contenders.map(centrality));
+      const central = contenders.filter((c) => centrality(c) - minCentrality <= 0.5);
+      const leader = central[hash(this.tree().id + parent.node.id + ':leader') % central.length];
 
       // zigzag habit (birch): the leader hand alternates by depth instead of
       // by hash — the trunk kinks side to side on its way up.
@@ -599,6 +619,26 @@ export class TreeCanvas {
     return this.labelField().get(point.node.id);
   }
 
+  /** The priority PILL behind a label — the scannable cue: golden for sun,
+   *  cool for shade, none for steady. Geometry straight from the block
+   *  (LINE_H exported by tree-labels); pad 5/3 < the packer's 16px margin,
+   *  so pills can never collide with a neighbor. */
+  protected pillFor(
+    point: LayoutPoint,
+    block: LabelBlock,
+  ): { x: number; y: number; w: number; h: number; kind: 'sun' | 'shade' } | null {
+    const light = this.lightOf(point);
+    if (light === 'steady') return null;
+    const lineH = LABEL_LINE_H * block.factor;
+    return {
+      x: block.cx - point.x - block.width / 2 - 5,
+      y: block.y0 - point.y - lineH - 3,
+      w: block.width + 10,
+      h: block.lines.length * lineH + 6,
+      kind: light === 'sunlit' ? 'sun' : 'shade',
+    };
+  }
+
   /** Focused node's FULL name as an overlay cartouche painted on top —
    *  tabbing must never reflow the packed field. Covers silent chain links
    *  too (focus always speaks, like it always has). */
@@ -614,7 +654,13 @@ export class TreeCanvas {
     return { point, lines, factor, yRel: row + LABEL_BASELINE - point.y };
   });
 
-  /** The growing sapling leans along its limb's incoming direction —
+  /** Sunlit nodes grow their glyph — attention has size (composes with the
+   *  capullo's lean; empty string keeps other glyphs' transforms clean). */
+  protected glyphScale(point: LayoutPoint): string {
+    return this.lightOf(point) === 'sunlit' ? ' scale(1.35)' : '';
+  }
+
+  /** The growing capullo leans along its limb's incoming direction —
    *  tempered toward the sky (phototropism), never lying flat. Reads the
    *  SAME geometry the limb is drawn with (leader/fork aware). */
   protected saplingAngle(point: LayoutPoint): number {

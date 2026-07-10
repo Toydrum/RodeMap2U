@@ -447,6 +447,13 @@ export class ForestPage {
     return (this.nodes.byTree().get(treeId) ?? []).filter((n) => n.status === 'achieved').length;
   }
 
+  /** Forest-level triage: this tree holds at least one «a pleno sol» branch. */
+  protected hasSun(treeId: string): boolean {
+    return (this.nodes.byTree().get(treeId) ?? []).some(
+      (n) => n.priority === 'sunlit' && (n.status === 'seed' || n.status === 'growing'),
+    );
+  }
+
   protected askArchive(event: Event, tree: Tree): void {
     // The button lives inside the plot link — don't navigate.
     event.preventDefault();
