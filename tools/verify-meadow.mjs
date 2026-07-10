@@ -128,7 +128,8 @@ await page.waitForTimeout(700);
 const mob = await plotRects();
 const dotsM = await page.locator('.clearing-dots .dot').count();
 const fits = mob.every((r) => r.left >= -6 && r.right <= 396 && r.top > 200);
-console.log(`F mobile: visible=${mob.length} dots=${dotsM} all-inside=${fits} | OK=${mob.length === 4 && dotsM === 4 && fits}`);
+// Phones hold THREE per clearing (0.0.63 — four grown crowns jostle at 390px).
+console.log(`F mobile: visible=${mob.length} dots=${dotsM} all-inside=${fits} | OK=${mob.length === 3 && dotsM === 6 && fits}`);
 
 // G — DRY FEET on a WIDE window (Hector's case): no trunk stands in the river.
 await page.setViewportSize({ width: 1700, height: 800 });

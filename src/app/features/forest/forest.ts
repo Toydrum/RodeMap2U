@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -228,21 +228,35 @@ export class ForestPage {
 
   /** Press pending on a plot: becomes a drag on movement (mouse) or after a
    *  long-press (touch); otherwise the tap navigates as always. */
-  private pendingDrag: { tree: Tree; x: number; y: number; timer: ReturnType<typeof setTimeout> | null } | null = null;
+  private pendingDrag: {
+    tree: Tree;
+    x: number;
+    y: number;
+    pointerId: number;
+    timer: ReturnType<typeof setTimeout> | null;
+  } | null = null;
   private suppressClick = false;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected plotDown(ev: PointerEvent, tree: Tree): void {
     this.suppressClick = false;
     this.dragMoved = false;
     if ((ev.target as Element).closest('.plot-archive')) return;
-    const pending = { tree, x: ev.clientX, y: ev.clientY, timer: null as ReturnType<typeof setTimeout> | null };
+    const pending = {
+      tree,
+      x: ev.clientX,
+      y: ev.clientY,
+      pointerId: ev.pointerId,
+      timer: null as ReturnType<typeof setTimeout> | null,
+    };
     // Holding also lifts the tree (mouse a bit sooner than a finger) —
     // matching the natural "press and hold to grab it" instinct.
     pending.timer = setTimeout(
       () => {
         if (this.pendingDrag === pending) this.beginDrag(tree);
       },
-      ev.pointerType === 'mouse' ? 250 : 350,
+      // A real thumb can't hold perfectly still — grab a bit sooner on touch.
+      ev.pointerType === 'mouse' ? 250 : 300,
     );
     this.pendingDrag = pending;
   }
@@ -251,11 +265,24 @@ export class ForestPage {
   private dragMoved = false;
 
   private beginDrag(tree: Tree): void {
+    const pointerId = this.pendingDrag?.pointerId;
     this.clearPending();
     // A lone tree has no neighbor to trade places with — say so kindly.
     if (this.trees.active().length < 2) {
       this.toast.show({ message: this.i18n.t().forest.moveNeedsTwo });
       return;
+    }
+    // Capture the pointer on the HOST (it never unmounts): touch pointers
+    // are implicitly captured by the pressed PLOT, and a mid-drag clearing
+    // flip unmounts that plot — the captured stream would die with a
+    // pointercancel and collapse the drag. Retargeted here, events survive
+    // any DOM churn below.
+    if (pointerId !== undefined) {
+      try {
+        this.host.nativeElement.setPointerCapture(pointerId);
+      } catch {
+        /* synthetic/expired pointers may not be capturable — fine */
+      }
     }
     this.draggingId.set(tree.id);
     this.dragPreview.set(this.trees.active().map((t) => t.id));
@@ -276,14 +303,19 @@ export class ForestPage {
     }
   }
 
+  /** Throttle for mid-drag clearing flips (edge hover). */
+  private lastDragFlip = 0;
+
   protected moveOver(ev: PointerEvent): void {
     const pending = this.pendingDrag;
     if (pending && !this.draggingId()) {
       const dist = Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y);
       if (ev.pointerType === 'mouse') {
         if (dist > 8) this.beginDrag(pending.tree);
-      } else if (dist > 14) {
-        // Finger slid before the long-press: that's a scroll, not a drag.
+      } else if (dist > 26) {
+        // A DELIBERATE slide before the long-press is a scroll, not a drag —
+        // but a thumb's natural tremor (the old 14px) must not cancel the
+        // grab (Hector's phone: "no puedo intercambiar árboles").
         this.clearPending();
       }
     }
@@ -291,6 +323,21 @@ export class ForestPage {
     const preview = this.dragPreview();
     if (!dragId || !preview) return;
     this.dragMoved = true;
+
+    // Carrying a tree to the meadow's edge walks to the NEXT clearing — the
+    // only way a drag can cross pages. Throttled so one hover flips once.
+    const EDGE = 52;
+    const dir = ev.clientX < EDGE ? -1 : ev.clientX > window.innerWidth - EDGE ? 1 : 0;
+    if (dir) {
+      const now = Date.now();
+      const target = this.page() + dir;
+      if (now - this.lastDragFlip > 600 && target >= 0 && target < this.pageCount()) {
+        this.lastDragFlip = now;
+        this.page.set(target);
+      }
+      return; // the new clearing's plots land next move
+    }
+
     for (const el of document.elementsFromPoint(ev.clientX, ev.clientY)) {
       const host = (el as Element).closest?.('[data-tree-id]') as HTMLElement | null;
       const overId = host?.dataset['treeId'];
@@ -337,9 +384,11 @@ export class ForestPage {
 
   /* ----------------------------------------- the clearings ("claros") */
 
-  /** Trees per clearing — every tree keeps a clear, tappable heart. */
+  /** Trees per clearing — every tree keeps a clear, tappable heart.
+   *  Phones hold THREE: four grown crowns already jostle at 390px
+   *  (Hector's report — "con más de 3 se satura"). */
   private readonly pageSizeValue =
-    typeof matchMedia !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 4 : 6;
+    typeof matchMedia !== 'undefined' && matchMedia('(max-width: 700px)').matches ? 3 : 6;
 
   protected readonly page = signal(0);
   protected readonly pageCount = computed(() =>
@@ -347,11 +396,22 @@ export class ForestPage {
   );
   protected readonly dots = computed(() => Array.from({ length: this.pageCount() }, (_, i) => i));
 
-  /** The trees standing in the current clearing (drag preview respected). */
+  /** The trees standing in the current clearing (drag preview respected).
+   *  A tree being CARRIED rides along into whatever clearing is shown: if
+   *  its plot unmounted on a mid-drag flip, the latched touch stream would
+   *  die silently (no pointercancel — it just stops) and the drag would
+   *  collapse. Kept mounted, the @for reuses its node (track by id) and the
+   *  gesture survives the crossing. */
   protected readonly pageTrees = computed(() => {
     const size = this.pageSizeValue;
     const clamped = Math.min(this.page(), this.pageCount() - 1);
-    return this.displayTrees().slice(clamped * size, (clamped + 1) * size);
+    const slice = this.displayTrees().slice(clamped * size, (clamped + 1) * size);
+    const dragId = this.draggingId();
+    if (dragId && !slice.some((t) => t.id === dragId)) {
+      const dragged = this.displayTrees().find((t) => t.id === dragId);
+      if (dragged) return [...slice, dragged];
+    }
+    return slice;
   });
 
   protected goPage(delta: number): void {
