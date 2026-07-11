@@ -216,6 +216,17 @@ export class ForestPage {
   /** Live order while dragging (ids); null when at rest. */
   protected readonly dragPreview = signal<string[] | null>(null);
   protected readonly draggingId = signal<string | null>(null);
+  /** The carried plot's live position (band %) + FROZEN scale — while
+   *  dragging, the tree renders from the finger, not from its anchor slot.
+   *  Scale is frozen at grab: `slot.s` is index-dependent and would snap on
+   *  every preview splice. */
+  protected readonly dragPos = signal<{ x: number; b: number; s: number } | null>(null);
+  /** The plot gliding home right after a drop (spring transition + settle). */
+  protected readonly settlingId = signal<string | null>(null);
+  /** Pointer→bottom-center offset at grab, so the tree doesn't jump. */
+  private grabDX = 0;
+  private grabDY = 0;
+  private bandEl: HTMLElement | null = null;
 
   /** What the meadow renders: the drag preview if one is in flight. */
   protected readonly displayTrees = computed(() => {
@@ -266,6 +277,8 @@ export class ForestPage {
 
   private beginDrag(tree: Tree): void {
     const pointerId = this.pendingDrag?.pointerId;
+    const px = this.pendingDrag?.x ?? 0;
+    const py = this.pendingDrag?.y ?? 0;
     this.clearPending();
     // A lone tree has no neighbor to trade places with — say so kindly.
     if (this.trees.active().length < 2) {
@@ -283,6 +296,26 @@ export class ForestPage {
       } catch {
         /* synthetic/expired pointers may not be capturable — fine */
       }
+    }
+    // From here on the tree rides the finger: seed its live position from the
+    // RENDERED rect (frame 1 = exactly where it stands, zero jump) and keep
+    // the pointer→bottom-center offset. With transform-origin 50% 100% +
+    // translateX(-50%), the rect's bottom-center IS the (left%, bottom%)
+    // anchor — scale never moves it.
+    this.bandEl = this.host.nativeElement.querySelector('.plots');
+    const plotEl = this.host.nativeElement.querySelector<HTMLElement>(
+      `[data-tree-id="${CSS.escape(tree.id)}"]`,
+    );
+    if (plotEl && this.bandEl) {
+      const r = plotEl.getBoundingClientRect();
+      const band = this.bandEl.getBoundingClientRect();
+      this.grabDX = px - (r.left + r.right) / 2;
+      this.grabDY = py - r.bottom;
+      this.dragPos.set({
+        x: (((r.left + r.right) / 2 - band.left) / band.width) * 100,
+        b: ((band.bottom - r.bottom) / band.height) * 100,
+        s: plotEl.offsetWidth ? r.width / plotEl.offsetWidth : 1,
+      });
     }
     this.draggingId.set(tree.id);
     this.dragPreview.set(this.trees.active().map((t) => t.id));
@@ -324,6 +357,19 @@ export class ForestPage {
     if (!dragId || !preview) return;
     this.dragMoved = true;
 
+    // The tree rides the finger — BEFORE the edge check, so it keeps
+    // tracking while parked at the edge waiting for a clearing flip. Band
+    // rect per move keeps it honest across scroll/resize mid-drag.
+    if (this.bandEl) {
+      const band = this.bandEl.getBoundingClientRect();
+      const prev = this.dragPos();
+      this.dragPos.set({
+        x: Math.min(100, Math.max(0, ((ev.clientX - this.grabDX - band.left) / band.width) * 100)),
+        b: Math.max(-8, Math.min(108, ((band.bottom - (ev.clientY - this.grabDY)) / band.height) * 100)),
+        s: prev?.s ?? 1,
+      });
+    }
+
     // Carrying a tree to the meadow's edge walks to the NEXT clearing — the
     // only way a drag can cross pages. Throttled so one hover flips once.
     const EDGE = 52;
@@ -355,13 +401,29 @@ export class ForestPage {
 
   protected async endMove(): Promise<void> {
     this.clearPending();
-    if (!this.draggingId()) return;
+    const dragId = this.draggingId();
+    if (!dragId) return;
     const preview = this.dragPreview();
+    // Same CD pass: .dragging off + bindings back to the slot → the tree
+    // glides home from under the finger (the after-change style has its
+    // transitions again). .settling retargets that glide with the spring.
     this.draggingId.set(null);
-    this.dragPreview.set(null);
-    // A hold that never traveled is just a slow click — let it navigate.
-    if (!this.dragMoved) this.suppressClick = false;
+    this.dragPos.set(null);
+    this.bandEl = null;
+    if (this.dragMoved) {
+      this.settlingId.set(dragId);
+      setTimeout(() => {
+        if (this.settlingId() === dragId) this.settlingId.set(null);
+      }, 520);
+    } else {
+      // A hold that never traveled is just a slow click — let it navigate.
+      this.suppressClick = false;
+    }
     if (preview) await this.trees.setOrder(preview);
+    // The preview lives until the commit lands — nulling it before the await
+    // let displayTrees flash the OLD order under the settle glide. Guard: a
+    // new drag may have begun while we waited.
+    if (!this.draggingId()) this.dragPreview.set(null);
   }
 
   /** Keyboard rearranging: arrows swap the tree with its neighbor. */

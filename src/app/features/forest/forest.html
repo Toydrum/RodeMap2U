@@ -181,11 +181,13 @@
       <div class="plots container" [class.paged]="pageCount() > 1" [class.crowded]="pageTrees().length >= 5">
         @for (tree of pageTrees(); track tree.id; let i = $index) {
           @let slot = slotFor(i, tree);
+          @let drag = draggingId() === tree.id ? dragPos() : null;
           <a
             class="plot"
             [routerLink]="['/tree', tree.id]"
             [attr.data-tree-id]="tree.id"
             [class.dragging]="draggingId() === tree.id"
+            [class.settling]="settlingId() === tree.id"
             (pointerdown)="plotDown($event, tree)"
             (click)="plotClick($event)"
             (keydown)="nudge($event, tree)"
@@ -194,10 +196,10 @@
             [attr.aria-label]="i18n.fill(i18n.t().forest.plotAria, { name: tree.name })"
             [title]="i18n.t().forest.plotHint"
             [style.--plot-accent]="'var(--accent-' + tree.accent + ')'"
-            [style.left.%]="slot.x"
-            [style.bottom.%]="slot.b"
+            [style.left.%]="drag ? drag.x : slot.x"
+            [style.bottom.%]="drag ? drag.b : slot.b"
             [style.zIndex]="slot.z"
-            [style.transform]="'translateX(-50%) scale(' + slot.s + ')'"
+            [style.transform]="'translateX(-50%) scale(' + (drag ? drag.s : slot.s) + ')'"
           >
             <button
               type="button"

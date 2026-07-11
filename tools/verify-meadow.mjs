@@ -88,10 +88,22 @@ console.log(`B determinism across reload: ${same} | OK=${same}`);
   await page.mouse.move(cx(a), cy(a));
   await page.mouse.down();
   await page.waitForTimeout(300); // mouse hold beats the 250ms timer
+  // C2 — mid-drag the carried plot rides the pointer (0.0.64): grabbed at
+  // its center, the plot's center-x must track the mouse 1:1.
+  const mx = (cx(a) + cx(b)) / 2;
+  const my = cy(a) - 40;
+  await page.mouse.move(mx, my, { steps: 6 });
+  await page.waitForTimeout(150); // zoneless CD is frame-scheduled
+  const carried = await page.evaluate((id) => {
+    const r = document.querySelector(`[data-tree-id="${id}"]`).getBoundingClientRect();
+    return (r.left + r.right) / 2;
+  }, a.id);
+  const followDx = Math.abs(carried - mx);
+  console.log(`C2 pointer-follow: dx=${Math.round(followDx)} | OK=${followDx < 40}`);
   await page.mouse.move(cx(b), cy(b), { steps: 8 });
   await page.waitForTimeout(250);
   await page.mouse.up();
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(700); // > 0.45s settle glide
   const moved = await plotRects();
   const aNow = moved.find((r) => r.id === a.id);
   const swapped = aNow && Math.abs(aNow.left - a.left) > 40;
