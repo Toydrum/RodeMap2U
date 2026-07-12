@@ -230,6 +230,20 @@
           </a>
         }
 
+        <!-- The parakeet waits on the crown of the tree you're working on -->
+        @if (crownPerchPos(); as cp) {
+          <a
+            class="session-perch on-tree"
+            routerLink="/timer"
+            [style.left.px]="cp.x"
+            [style.top.px]="cp.y"
+            [attr.aria-label]="i18n.t().timer.title"
+          >
+            <app-companion-bird [state]="perchBirdState()" [seed]="focus.active()!.sessionId" />
+            <span class="perch-time" role="timer">{{ focus.display() }}</span>
+          </a>
+        }
+
         <!-- More trees than one clearing holds: little arrows walk the meadow -->
         @if (pageCount() > 1) {
           <button

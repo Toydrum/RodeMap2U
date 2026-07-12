@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   effect,
@@ -9,10 +10,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Tree, TreeNode } from '../../core/db/schema';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
+import { FocusSessionService } from '../../core/focus-session.service';
+import { PerchAnchorService } from '../../core/perch-anchor.service';
+import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
 import {
   EdgeGeometry,
   LEVEL_H,
@@ -93,7 +98,7 @@ interface LimbPlan {
  */
 @Component({
   selector: 'app-tree-canvas',
-  imports: [FlowerGlyph],
+  imports: [FlowerGlyph, CompanionBird, RouterLink],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
   // Closes the little note letter when tapping anywhere else (never preventDefault).
@@ -133,6 +138,41 @@ export class TreeCanvas {
   protected hideLetter(): void {
     this.hoverNote.set(null);
   }
+
+  /* ------------------------------------ the parakeet perches on the ramita */
+
+  protected readonly focus = inject(FocusSessionService);
+  private readonly perchAnchor = inject(PerchAnchorService);
+
+  /** The session's node, only when it lives in THIS tree and is visible.
+   *  On visits the injected repo is the other person's — the lookup misses
+   *  and the parakeet correctly stays off someone else's forest. */
+  private readonly sessionNode = computed(() => {
+    const id = this.focus.active()?.nodeId;
+    if (!id) return null;
+    const node = this.nodes.byId().get(id);
+    return node && !node.archivedAt && !node.deletedAt && node.treeId === this.tree().id
+      ? node
+      : null;
+  });
+
+  /** Screen position of the perch — the note-letter pattern: constant size,
+   *  rides the branch through pan and zoom. */
+  protected readonly perchPoint = computed(() => {
+    const node = this.sessionNode();
+    if (!node) return null;
+    const p = this.layout().byId.get(node.id);
+    if (!p) return null;
+    return { x: this.tx() + p.x * this.k(), y: this.ty() + p.y * this.k() };
+  });
+
+  protected readonly perchBirdState = computed<BirdState>(() =>
+    birdStateFrom(
+      this.focus.paused(),
+      this.focus.overtime(),
+      this.focus.plannedMs() - this.focus.elapsedMs(),
+    ),
+  );
 
   /** Mouse hovers; touch taps to toggle (hover events fight the tap there). */
   protected onMarkEnter(ev: PointerEvent, point: LayoutPoint): void {
@@ -554,6 +594,14 @@ export class TreeCanvas {
       this.lastFitId = id;
       queueMicrotask(() => this.fitTree());
     });
+
+    // While the session's branch is on THIS canvas, the scene holds the
+    // parakeet and the app shell's corner perch yields.
+    effect(() => {
+      if (this.perchPoint()) this.perchAnchor.claim('tree');
+      else this.perchAnchor.release('tree');
+    });
+    inject(DestroyRef).onDestroy(() => this.perchAnchor.release('tree'));
   }
 
   private lastFitId: string | null = null;

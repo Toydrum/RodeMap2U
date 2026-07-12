@@ -29,15 +29,19 @@ export function birdStateFrom(paused: boolean, overtime: boolean, remainingMs: n
          [style.--preen-delay.ms]="preenDelay()">
       <g class="flip">
         <g class="breathe">
-          <path class="tail" d="M 7 22 Q 1 25 2 29 Q 8 28 11 24 Z"/>
-          <ellipse class="body" cx="19" cy="21" rx="10" ry="8"/>
-          <ellipse class="belly" cx="21" cy="24" rx="6" ry="4.4"/>
-          <path class="wing" d="M 13 19 Q 20 15 25 20 Q 21 26 14 24 Z"/>
+          <!-- A parakeet after the owner's reference: long tapered tail,
+               layered wing, cream belly, hooked coral beak, cheek spot. -->
+          <path class="tail" d="M 12 23 Q 5 27 1.5 33 Q 7 32 11 27.5 Q 12.6 25.6 13.4 24.4 Z"/>
+          <ellipse class="body" cx="18.5" cy="20" rx="8.6" ry="9.4"/>
+          <ellipse class="belly" cx="21" cy="23.4" rx="5.4" ry="5.6"/>
+          <path class="wing" d="M 11 15.5 Q 19 11.5 24 17.5 Q 22.5 24.5 13.5 24 Q 9.8 20 11 15.5 Z"/>
+          <path class="wing-tip" d="M 12.4 21.6 Q 17.5 24.2 22.8 20.6 Q 20.5 26.4 12.8 24.6 Z"/>
           <g class="head">
-            <circle class="body" cx="28" cy="12" r="6"/>
-            <path class="beak" d="M 33.5 11 L 38 12.4 L 33.5 14 Z"/>
-            <circle class="eye" cx="30" cy="11" r="1.3"/>
-            <path class="lid" d="M 28.6 11 q 1.4 -1.2 2.8 0"/>
+            <circle class="body" cx="27" cy="10" r="6.5"/>
+            <path class="beak" d="M 32.6 7.8 Q 38.4 8.2 37.2 12.4 Q 36.3 15 33.2 14 Q 35.4 11.4 32.6 9.6 Z"/>
+            <circle class="cheek" cx="29.6" cy="12.6" r="1.9"/>
+            <circle class="eye" cx="28.4" cy="9.2" r="1.3"/>
+            <path class="lid" d="M 27 9.2 q 1.4 -1.2 2.8 0"/>
           </g>
         </g>
         <path class="legs" d="M 16 29 v 3 M 22 29 v 3"/>
@@ -55,12 +59,17 @@ export function birdStateFrom(paused: boolean, overtime: boolean, remainingMs: n
       overflow: visible;
     }
 
-    /* Logo palette via tokens — theme-aware, terminal included. */
+    /* Parakeet palette via tokens — theme-aware, terminal included. The
+       coral beak/cheek is a SPECIES color (rose+clay mix), not an urgency
+       signal — the never-red doctrine governs rings and statuses. */
     .body { fill: var(--accent-sage); }
-    .tail,
     .wing { fill: var(--accent-moss); }
-    .belly { fill: var(--surface-2); }
-    .beak { fill: var(--status-branched); }
+    .wing-tip { fill: color-mix(in srgb, var(--accent-pine) 70%, var(--accent-moss)); }
+    .tail { fill: color-mix(in srgb, var(--accent-moss) 60%, var(--accent-pine)); }
+    .belly { fill: color-mix(in srgb, var(--accent-sand) 55%, var(--surface-2)); }
+    .beak,
+    .cheek { fill: color-mix(in srgb, var(--accent-rose) 72%, var(--accent-clay)); }
+    .cheek { opacity: 0.85; }
     .legs { fill: none; stroke: var(--status-branched); stroke-width: 1.6; stroke-linecap: round; }
     .eye { fill: var(--text); }
     .lid { display: none; fill: none; stroke: var(--accent-moss); stroke-width: 1.4; stroke-linecap: round; }

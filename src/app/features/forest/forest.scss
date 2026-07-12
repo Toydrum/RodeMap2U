@@ -384,6 +384,38 @@
   transition: none;
 }
 
+/* The parakeet on the session tree's crown — measured to the mini's top,
+   feet just touching the foliage. Tapping returns to the session. */
+.session-perch.on-tree {
+  position: absolute;
+  z-index: 220; /* above hovered plots (200) — the bird is never buried */
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  transform: translate(-58%, -100%) translateY(6px);
+  text-decoration: none;
+  transition: left 0.35s ease, top 0.35s ease;
+
+  app-companion-bird {
+    width: 30px;
+  }
+
+  .perch-time {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border-radius: 999px;
+    padding: 0.05rem 0.4rem;
+    margin-bottom: 3px;
+  }
+}
+
+:host-context(.reduce-motion) .session-perch.on-tree {
+  transition: none;
+}
+
 /* Pointer-following while dragging is direct manipulation (1:1 with the
    finger) and stays; only the decorative settle bounce goes quiet. */
 :host-context(.reduce-motion) .plot.settling app-mini-tree {

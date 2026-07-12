@@ -264,6 +264,39 @@
   }
 }
 
+/* The parakeet on the ramita — feet on the limb just above the node glyph
+   (clear of the capullo/flower), constant screen size through pan/zoom.
+   Tapping goes back to the session, like every perch. */
+.session-perch.on-branch {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  transform: translate(-58%, -100%) translateY(-16px);
+  text-decoration: none;
+  animation: letter-open 0.18s ease both;
+
+  app-companion-bird {
+    width: 32px;
+  }
+
+  .perch-time {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border-radius: 999px;
+    padding: 0.05rem 0.4rem;
+    margin-bottom: 4px;
+  }
+}
+
+:host-context(.reduce-motion) .session-perch.on-branch {
+  animation: none;
+}
+
 @keyframes letter-open {
   from {
     opacity: 0;

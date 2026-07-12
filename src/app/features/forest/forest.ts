@@ -14,6 +14,9 @@ import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { FlowerSpec, flowerFor } from './flora';
 import { FlowerGlyph } from './flower';
+import { FocusSessionService } from '../../core/focus-session.service';
+import { PerchAnchorService } from '../../core/perch-anchor.service';
+import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
 
@@ -65,7 +68,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -120,7 +123,85 @@ export class ForestPage {
     };
     document.addEventListener('touchmove', lockTouch, { passive: false });
     inject(DestroyRef).onDestroy(() => document.removeEventListener('touchmove', lockTouch));
+
+    // The parakeet waits on the session tree's crown — position by
+    // MEASUREMENT (earned-size scales make math brittle): once after render,
+    // again after the plots' 0.35s glide settles. Hidden while dragging (the
+    // corner perch takes over; the tree is moving under a finger).
+    effect((onCleanup) => {
+      const treeId = this.sessionTreeId();
+      const visible =
+        treeId !== null &&
+        !this.draggingId() &&
+        this.pageTrees().some((t) => t.id === treeId);
+      this.viewportSize(); // re-measure on resize
+      if (!visible) {
+        this.crownPerchPos.set(null);
+        return;
+      }
+      const measure = () => {
+        const band = this.host.nativeElement.querySelector('.plots');
+        const svg = this.host.nativeElement.querySelector<SVGSVGElement>(
+          `.plot[data-tree-id="${CSS.escape(treeId)}"] app-mini-tree svg`,
+        );
+        if (!band || !svg) {
+          this.crownPerchPos.set(null);
+          return;
+        }
+        const b = band.getBoundingClientRect();
+        const m = svg.getBoundingClientRect();
+        // The svg box has headroom above short trees — perch on the PAINTED
+        // crown (getBBox), not the viewBox top.
+        let crownY = m.top;
+        try {
+          const painted = svg.getBBox();
+          crownY = m.top + (painted.y / 160) * m.height;
+        } catch {
+          /* detached svg — the raf pass will retry */
+        }
+        this.crownPerchPos.set({ x: (m.left + m.right) / 2 - b.left, y: crownY - b.top });
+      };
+      const first = requestAnimationFrame(measure);
+      const settle = setTimeout(measure, 480);
+      onCleanup(() => {
+        cancelAnimationFrame(first);
+        clearTimeout(settle);
+      });
+    });
+
+    // While the crown holds the parakeet, the corner perch yields.
+    effect(() => {
+      if (this.crownPerchPos()) this.perchAnchor.claim('forest');
+      else this.perchAnchor.release('forest');
+    });
+    inject(DestroyRef).onDestroy(() => this.perchAnchor.release('forest'));
   }
+
+  /* ------------------------------- the parakeet on the session tree's crown */
+
+  protected readonly focus = inject(FocusSessionService);
+  private readonly perchAnchor = inject(PerchAnchorService);
+
+  /** The tree the live session's branch belongs to (null for «solo estar»). */
+  private readonly sessionTreeId = computed(() => {
+    const id = this.focus.active()?.nodeId;
+    if (!id) return null;
+    const node = this.nodes.byId().get(id);
+    if (!node || node.archivedAt || node.deletedAt) return null;
+    const tree = this.trees.byId().get(node.treeId);
+    return tree && !tree.archivedAt && !tree.deletedAt ? tree.id : null;
+  });
+
+  /** Crown top-center in `.plots`-band coordinates; null → corner fallback. */
+  protected readonly crownPerchPos = signal<{ x: number; y: number } | null>(null);
+
+  protected readonly perchBirdState = computed<BirdState>(() =>
+    birdStateFrom(
+      this.focus.paused(),
+      this.focus.overtime(),
+      this.focus.plannedMs() - this.focus.elapsedMs(),
+    ),
+  );
 
   /** `?mood=` dev/demo override, else the latest check-in's feeling. */
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;

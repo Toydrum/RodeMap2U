@@ -8,6 +8,7 @@ import { MotionService } from './core/motion.service';
 import { UpdateService } from './core/update.service';
 import { AccompanimentService } from './core/accompaniment.service';
 import { FocusSessionService } from './core/focus-session.service';
+import { PerchAnchorService } from './core/perch-anchor.service';
 import { ToastService } from './shared/ui/toast.service';
 import { BirdState, CompanionBird, birdStateFrom } from './features/timer/companion-bird';
 
@@ -34,10 +35,14 @@ export class App {
     return !url.startsWith('/check-in') && !url.startsWith('/account');
   });
 
+  private readonly anchor = inject(PerchAnchorService);
+
   /** The traveling perch: the companion follows a live session everywhere
-   *  EXCEPT the two surfaces that already hold their own bird. */
+   *  EXCEPT the two surfaces that already hold their own bird — and yields
+   *  whenever a SCENE holds the parakeet (perched on the session's branch
+   *  in the tree view, or on the session tree's crown in the meadow). */
   protected readonly showPerch = computed(() => {
-    if (!this.focus.active() || !this.showTabs()) return false;
+    if (!this.focus.active() || !this.showTabs() || this.anchor.claimed()) return false;
     const url = this.url();
     return !url.startsWith('/timer') && !url.startsWith('/ahora');
   });

@@ -398,6 +398,21 @@
   </div>
 }
 
+<!-- The parakeet perches on the ramita you're working on — constant size,
+     rides the branch through pan/zoom. No twig: it stands on real wood. -->
+@if (perchPoint(); as pp) {
+  <a
+    class="session-perch on-branch"
+    routerLink="/timer"
+    [style.left.px]="pp.x"
+    [style.top.px]="pp.y"
+    [attr.aria-label]="i18n.t().timer.title"
+  >
+    <app-companion-bird [state]="perchBirdState()" [seed]="focus.active()!.sessionId" />
+    <span class="perch-time" role="timer">{{ focus.display() }}</span>
+  </a>
+}
+
 <div class="sr-live" aria-live="polite">
   @if (focusedId(); as id) {
     @if (layout().byId.get(id); as point) {
