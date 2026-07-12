@@ -60,6 +60,7 @@
     @if (node().status === 'seed' || node().status === 'growing') {
       <div class="field light-field">
         <label>☀️ {{ i18n.t().node.lightLabel }}</label>
+        <p class="hint light-explainer">{{ i18n.t().node.lightExplainer }}</p>
         <div class="status-row light-row" role="group" [attr.aria-label]="i18n.t().node.lightLabel">
           @for (light of lights; track light) {
             <button

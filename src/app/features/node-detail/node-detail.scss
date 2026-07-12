@@ -256,3 +256,8 @@
     justify-content: center !important;
   }
 }
+
+/* The luz explainer sits tight under its label, before the pills */
+.light-explainer {
+  margin: 0.1rem 0 0.45rem;
+}

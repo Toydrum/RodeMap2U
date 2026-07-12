@@ -229,6 +229,7 @@ export const EN: Dict = {
     triggerPlaceholder: 'When I pour my morning coffee…',
     triggerHint: 'Your own "when X happens, I touch this branch" plan. Now will remind you — never with alarms.',
     lightLabel: 'How much light does it get?',
+    lightExplainer: 'Your way to prioritize: whatever stands in full sun gets suggested first; whatever rests in the shade waits, guilt-free.',
     steps: 'Small steps',
     addStep: 'Add a small step',
     stepPlaceholder: 'One tiny step from here…',

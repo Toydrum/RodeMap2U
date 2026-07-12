@@ -231,6 +231,7 @@ export const ES = {
     triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
     triggerHint: 'Tu propio plan «cuando pase X, toco esta rama». Ahora te lo recordará — jamás con alarmas.',
     lightLabel: '¿Cuánta luz le toca?',
+    lightExplainer: 'Tu forma de priorizar: lo que está a pleno sol se sugiere primero; lo que está a la sombra espera sin pena.',
     steps: 'Pasitos',
     addStep: 'Agregar un pasito',
     stepPlaceholder: 'Un pasito chiquito desde aquí…',

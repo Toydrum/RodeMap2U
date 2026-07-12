@@ -11,7 +11,9 @@ import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { VisitSession } from '../../core/visit/visit-session';
 
-const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'resting', 'achieved'];
+// Life-cycle order, rest LAST (owner 2026-07-11): seed → growing → bloomed
+// reads as the branch's natural arc; resting is the aside, not a stage.
+const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'achieved', 'resting'];
 
 /** UI positions of the «luz» picker — 'steady' is the unstored default. */
 export type LightChoice = 'sunlit' | 'steady' | 'shade';
