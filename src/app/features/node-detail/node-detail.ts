@@ -41,6 +41,14 @@ export class NodeDetail {
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly lights = LIGHTS;
   protected readonly lightIcons = LIGHT_ICONS;
+  /** «Brújula del tiempo» choices — null is «ni idea», a dignified answer. */
+  protected readonly estimates: (2 | 10 | 30 | null)[] = [2, 10, 30, null];
+
+  protected async setEstimate(minutes: 2 | 10 | 30 | null): Promise<void> {
+    // Re-tapping the selected chip clears back to «ni idea».
+    const next = (this.node().estimateMin ?? null) === minutes ? null : minutes;
+    await this.nodes.update(this.node(), { estimateMin: next });
+  }
   /** Sessions are the visitor's own — never offered inside someone else's forest. */
   protected readonly visiting = inject(VisitSession, { optional: true }) !== null;
   protected readonly branching = signal(false);

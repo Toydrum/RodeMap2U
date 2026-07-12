@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { SessionsRepo } from './repos/sessions.repo';
 import { SettingsService } from './repos/settings.service';
+import { NodesRepo } from './repos/nodes.repo';
 import { ToastService } from '../shared/ui/toast.service';
 import { I18nService } from './i18n/i18n.service';
 import { BirdState, birdStateFrom } from './bird-state';
@@ -199,7 +200,31 @@ export class FocusSessionService {
     if (row && row.endedAt === null) {
       await this.sessions.end({ ...row, pausedAt: null, pausedMs: finalPausedMs });
     }
+    this.maybeTimeCompass(active.nodeId, minutes);
     return minutes;
+  }
+
+  /** «Brújula del tiempo» — opt-in, at most ONE curiosity line, and only
+   *  when the gap is NOTABLE (≥2× and ≥5 min apart): dato, no calificación.
+   *  Rides the toast queue after the caller's momentum toast. */
+  private readonly nodes = inject(NodesRepo);
+  private maybeTimeCompass(nodeId: string | null, realMin: number): void {
+    if (!this.settings.settings().timeCompass || !nodeId) return;
+    const estimate = this.nodes.byId().get(nodeId)?.estimateMin ?? null;
+    if (!estimate) return;
+    const lo = Math.min(estimate, realMin);
+    const hi = Math.max(estimate, realMin);
+    if (hi < lo * 2 || hi - lo < 5) return;
+    // A beat AFTER the caller's momentum toast: that one carries the action
+    // and owns the slot; the curiosity line waits its turn in the queue.
+    setTimeout(() => {
+      this.toast.show({
+        message: this.i18n.fill(this.i18n.t().timer.timeCompassLine, {
+          est: String(estimate),
+          real: String(realMin),
+        }),
+      });
+    }, 80);
   }
 
   /** Reload persistence for free: the running row already lives in IndexedDB. */

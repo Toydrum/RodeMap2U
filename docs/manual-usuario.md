@@ -154,6 +154,8 @@ Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo an
 | **Florecida** | La flor de su especie, abierta 🌸 | ¡Floreció! |
 | **Ramificada** | Nudo dorado | De aquí nacieron caminos nuevos |
 
+> 🧭 **Brújula del tiempo** *(opcional)*: a cada rama viva puedes ponerle un tamaño con tus propios ojos — **2, 10 o 30 min**, o el muy digno **«Ni idea»**. La sugerencia de Ahora te lo susurra («~10 minutitos, decías»). Y si en Ajustes enciendes la brújula (viene apagada), tras una sesión con diferencia grande te cuenta UNA línea de curiosidad: *«Pensabas 10 minutitos; fueron 25 — dato curioso, no calificación»*. Jamás gráficas, jamás promedios.
+
 > 🔪 **Desmenuzar**: si una rama viva sigue sin pasitos (o con uno solo), junto al «+» aparece **«Desmenuzar esta meta»** — tres preguntitas de brújula (la primera acción física · lo que se interpone · la versión de dos minutitos) y cada respuesta TUYA brota como pasito. Todas se pueden saltar sin pena. Es el antídoto a la parálisis de «¿y por dónde empiezo?».
 
 > 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia. Para empezar esa transformación tienes dos caminos: el chip dorado **"🌿 Ramificar…"** al final de la fila de estados, o el botón **"Brotar ramitas nuevas"** — ambos abren el mismo ritual.

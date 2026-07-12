@@ -100,7 +100,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
 
   async update(
     node: TreeNode,
-    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow' | 'priority'>>,
+    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow' | 'priority' | 'estimateMin'>>,
   ): Promise<TreeNode> {
     return this.save({ ...node, ...patch });
   }

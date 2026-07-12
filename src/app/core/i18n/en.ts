@@ -95,6 +95,7 @@ export const EN: Dict = {
     todayEditAria: 'Change my branches for today',
     reasonToday: 'You chose it for today 🌅',
     reasonLowEnergy: 'For a low-water day, one tiny pasito 💧',
+    estimateHint: '~{min} little minutes, you said',
     reasonTrigger: '🧶 "{trigger}"',
     reasonSunlit: 'You have it in full sun ☀️',
     shadeAside: 'It sits in the shade — only if it calls you 🌳',
@@ -258,6 +259,8 @@ export const EN: Dict = {
     notePlaceholder: 'Anything you want to remember…',
     dateLabel: 'Gentle date',
     dateHint: "It's a compass, not a contract. Change it or let it go anytime.",
+    estimateLabel: 'How big does it feel?',
+    estimateNoIdea: 'No idea',
     triggerLabel: 'When-then twig',
     triggerPlaceholder: 'When I pour my morning coffee…',
     triggerHint: 'Your own "when X happens, I touch this branch" plan. Now will remind you — never with alarms.',
@@ -345,6 +348,7 @@ export const EN: Dict = {
     wellDoneShort: 'Every minute counts. Thanks for being here.',
     plannedBloomed: 'Your time bloomed 🌸 You can stay or close whenever it feels right.',
     resumed: 'Your session was still here, waiting for you 🌿',
+    timeCompassLine: 'You guessed {est} little minutes; it took {real} — fun fact, not a grade 🧭',
   },
   settings: {
     title: 'Settings',
@@ -365,6 +369,8 @@ export const EN: Dict = {
     bridge2: '2 little minutes before',
     bridge5: '5 little minutes before',
     bridgeHint: 'How early the ring warms to gold and the parakeet turns to look at you — a little light cue to land softly, never a sound.',
+    timeCompassLabel: 'Time compass',
+    timeCompassHint: 'After a session on an estimated branch, one curiosity line compares your guess with the real time. A fact, never a grade — off by default.',
     minutes: 'min',
     data: 'Your data',
     dataHint:

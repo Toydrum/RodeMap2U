@@ -97,6 +97,7 @@ export const ES = {
     todayEditAria: 'Cambiar mis ramas de hoy',
     reasonToday: 'La elegiste para hoy 🌅',
     reasonLowEnergy: 'Para un día de regadera bajita, un pasito chiquito 💧',
+    estimateHint: '~{min} minutitos, decías',
     reasonTrigger: '🧶 «{trigger}»',
     reasonSunlit: 'La tienes a pleno sol ☀️',
     shadeAside: 'Anda a la sombra — solo si te llama 🌳',
@@ -260,6 +261,8 @@ export const ES = {
     notePlaceholder: 'Lo que quieras recordar…',
     dateLabel: 'Fecha amable',
     dateHint: 'Es una brújula, no un contrato. Puedes cambiarla o soltarla cuando quieras.',
+    estimateLabel: '¿De qué tamaño se siente?',
+    estimateNoIdea: 'Ni idea',
     triggerLabel: 'Ramita cuando-entonces',
     triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
     triggerHint: 'Tu propio plan «cuando pase X, toco esta rama». Ahora te lo recordará — jamás con alarmas.',
@@ -347,6 +350,7 @@ export const ES = {
     wellDoneShort: 'Cada minuto cuenta. Gracias por estar.',
     plannedBloomed: 'Tu tiempo floreció 🌸 Puedes quedarte o cerrar cuando sientas.',
     resumed: 'Tu sesión seguía aquí, esperándote 🌿',
+    timeCompassLine: 'Pensabas {est} minutitos; fueron {real} — dato curioso, no calificación 🧭',
   },
   settings: {
     title: 'Ajustes',
@@ -367,6 +371,8 @@ export const ES = {
     bridge2: '2 minutitos antes',
     bridge5: '5 minutitos antes',
     bridgeHint: 'Cuánto antes de cumplirse tu tiempo el anillo entibia a dorado y el periquito voltea a verte — un avisito de luz para aterrizar suave, sin sonidos.',
+    timeCompassLabel: 'Brújula del tiempo',
+    timeCompassHint: 'Tras una sesión en una rama con tamaño estimado, una línea de curiosidad compara lo pensado con lo real. Dato, jamás calificación — apagada de fábrica.',
     minutes: 'min',
     data: 'Tus datos',
     dataHint:

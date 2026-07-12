@@ -110,6 +110,21 @@
       </div>
     </div>
     <p class="hint">{{ i18n.t().settings.bridgeHint }}</p>
+    <div class="row">
+      <span class="label">🧭 {{ i18n.t().settings.timeCompassLabel }}</span>
+      <div class="opts">
+        <button
+          type="button"
+          class="chip opt"
+          [class.selected]="settings.settings().timeCompass"
+          (click)="toggleTimeCompass()"
+          [attr.aria-pressed]="settings.settings().timeCompass"
+        >
+          {{ settings.settings().timeCompass ? '✓' : '—' }}
+        </button>
+      </div>
+    </div>
+    <p class="hint">{{ i18n.t().settings.timeCompassHint }}</p>
   </section>
 
   <!-- Whispers -->

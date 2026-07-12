@@ -105,6 +105,11 @@ export interface TreeNode extends SyncBase {
    *  NEVER parsed or scheduled. Ahora re-presents it; nothing alarms.
    *  Optional: records born before v2 simply lack it (undefined ≡ null). */
   trigger?: string | null;
+  /** «Brújula del tiempo» — the user's own gentle size guess (2/10/30 min;
+   *  null/absent = «ni idea», always a dignified answer). Optional +
+   *  additive. Never charted, never averaged: after a session it earns at
+   *  most ONE curiosity line — dato, no calificación. */
+  estimateMin?: 2 | 10 | 30 | null;
   /** How this branch's pasitos grow: 'steps' = an ordered path (paso 1 → 2…)
    *  drawn as a chain that fills with flowers as stages bloom; 'free' = the
    *  parallel fan. Optional: records born before v3 lack it (undefined ≡ 'free').
@@ -182,6 +187,9 @@ export interface Settings {
   bridgeMinutes: 2 | 5;
   /** Surfaces whose first-visit «¿qué es esto?» hint was dismissed. */
   hintsSeen: string[];
+  /** «Brújula del tiempo»: opt-in curiosity line after a session on an
+   *  estimated branch. OFF by default — time feedback can shame. */
+  timeCompass: boolean;
   /** 30-min cooldown so a PWA resume doesn't re-prompt the check-in. */
   lastCheckInAt: number | null;
   /** First-run flag for the welcome flow. */
@@ -210,6 +218,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timerDefaultMinutes: 20,
   bridgeMinutes: 2,
   hintsSeen: [],
+  timeCompass: false,
   lastCheckInAt: null,
   onboarded: false,
   todayIntentions: null,

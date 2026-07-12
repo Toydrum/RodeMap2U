@@ -90,6 +90,26 @@
       </button>
     }
 
+    <!-- «Brújula del tiempo»: the user's own size guess — optional, with
+         «ni idea» as a first-class answer. Dato, no calificación. -->
+    @if (node().status === 'seed' || node().status === 'growing') {
+      <div class="field">
+        <label>🧭 {{ i18n.t().node.estimateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+        <div class="status-row" role="group" [attr.aria-label]="i18n.t().node.estimateLabel">
+          @for (est of estimates; track est) {
+            <button
+              type="button"
+              class="chip pick"
+              [class.selected]="(node().estimateMin ?? null) === est"
+              (click)="setEstimate(est)"
+            >
+              {{ est === null ? i18n.t().node.estimateNoIdea : est + ' min' }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
     <!-- If-then twig: the user's own plan, re-presented in Ahora — never scheduled -->
     <div class="field">
       <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>

@@ -347,3 +347,10 @@ h1 {
     opacity: 0;
   }
 }
+
+/* «Brújula del tiempo» — the soft size hint on the suggestion card */
+.estimate-hint {
+  margin: -0.2rem 0 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}

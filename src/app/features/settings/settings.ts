@@ -173,6 +173,10 @@ export class SettingsPage {
     void this.settings.patch({ bridgeMinutes: minutes });
   }
 
+  protected toggleTimeCompass(): void {
+    void this.settings.patch({ timeCompass: !this.settings.settings().timeCompass });
+  }
+
   protected exportData(): void {
     void this.backup.download();
   }
