@@ -77,7 +77,8 @@
       <app-weather-front [mood]="mood()" />
 
       <!-- The "tablita": browse every branch without leaving the map. -->
-      @if (outlineOpen()) {
+      @defer (when outlineOpen()) {
+        @if (outlineOpen()) {
         <aside class="outline-rail card">
           <app-tree-outline
             [tree]="t"
@@ -88,6 +89,7 @@
             (closed)="outlineOpen.set(false)"
           />
         </aside>
+        }
       }
     </div>
 
@@ -148,12 +150,19 @@
       </div>
     }
 
-    @if (liveOpenNode(); as node) {
-      <app-node-detail [node]="node" [tree]="t" (closed)="openNode.set(null)" />
+    <!-- Sheets load their code the first time they're needed (@defer):
+         look-only visits and plain browsing never pay for the editing
+         toolkit (node-detail bundles branch-flow with it). -->
+    @defer (when !!liveOpenNode()) {
+      @if (liveOpenNode(); as node) {
+        <app-node-detail [node]="node" [tree]="t" (closed)="openNode.set(null)" />
+      }
     }
 
-    @if (reviewing()) {
-      <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+    @defer (when reviewing()) {
+      @if (reviewing()) {
+        <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
+      }
     }
 
     @if (archiving()) {

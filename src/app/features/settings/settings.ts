@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsService } from '../../core/repos/settings.service';
@@ -22,7 +23,7 @@ import { FamilyService } from '../../core/family.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard],
+  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard, ConfirmSheet],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

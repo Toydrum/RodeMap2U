@@ -9,6 +9,7 @@ import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { VisitSession } from '../../core/visit/visit-session';
 
 // Life-cycle order, rest LAST (owner 2026-07-11): seed → growing → bloomed
@@ -23,7 +24,7 @@ const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '�
 
 @Component({
   selector: 'app-node-detail',
-  imports: [BranchFlow, SheetDirective],
+  imports: [BranchFlow, SheetDirective, ConfirmSheet],
   templateUrl: './node-detail.html',
   styleUrl: './node-detail.scss',
 })
@@ -263,6 +264,14 @@ export class NodeDetail {
 
   protected focusHere(): void {
     void this.router.navigate(['/timer'], { queryParams: { node: this.node().id } });
+  }
+
+  /** Body for the archive confirm — the subtree count folds into the text. */
+  protected archiveBodyText(): string {
+    const base = this.i18n.t().node.archiveNodeBody;
+    return this.descendantCount() > 0
+      ? base + ' ' + this.i18n.plural(this.descendantCount(), this.i18n.t().node.archiveNodeChildren)
+      : base;
   }
 
   protected async archive(): Promise<void> {

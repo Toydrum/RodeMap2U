@@ -111,7 +111,7 @@ await page.locator('nav a', { hasText: 'Ahora' }).click();
 await page.waitForTimeout(600);
 const nextTitle = (await page.locator('.next-title').textContent()).trim();
 const reason = (await page.locator('.reason').textContent()).trim();
-const firstThen = (await page.locator('.first-then').textContent().catch(() => '')).trim();
+const firstThen = (await page.locator('.card.next .secondary').textContent().catch(() => '')).trim();
 const okE = reason.includes('El siguiente paso de') && firstThen.startsWith('Primero:') && nextTitle === 'Paso 1';
 console.log(`E ahora: next="${nextTitle}" reason="${reason}" first-then="${firstThen}" | OK=${okE}`);
 

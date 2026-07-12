@@ -313,36 +313,24 @@
   <p class="version">{{ version }}</p>
 
   @if (deleting(); as tree) {
-    <div class="confirm-backdrop" (click)="deleting.set(null)">
-      <div class="confirm card" appSheet (sheetClose)="deleting.set(null)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().settings.deleteForeverTitle, { name: tree.name })">
-        <span class="confirm-icon" aria-hidden="true">🍃</span>
-        <h2>{{ i18n.fill(i18n.t().settings.deleteForeverTitle, { name: tree.name }) }}</h2>
-        <p class="confirm-body">
-          {{ i18n.plural(branchCountOf(tree), i18n.t().settings.deleteForeverBody) }}
-        </p>
-        <div class="row">
-          <button type="button" class="btn btn-primary" (click)="deleting.set(null)">
-            {{ i18n.t().common.cancel }}
-          </button>
-          <button type="button" class="btn btn-ghost danger" (click)="deleteForever()">
-            {{ i18n.t().settings.deleteForeverCta }}
-          </button>
-        </div>
-      </div>
-    </div>
-  }
+  <app-confirm-sheet
+    icon="🍃"
+    [title]="i18n.fill(i18n.t().settings.deleteForeverTitle, { name: tree.name })"
+    [body]="i18n.plural(branchCountOf(tree), i18n.t().settings.deleteForeverBody)"
+    [confirmLabel]="i18n.t().settings.deleteForeverCta"
+    (cancelled)="deleting.set(null)"
+    (confirmed)="deleteForever()"
+  />
+}
 </div>
 
 @if (confirmingMockReset()) {
-  <div class="confirm-backdrop" (click)="confirmingMockReset.set(false)">
-    <div class="confirm card" appSheet (sheetClose)="confirmingMockReset.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().settings.mockResetConfirmTitle">
-      <span class="confirm-icon" aria-hidden="true">🧪</span>
-      <h2>{{ i18n.t().settings.mockResetConfirmTitle }}</h2>
-      <p class="confirm-body">{{ i18n.t().settings.mockResetConfirmBody }}</p>
-      <div class="row">
-        <button type="button" class="btn-ghost" (click)="confirmingMockReset.set(false)">{{ i18n.t().common.cancel }}</button>
-        <button type="button" class="btn-primary" (click)="resetMockCloud()">{{ i18n.t().settings.mockResetConfirmGo }}</button>
-      </div>
-    </div>
-  </div>
+  <app-confirm-sheet
+    icon="🧪"
+    [title]="i18n.t().settings.mockResetConfirmTitle"
+    [body]="i18n.t().settings.mockResetConfirmBody"
+    [confirmLabel]="i18n.t().settings.mockResetConfirmGo"
+    (cancelled)="confirmingMockReset.set(false)"
+    (confirmed)="resetMockCloud()"
+  />
 }

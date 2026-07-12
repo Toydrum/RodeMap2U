@@ -344,6 +344,28 @@ input::placeholder {
   color: var(--text-dim);
 }
 
+/* EVERY interactive chip gets its affordance and its VISIBLE selected
+   state HERE — six screens used to re-invent .selected locally and one
+   shipped without it (the 0.0.73 regadera bug: a tapped token changed
+   class invisibly). Local styles may specialize; they can no longer
+   forget. */
+button.chip,
+a.chip {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+button.chip:hover,
+a.chip:hover {
+  border-color: var(--primary);
+}
+
+.chip.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  color: var(--text);
+}
+
 /* Status dot used across lists */
 .status-dot {
   width: 10px;

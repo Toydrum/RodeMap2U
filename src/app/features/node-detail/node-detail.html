@@ -245,44 +245,25 @@
 </div>
 
 @if (confirmingArchive()) {
-  <div class="sheet-backdrop" (click)="confirmingArchive.set(false)">
-    <div class="sheet card confirm" appSheet (sheetClose)="confirmingArchive.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title })">
-      <span class="confirm-icon" aria-hidden="true">🗃</span>
-      <h2>{{ i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title }) }}</h2>
-      <p class="confirm-body">
-        {{ i18n.t().node.archiveNodeBody }}
-        @if (descendantCount() > 0) {
-          {{ i18n.plural(descendantCount(), i18n.t().node.archiveNodeChildren) }}
-        }
-      </p>
-      <div class="row">
-        <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(false)">
-          {{ i18n.t().common.cancel }}
-        </button>
-        <button type="button" class="btn btn-primary" (click)="archive()">
-          {{ i18n.t().tree.archiveCta }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-confirm-sheet
+    icon="🗃"
+    [title]="i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title })"
+    [body]="archiveBodyText()"
+    [confirmLabel]="i18n.t().tree.archiveCta"
+    (cancelled)="confirmingArchive.set(false)"
+    (confirmed)="archive()"
+  />
 }
 
 @if (confirmingRevert()) {
-  <div class="sheet-backdrop" (click)="confirmingRevert.set(false)">
-    <div class="sheet card confirm" appSheet (sheetClose)="confirmingRevert.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().node.revertTitle, { title: node().title })">
-      <span class="confirm-icon" aria-hidden="true">🌿</span>
-      <h2>{{ i18n.fill(i18n.t().node.revertTitle, { title: node().title }) }}</h2>
-      <p class="confirm-body">{{ i18n.t().node.revertBody }}</p>
-      <div class="row">
-        <button type="button" class="btn btn-ghost" (click)="confirmingRevert.set(false)">
-          {{ i18n.t().common.cancel }}
-        </button>
-        <button type="button" class="btn btn-primary" (click)="revertBranch()">
-          {{ i18n.t().node.revertCta }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-confirm-sheet
+    icon="🌿"
+    [title]="i18n.fill(i18n.t().node.revertTitle, { title: node().title })"
+    [body]="i18n.t().node.revertBody"
+    [confirmLabel]="i18n.t().node.revertCta"
+    (cancelled)="confirmingRevert.set(false)"
+    (confirmed)="revertBranch()"
+  />
 }
 
 @if (branching()) {
