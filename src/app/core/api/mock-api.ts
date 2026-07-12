@@ -258,9 +258,19 @@ export class MockApi implements ApiClient {
     const caller = await this.caller();
     const code = rawCode?.trim().toUpperCase().replace(/-/g, '');
     if (!code) throw new ApiError('VALIDATION');
+    // Same code-guessing brake as friend codes (the contract scopes it to
+    // BAD redemptions of any code — family invites were uncovered).
+    const bucket = Math.floor(Date.now() / 3_600_000);
+    const rateKey = `rate:${caller.userId}:${bucket}`;
+    const attempts = (await mockGet<{ key: string; value: number }>('kv', rateKey))?.value ?? 0;
+    if (attempts >= LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+    const badAttempt = async (errorCode: ApiErrorCode): Promise<never> => {
+      await mockNextSeq(rateKey);
+      throw new ApiError(errorCode);
+    };
     const invite = await mockGet<MockCodeRow>('codes', code);
-    if (!invite || invite.kind === 'friend') throw new ApiError('CODE_INVALID');
-    if (invite.expiresAt <= Date.now()) throw new ApiError('CODE_EXPIRED');
+    if (!invite || invite.kind === 'friend') return badAttempt('CODE_INVALID');
+    if (invite.expiresAt <= Date.now()) return badAttempt('CODE_EXPIRED');
 
     const now = Date.now();
     if (invite.kind === 'coGuardian') {
@@ -389,17 +399,27 @@ export class MockApi implements ApiClient {
     if (await this.friendshipBetween(caller.userId, grant.userId)) {
       throw new ApiError('CONFLICT', 'already friends');
     }
-    const already = (await mockGetAll<MockFriendRequestRow>('friendRequests')).find(
+    const pending = await mockGetAll<MockFriendRequestRow>('friendRequests');
+    const already = pending.find(
       (r) => r.fromId === caller.userId && r.toId === grant.userId && r.expiresAt > Date.now(),
     );
     if (already) throw new ApiError('CONFLICT', 'request already pending');
+    // A pending request in the OPPOSITE direction means you're already mid-
+    // handshake — redeeming back would mint a mutual pair that both accept.
+    const inverse = pending.find(
+      (r) => r.fromId === grant.userId && r.toId === caller.userId && r.expiresAt > Date.now(),
+    );
+    if (inverse) throw new ApiError('CONFLICT', 'they already asked you');
     const mine = (await mockGetAll<MockFriendshipRow>('friendships')).filter(
       (f) => f.userA === caller.userId || f.userB === caller.userId,
     );
     if (mine.length >= LIMITS.maxFriends) throw new ApiError('LIMIT_EXCEEDED');
 
     const now = Date.now();
-    const requestId = `freq-${await mockNextSeq('reqseq')}`;
+    // DETERMINISTIC id (the Lambda's law): a double-submit race lands the
+    // same key and the second write is a harmless overwrite, never a
+    // duplicate row (`freq-<seq>` allowed two pending requests to coexist).
+    const requestId = `freq-${caller.userId}~${grant.userId}`;
     const request: MockFriendRequestRow = {
       requestId,
       fromId: caller.userId,
@@ -560,6 +580,13 @@ export class MockApi implements ApiClient {
   private async pushInto(ownerId: string, req: SyncPushRequest): Promise<SyncPushResponse> {
     if (!Array.isArray(req.records)) throw new ApiError('VALIDATION');
     if (req.records.length > LIMITS.syncPushMax) throw new ApiError('LIMIT_EXCEEDED');
+    // The executable spec must rehearse what the Lambda enforces: a client
+    // whose schema outruns the server gets SYNC_TOO_OLD, and every record
+    // must carry a valid SyncBase + a known store.
+    if (typeof req.schemaVersion !== 'number' || req.schemaVersion > SCHEMA_VERSION) {
+      throw new ApiError('SYNC_TOO_OLD');
+    }
+    const STORES: readonly string[] = ['trees', 'nodes', 'checkins', 'sessions'];
 
     const applied: string[] = [];
     const rejected: { id: string; reason: 'STALE_REV' }[] = [];
@@ -567,6 +594,14 @@ export class MockApi implements ApiClient {
     const syncedAt = Date.now();
     for (const entry of req.records) {
       const record = entry.record;
+      if (
+        !STORES.includes(entry.store) ||
+        typeof record?.id !== 'string' ||
+        typeof record.rev !== 'number' ||
+        typeof record.updatedAt !== 'number'
+      ) {
+        throw new ApiError('VALIDATION', 'malformed sync record');
+      }
       const key = `${ownerId}|${entry.store}|${record.id}`;
       const stored = await mockGet<MockRecordRow>('records', key);
       if (stored && !lwwBeats(record, stored.record)) {

@@ -60,30 +60,57 @@ export class BackupService {
     if (typeof envelope.schemaVersion !== 'number' || envelope.schemaVersion > SCHEMA_VERSION) {
       throw new Error('backup from a newer app version');
     }
+    // Validate the WHOLE shape before touching disk: a malformed file that
+    // passed the header checks used to wipe the stores and THEN throw —
+    // empty forest on next reload.
+    const data = envelope.data;
+    if (!data || typeof data !== 'object') throw new Error('backup has no data');
+    const trees = data.trees ?? [];
+    const nodes = data.nodes ?? [];
+    const checkins = data.checkins ?? [];
+    const sessions = data.sessions ?? [];
+    for (const list of [trees, nodes, checkins, sessions]) {
+      if (!Array.isArray(list) || list.some((r) => typeof r?.id !== 'string')) {
+        throw new Error('backup data is malformed');
+      }
+    }
     // (When SCHEMA_VERSION grows, run the same data-migration pipeline used
     // at DB open against envelope.data before writing.)
+
+    // Records the import REMOVES must also be announced, or a second tab's
+    // in-memory copy resurrects them on its next save.
+    const removedIds = {
+      trees: this.trees.all().map((r) => r.id),
+      nodes: this.nodes.all().map((r) => r.id),
+      checkins: this.checkins.all().map((r) => r.id),
+      sessions: this.sessions.all().map((r) => r.id),
+    };
 
     await this.download('roadmap2u-pre-import');
 
     await Promise.all([clear('trees'), clear('nodes'), clear('checkins'), clear('sessions')]);
     await Promise.all([
-      putMany('trees', envelope.data.trees ?? []),
-      putMany('nodes', envelope.data.nodes ?? []),
-      putMany('checkins', envelope.data.checkins ?? []),
-      putMany('sessions', envelope.data.sessions ?? []),
+      putMany('trees', trees),
+      putMany('nodes', nodes),
+      putMany('checkins', checkins),
+      putMany('sessions', sessions),
     ]);
 
-    this.trees.resetTo(envelope.data.trees ?? []);
-    this.nodes.resetTo(envelope.data.nodes ?? []);
-    this.checkins.resetTo(envelope.data.checkins ?? []);
-    this.sessions.resetTo(envelope.data.sessions ?? []);
-    if (envelope.data.settings) await this.settings.patch(envelope.data.settings);
+    this.trees.resetTo(trees);
+    this.nodes.resetTo(nodes);
+    this.checkins.resetTo(checkins);
+    this.sessions.resetTo(sessions);
+    if (data.settings) await this.settings.patch(data.settings);
 
-    // Other tabs re-read what the import replaced (same rail as every write).
-    broadcastChange({ store: 'trees', ids: (envelope.data.trees ?? []).map((r) => r.id) });
-    broadcastChange({ store: 'nodes', ids: (envelope.data.nodes ?? []).map((r) => r.id) });
-    broadcastChange({ store: 'checkins', ids: (envelope.data.checkins ?? []).map((r) => r.id) });
-    broadcastChange({ store: 'sessions', ids: (envelope.data.sessions ?? []).map((r) => r.id) });
+    // Other tabs re-read what the import replaced (same rail as every write);
+    // ids no longer on disk get DROPPED from their memory by refreshFromDisk.
+    const union = (kept: { id: string }[], removed: string[]) => [
+      ...new Set([...removed, ...kept.map((r) => r.id)]),
+    ];
+    broadcastChange({ store: 'trees', ids: union(trees, removedIds.trees) });
+    broadcastChange({ store: 'nodes', ids: union(nodes, removedIds.nodes) });
+    broadcastChange({ store: 'checkins', ids: union(checkins, removedIds.checkins) });
+    broadcastChange({ store: 'sessions', ids: union(sessions, removedIds.sessions) });
 
     // An explicit restore must WIN over the cloud — without this, the next
     // pull silently resurrects whatever the backup rolled back (cloud revs

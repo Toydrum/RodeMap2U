@@ -85,7 +85,9 @@ const FLORA: Record<AccentToken, FlowerSpec[]> = {
 /** Accent → family; the seed id (usually the TREE id, so a whole tree blooms
  *  one way) → the cousin. Omit `seedId` for the classic. */
 export function flowerFor(accent: AccentToken, seedId?: string): FlowerSpec {
-  const variants = FLORA[accent] ?? FLORA.rose;
+  // Fallback matches tree-forms' (moss): a drifted accent must not bloom
+  // rose flowers on a moss-dialed body.
+  const variants = FLORA[accent] ?? FLORA.moss;
   if (!seedId) return variants[0];
   return variants[hash(seedId + ':flora') % variants.length];
 }

@@ -1,15 +1,34 @@
+import { signal } from '@angular/core';
+
 /**
  * Date-only helpers. Gentle deadlines are 'YYYY-MM-DD' strings compared
  * lexicographically against local-today — NEVER constructed into Date
  * objects (new Date('YYYY-MM-DD') parses as UTC and shifts a day).
+ *
+ * `today()` is REACTIVE: it reads a module signal that flips at midnight,
+ * so every day-keyed computed (ramas de hoy, date reviews, «Otra idea»)
+ * follows the sun instead of the last navigation. A tab left open on
+ * /ahora used to keep showing yesterday's intentions at 9am.
  */
 
-export function today(): string {
+function computeToday(): string {
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const d = String(now.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
+}
+
+const todayState = signal(computeToday());
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const t = computeToday();
+    if (t !== todayState()) todayState.set(t);
+  }, 30_000);
+}
+
+export function today(): string {
+  return todayState();
 }
 
 /** True when the date-only string is strictly before local today. */

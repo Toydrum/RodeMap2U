@@ -10,7 +10,7 @@ import {
   TreeNode,
 } from '../db/schema';
 import { get, put } from '../db/idb';
-import { broadcastChange, onLocalWrite } from '../db/broadcast';
+import { broadcastRemote, onLocalWrite } from '../db/broadcast';
 import { AuthService } from '../auth/auth.service';
 import { AccountLinkSnapshot, META_ACCOUNT_LINK } from '../auth/auth-types';
 import { RecordsRepo } from '../repos/records.repo';
@@ -97,7 +97,11 @@ export class SyncService {
   private readonly dirtyIds = new Map<SyncStore, Set<string>>();
   private pushTimer: ReturnType<typeof setTimeout> | null = null;
   /** Suppresses the local-write echo while a pull applies remote records. */
-  private applyingRemote = false;
+  /** Debounce for persisting dirty marks outside a sync pass. */
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Bumped by forgetEverything so an in-flight sync can't re-persist stale
+   *  cursor/watermark over a reset. */
+  private epoch = 0;
   private initialized = false;
 
   constructor() {
@@ -137,7 +141,10 @@ export class SyncService {
     }
 
     onLocalWrite((message) => {
-      if (this.applyingRemote) return;
+      // No applyingRemote gate here: pulls broadcast via broadcastRemote
+      // (cross-tab only), so everything that reaches this handler is a
+      // GENUINE local write — the old gate silently dropped user writes
+      // that interleaved with a pull being applied.
       // Mark ALWAYS (even signed out): if the clock jumped backward these
       // writes are invisible to the watermark, and the dirty set is what
       // still gets them pushed after the next sign-in.
@@ -145,6 +152,10 @@ export class SyncService {
         const set = this.dirtyIds.get(message.store) ?? new Set<string>();
         for (const id of message.ids) set.add(id);
         this.dirtyIds.set(message.store, set);
+        // …and marks must reach DISK even without a successful sync (the
+        // in-memory set dies with the tab; the watermark scan can't cover a
+        // backward clock — the exact case the persisted set exists for).
+        this.schedulePersistState();
       }
       if (this.phase() === 'off' || this.phase() === 'mismatch') return;
       this.schedulePush();
@@ -199,6 +210,7 @@ export class SyncService {
     }
     this.busySignal.set(true);
     this.lastErrorSignal.set(null);
+    const epoch = this.epoch;
     try {
       if (this.forcePending) {
         this.watermark = 0; // a restore pushes EVERYTHING, and it wins
@@ -208,6 +220,10 @@ export class SyncService {
         await this.pushDirty();
       }
       await this.pullChanges();
+      // A reset (forgetEverything) mid-pass: our watermark/cursor belong to
+      // the OLD cloud — persisting them would make the fresh cursor silently
+      // skip records, the exact failure the reset guards against.
+      if (epoch !== this.epoch) return false;
       this.lastSyncAtSignal.set(Date.now());
       await this.persistState();
       return true;
@@ -217,6 +233,16 @@ export class SyncService {
     } finally {
       this.busySignal.set(false);
     }
+  }
+
+  /** Dirty marks reach disk shortly after they're made — not only after a
+   *  successful sync (a tab closed offline used to lose them all). */
+  private schedulePersistState(): void {
+    if (this.persistTimer) return;
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null;
+      void this.persistState();
+    }, 2000);
   }
 
   /** Called by BackupService after an import-replace. An EXPLICIT restore
@@ -267,7 +293,12 @@ export class SyncService {
     for (let i = 0; i < dirty.length; i += PUSH_CHUNK) {
       const chunk = dirty.slice(i, i + PUSH_CHUNK);
       const result = await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: chunk });
-      if (!result.rejected.length) continue;
+      if (!result.rejected.length) {
+        // Fully accepted chunks settle too — skipping them left cleanly
+        // restored ids marked dirty forever (redundant churn every pass).
+        this.settleDirty(chunk);
+        continue;
+      }
       const winnerRevs = new Map(result.serverRecords.map((w) => [w.record.id, w.record.rev]));
       const retry: SyncRecord[] = [];
       for (const rejection of result.rejected) {
@@ -333,20 +364,17 @@ export class SyncService {
     for (let page = 0; page < MAX_PULL_PAGES; page++) {
       const batch = await this.api.getSyncChanges(this.cursor === '0' ? undefined : this.cursor);
       const touched = new Map<SyncStore, string[]>();
-      this.applyingRemote = true;
-      try {
-        for (const change of batch.changes) {
-          if (await this.acceptRemote(change)) {
-            const ids = touched.get(change.store) ?? [];
-            ids.push(change.record.id);
-            touched.set(change.store, ids);
-          }
+      for (const change of batch.changes) {
+        if (await this.acceptRemote(change)) {
+          const ids = touched.get(change.store) ?? [];
+          ids.push(change.record.id);
+          touched.set(change.store, ids);
         }
-      } finally {
-        this.applyingRemote = false;
       }
-      // Other tabs learn the same way they always have.
-      for (const [store, ids] of touched) broadcastChange({ store, ids });
+      // Other tabs learn the same way they always have — but NOT this tab's
+      // own sync handler (these records came FROM the server; re-marking
+      // them dirty echoed a pointless full re-push after every pull).
+      for (const [store, ids] of touched) broadcastRemote({ store, ids });
       this.cursor = batch.cursor;
       if (!batch.more) break;
     }
@@ -416,6 +444,7 @@ export class SyncService {
    *  the cloud — a kept cursor against a reseeded feed silently skips records,
    *  and a kept link points at an account that no longer exists. */
   async forgetEverything(): Promise<void> {
+    this.epoch++; // an in-flight sync must not re-persist the old cloud's cursor
     await this.disconnect();
     this.watermark = 0;
     this.cursor = '0';

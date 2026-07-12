@@ -252,6 +252,7 @@
                 type="button"
                 class="dot"
                 [class.on]="d === page()"
+                [disabled]="!!draggingId()"
                 (click)="page.set(d)"
                 [attr.aria-label]="i18n.fill(i18n.t().forest.clearingDot, { n: d + 1 })"
                 [attr.aria-selected]="d === page()"

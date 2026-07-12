@@ -80,7 +80,18 @@ export abstract class RecordsRepo<T extends SyncBase> {
   async refreshFromDisk(ids: string[]): Promise<void> {
     for (const id of ids) {
       const fresh = await get<T>(this.store, id);
-      if (fresh) this.applyExternal(fresh);
+      if (fresh) {
+        this.applyExternal(fresh);
+      } else {
+        // Gone from disk (an import-replace dropped it): a copy kept in
+        // this tab's memory would resurrect it on the next save.
+        this.records.update((map) => {
+          if (!map.has(id)) return map;
+          const next = new Map(map);
+          next.delete(id);
+          return next;
+        });
+      }
     }
   }
 

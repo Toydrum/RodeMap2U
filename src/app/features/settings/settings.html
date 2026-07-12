@@ -161,7 +161,7 @@
     @if (isMock) {
       <div class="row mock-row">
         <span class="label">{{ i18n.t().settings.mockResetHint }}</span>
-        <button type="button" class="chip opt" (click)="resetMockCloud()">
+        <button type="button" class="chip opt" (click)="askMockReset()">
           🧪 {{ i18n.t().settings.mockReset }}
         </button>
       </div>
@@ -287,7 +287,7 @@
 
   @if (deleting(); as tree) {
     <div class="confirm-backdrop" (click)="deleting.set(null)">
-      <div class="confirm card" appSheet (sheetClose)="deleting.set(null)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="confirm card" appSheet (sheetClose)="deleting.set(null)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().settings.deleteForeverTitle, { name: tree.name })">
         <span class="confirm-icon" aria-hidden="true">🍃</span>
         <h2>{{ i18n.fill(i18n.t().settings.deleteForeverTitle, { name: tree.name }) }}</h2>
         <p class="confirm-body">
@@ -305,3 +305,17 @@
     </div>
   }
 </div>
+
+@if (confirmingMockReset()) {
+  <div class="confirm-backdrop" (click)="confirmingMockReset.set(false)">
+    <div class="confirm card" appSheet (sheetClose)="confirmingMockReset.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.t().settings.mockResetConfirmTitle">
+      <span class="confirm-icon" aria-hidden="true">🧪</span>
+      <h2>{{ i18n.t().settings.mockResetConfirmTitle }}</h2>
+      <p class="confirm-body">{{ i18n.t().settings.mockResetConfirmBody }}</p>
+      <div class="row">
+        <button type="button" class="btn-ghost" (click)="confirmingMockReset.set(false)">{{ i18n.t().common.cancel }}</button>
+        <button type="button" class="btn-primary" (click)="resetMockCloud()">{{ i18n.t().settings.mockResetConfirmGo }}</button>
+      </div>
+    </div>
+  </div>
+}

@@ -189,7 +189,7 @@
 
 @if (confirmingArchive()) {
   <div class="sheet-backdrop" (click)="confirmingArchive.set(false)">
-    <div class="sheet card confirm" appSheet (sheetClose)="confirmingArchive.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="sheet card confirm" appSheet (sheetClose)="confirmingArchive.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title })">
       <span class="confirm-icon" aria-hidden="true">🗃</span>
       <h2>{{ i18n.fill(i18n.t().node.archiveNodeTitle, { title: node().title }) }}</h2>
       <p class="confirm-body">
@@ -212,7 +212,7 @@
 
 @if (confirmingRevert()) {
   <div class="sheet-backdrop" (click)="confirmingRevert.set(false)">
-    <div class="sheet card confirm" appSheet (sheetClose)="confirmingRevert.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="sheet card confirm" appSheet (sheetClose)="confirmingRevert.set(false)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="i18n.fill(i18n.t().node.revertTitle, { title: node().title })">
       <span class="confirm-icon" aria-hidden="true">🌿</span>
       <h2>{{ i18n.fill(i18n.t().node.revertTitle, { title: node().title }) }}</h2>
       <p class="confirm-body">{{ i18n.t().node.revertBody }}</p>

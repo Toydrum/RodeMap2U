@@ -36,7 +36,13 @@ export class TreeViewPage {
    *  the sky stays neutral (their feelings are private), back goes home. */
   protected readonly visit = inject(VisitSession, { optional: true });
 
-  protected readonly tree = computed(() => this.trees.byId().get(this.id()) ?? null);
+  /** Archived and deleted-forever trees are NOT pages: a stale bookmark used
+   *  to render a fully editable ghost (you could even plant live nodes under
+   *  a tombstoned tree). The archive page is the door back. */
+  protected readonly tree = computed(() => {
+    const record = this.trees.byId().get(this.id());
+    return record && !record.archivedAt && !record.deletedAt ? record : null;
+  });
 
   protected readonly backLink = computed(() =>
     this.visit ? ['/visit', this.visit.userId()] : ['/forest'],
@@ -55,15 +61,24 @@ export class TreeViewPage {
   protected readonly openNode = signal<TreeNode | null>(null);
 
   private readonly route = inject(ActivatedRoute);
-  /** `?node=` deep link (e.g. from "Tus huellas"): open that branch's sheet on arrival. */
-  private pendingOpenId = this.route.snapshot.queryParamMap.get('node');
+  /** `?node=` deep link (e.g. from "Tus huellas"): open that branch's sheet
+   *  on arrival. A signal fed by the LIVE query params — the constructor
+   *  snapshot ignored a second deep link into a reused page instance. */
+  private readonly pendingOpenId = signal(this.route.snapshot.queryParamMap.get('node'));
 
   constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const id = params.get('node');
+      if (id) this.pendingOpenId.set(id);
+    });
     effect(() => {
-      if (!this.pendingOpenId || !this.canEdit()) return;
-      const node = this.nodes.byId().get(this.pendingOpenId) as TreeNode | undefined;
-      if (!node || node.treeId !== this.id()) return;
-      this.pendingOpenId = null;
+      const pendingId = this.pendingOpenId();
+      if (!pendingId || !this.canEdit()) return;
+      const node = this.nodes.byId().get(pendingId) as TreeNode | undefined;
+      // Archived/tombstoned nodes aren't on the canvas — a stale deep link
+      // must not open a sheet whose writes land on an invisible record.
+      if (!node || node.treeId !== this.id() || node.archivedAt || node.deletedAt) return;
+      this.pendingOpenId.set(null);
       this.openNode.set(node);
       const params = { ...this.route.snapshot.queryParams, node: null };
       void this.router.navigate([], { queryParams: params, replaceUrl: true });
@@ -126,11 +141,13 @@ export class TreeViewPage {
     if (window.innerWidth < 980) this.outlineOpen.set(false);
   }
 
-  /** Keep the sheet showing the live version of the node. */
+  /** Keep the sheet showing the live version of the node — and close it if
+   *  the node stops existing on the canvas (archived in another tab). */
   protected readonly liveOpenNode = computed(() => {
     const open = this.openNode();
     if (!open) return null;
-    return (this.nodes.byId().get(open.id) as TreeNode | undefined) ?? null;
+    const live = this.nodes.byId().get(open.id) as TreeNode | undefined;
+    return live && !live.archivedAt && !live.deletedAt ? live : null;
   });
 
   protected plantSheetTitle(): string {

@@ -165,6 +165,7 @@ export class TreeCanvas {
   /** Nodes created this session get the grow animation exactly once. */
   private readonly bornThisSession = new Set<string>();
   private knownIds: Set<string> | null = null;
+  private knownTreeId: string | null = null;
 
   protected readonly layout = computed(() => {
     const tree = this.tree();
@@ -518,6 +519,16 @@ export class TreeCanvas {
     // Track newborn nodes for the grow animation; pan the newest into view
     // so planting can never grow the tree off-screen unnoticed.
     effect(() => {
+      // A tree SWITCH within a reused component (adjacent history entries)
+      // must reset the newborn tracker — diffing tree A's ids against tree
+      // B's marked B's every node "born" and played the grow animation on
+      // the whole destination tree.
+      const treeId = this.tree().id;
+      if (treeId !== this.knownTreeId) {
+        this.knownTreeId = treeId;
+        this.knownIds = null;
+        this.bornThisSession.clear();
+      }
       const ids = new Set(this.layout().points.map((p) => p.node.id));
       if (this.knownIds) {
         let lastNew: LayoutPoint | null = null;
@@ -565,9 +576,11 @@ export class TreeCanvas {
     return Math.min(24, Math.max(16, 24 / this.k()));
   }
 
-  /** The "+" bud keeps a finger-sized target even zoomed out. */
+  /** The "+" bud keeps a finger-sized target even zoomed out: ~18 SCREEN px
+   *  (the old world-space clamp shrank it to 8-10px at the zoom floors).
+   *  World cap 34 keeps the disc clear of the node glyph 46px below. */
   protected budHitRadius(): number {
-    return Math.max(14, Math.min(20, 16 / this.k()));
+    return Math.min(34, 18 / this.k());
   }
 
   /** The bud floats above the node — except on an ordered-steps branch,
@@ -649,7 +662,10 @@ export class TreeCanvas {
     if (!point) return null;
     const factor = 1.15;
     const maxChars = Math.max(8, Math.floor(180 / (CHAR_W * factor)));
-    const { lines } = wrapTitle(point.node.title, maxChars, 6);
+    // 8 lines hold ANY 80-char title (the input's maxlength) even as
+    // one-word-per-line — the cartouche's full-title promise stays intact
+    // (6 lines silently dropped words on pathological titles).
+    const { lines } = wrapTitle(point.node.title, maxChars, 8);
     const row = point.rowY ?? -point.depth * LEVEL_H;
     return { point, lines, factor, yRel: row + LABEL_BASELINE - point.y };
   });
@@ -909,6 +925,10 @@ export class TreeCanvas {
       }
       case 'ArrowLeft':
       case 'ArrowRight': {
+        // Chain links have no lateral siblings — their layout parent is the
+        // PREVIOUS link, so "siblings" would be that link's real children
+        // and ArrowRight jumped to an unrelated niece. The path is Up/Down.
+        if (point.chain) break;
         const siblings = point.parent
           ? this.nodes.childrenOf(point.parent.node)
           : this.nodes.rootsOf(this.tree().id);

@@ -70,6 +70,24 @@ export class FocusSessionService {
   constructor() {
     this.adoptOrphan();
 
+    // The session is GLOBAL, not per-tab: the repo is cross-tab fresh via
+    // BroadcastChannel, so mirror it — a session started in another tab
+    // appears here (whispers then respect it, the timer page shows it, and
+    // no second session can be started); one finished elsewhere clears here.
+    effect(() => {
+      const running = this.sessions.running();
+      const mine = this.state();
+      if (!mine && running && Date.now() - running.startedAt <= ADOPT_WINDOW_MS) {
+        this.adoptRow(running);
+      } else if (mine && (!running || running.id !== mine.sessionId)) {
+        const row = this.sessions.byId().get(mine.sessionId);
+        if (!row || row.endedAt !== null) {
+          this.stopTicker();
+          this.state.set(null);
+        }
+      }
+    });
+
     // Completion cue: one gentle toast when the planted time blooms —
     // on whatever route you're on (the toast lives in the app shell).
     effect(() => {
@@ -93,6 +111,13 @@ export class FocusSessionService {
 
   async start(nodeId: string | null, minutes: number): Promise<void> {
     if (this.state()) return; // one session at a time
+    // …in ANY tab: the repo is the cross-tab truth. Adopt instead of
+    // creating a second running row.
+    const elsewhere = this.sessions.running();
+    if (elsewhere) {
+      this.adoptRow(elsewhere);
+      return;
+    }
     const row = await this.sessions.start(nodeId, minutes);
     this.celebrated = false;
     this.state.set({
@@ -110,18 +135,35 @@ export class FocusSessionService {
     const active = this.state();
     if (!active || active.pausedAt !== null) return;
     this.stopTicker(); // elapsed is frozen while paused; no tick needed
-    this.state.set({ ...active, pausedAt: Date.now() });
+    const pausedAt = Date.now();
+    this.state.set({ ...active, pausedAt });
+    // Persist the pause: a reload used to re-adopt with the pause erased,
+    // silently converting the whole paused span into "worked" minutes.
+    void this.persistPause(active.sessionId, pausedAt, active.accumulatedPausedMs);
   }
 
   resume(): void {
     const active = this.state();
     if (!active || active.pausedAt === null) return;
+    const accumulated = active.accumulatedPausedMs + (Date.now() - active.pausedAt);
     this.state.set({
       ...active,
       pausedAt: null,
-      accumulatedPausedMs: active.accumulatedPausedMs + (Date.now() - active.pausedAt),
+      accumulatedPausedMs: accumulated,
     });
     this.startTicker();
+    void this.persistPause(active.sessionId, null, accumulated);
+  }
+
+  private async persistPause(
+    sessionId: string,
+    pausedAt: number | null,
+    pausedMs: number,
+  ): Promise<void> {
+    const row = this.sessions.byId().get(sessionId);
+    if (row && row.endedAt === null) {
+      await this.sessions.save({ ...row, pausedAt, pausedMs });
+    }
   }
 
   /** Ends with care and returns whole minutes (min 1) for the caller's toast. */
@@ -129,10 +171,16 @@ export class FocusSessionService {
     const active = this.state();
     if (!active) return 0;
     const minutes = Math.max(1, Math.round(this.elapsedMs() / 60_000));
+    // A finish while paused folds the open pause into the final tally so
+    // the stored row's timestamps stay honest for totalMinutesFor.
+    const finalPausedMs =
+      active.accumulatedPausedMs + (active.pausedAt !== null ? Date.now() - active.pausedAt : 0);
     this.stopTicker();
     this.state.set(null); // overtime → false clears the 🌸 via the effect
     const row = this.sessions.byId().get(active.sessionId);
-    if (row && row.endedAt === null) await this.sessions.end(row);
+    if (row && row.endedAt === null) {
+      await this.sessions.end({ ...row, pausedAt: null, pausedMs: finalPausedMs });
+    }
     return minutes;
   }
 
@@ -148,18 +196,36 @@ export class FocusSessionService {
       });
       return;
     }
-    // No surprise completion toast at boot if it's already overtime.
-    this.celebrated = Date.now() - orphan.startedAt >= orphan.plannedMinutes * 60_000;
-    this.state.set({
-      nodeId: orphan.nodeId,
-      plannedMinutes: orphan.plannedMinutes,
-      startedAt: orphan.startedAt,
-      pausedAt: null,
-      accumulatedPausedMs: 0,
-      sessionId: orphan.id,
-    });
-    this.startTicker();
+    this.adoptRow(orphan);
     this.toast.show({ message: this.i18n.t().timer.resumed });
+  }
+
+  /** Rebuild in-memory state from a persisted running row — pause included
+   *  (a reload used to zero the pause and count it as worked time). */
+  private adoptRow(row: {
+    id: string;
+    nodeId: string | null;
+    plannedMinutes: number;
+    startedAt: number;
+    pausedAt?: number | null;
+    pausedMs?: number;
+  }): void {
+    const pausedAt = row.pausedAt ?? null;
+    const accumulatedPausedMs = row.pausedMs ?? 0;
+    // No surprise completion toast at adoption if it's already overtime —
+    // NET of pauses, or a long-paused short session would celebrate early.
+    const netElapsed =
+      (pausedAt ?? Date.now()) - row.startedAt - accumulatedPausedMs;
+    this.celebrated = netElapsed >= row.plannedMinutes * 60_000;
+    this.state.set({
+      nodeId: row.nodeId,
+      plannedMinutes: row.plannedMinutes,
+      startedAt: row.startedAt,
+      pausedAt,
+      accumulatedPausedMs,
+      sessionId: row.id,
+    });
+    if (pausedAt === null) this.startTicker();
   }
 
   private startTicker(): void {

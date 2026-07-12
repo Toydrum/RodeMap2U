@@ -5,6 +5,7 @@ export const EN: Dict = {
   app: {
     name: 'RoadMap2U',
     tagline: 'Your route grows with you',
+    memoryOnly: 'This device could not open its storage: your forest lives only in this session and will be lost on reload. Close other tabs and reload to retry.',
   },
   common: {
     save: 'Save',
@@ -354,6 +355,9 @@ export const EN: Dict = {
     mockResetHint: 'Rehearsal mode only: restarts the demo family (rocio, nico, val, ambar).',
     mockResetDone: 'The practice cloud started over 🌱',
     mockResetBlocked: 'Almost: close the app’s other tabs and the practice cloud will restart on its own.',
+    mockResetConfirmTitle: 'Reset the practice cloud?',
+    mockResetConfirmBody: 'You will be signed out and the demo family starts over from scratch. Your local trees are untouched.',
+    mockResetConfirmGo: 'Yes, reset',
     about: 'About',
     aboutText: 'Made with care for minds that grow in spirals, not straight lines.',
     updatesTitle: 'Updates',

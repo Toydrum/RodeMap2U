@@ -141,15 +141,19 @@ export class HttpApi implements ApiClient {
     return this.request('GET', `${API_PATHS.syncChanges}${query}`);
   }
   pushSync(req: SyncPushRequest): Promise<SyncPushResponse> {
-    return this.request('POST', API_PATHS.syncPush, req);
+    return this.request('POST', API_PATHS.syncPush, req, true);
   }
   pushSyncFor(userId: string, req: SyncPushRequest): Promise<SyncPushResponse> {
-    return this.request('POST', API_PATHS.userSyncPush(userId), req);
+    return this.request('POST', API_PATHS.userSyncPush(userId), req, true);
   }
 
   // ── transport ─────────────────────────────────────────────────────────────
 
-  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown, idempotent?: boolean): Promise<T> {
+    // 5xx retries are safe only when re-sending can't double an effect:
+    // GETs always, sync pushes by contract (rev-LWW makes them replayable).
+    // A createChild/accept retried after a committed-then-500 would run twice.
+    const retryOn5xx = method === 'GET' || idempotent === true;
     let forceRefresh = false;
     let retries = 0;
     for (;;) {
@@ -180,7 +184,7 @@ export class HttpApi implements ApiClient {
         forceRefresh = true;
         continue;
       }
-      if (response.status >= 500 && retries < BACKOFF_MS.length) {
+      if (response.status >= 500 && retryOn5xx && retries < BACKOFF_MS.length) {
         await wait(BACKOFF_MS[retries]);
         retries += 1;
         continue;

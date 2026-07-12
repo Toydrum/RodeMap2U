@@ -199,7 +199,13 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
     },
   ): Promise<TreeNode[]> {
     const now = Date.now();
-    const children = this.childrenOf(parent).filter((c) => c.origin === 'branch');
+    // ALL branch-born children, archived ones included — childrenOf reads
+    // the visible index, so an individually-archived branch child survived
+    // the revert invisibly under a now-growing parent (and could resurface
+    // via unarchive).
+    const children = this.all().filter(
+      (c) => c.parentId === parent.id && c.origin === 'branch' && !c.deletedAt,
+    );
     const reverted = stamp(
       { ...parent, status: restoreTo.status, targetDate: restoreTo.targetDate, branchedAt: null },
       now,

@@ -29,7 +29,8 @@ interface MiniDot {
 
 interface MiniView {
   branches: MiniBranch[];
-  trunk: string;
+  /** One trunk per ROOT — the header "+ Plantar" plants at root level, so a tree can hold several; a single string dropped all but the last (floating crowns). */
+  trunks: string[];
   dots: MiniDot[];
 }
 
@@ -49,7 +50,9 @@ const PAD = 12;
   template: `
     <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" aria-hidden="true" class="mini">
       @if (view(); as v) {
-        <path class="trunk" [attr.d]="v.trunk" />
+        @for (t of v.trunks; track $index) {
+          <path class="trunk" [attr.d]="t" />
+        }
         @for (branch of v.branches; track $index) {
           <path [attr.d]="branch.d" [style.fill]="branch.fill" />
         }
@@ -207,7 +210,7 @@ export class MiniTree {
 
     const branches: MiniBranch[] = [];
     const dots: MiniDot[] = [];
-    let trunk = '';
+    const trunks: string[] = [];
 
     for (const p of layout.points) {
       const sp = scaled.get(p.node.id)!;
@@ -222,7 +225,7 @@ export class MiniTree {
           : Math.max(3, widthForMass(sp.mass ?? 1, form.girthMul) * 0.9 * s * wBoost);
         const w0 = Math.min(26, wTop * (isBaby ? 1.5 : 1.35));
         const sway = (((hashAngle(p.node.id + ':sway') % 11) - 5) * len) / 70;
-        trunk = taperedRibbon(
+        trunks.push(taperedRibbon(
           sp.x + sway,
           GROUND + 2,
           sp.x + sway * 0.5,
@@ -233,7 +236,7 @@ export class MiniTree {
           sp.y,
           w0,
           wTop,
-        );
+        ));
       } else {
         const isLeaf = this.nodes.childrenOf(p.node).length === 0;
         // Habit echoes — the mini keeps the big tree's soul: willows hang
@@ -305,7 +308,7 @@ export class MiniTree {
       }
     }
 
-    return { branches, trunk, dots };
+    return { branches, trunks, dots };
   });
 
   private woodFill(point: LayoutPoint): string {

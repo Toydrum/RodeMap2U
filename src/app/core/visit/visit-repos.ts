@@ -1,9 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { API_CLIENT } from '../api/api-client';
-import { ApiError, SyncRecord } from '../api/contracts';
+import { ApiError, LIMITS, SyncRecord } from '../api/contracts';
 import { SCHEMA_VERSION, Tree, TreeNode, stamp } from '../db/schema';
 import { NodesRepo } from '../repos/nodes.repo';
 import { TreesRepo } from '../repos/trees.repo';
+
+/** The server caps a push at LIMITS.syncPushMax records — a guardian
+ *  archiving a 100+ node subtree in the kid's forest must chunk like the
+ *  real sync engine does, not fail wholesale. */
+function chunked<T>(records: T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < records.length; i += LIMITS.syncPushMax) {
+    out.push(records.slice(i, i + LIMITS.syncPushMax));
+  }
+  return out;
+}
 
 /**
  * Route-scoped repo variants for visiting someone else's forest. They extend
@@ -46,17 +57,19 @@ export class VisitTreesRepo extends TreesRepo {
 
   private async push(records: Tree[]): Promise<void> {
     if (!this.editable || !this.ownerId) throw new ApiError('FORBIDDEN', 'view-only visit');
-    const payload: SyncRecord[] = records.map((record) => ({ store: 'trees', record }));
-    const result = await this.api.pushSyncFor(this.ownerId, {
-      schemaVersion: SCHEMA_VERSION,
-      records: payload,
-    });
-    const rejectedIds = new Set(result.rejected.map((r) => r.id));
-    for (const record of records) {
-      if (!rejectedIds.has(record.id)) this.applyLocal(record);
-    }
-    for (const winner of result.serverRecords) {
-      if (winner.store === 'trees') this.applyExternal(winner.record as Tree);
+    for (const slice of chunked(records)) {
+      const payload: SyncRecord[] = slice.map((record) => ({ store: 'trees', record }));
+      const result = await this.api.pushSyncFor(this.ownerId, {
+        schemaVersion: SCHEMA_VERSION,
+        records: payload,
+      });
+      const rejectedIds = new Set(result.rejected.map((r) => r.id));
+      for (const record of slice) {
+        if (!rejectedIds.has(record.id)) this.applyLocal(record);
+      }
+      for (const winner of result.serverRecords) {
+        if (winner.store === 'trees') this.applyExternal(winner.record as Tree);
+      }
     }
   }
 }
@@ -91,17 +104,19 @@ export class VisitNodesRepo extends NodesRepo {
 
   private async push(records: TreeNode[]): Promise<void> {
     if (!this.editable || !this.ownerId) throw new ApiError('FORBIDDEN', 'view-only visit');
-    const payload: SyncRecord[] = records.map((record) => ({ store: 'nodes', record }));
-    const result = await this.api.pushSyncFor(this.ownerId, {
-      schemaVersion: SCHEMA_VERSION,
-      records: payload,
-    });
-    const rejectedIds = new Set(result.rejected.map((r) => r.id));
-    for (const record of records) {
-      if (!rejectedIds.has(record.id)) this.applyLocal(record);
-    }
-    for (const winner of result.serverRecords) {
-      if (winner.store === 'nodes') this.applyExternal(winner.record as TreeNode);
+    for (const slice of chunked(records)) {
+      const payload: SyncRecord[] = slice.map((record) => ({ store: 'nodes', record }));
+      const result = await this.api.pushSyncFor(this.ownerId, {
+        schemaVersion: SCHEMA_VERSION,
+        records: payload,
+      });
+      const rejectedIds = new Set(result.rejected.map((r) => r.id));
+      for (const record of slice) {
+        if (!rejectedIds.has(record.id)) this.applyLocal(record);
+      }
+      for (const winner of result.serverRecords) {
+        if (winner.store === 'nodes') this.applyExternal(winner.record as TreeNode);
+      }
     }
   }
 }

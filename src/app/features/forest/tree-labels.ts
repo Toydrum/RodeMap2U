@@ -93,6 +93,12 @@ export interface LabelInput {
   leadGlyphW: number;
   /** Packs first and may never be clipped (the 📍 place). */
   pinned: boolean;
+  /** Hard cap on wrapped lines. Chain links live only CHAIN_H=46px apart —
+   *  the 74px downward label budget was derived for 100px rows, so a
+   *  2+ line chain label paints across the glyph of the link below it.
+   *  Capped labels end in the fade-tail; the full name lives in the
+   *  cartouche/tablita as always. */
+  maxLines?: number;
 }
 
 /** Greedy word wrap. A single word longer than the line hard-breaks with a
@@ -203,7 +209,8 @@ function blockOf(
 ): { lines: string[]; clipped: boolean; w: number; h: number } {
   const maxChars =
     maxCharsOverride ?? Math.max(6, Math.floor(LINE_BUDGET / (CHAR_W * factor)));
-  const { lines, clipped } = wrapTitle(input.title, maxChars, maxLines);
+  const cappedLines = Math.min(maxLines, input.maxLines ?? Number.POSITIVE_INFINITY);
+  const { lines, clipped } = wrapTitle(input.title, maxChars, cappedLines);
   const longest = lines.reduce((m, l) => Math.max(m, l.length), 0);
   const w = longest * CHAR_W * factor * BOOST + 14 + input.leadGlyphW;
   const h = lines.length * LINE_H * factor * BOOST;
@@ -393,6 +400,9 @@ export function labelInputsFrom(
       emphasis: opts.emphasisOf(p),
       leadGlyphW: opts.leadGlyphOf(p),
       pinned: isPinned,
+      // Chain links sit CHAIN_H apart — a wrapped label would paint across
+      // the glyph below. One line + fade-tail; the cartouche says it all.
+      maxLines: p.chain ? 1 : undefined,
     });
   }
   return out;

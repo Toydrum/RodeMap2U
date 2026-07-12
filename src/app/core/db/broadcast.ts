@@ -33,6 +33,14 @@ export function broadcastChange(message: DbChangeMessage): void {
   channel?.postMessage(message);
 }
 
+/** Cross-tab ONLY — for changes that arrived FROM outside (a pull applying
+ *  server records). Skipping the local handlers matters: routing a pull
+ *  through them re-marked every pulled id dirty and echoed a full redundant
+ *  re-push after every sync round. */
+export function broadcastRemote(message: DbChangeMessage): void {
+  channel?.postMessage(message);
+}
+
 export function onDbChange(handler: (message: DbChangeMessage) => void): void {
   channel?.addEventListener('message', (event) => handler(event.data as DbChangeMessage));
 }

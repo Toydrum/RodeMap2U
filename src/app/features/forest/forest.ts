@@ -72,8 +72,8 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
   // the DOM, which breaks pointer capture mid-drag.
   host: {
     '(document:pointermove)': 'moveOver($event)',
-    '(document:pointerup)': 'endMove()',
-    '(document:pointercancel)': 'endMove()',
+    '(document:pointerup)': 'endMove($event)',
+    '(document:pointercancel)': 'endMove($event)',
   },
 })
 export class ForestPage {
@@ -227,6 +227,11 @@ export class ForestPage {
   private grabDX = 0;
   private grabDY = 0;
   private bandEl: HTMLElement | null = null;
+  /** The ONE pointer that owns the drag — all other pointers are ignored. */
+  private dragPointerId: number | null = null;
+  /** Settle generation: two quick drops of the same tree must not let the
+   *  first drop's timeout cut the second settle short. */
+  private settleGen = 0;
 
   /** What the meadow renders: the drag preview if one is in flight. */
   protected readonly displayTrees = computed(() => {
@@ -250,6 +255,12 @@ export class ForestPage {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected plotDown(ev: PointerEvent, tree: Tree): void {
+    // One gesture at a time: while a drag (or an armed press) is alive, a
+    // SECOND finger must not reset the bookkeeping, hijack the grab, or —
+    // via its later click — navigate mid-drag. And only the primary button
+    // grabs: a right-button press used to start a drag and then pop the
+    // native context menu on top of the drop.
+    if (this.draggingId() || this.pendingDrag || ev.button !== 0) return;
     this.suppressClick = false;
     this.dragMoved = false;
     if ((ev.target as Element).closest('.plot-archive')) return;
@@ -280,6 +291,14 @@ export class ForestPage {
     const px = this.pendingDrag?.x ?? 0;
     const py = this.pendingDrag?.y ?? 0;
     this.clearPending();
+    // Re-grabbing a tree inside its ~520ms settle window: the .settling
+    // transition outranks .dragging's `transition: none` (same specificity,
+    // later in source) and the tree would rubber-band behind the finger.
+    this.settlingId.set(null);
+    // Stale offsets from the PREVIOUS drag must never leak into this one
+    // (the measure block below is skipped when the plot unmounted mid-hold).
+    this.grabDX = 0;
+    this.grabDY = 0;
     // A lone tree has no neighbor to trade places with — say so kindly.
     if (this.trees.active().length < 2) {
       this.toast.show({ message: this.i18n.t().forest.moveNeedsTwo });
@@ -297,6 +316,7 @@ export class ForestPage {
         /* synthetic/expired pointers may not be capturable — fine */
       }
     }
+    this.dragPointerId = pointerId ?? null;
     // From here on the tree rides the finger: seed its live position from the
     // RENDERED rect (frame 1 = exactly where it stands, zero jump) and keep
     // the pointer→bottom-center offset. With transform-origin 50% 100% +
@@ -341,7 +361,7 @@ export class ForestPage {
 
   protected moveOver(ev: PointerEvent): void {
     const pending = this.pendingDrag;
-    if (pending && !this.draggingId()) {
+    if (pending && !this.draggingId() && ev.pointerId === pending.pointerId) {
       const dist = Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y);
       if (ev.pointerType === 'mouse') {
         if (dist > 8) this.beginDrag(pending.tree);
@@ -355,6 +375,9 @@ export class ForestPage {
     const dragId = this.draggingId();
     const preview = this.dragPreview();
     if (!dragId || !preview) return;
+    // Only the grabbing pointer steers: a resting palm or a second thumb
+    // must not teleport the tree, flip pages, or splice the order.
+    if (this.dragPointerId !== null && ev.pointerId !== this.dragPointerId) return;
     this.dragMoved = true;
 
     // The tree rides the finger — BEFORE the edge check, so it keeps
@@ -399,7 +422,16 @@ export class ForestPage {
     }
   }
 
-  protected async endMove(): Promise<void> {
+  protected async endMove(ev?: PointerEvent): Promise<void> {
+    // A pointer that isn't part of the gesture lifting must end NOTHING —
+    // neither the armed press nor the live drag (second-finger taps used to
+    // commit half-finished reorders).
+    if (ev) {
+      if (this.pendingDrag && ev.pointerId !== this.pendingDrag.pointerId) return;
+      if (this.draggingId() && this.dragPointerId !== null && ev.pointerId !== this.dragPointerId) {
+        return;
+      }
+    }
     this.clearPending();
     const dragId = this.draggingId();
     if (!dragId) return;
@@ -410,11 +442,18 @@ export class ForestPage {
     this.draggingId.set(null);
     this.dragPos.set(null);
     this.bandEl = null;
+    this.dragPointerId = null;
     if (this.dragMoved) {
+      const gen = ++this.settleGen;
       this.settlingId.set(dragId);
       setTimeout(() => {
-        if (this.settlingId() === dragId) this.settlingId.set(null);
+        if (this.settleGen === gen && this.settlingId() === dragId) this.settlingId.set(null);
       }, 520);
+      // The click that trails this pointerup (if any) must not navigate —
+      // but the flag must not LINGER either: when the drop lands off-plot no
+      // click ever comes, and a stale flag used to swallow the next
+      // keyboard Enter on a focused plot.
+      setTimeout(() => (this.suppressClick = false));
     } else {
       // A hold that never traveled is just a slow click — let it navigate.
       this.suppressClick = false;
@@ -428,6 +467,8 @@ export class ForestPage {
 
   /** Keyboard rearranging: arrows swap the tree with its neighbor. */
   protected async nudge(ev: KeyboardEvent, tree: Tree): Promise<void> {
+    // Never a second writer while a pointer drag holds the order.
+    if (this.draggingId()) return;
     const dir =
       ev.key === 'ArrowLeft' || ev.key === 'ArrowUp'
         ? -1
@@ -580,14 +621,22 @@ export class ForestPage {
     // The button lives inside the plot link — don't navigate.
     event.preventDefault();
     event.stopPropagation();
+    // A second finger tapping a 🗃 mid-drag must not pop the confirm sheet
+    // over the gesture.
+    if (this.draggingId()) return;
     this.archiving.set(tree);
   }
 
   protected async archiveTree(): Promise<void> {
-    const tree = this.archiving();
-    if (!tree) return;
-    await this.trees.archive(tree);
+    const asked = this.archiving();
+    if (!asked) return;
+    // The confirm sheet can sit open for minutes — archive the LIVE record,
+    // not the snapshot (a cross-tab rename landing meanwhile must survive;
+    // an already-archived one must not get a spurious re-stamp).
+    const tree = this.trees.byId().get(asked.id) ?? asked;
     this.archiving.set(null);
+    if (tree.archivedAt) return;
+    await this.trees.archive(tree);
     this.toast.show(
       {
         message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),

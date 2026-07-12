@@ -115,7 +115,7 @@ export class AccompanimentService {
       // Unpredictable but deterministic: each whisper seeds the next gap.
       return SURPRISE_MIN_MS + (hash(today() + ':' + String(lastAt ?? 0)) % SURPRISE_RANGE_MS);
     }
-    // Varying interval (±25%, deterministic per day) — fixed pings go blind.
+    // Varying interval (±12.5%, deterministic per day) — fixed pings go blind.
     const jitter = ((hash(new Date().toDateString()) % 51) - 25) / 100;
     return RHYTHM_MS[rhythm] * (1 + jitter * 0.5);
   }
@@ -139,7 +139,8 @@ export class AccompanimentService {
     } else if ('Notification' in window && Notification.permission === 'granted') {
       try {
         const reg = await navigator.serviceWorker?.getRegistration();
-        await reg?.showNotification(question, {
+        if (!reg) return; // SW not ready yet — the whisper slot is NOT consumed
+        await reg.showNotification(question, {
           body: t.body,
           tag: 'roadmap-whisper',
           silent: true,
@@ -147,7 +148,9 @@ export class AccompanimentService {
           badge: 'icons/icon-96x96.png',
         });
       } catch {
-        /* notification surface unavailable — the next visible moment will toast */
+        // Nothing was shown — consuming the slot here armed a beat-two offer
+        // whose question never existed. Try again next check.
+        return;
       }
     } else {
       return; // hidden and no permission — stay quiet, never nag about nagging

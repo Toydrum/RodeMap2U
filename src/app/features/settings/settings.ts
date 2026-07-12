@@ -100,7 +100,13 @@ export class SettingsPage {
    *  Also signs out — the session's user may no longer exist afterwards —
    *  and resets the device-side bookkeeping (link, cursor, family cache):
    *  kept against a reseeded cloud they'd skip records or paint ghosts. */
+  /** Confirm sheet open for the practice-cloud reset — one tap used to sign
+   *  out and wipe with no question asked (every other destructive action
+   *  gets a confirm). */
+  protected readonly confirmingMockReset = signal(false);
+
   protected async resetMockCloud(): Promise<void> {
+    this.confirmingMockReset.set(false);
     await this.auth.signOut();
     await this.sync.forgetEverything();
     await this.fam.clearCache();
@@ -169,10 +175,22 @@ export class SettingsPage {
     return this.nodes.all().filter((n) => n.treeId === tree.id).length;
   }
 
+  /** In-flight latch — a double-tap downloaded two pre-delete backups. */
+  private deletingBusy = false;
+
   /** The ONLY irreversible action in the app — backup first, always. */
   protected async deleteForever(): Promise<void> {
     const tree = this.deleting();
-    if (!tree) return;
+    if (!tree || this.deletingBusy) return;
+    this.deletingBusy = true;
+    try {
+      await this.deleteForeverInner(tree);
+    } finally {
+      this.deletingBusy = false;
+    }
+  }
+
+  private async deleteForeverInner(tree: Tree): Promise<void> {
     await this.backup.download('roadmap2u-pre-delete');
     const treeNodes = this.nodes.all().filter((n) => n.treeId === tree.id);
     await this.nodes.tombstoneMany(treeNodes);
@@ -181,6 +199,10 @@ export class SettingsPage {
     this.toast.show({
       message: this.i18n.fill(this.i18n.t().settings.deletedToast, { name: tree.name }),
     });
+  }
+
+  protected askMockReset(): void {
+    this.confirmingMockReset.set(true);
   }
 
   protected async onImportFile(event: Event): Promise<void> {

@@ -5,6 +5,9 @@ import { CheckinsRepo } from './repos/checkins.repo';
 import { SessionsRepo } from './repos/sessions.repo';
 import { SettingsService } from './repos/settings.service';
 import { onDbChange } from './db/broadcast';
+import { storageAvailable } from './db/idb';
+import { ToastService } from '../shared/ui/toast.service';
+import { I18nService } from './i18n/i18n.service';
 
 /** Loads every store into memory before first render and wires cross-tab refresh. */
 @Injectable({ providedIn: 'root' })
@@ -14,6 +17,8 @@ export class BootService {
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly settings = inject(SettingsService);
+  private readonly toast = inject(ToastService);
+  private readonly i18n = inject(I18nService);
 
   async init(): Promise<void> {
     // Loads catch their own storage failures; allSettled is belt-and-braces —
@@ -27,6 +32,13 @@ export class BootService {
     ]);
 
     onDbChange(({ store, ids }) => {
+      // Settings travel too — lastCheckInAt/todayIntentions/lastWhisperAt
+      // are behavioral, and a tab that can't see them re-routes to a
+      // check-in already done and whispers on its own clock.
+      if (store === 'meta') {
+        if (ids.includes('settings')) void this.settings.load();
+        return;
+      }
       const repo =
         store === 'trees' ? this.trees
         : store === 'nodes' ? this.nodes
@@ -37,6 +49,13 @@ export class BootService {
     });
 
     await this.maybeSeedDemo();
+
+    // Memory-only degrade must never be SILENT: an empty forest over an
+    // intact disk store reads as data loss, and work done in this session
+    // evaporates on reload. One honest sticky notice.
+    if (!(await storageAvailable())) {
+      this.toast.show({ message: this.i18n.t().app.memoryOnly, sticky: true });
+    }
   }
 
   /** `?seed=demo` on an EMPTY store loads a small showcase forest. */

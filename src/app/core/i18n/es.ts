@@ -7,6 +7,7 @@ export const ES = {
   app: {
     name: 'RoadMap2U',
     tagline: 'Tu ruta crece contigo',
+    memoryOnly: 'Este dispositivo no pudo abrir su almacenamiento: tu bosque vive solo en esta sesión y se perderá al recargar. Cierra otras pestañas y recarga para reintentar.',
   },
   common: {
     save: 'Guardar',
@@ -356,6 +357,9 @@ export const ES = {
     mockResetHint: 'Solo en modo ensayo: reinicia la familia demo (rocio, nico, val, ambar).',
     mockResetDone: 'La nube de prueba volvió a empezar 🌱',
     mockResetBlocked: 'Casi: cierra las otras pestañas de la app y la nube de prueba se reiniciará sola.',
+    mockResetConfirmTitle: '¿Reiniciar la nube de prueba?',
+    mockResetConfirmBody: 'Se cierra tu sesión y la familia demo vuelve a empezar de cero. Tus árboles locales no se tocan.',
+    mockResetConfirmGo: 'Sí, reiniciar',
     about: 'Acerca de',
     aboutText: 'Hecho con cariño para mentes que crecen en espiral, no en línea recta.',
     updatesTitle: 'Actualizaciones',

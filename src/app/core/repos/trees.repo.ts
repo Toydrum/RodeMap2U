@@ -1,5 +1,5 @@
 import { Injectable, computed } from '@angular/core';
-import { AccentToken, Tree, newSyncBase } from '../db/schema';
+import { AccentToken, Tree, newSyncBase, stamp } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
 
@@ -19,10 +19,17 @@ export class TreesRepo extends RecordsRepo<Tree> {
   async setOrder(ids: string[]): Promise<void> {
     const byId = this.byId();
     const updates: Tree[] = [];
+    const now = Date.now();
     ids.forEach((id, index) => {
       const tree = byId.get(id);
       const order = (index + 1) * 10;
-      if (tree && tree.order !== order) updates.push({ ...tree, order });
+      // stamp() is on us: saveMany persists AS-IS (unlike save) — an
+      // unstamped reorder ties the server's rev and LWW hands the old order
+      // back two seconds after the drag. Archived ids (a cross-tab archive
+      // mid-drag can leave one in the preview) are left untouched.
+      if (tree && !tree.archivedAt && tree.order !== order) {
+        updates.push(stamp({ ...tree, order }, now));
+      }
     });
     if (updates.length) await this.saveMany(updates);
   }

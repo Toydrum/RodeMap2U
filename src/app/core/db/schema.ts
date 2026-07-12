@@ -134,6 +134,12 @@ export interface TimerSession extends SyncBase {
   /** null = still running (survives app close). No outcome flag — minutes are never judged. */
   endedAt: number | null;
   note: string;
+  /** Non-null while paused — PERSISTED so a reload adopts the pause honestly
+   *  instead of silently converting the paused span into "worked" minutes.
+   *  Optional + additive: older rows read as never-paused. */
+  pausedAt?: number | null;
+  /** Total paused ms so far — subtracted from every minutes computation. */
+  pausedMs?: number;
 }
 
 export type Lang = 'es' | 'en';

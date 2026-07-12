@@ -14,7 +14,7 @@ export class SessionsRepo extends RecordsRepo<TimerSession> {
     return Math.round(
       this.all()
         .filter((s) => s.nodeId === nodeId && s.endedAt !== null)
-        .reduce((sum, s) => sum + (s.endedAt! - s.startedAt), 0) / 60_000,
+        .reduce((sum, s) => sum + (s.endedAt! - s.startedAt - (s.pausedMs ?? 0)), 0) / 60_000,
     );
   }
 

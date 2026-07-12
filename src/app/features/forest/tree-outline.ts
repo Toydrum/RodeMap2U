@@ -278,6 +278,14 @@ export class TreeOutline {
   private seededFor: string | null = null;
 
   constructor() {
+    // The "second tap opens" memory only means something while the row is
+    // still the focused one — after focusing elsewhere (a canvas tap), a
+    // return tap minutes later should LOCATE again, not surprise-open.
+    effect(() => {
+      const focused = this.focusedId();
+      if (this.lastTap() && this.lastTap() !== focused) this.lastTap.set(null);
+    });
+
     // Big trees open folded to their main branches — once per tree visit.
     effect(() => {
       const treeId = this.tree().id;
