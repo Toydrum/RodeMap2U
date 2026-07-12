@@ -139,6 +139,13 @@
       </label>
       @if (flowSteps()) {
         <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
+        <label class="flow-toggle">
+          <input type="checkbox" [checked]="node().repeatsDaily === true" (change)="toggleRepeats()">
+          🌄 {{ i18n.t().node.repeatsToggle }}
+        </label>
+        @if (node().repeatsDaily) {
+          <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
+        }
       }
     }
     @if (children().length) {

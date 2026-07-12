@@ -271,6 +271,8 @@ export const EN: Dict = {
     stepPlaceholder: 'One tiny step from here…',
     flowToggle: 'Do these go in order?',
     flowHint: 'Step 1, step 2… The branch draws as a little path that blooms along with you.',
+    repeatsToggle: 'Repeats every day (a path)',
+    repeatsHint: 'Each morning the path wakes up clean, ready to walk again. Nobody counts the days — today is today.',
     nextStepTag: 'next',
     nextStepAction: 'Next step?',
     moveUp: 'Move up',

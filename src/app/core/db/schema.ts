@@ -115,6 +115,12 @@ export interface TreeNode extends SyncBase {
    *  parallel fan. Optional: records born before v3 lack it (undefined ≡ 'free').
    *  Never forced — the toggle lives in the node sheet. */
   flow?: 'free' | 'steps';
+  /** «Sendero» (0.0.72): a steps path that quietly starts over each day —
+   *  yesterday's bloomed steps reset to seed on the day flip. NO history,
+   *  NO streaks, NO completion counts, NO times: today is today (TEACCH
+   *  visual-schedule shape, doctrine-safe). Only meaningful with
+   *  flow === 'steps'. Optional + additive. */
+  repeatsDaily?: boolean;
   /** «La luz» (see NodePriority). Optional: records born before v4 lack it
    *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
    *  is the forever-default; `null` clears an earlier choice. */

@@ -208,6 +208,11 @@ export class NodeDetail {
     await this.nodes.update(this.node(), { flow: this.flowSteps() ? 'free' : 'steps' });
   }
 
+  /** «Sendero»: the path quietly starts over each day. No history kept. */
+  protected async toggleRepeats(): Promise<void> {
+    await this.nodes.update(this.node(), { repeatsDaily: !this.node().repeatsDaily });
+  }
+
   protected async moveStep(child: TreeNode, dir: -1 | 1): Promise<void> {
     await this.nodes.moveStep(child, dir);
   }

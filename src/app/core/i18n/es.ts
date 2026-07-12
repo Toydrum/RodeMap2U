@@ -273,6 +273,8 @@ export const ES = {
     stepPlaceholder: 'Un pasito chiquito desde aquí…',
     flowToggle: '¿Van en orden?',
     flowHint: 'Paso 1, paso 2… La rama se dibuja como un caminito que va floreciendo contigo.',
+    repeatsToggle: 'Se repite cada día (sendero)',
+    repeatsHint: 'Cada mañana el sendero amanece limpio para caminarse de nuevo. Nadie cuenta los días — hoy es hoy.',
     nextStepTag: 'siguiente',
     nextStepAction: '¿Siguiente paso?',
     moveUp: 'Subir',
