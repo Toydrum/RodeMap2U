@@ -29,6 +29,10 @@ export interface Suggestion {
   /** For 'step-of-current': the thread node this pasito hangs from. */
   parent: TreeNode | null;
   kind: SuggestKind;
+  /** True when a «regadera bajita» day floated this SMALL door up — the
+   *  reason line says so honestly. Never set on today/trigger (explicit
+   *  now needs no excuse). */
+  lowEnergy?: boolean;
 }
 
 export interface ThreadContext {
@@ -127,6 +131,7 @@ export function suggestionPool(
   checkins: CheckIn[],
   nodesById: ReadonlyMap<string, TreeNode>,
   todayIds: string[] = [],
+  energy: 'llena' | 'media' | 'bajita' | null = null,
 ): Suggestion[] {
   const treeById = new Map(activeTrees.map((t) => [t.id, t]));
   const actionable = (n: TreeNode) => n.status === 'seed' || n.status === 'growing';
@@ -184,6 +189,23 @@ export function suggestionPool(
   const byLightThenFresh = (a: TreeNode, b: TreeNode) => lightRank(a) - lightRank(b) || byFresh(a, b);
   for (const node of all.filter((n) => n.status === 'growing').sort(byLightThenFresh)) add(node, 'fresh-growing');
   for (const node of all.filter((n) => n.status === 'seed').sort(byLightThenFresh)) add(node, 'fresh-seed');
+
+  // «Regadera bajita»: today's energy floats the SMALLEST doors (leaf
+  // pasitos — nothing left to decompose) up front. A STABLE partition, not
+  // a filter — every idea stays reachable, and the explicit now (today's
+  // intentions + cuando-entonces) keeps outranking everything: low energy
+  // biases, never tyrannizes (the «luz» guardrails apply verbatim).
+  if (energy === 'bajita') {
+    const explicit = pool.filter((s) => s.kind === 'today' || s.kind === 'trigger');
+    const rest = pool.filter((s) => s.kind !== 'today' && s.kind !== 'trigger');
+    // Small = a CHILD leaf (a concrete pasito). A bare TOP-LEVEL goal also
+    // has zero children but is the big ambiguous thing — the opposite of a
+    // small door.
+    const small = rest.filter((s) => s.node.parentId !== null && childrenOf(s.node).length === 0);
+    const big = rest.filter((s) => !(s.node.parentId !== null && childrenOf(s.node).length === 0));
+    for (const s of small) s.lowEnergy = true;
+    return [...explicit, ...small, ...big].slice(0, POOL_CAP);
+  }
 
   return pool.slice(0, POOL_CAP);
 }

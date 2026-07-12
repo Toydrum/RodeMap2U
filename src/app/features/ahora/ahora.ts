@@ -71,8 +71,20 @@ export class AhoraPage {
       this.checkins.all(),
       this.nodes.byId(),
       this.todayNodes().map((n) => n.id),
+      this.todayEnergy(),
     ),
   );
+
+  /** Today's «regadera» token — only TODAY's check-in counts (energy is a
+   *  moment, never a trend; yesterday's low says nothing about now). */
+  private readonly todayEnergy = computed(() => {
+    const latest = this.checkins.latest();
+    if (!latest || !latest.energy) return null;
+    const day = new Date(latest.createdAt);
+    return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}` === today()
+      ? latest.energy
+      : null;
+  });
 
   protected readonly suggestion = computed(() => pickAt(this.pool(), this.ideaOffset(), today()));
   protected readonly canCycle = computed(() => this.pool().length > 1);
@@ -161,6 +173,8 @@ export class AhoraPage {
 
   protected reasonText(s: Suggestion): string {
     const t = this.i18n.t().ahora;
+    // A bajita day speaks first — the honest reason IS the small door.
+    if (s.lowEnergy) return t.reasonLowEnergy;
     switch (s.kind) {
       case 'today':
         return t.reasonToday;

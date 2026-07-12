@@ -13,13 +13,22 @@ export class CheckinsRepo extends RecordsRepo<CheckIn> {
     [...this.all()].sort((a, b) => b.createdAt - a.createdAt).at(0) ?? null,
   );
 
-  async record(feeling: Feeling, opts: { note?: string; treeId?: string | null; nodeId?: string | null } = {}): Promise<CheckIn> {
+  async record(
+    feeling: Feeling,
+    opts: {
+      note?: string;
+      treeId?: string | null;
+      nodeId?: string | null;
+      energy?: 'llena' | 'media' | 'bajita' | null;
+    } = {},
+  ): Promise<CheckIn> {
     const checkIn: CheckIn = {
       ...newSyncBase(),
       feeling,
       note: opts.note ?? '',
       treeId: opts.treeId ?? null,
       nodeId: opts.nodeId ?? null,
+      energy: opts.energy ?? null,
     };
     const saved = await this.insert(checkIn);
     // "Where I am" moves with the check-in.

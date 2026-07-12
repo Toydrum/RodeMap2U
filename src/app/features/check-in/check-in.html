@@ -38,6 +38,24 @@
           }
         </div>
 
+        <!-- «La regadera» — optional energy token (tap to toggle). It never
+             advances the step and never becomes a score. -->
+        <div class="energy-row" role="group" [attr.aria-label]="i18n.t().checkIn.energyLabel">
+          <span class="energy-label">{{ i18n.t().checkIn.energyLabel }} <span class="opt">({{ i18n.t().common.optional }})</span></span>
+          <div class="energy-tokens">
+            @for (token of energyTokens; track token) {
+              <button
+                type="button"
+                class="chip pick"
+                [class.selected]="energy() === token"
+                (click)="toggleEnergy(token)"
+              >
+                {{ energyIcons[token] }} {{ i18n.t().checkIn.energy[token] }}
+              </button>
+            }
+          </div>
+        </div>
+
         <!-- The notita, folded in: it used to be a whole screen of its own. -->
         @if (!noteOpen()) {
           <button type="button" class="btn btn-ghost note-toggle" (click)="openNote()">

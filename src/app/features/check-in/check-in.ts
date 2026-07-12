@@ -48,6 +48,19 @@ export class CheckInPage {
   protected readonly feelings = FEELINGS;
   protected readonly step = signal<Step>('feeling');
   protected readonly feeling = signal<Feeling | null>(null);
+  /** «¿Cuánta agua trae tu regadera?» — optional, tap-to-toggle, never
+   *  required, never advances the step (the feeling tap does). */
+  protected readonly energy = signal<'llena' | 'media' | 'bajita' | null>(null);
+  protected readonly energyTokens = ['llena', 'media', 'bajita'] as const;
+  protected readonly energyIcons: Record<'llena' | 'media' | 'bajita', string> = {
+    llena: '🚿',
+    media: '💧',
+    bajita: '🌵',
+  };
+
+  protected toggleEnergy(token: 'llena' | 'media' | 'bajita'): void {
+    this.energy.set(this.energy() === token ? null : token);
+  }
   protected readonly note = signal('');
   protected readonly noteOpen = signal(false);
 
@@ -137,6 +150,7 @@ export class CheckInPage {
         note: this.note().trim(),
         treeId: where?.treeId ?? null,
         nodeId: where?.id ?? null,
+        energy: this.energy(),
       });
     }
     await this.settings.patch({ lastCheckInAt: Date.now(), onboarded: true });

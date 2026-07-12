@@ -125,6 +125,11 @@ export interface CheckIn extends SyncBase {
   /** "Where do you feel you are" — both optional. */
   treeId: string | null;
   nodeId: string | null;
+  /** «¿Cuánta agua trae tu regadera?» — optional energy token (AuDHD
+   *  energy accounting). Additive + optional like `trigger`; absent ≡
+   *  unknown. NEVER a score, never charted, never compared across days —
+   *  it only biases TODAY's suggestion toward smaller doors. */
+  energy?: 'llena' | 'media' | 'bajita' | null;
 }
 
 export interface TimerSession extends SyncBase {
