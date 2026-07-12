@@ -99,7 +99,7 @@ export const EN: Dict = {
     estimateSizes: { minutes: '{n} little minutes', hour: '1 little hour', day: '1 day', week: '1 week' },
     reasonTrigger: '🧶 "{trigger}"',
     reasonSunlit: 'You have it in full sun ☀️',
-    shadeAside: 'It sits in the shade — only if it calls you 🌳',
+    shadeAside: 'It sits in the shade — only if it calls you ⛱️',
   },
   whispers: {
     q1: 'Where do you feel you are right now?',
@@ -262,6 +262,7 @@ export const EN: Dict = {
     dateHint: "It's a compass, not a contract. Change it or let it go anytime.",
     estimateLabel: 'How big does it feel?',
     estimateNoIdea: 'No idea',
+    moreDetails: 'More details',
     estimateSizes: { hour1: '1 hour', day1: '1 day', week1: '1 week' },
     triggerLabel: 'When-then twig',
     triggerPlaceholder: 'When I pour my morning coffee…',
@@ -620,7 +621,7 @@ export const EN: Dict = {
       {
         icon: '🧭',
         title: 'The check-in',
-        body: 'The very first time, the forest introduces itself with a short welcome. After that, the ritual is just TWO screens. First: "Where do you feel you are?" — you pick your inner weather (☀️ to ⛈ — weather, not a grade), and if you like, you leave yourself a little note 💌 right there before tapping your weather. Second: "Where are you today?" — your liveliest branches as shortcuts, your trees in a circle, or "Just look at the forest". Everything can be skipped with "I don\'t want to answer today", with zero consequence. For everyday use there is a shortcut: "I feel the same as last time" records your check-in in one tap and leaves you in Now, with your thread waiting. And if you tap something by mistake, there is "← Back". Want the full ritual again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints" — the little paw 🐾 next to the wind rose (also in Settings).',
+        body: 'The very first time, the forest introduces itself with a short welcome. After that, the ritual is just TWO screens. First: "Where do you feel you are?" — you pick your inner weather (☀️ to ⛈ — weather, not a grade), and if you like, you leave yourself a little note 💌 right there before tapping your weather. Second: "Where are you today?" — your liveliest branches as shortcuts, your trees in a circle, or "Just look at the forest". Everything can be skipped with "I don\'t want to answer today", with zero consequence. For everyday use there is a shortcut: "I feel the same as last time" records your check-in in one tap and leaves you in Now, with your thread waiting. And if you tap something by mistake, there is "← Back". Want the full ritual again? A wind rose lives in your forest: "Find myself in this enchanted forest". Your check-ins from other days live in "Your footprints" — the little paw 🐾 next to the wind rose (also in Settings). Below the weather also lives, folded and optional, the 💧 watering can: mark it 🌵 low one day and Ahora will offer tiny pasitos first — doors the size of your energy. Never a grade, and only TODAY counts.',
       },
       {
         icon: '🧶',
@@ -630,7 +631,7 @@ export const EN: Dict = {
       {
         icon: '🌳',
         title: 'Your forest',
-        body: 'Each tree is an area of your life: a project, a habit, a dream. And each color is a SPECIES with its own bearing: a round dense oak, an acacia with flat crowns and air between them, slender ones toward the sky, a weeping willow that lets its tips fall, a pale birch that zigzags on its way up and a conifer with tiered limbs — all with a continuous trunk that thickens with what it carries. And no two trees of the same color are identical: each brings its own bearing and even its own flower variant. SIZE is earned: the more branches and blooms 🌸 a tree carries, the taller it stands on the meadow — one glance tells you which area holds the most work. Your trees sprout scattered across the meadow, each in its own little spot; when they no longer fit one clearing, the ‹ › arrows walk you between the clearings of your forest. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: sun, fog, drizzle or storm — and your trees always standing. Want a different arrangement? Press and hold any tree and drag it (or move it with the arrow keys).',
+        body: 'Each tree is an area of your life: a project, a habit, a dream. And each color is a SPECIES with its own bearing: a round dense oak, an acacia with flat crowns and air between them, slender ones toward the sky, a weeping willow that lets its tips fall, a pale birch that zigzags on its way up and a conifer with tiered limbs — all with a continuous trunk that thickens with what it carries. And no two trees of the same color are identical: each brings its own bearing and even its own flower variant. SIZE is earned: the more branches and blooms 🌸 a tree carries, the taller it stands on the meadow — one glance tells you which area holds the most work. Your trees sprout scattered across the meadow, each in its own little spot; when they no longer fit one clearing, the ‹ › arrows walk you between the clearings of your forest. With three trees the stream appears, and every bloomed goal sprouts a flower on the meadow. The sky feels with you: sun, fog, drizzle or storm — and your trees always standing. Want a different arrangement? Press and hold any tree and drag it (or move it with the arrow keys). And if a branch is nowhere in sight, the little 🔍 "Search my forest" button finds it by name and takes you right to it, opening nothing.',
       },
       {
         icon: '🌿',
@@ -640,12 +641,12 @@ export const EN: Dict = {
       {
         icon: '🌱',
         title: 'Planting',
-        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. Already have the whole plan in your head? In the planting sheet, "Several at once" opens a little box where every line sows a branch (indent = child branch) — paste your whole list and the tree sprouts at once. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then.',
+        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. Already have the whole plan in your head? In the planting sheet, "Several at once" opens a little box where every line sows a branch (indent = child branch) — paste your whole list and the tree sprouts at once. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then. Does the goal feel huge with no clear start? Its sheet holds 🔪 "Crumble this goal": three little compass questions, and each answer of YOURS sprouts as a pasito — all skippable. And an ordered path can be marked 🌄 "Repeats every day (a path)": each morning it wakes up clean to walk again, with nobody counting the days.',
       },
       {
         icon: '🗓',
         title: 'The gentle date',
-        body: 'It is optional and it is a compass, not a contract: it only marks the moment you would like to look at that branch again. Change it or let it go anytime. It never creates notifications or alarms.',
+        body: 'It is optional and it is a compass, not a contract: it only marks the moment you would like to look at that branch again. Change it or let it go anytime. It never creates notifications or alarms. Next to the date, under "More details", you can also tell a branch how big it feels (🕐 2, 10 or 30 min · 1 hour · 1 day · 1 week — or the very dignified "No idea"): the Ahora suggestion whispers it back. And if you turn on the time compass in Settings (off by default), after a session with a big gap it shares ONE curiosity line — a fact, never a grade.',
       },
       {
         icon: '🍂',
@@ -655,7 +656,7 @@ export const EN: Dict = {
       {
         icon: '⏳',
         title: 'Focus sessions',
-        body: 'From the Focus tab pick a branch (or "Just be") and a duration; the ring breathes with you, the little bird keeps you company perched on its crown, and the session follows you across the app — it even survives closing it. When your time draws near, the ring warms its color toward gold; when it blooms, a whisper and a 🌸 on the tab tell you, with no sounds and no cutoffs. When you finish, the app celebrates whatever it was and offers "One more little step" in case you are on a roll: being here a little while is enough.',
+        body: 'From the Focus tab pick a branch (or "Just be") and a duration; the ring breathes with you, the little bird keeps you company perched on its crown, and the session follows you across the app — it even survives closing it. When your time draws near, the ring warms its color toward gold; when it blooms, a whisper and a 🌸 on the tab tell you, with no sounds and no cutoffs. When you finish, the app celebrates whatever it was and offers "One more little step" in case you are on a roll: being here a little while is enough. The golden bridge arrives two little minutes before your planted time — and in Settings you can ask for it five little minutes early, if a longer landing strip helps you exit hyperfocus.',
       },
       {
         icon: '🔒',

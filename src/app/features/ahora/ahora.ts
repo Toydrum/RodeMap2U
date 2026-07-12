@@ -171,6 +171,20 @@ export class AhoraPage {
     });
   }
 
+  /** ONE secondary line under the suggestion — never a stack. The card is
+   *  the doctrine's hero; four justification lines buried it. Priority:
+   *  first-then (actionable) > shade aside (honesty) > estimate whisper. */
+  protected secondaryLine(s: Suggestion): { kind: 'steps' | 'shade' | 'estimate'; text: string } | null {
+    const ft = this.firstThen(s);
+    if (ft) return { kind: 'steps', text: ft };
+    const aside = this.shadeAside(s);
+    if (aside) return { kind: 'shade', text: aside };
+    if (s.node.estimateMin) {
+      return { kind: 'estimate', text: '🕐 ' + this.estimateHintText(s.node.estimateMin) };
+    }
+    return null;
+  }
+
   /** «~1 día, decías» — the size in words (minutes only under an hour). */
   protected estimateHintText(minutes: number): string {
     const t = this.i18n.t().ahora;

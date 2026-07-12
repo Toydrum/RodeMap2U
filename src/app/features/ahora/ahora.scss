@@ -13,11 +13,13 @@ h1 {
 
 /* Same gentle banner as the tree view — dates that want a word. */
 .review-banner {
-  display: block;
-  width: 100%;
-  margin: 0 0 0.9rem;
-  padding: 0.7rem 1rem;
-  border-radius: var(--radius-sm);
+  /* A slim inline pill — the banner must never outweigh the ONE pasito. */
+  display: inline-block;
+  width: auto;
+  margin: 0 0 0.7rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
   border: 1.5px solid var(--status-branched);
   background: color-mix(in srgb, var(--status-branched) 12%, var(--surface));
   color: var(--text);
@@ -349,6 +351,12 @@ h1 {
 }
 
 /* «Brújula del tiempo» — the soft size hint on the suggestion card */
+.card.next .secondary {
+  margin: -0.2rem 0 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
 .estimate-hint {
   margin: -0.2rem 0 0.3rem;
   font-size: 0.82rem;

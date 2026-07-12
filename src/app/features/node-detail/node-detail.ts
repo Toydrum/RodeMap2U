@@ -18,7 +18,8 @@ const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'achieved', 'resti
 /** UI positions of the «luz» picker — 'steady' is the unstored default. */
 export type LightChoice = 'sunlit' | 'steady' | 'shade';
 const LIGHTS: LightChoice[] = ['sunlit', 'steady', 'shade'];
-const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '🌿', shade: '🌳' };
+// ⛱️ matches the canvas parasol; 🌳 was colliding with «ver mi bosque».
+const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '🌿', shade: '⛱️' };
 
 @Component({
   selector: 'app-node-detail',
@@ -73,6 +74,8 @@ export class NodeDetail {
   /** Archiving takes the whole subtree with it — always ask first. */
   protected readonly confirmingArchive = signal(false);
   protected readonly confirmingRevert = signal(false);
+  /** «Más detalles» fold — estimate + trigger live behind it. */
+  protected readonly moreOpen = signal(false);
 
   /** Every branch that would rest along with this one (self excluded). */
   protected readonly descendantCount = computed(() => {

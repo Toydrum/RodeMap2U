@@ -87,14 +87,11 @@
         <span class="kicker">{{ i18n.t().ahora.nextKicker }}</span>
         <h2 class="next-title">{{ s.node.title }}</h2>
         <p class="reason">{{ reasonText(s) }}</p>
-        @if (s.node.estimateMin) {
-          <p class="estimate-hint">🧭 {{ estimateHintText(s.node.estimateMin) }}</p>
-        }
-        @if (shadeAside(s); as aside) {
-          <p class="shade-aside">{{ aside }}</p>
-        }
-        @if (firstThen(s); as ft) {
-          <p class="first-then">{{ ft }}</p>
+        <!-- ONE secondary line, never a stack (rule 11: the ONE pasito must
+             dominate). Priority: first-then (actionable) > shade aside
+             (honesty) > estimate whisper. -->
+        @if (secondaryLine(s); as line) {
+          <p class="secondary" [class.shade-aside]="line.kind === 'shade'">{{ line.text }}</p>
         }
         <div class="next-actions">
           <button type="button" class="btn btn-primary" (click)="ramp2()">🌱 {{ i18n.t().ahora.ramp2 }}</button>

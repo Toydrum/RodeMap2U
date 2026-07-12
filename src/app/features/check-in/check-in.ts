@@ -51,6 +51,8 @@ export class CheckInPage {
   /** «¿Cuánta agua trae tu regadera?» — optional, tap-to-toggle, never
    *  required, never advances the step (the feeling tap does). */
   protected readonly energy = signal<'llena' | 'media' | 'bajita' | null>(null);
+  /** The regadera folds like the notita — optional extras share one shape. */
+  protected readonly energyOpen = signal(false);
   protected readonly energyTokens = ['llena', 'media', 'bajita'] as const;
   protected readonly energyIcons: Record<'llena' | 'media' | 'bajita', string> = {
     llena: '🚿',

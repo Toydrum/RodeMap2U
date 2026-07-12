@@ -60,7 +60,11 @@
     @if (node().status === 'seed' || node().status === 'growing') {
       <div class="field light-field">
         <label>☀️ {{ i18n.t().node.lightLabel }}</label>
-        <p class="hint light-explainer">{{ i18n.t().node.lightExplainer }}</p>
+        <!-- The explainer teaches ONCE: it folds away as soon as this branch
+             has ever held a light (the picker itself is the reminder). -->
+        @if (!node().priority) {
+          <p class="hint light-explainer">{{ i18n.t().node.lightExplainer }}</p>
+        }
         <div class="status-row light-row" role="group" [attr.aria-label]="i18n.t().node.lightLabel">
           @for (light of lights; track light) {
             <button
@@ -90,39 +94,58 @@
       </button>
     }
 
-    <!-- «Brújula del tiempo»: the user's own size guess — optional, with
-         «ni idea» as a first-class answer. Dato, no calificación. -->
-    @if (node().status === 'seed' || node().status === 'growing') {
-      <div class="field">
-        <label>🧭 {{ i18n.t().node.estimateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
-        <div class="status-row" role="group" [attr.aria-label]="i18n.t().node.estimateLabel">
-          @for (est of estimates; track est) {
-            <button
-              type="button"
-              class="chip pick"
-              [class.selected]="(node().estimateMin ?? null) === est"
-              (click)="setEstimate(est)"
-            >
-              {{ est === null ? i18n.t().node.estimateNoIdea : estimateLabel(est) }}
-            </button>
-          }
+    <!-- «Más detalles»: the optional planning tools fold away so the sheet's
+         default view stays calm and the ACTIONS rise above the fold. The
+         chevron remembers if either field already holds something. -->
+    <button
+      type="button"
+      class="btn btn-ghost more-toggle"
+      (click)="moreOpen.set(!moreOpen())"
+      [attr.aria-expanded]="moreOpen()"
+    >
+      {{ moreOpen() ? '▾' : '▸' }} {{ i18n.t().node.moreDetails }}
+      @if (!moreOpen() && (node().estimateMin || node().trigger)) {
+        <span class="more-marks">
+          @if (node().estimateMin) { <span>🕐</span> }
+          @if (node().trigger) { <span>🧶</span> }
+        </span>
+      }
+    </button>
+    @if (moreOpen()) {
+      <!-- «Brújula del tiempo»: the user's own size guess — optional, with
+           «ni idea» as a first-class answer. Dato, no calificación. -->
+      @if (node().status === 'seed' || node().status === 'growing') {
+        <div class="field">
+          <label>🕐 {{ i18n.t().node.estimateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+          <div class="status-row" role="group" [attr.aria-label]="i18n.t().node.estimateLabel">
+            @for (est of estimates; track est) {
+              <button
+                type="button"
+                class="chip pick"
+                [class.selected]="(node().estimateMin ?? null) === est"
+                (click)="setEstimate(est)"
+              >
+                {{ est === null ? i18n.t().node.estimateNoIdea : estimateLabel(est) }}
+              </button>
+            }
+          </div>
         </div>
+      }
+
+      <!-- If-then twig: the user's own plan, re-presented in Ahora — never scheduled -->
+      <div class="field">
+        <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+        <input
+          id="nd-trigger"
+          type="text"
+          [value]="node().trigger ?? ''"
+          (change)="setTrigger($any($event.target).value)"
+          [placeholder]="i18n.t().node.triggerPlaceholder"
+          maxlength="120"
+        >
+        <span class="hint">{{ i18n.t().node.triggerHint }}</span>
       </div>
     }
-
-    <!-- If-then twig: the user's own plan, re-presented in Ahora — never scheduled -->
-    <div class="field">
-      <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
-      <input
-        id="nd-trigger"
-        type="text"
-        [value]="node().trigger ?? ''"
-        (change)="setTrigger($any($event.target).value)"
-        [placeholder]="i18n.t().node.triggerPlaceholder"
-        maxlength="120"
-      >
-      <span class="hint">{{ i18n.t().node.triggerHint }}</span>
-    </div>
 
     <!-- Note -->
     <div class="field">

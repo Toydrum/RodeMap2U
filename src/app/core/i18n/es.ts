@@ -101,7 +101,7 @@ export const ES = {
     estimateSizes: { minutes: '{n} minutitos', hour: '1 horita', day: '1 día', week: '1 semana' },
     reasonTrigger: '🧶 «{trigger}»',
     reasonSunlit: 'La tienes a pleno sol ☀️',
-    shadeAside: 'Anda a la sombra — solo si te llama 🌳',
+    shadeAside: 'Anda a la sombra — solo si te llama ⛱️',
   },
   whispers: {
     q1: '¿Dónde sientes que estás ahorita?',
@@ -264,6 +264,7 @@ export const ES = {
     dateHint: 'Es una brújula, no un contrato. Puedes cambiarla o soltarla cuando quieras.',
     estimateLabel: '¿De qué tamaño se siente?',
     estimateNoIdea: 'Ni idea',
+    moreDetails: 'Más detalles',
     estimateSizes: { hour1: '1 hora', day1: '1 día', week1: '1 semana' },
     triggerLabel: 'Ramita cuando-entonces',
     triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
@@ -622,7 +623,7 @@ export const ES = {
       {
         icon: '🧭',
         title: 'El check-in',
-        body: 'La primera vez, el bosque se presenta con una bienvenida cortita. Después, el ritual son solo DOS pantallas. Primera: "¿Dónde sientes que estás?" — eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), y si quieres, ahí mismo te dejas una notita 💌 antes de tocar tu clima. Segunda: "¿Por dónde andas hoy?" — tus ramas más vivas como atajos, tus árboles en círculo, o «Solo mirar el bosque». Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. Para el día a día hay un atajo: «Me siento igual que la última vez» registra tu check-in en un toque y te deja en Ahora, con tu hilo esperándote. Y si tocas algo por error, hay «← Volver». ¿Quieres el ritual de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas» — la huellita 🐾 junto a la rosa de los vientos (también en Ajustes).',
+        body: 'La primera vez, el bosque se presenta con una bienvenida cortita. Después, el ritual son solo DOS pantallas. Primera: "¿Dónde sientes que estás?" — eliges tu clima interno (☀️ a ⛈ — es clima, no calificación), y si quieres, ahí mismo te dejas una notita 💌 antes de tocar tu clima. Segunda: "¿Por dónde andas hoy?" — tus ramas más vivas como atajos, tus árboles en círculo, o «Solo mirar el bosque». Todo se puede saltar con "Hoy no quiero responder", sin consecuencia alguna. Para el día a día hay un atajo: «Me siento igual que la última vez» registra tu check-in en un toque y te deja en Ahora, con tu hilo esperándote. Y si tocas algo por error, hay «← Volver». ¿Quieres el ritual de nuevo? En tu bosque vive una rosa de los vientos: «Buscarme en este bosque encantado». Tus check-ins de otros días viven en «Tus huellas» — la huellita 🐾 junto a la rosa de los vientos (también en Ajustes). Debajo del clima también vive, plegadita y opcional, la 💧 regadera: si un día la marcas 🌵 bajita, Ahora te ofrecerá pasitos chiquitos primero — puertas del tamaño de tu energía. Jamás es calificación y solo cuenta HOY.',
       },
       {
         icon: '🧶',
@@ -632,7 +633,7 @@ export const ES = {
       {
         icon: '🌳',
         title: 'Tu bosque',
-        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Y cada color es una ESPECIE con su propio porte: roble redondo y denso, acacia de copas planas con aire entre ellas, esbeltos hacia el cielo, sauce llorón que deja caer sus puntas, abedul pálido que zigzaguea al subir y conífera de ramas en pisos — todos con un tronco continuo que se engrosa con lo que carga. Y ni dos árboles del mismo color son idénticos: cada uno trae su propio porte y hasta su propia variante de flor. El TAMAÑO se gana: entre más ramas y flores 🌸 carga un árbol, más grande se planta en el prado — de un vistazo sabes cuál área trae más trabajo. Tus árboles brotan repartidos por el prado, cada uno en su lugarcito; cuando ya no caben en un claro, las flechitas ‹ › te pasean entre los claros de tu bosque. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol, niebla, llovizna o tormenta — y tus árboles siempre en pie. ¿Quieres otro acomodo? Mantén presionado cualquier árbol y arrástralo (o muévelo con las flechas del teclado).',
+        body: 'Cada árbol es un área de tu vida: un proyecto, un hábito, un sueño. Y cada color es una ESPECIE con su propio porte: roble redondo y denso, acacia de copas planas con aire entre ellas, esbeltos hacia el cielo, sauce llorón que deja caer sus puntas, abedul pálido que zigzaguea al subir y conífera de ramas en pisos — todos con un tronco continuo que se engrosa con lo que carga. Y ni dos árboles del mismo color son idénticos: cada uno trae su propio porte y hasta su propia variante de flor. El TAMAÑO se gana: entre más ramas y flores 🌸 carga un árbol, más grande se planta en el prado — de un vistazo sabes cuál área trae más trabajo. Tus árboles brotan repartidos por el prado, cada uno en su lugarcito; cuando ya no caben en un claro, las flechitas ‹ › te pasean entre los claros de tu bosque. Con tres árboles aparece el arroyo, y cada meta florecida hace brotar una flor en el prado. El cielo siente contigo: sol, niebla, llovizna o tormenta — y tus árboles siempre en pie. ¿Quieres otro acomodo? Mantén presionado cualquier árbol y arrástralo (o muévelo con las flechas del teclado). Y si una rama no aparece a la vista, el botoncito 🔍 «Buscar en mi bosque» la encuentra por nombre y te lleva justo a ella, sin abrir nada.',
       },
       {
         icon: '🌿',
@@ -642,12 +643,12 @@ export const ES = {
       {
         icon: '🌱',
         title: 'Plantar',
-        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. ¿Ya traes el plan completo en la cabeza? En la hoja de plantar, «Varios a la vez» abre una cajita donde cada línea siembra una ramita (con sangría = ramita hija) — pega tu lista entera y el árbol brota de golpe. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego.',
+        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. ¿Ya traes el plan completo en la cabeza? En la hoja de plantar, «Varios a la vez» abre una cajita donde cada línea siembra una ramita (con sangría = ramita hija) — pega tu lista entera y el árbol brota de golpe. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego. ¿La meta se siente enorme y no sabes por dónde empezar? En su hoja vive 🔪 «Desmenuzar esta meta»: tres preguntitas de brújula y cada respuesta TUYA brota como pasito — todas se pueden saltar. Y un camino en orden puede marcarse 🌄 «Se repite cada día (sendero)»: cada mañana amanece limpio para caminarse de nuevo, sin que nadie cuente los días.',
       },
       {
         icon: '🗓',
         title: 'La fecha amable',
-        body: 'Es opcional y es una brújula, no un contrato: solo marca el momento en que te gustaría volver a mirar esa rama. Puedes cambiarla o soltarla cuando quieras. Nunca genera notificaciones ni alarmas.',
+        body: 'Es opcional y es una brújula, no un contrato: solo marca el momento en que te gustaría volver a mirar esa rama. Puedes cambiarla o soltarla cuando quieras. Nunca genera notificaciones ni alarmas. Junto a la fecha, en «Más detalles», también puedes decirle a una rama de qué tamaño se siente (🕐 2, 10 o 30 min · 1 hora · 1 día · 1 semana — o el muy digno «Ni idea»): la sugerencia de Ahora te lo susurra. Y si en Ajustes enciendes la brújula del tiempo (viene apagada), tras una sesión con diferencia grande te cuenta UNA línea de curiosidad — dato, no calificación.',
       },
       {
         icon: '🍂',
@@ -657,7 +658,7 @@ export const ES = {
       {
         icon: '⏳',
         title: 'Sesiones de enfoque',
-        body: 'Desde la pestaña Enfoque eliges una rama (o "Solo estar") y una duración; el anillo respira contigo, el pajarito te acompaña posado en la corona, y la sesión te sigue por toda la app — hasta sobrevive si la cierras. Cuando tu tiempo se acerca, el anillo entibia su color hacia dorado; cuando florece, un susurro y una 🌸 en la pestaña te lo cuentan, sin sonidos ni cortes. Al terminar, la app celebra lo que haya sido y te ofrece «Un pasito más» por si traes cuerda: estar un ratito es suficiente.',
+        body: 'Desde la pestaña Enfoque eliges una rama (o "Solo estar") y una duración; el anillo respira contigo, el pajarito te acompaña posado en la corona, y la sesión te sigue por toda la app — hasta sobrevive si la cierras. Cuando tu tiempo se acerca, el anillo entibia su color hacia dorado; cuando florece, un susurro y una 🌸 en la pestaña te lo cuentan, sin sonidos ni cortes. Al terminar, la app celebra lo que haya sido y te ofrece «Un pasito más» por si traes cuerda: estar un ratito es suficiente. El puente dorado llega dos minutitos antes de cumplirse tu tiempo — y en Ajustes puedes pedirlo cinco minutitos antes, si te sirve más pista de aterrizaje para salir del hiperfoco.',
       },
       {
         icon: '🔒',
