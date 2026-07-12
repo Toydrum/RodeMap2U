@@ -35,6 +35,8 @@ const center = await page.evaluate(() => {
 // A — pick 30 min, close, reopen: persisted; re-tap clears to «ni idea».
 await page.mouse.click(center.x, center.y);
 await page.waitForTimeout(450);
+await page.locator('.more-toggle').click(); // 0.0.75: estimate folds behind «Más detalles»
+await page.waitForTimeout(200);
 const chips = await page.locator('.sheet .status-row .chip', { hasText: 'min' }).count();
 await page.locator('.sheet .chip', { hasText: '30 min' }).click();
 await page.waitForTimeout(300);
@@ -42,6 +44,8 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 await page.mouse.click(center.x, center.y);
 await page.waitForTimeout(450);
+await page.locator('.more-toggle').click();
+await page.waitForTimeout(200);
 const persisted = (await page.locator('.sheet .chip.selected', { hasText: '30 min' }).count()) === 1;
 console.log(`A estimate chips: sizes=${chips >= 2} persisted-30=${persisted} | OK=${chips >= 2 && persisted}`);
 await page.keyboard.press('Escape');
@@ -50,7 +54,9 @@ await page.waitForTimeout(300);
 // B — the suggestion card whispers the size.
 await page.locator('nav a', { hasText: 'Ahora' }).click();
 await page.waitForTimeout(700);
-const hint = (await page.locator('.estimate-hint').textContent().catch(() => '')) ?? '';
+// 0.0.75: the ONE secondary line replaced .estimate-hint (estimate wins here:
+// the fresh branch has no priority and no shade).
+const hint = (await page.locator('.card.next .secondary').textContent().catch(() => '')) ?? '';
 const okB = hint.includes('30');
 console.log(`B card hint: "${hint.trim()}" | OK=${okB}`);
 

@@ -6,12 +6,14 @@ const page = await browser.newPage({ viewport: { width: 900, height: 800 } });
 // A — the when-then editor saves, persists, and takes over the Ahora reason
 await page.goto(`${BASE}/tree/demo-guitar?seed=demo&node=demo-g-record`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.sheet');
+await page.locator('.more-toggle').click(); // 0.0.75: trigger folds behind «Más detalles»
 await page.fill('#nd-trigger', 'Cuando cierre la laptop del trabajo');
 await page.locator('#nd-trigger').dispatchEvent('change');
 await page.waitForTimeout(300);
 await page.keyboard.press('Escape');
 await page.goto(`${BASE}/tree/demo-guitar?node=demo-g-record`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.sheet');
+await page.locator('.more-toggle').click();
 const persisted = await page.locator('#nd-trigger').inputValue();
 await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
