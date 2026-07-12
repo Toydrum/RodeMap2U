@@ -171,6 +171,20 @@ export class AhoraPage {
     });
   }
 
+  /** «~1 día, decías» — the size in words (minutes only under an hour). */
+  protected estimateHintText(minutes: number): string {
+    const t = this.i18n.t().ahora;
+    const size =
+      minutes === 60
+        ? t.estimateSizes.hour
+        : minutes === 1440
+          ? t.estimateSizes.day
+          : minutes === 10080
+            ? t.estimateSizes.week
+            : this.i18n.fill(t.estimateSizes.minutes, { n: String(minutes) });
+    return this.i18n.fill(t.estimateHint, { size });
+  }
+
   protected reasonText(s: Suggestion): string {
     const t = this.i18n.t().ahora;
     // A bajita day speaks first — the honest reason IS the small door.

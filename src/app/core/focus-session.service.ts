@@ -211,7 +211,9 @@ export class FocusSessionService {
   private maybeTimeCompass(nodeId: string | null, realMin: number): void {
     if (!this.settings.settings().timeCompass || !nodeId) return;
     const estimate = this.nodes.byId().get(nodeId)?.estimateMin ?? null;
-    if (!estimate) return;
+    // Session-scale guesses only: comparing «1 día» against one sitting's
+    // minutes would be nonsense dressed as a dato.
+    if (!estimate || estimate > 60) return;
     const lo = Math.min(estimate, realMin);
     const hi = Math.max(estimate, realMin);
     if (hi < lo * 2 || hi - lo < 5) return;

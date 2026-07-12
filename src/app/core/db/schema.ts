@@ -84,6 +84,11 @@ export function lightRank(node: { priority?: NodePriority | null }): 0 | 1 | 2 {
   return 1;
 }
 
+/** «Brújula del tiempo» sizes, in minutes (60 = 1 h, 1440 = 1 día,
+ *  10080 = 1 semana). The picker order; null = «ni idea». */
+export type EstimateMin = 2 | 10 | 30 | 60 | 1440 | 10080;
+export const ESTIMATE_CHOICES: (EstimateMin | null)[] = [2, 10, 30, 60, 1440, 10080, null];
+
 export interface TreeNode extends SyncBase {
   treeId: string;
   /** null = the tree's root node. */
@@ -105,11 +110,13 @@ export interface TreeNode extends SyncBase {
    *  NEVER parsed or scheduled. Ahora re-presents it; nothing alarms.
    *  Optional: records born before v2 simply lack it (undefined ≡ null). */
   trigger?: string | null;
-  /** «Brújula del tiempo» — the user's own gentle size guess (2/10/30 min;
-   *  null/absent = «ni idea», always a dignified answer). Optional +
-   *  additive. Never charted, never averaged: after a session it earns at
-   *  most ONE curiosity line — dato, no calificación. */
-  estimateMin?: 2 | 10 | 30 | null;
+  /** «Brújula del tiempo» — the user's own gentle size guess, in minutes
+   *  (2/10/30 · 60 = 1 h · 1440 = 1 día · 10080 = 1 semana; null/absent =
+   *  «ni idea», always a dignified answer). Optional + additive. Never
+   *  charted, never averaged: after a session it earns at most ONE
+   *  curiosity line (session-scale guesses only, ≤ 60) — dato, no
+   *  calificación. */
+  estimateMin?: EstimateMin | null;
   /** How this branch's pasitos grow: 'steps' = an ordered path (paso 1 → 2…)
    *  drawn as a chain that fills with flowers as stages bloom; 'free' = the
    *  parallel fan. Optional: records born before v3 lack it (undefined ≡ 'free').

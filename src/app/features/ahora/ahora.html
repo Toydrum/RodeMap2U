@@ -88,7 +88,7 @@
         <h2 class="next-title">{{ s.node.title }}</h2>
         <p class="reason">{{ reasonText(s) }}</p>
         @if (s.node.estimateMin) {
-          <p class="estimate-hint">🧭 {{ i18n.fill(i18n.t().ahora.estimateHint, { min: s.node.estimateMin }) }}</p>
+          <p class="estimate-hint">🧭 {{ estimateHintText(s.node.estimateMin) }}</p>
         }
         @if (shadeAside(s); as aside) {
           <p class="shade-aside">{{ aside }}</p>

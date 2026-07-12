@@ -103,7 +103,7 @@
               [class.selected]="(node().estimateMin ?? null) === est"
               (click)="setEstimate(est)"
             >
-              {{ est === null ? i18n.t().node.estimateNoIdea : est + ' min' }}
+              {{ est === null ? i18n.t().node.estimateNoIdea : estimateLabel(est) }}
             </button>
           }
         </div>

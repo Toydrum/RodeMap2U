@@ -4,7 +4,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
-import { NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
+import { ESTIMATE_CHOICES, EstimateMin, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BranchFlow } from './branch-flow';
@@ -42,12 +42,26 @@ export class NodeDetail {
   protected readonly lights = LIGHTS;
   protected readonly lightIcons = LIGHT_ICONS;
   /** «Brújula del tiempo» choices — null is «ni idea», a dignified answer. */
-  protected readonly estimates: (2 | 10 | 30 | null)[] = [2, 10, 30, null];
+  protected readonly estimates = ESTIMATE_CHOICES;
 
-  protected async setEstimate(minutes: 2 | 10 | 30 | null): Promise<void> {
+  protected async setEstimate(minutes: EstimateMin | null): Promise<void> {
     // Re-tapping the selected chip clears back to «ni idea».
     const next = (this.node().estimateMin ?? null) === minutes ? null : minutes;
     await this.nodes.update(this.node(), { estimateMin: next });
+  }
+
+  protected estimateLabel(minutes: EstimateMin): string {
+    const sizes = this.i18n.t().node.estimateSizes;
+    switch (minutes) {
+      case 60:
+        return sizes.hour1;
+      case 1440:
+        return sizes.day1;
+      case 10080:
+        return sizes.week1;
+      default:
+        return minutes + ' min';
+    }
   }
   /** Sessions are the visitor's own — never offered inside someone else's forest. */
   protected readonly visiting = inject(VisitSession, { optional: true }) !== null;
