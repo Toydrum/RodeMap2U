@@ -2,6 +2,8 @@
   <h1>{{ i18n.t().timer.title }}</h1>
   <p class="sub">{{ i18n.t().timer.subtitle }}</p>
 
+  <app-hint-chip surface="timer" [text]="i18n.t().hints.timer" />
+
   @if (focus.active()) {
     <p class="linked chip">
       @if (linkedNode(); as node) {

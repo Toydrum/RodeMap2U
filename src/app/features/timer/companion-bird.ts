@@ -2,17 +2,11 @@ import { Component, inject, input } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { hash } from '../forest/tree-layout';
 
-export type BirdState = 'working' | 'resting' | 'bloomed' | 'approaching';
-
-/** Transition-bridge window before the planted time completes. */
-export const BRIDGE_MS = 2 * 60_000;
-
-/** Pure state resolver shared by timer + ahora (each wraps it in a computed). */
-export function birdStateFrom(paused: boolean, overtime: boolean, remainingMs: number): BirdState {
-  if (paused) return 'resting';
-  if (overtime) return 'bloomed';
-  return remainingMs <= BRIDGE_MS ? 'approaching' : 'working';
-}
+// Pure state logic lives in core (FocusSessionService owns the ONE shared
+// birdState computed since 0.0.68); re-exported here for compatibility.
+import { BirdState } from '../../core/bird-state';
+export { BRIDGE_MS, birdStateFrom } from '../../core/bird-state';
+export type { BirdState } from '../../core/bird-state';
 
 /**
  * Single-player body doubling: a little bird that perches while a focus

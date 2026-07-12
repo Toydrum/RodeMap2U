@@ -7,6 +7,20 @@ export const EN: Dict = {
     tagline: 'Your route grows with you',
     memoryOnly: 'This device could not open its storage: your forest lives only in this session and will be lost on reload. Close other tabs and reload to retry.',
   },
+  finder: {
+    title: 'Search my forest',
+    placeholder: 'A tree or branch name…',
+    empty: 'Nothing by that name around here — maybe it lives under other words.',
+    hint: 'Type two or more letters and I will take you to that branch.',
+  },
+  hints: {
+    forest: 'Each tree is an area of your life. Tap it to enter; press and hold to arrange it.',
+    tree: 'Your goals live at the branch tips. Tap one to see it; the «+» plants a new one.',
+    ahora: 'ONE idea at a time waits for you here — ask for another, or just watch your forest.',
+    timer: 'Soft time with your branch. Nothing rings, nothing cuts off: you decide when to close.',
+    gotIt: 'Got it',
+    guideLink: 'See the guide',
+  },
   common: {
     save: 'Save',
     cancel: 'Cancel',
@@ -328,6 +342,10 @@ export const EN: Dict = {
     dyslexiaFont: 'Dyslexia-friendly font',
     focus: 'Focus',
     timerDefault: 'Default duration',
+    bridgeLabel: 'The golden bridge',
+    bridge2: '2 little minutes before',
+    bridge5: '5 little minutes before',
+    bridgeHint: 'How early the ring warms to gold and the parakeet turns to look at you — a little light cue to land softly, never a sound.',
     minutes: 'min',
     data: 'Your data',
     dataHint:

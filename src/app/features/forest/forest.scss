@@ -874,3 +874,48 @@
 .plots.crowded .plot {
   width: clamp(128px, 19vw, 168px);
 }
+
+/* «Buscar una rama» — utilitarian, calm, one purpose */
+.sheet.finder {
+  .finder-hits {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    max-height: 46vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .finder-hit {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      background: var(--surface-2);
+    }
+
+    .hit-title {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hit-tree {
+      flex-shrink: 0;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { Component, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { HintChip } from '../../shared/ui/hint-chip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -18,7 +19,7 @@ import { VisitSession } from '../../core/visit/visit-session';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective],
+  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
@@ -66,10 +67,27 @@ export class TreeViewPage {
    *  snapshot ignored a second deep link into a reused page instance. */
   private readonly pendingOpenId = signal(this.route.snapshot.queryParamMap.get('node'));
 
+  /** `?locate=` deep link (the finder): PAN to the branch, open nothing. */
+  private readonly pendingLocateId = signal(this.route.snapshot.queryParamMap.get('locate'));
+
   constructor() {
     this.route.queryParamMap.subscribe((params) => {
       const id = params.get('node');
       if (id) this.pendingOpenId.set(id);
+      const locate = params.get('locate');
+      if (locate) this.pendingLocateId.set(locate);
+    });
+    effect(() => {
+      const pendingId = this.pendingLocateId();
+      const canvas = this.canvas();
+      if (!pendingId || !canvas) return;
+      const node = this.nodes.byId().get(pendingId) as TreeNode | undefined;
+      if (!node || node.treeId !== this.id() || node.archivedAt || node.deletedAt) return;
+      this.pendingLocateId.set(null);
+      // After the one-time fitTree framing settles, pan to the branch.
+      setTimeout(() => canvas.focusNode(pendingId), 350);
+      const params = { ...this.route.snapshot.queryParams, locate: null };
+      void this.router.navigate([], { queryParams: params, replaceUrl: true });
     });
     effect(() => {
       const pendingId = this.pendingOpenId();

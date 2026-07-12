@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { HintChip } from '../../shared/ui/hint-chip';
 import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -13,7 +14,7 @@ import { daysFromToday, today } from '../../core/time';
 import { MiniTree } from '../forest/mini-tree';
 import { DateReview } from '../check-in/date-review';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
-import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
+import { CompanionBird } from '../timer/companion-bird';
 import { Suggestion, ThreadContext, pickAt, resolveThread, suggestionPool } from './suggest';
 
 /**
@@ -24,7 +25,7 @@ import { Suggestion, ThreadContext, pickAt, resolveThread, suggestionPool } from
  */
 @Component({
   selector: 'app-ahora',
-  imports: [RouterLink, MiniTree, DateReview, CompanionBird, SheetDirective],
+  imports: [RouterLink, MiniTree, DateReview, CompanionBird, SheetDirective, HintChip],
   templateUrl: './ahora.html',
   styleUrl: './ahora.scss',
 })
@@ -82,9 +83,7 @@ export class AhoraPage {
     return (this.nodes.byId().get(id) as TreeNode | undefined) ?? null;
   });
 
-  protected readonly birdState = computed<BirdState>(() =>
-    birdStateFrom(this.focus.paused(), this.focus.overtime(), this.focus.plannedMs() - this.focus.elapsedMs()),
-  );
+  protected readonly birdState = this.focus.birdState;
 
   protected readonly pendingReviews = computed(() => {
     const activeIds = new Set(this.trees.active().map((t) => t.id));

@@ -10,7 +10,7 @@ import { AccompanimentService } from './core/accompaniment.service';
 import { FocusSessionService } from './core/focus-session.service';
 import { PerchAnchorService } from './core/perch-anchor.service';
 import { ToastService } from './shared/ui/toast.service';
-import { BirdState, CompanionBird, birdStateFrom } from './features/timer/companion-bird';
+import { CompanionBird } from './features/timer/companion-bird';
 
 @Component({
   selector: 'app-root',
@@ -47,9 +47,8 @@ export class App {
     return !url.startsWith('/timer') && !url.startsWith('/ahora');
   });
 
-  protected readonly birdState = computed<BirdState>(() =>
-    birdStateFrom(this.focus.paused(), this.focus.overtime(), this.focus.plannedMs() - this.focus.elapsedMs()),
-  );
+  /** The ONE shared pose (bridge window included) lives on the service. */
+  protected readonly birdState = this.focus.birdState;
 
   constructor() {
     inject(ThemeService); // instantiates the <html> attribute effects

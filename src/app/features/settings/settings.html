@@ -98,6 +98,18 @@
         <span class="unit">{{ i18n.t().settings.minutes }}</span>
       </div>
     </div>
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.bridgeLabel }}</span>
+      <div class="opts" role="group" [attr.aria-label]="i18n.t().settings.bridgeLabel">
+        <button type="button" class="chip opt" [class.selected]="settings.settings().bridgeMinutes !== 5" (click)="setBridge(2)">
+          {{ i18n.t().settings.bridge2 }}
+        </button>
+        <button type="button" class="chip opt" [class.selected]="settings.settings().bridgeMinutes === 5" (click)="setBridge(5)">
+          {{ i18n.t().settings.bridge5 }}
+        </button>
+      </div>
+    </div>
+    <p class="hint">{{ i18n.t().settings.bridgeHint }}</p>
   </section>
 
   <!-- Whispers -->

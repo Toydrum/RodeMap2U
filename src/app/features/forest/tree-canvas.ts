@@ -17,7 +17,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
-import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
+import { CompanionBird } from '../timer/companion-bird';
 import {
   EdgeGeometry,
   LEVEL_H,
@@ -166,13 +166,7 @@ export class TreeCanvas {
     return { x: this.tx() + p.x * this.k(), y: this.ty() + p.y * this.k() };
   });
 
-  protected readonly perchBirdState = computed<BirdState>(() =>
-    birdStateFrom(
-      this.focus.paused(),
-      this.focus.overtime(),
-      this.focus.plannedMs() - this.focus.elapsedMs(),
-    ),
-  );
+  protected readonly perchBirdState = this.focus.birdState;
 
   /** Mouse hovers; touch taps to toggle (hover events fight the tap there). */
   protected onMarkEnter(ev: PointerEvent, point: LayoutPoint): void {

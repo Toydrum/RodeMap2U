@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import { HintChip } from '../../shared/ui/hint-chip';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { FocusSessionService } from '../../core/focus-session.service';
@@ -9,7 +10,7 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { AccentToken, TreeNode, lightRank } from '../../core/db/schema';
-import { BirdState, CompanionBird, birdStateFrom } from './companion-bird';
+import { CompanionBird } from './companion-bird';
 import { suggestNext } from '../ahora/suggest';
 
 const PRESETS = [10, 25, 45];
@@ -28,7 +29,7 @@ interface NodeChoice {
  */
 @Component({
   selector: 'app-timer',
-  imports: [CompanionBird],
+  imports: [CompanionBird, HintChip],
   templateUrl: './timer.html',
   styleUrl: './timer.scss',
 })
@@ -78,9 +79,7 @@ export class TimerPage {
     return id ? ((this.nodes.byId().get(id) as TreeNode | undefined) ?? null) : null;
   });
 
-  protected readonly birdState = computed<BirdState>(() =>
-    birdStateFrom(this.focus.paused(), this.focus.overtime(), this.focus.plannedMs() - this.focus.elapsedMs()),
-  );
+  protected readonly birdState = this.focus.birdState;
 
   protected start(): Promise<void> {
     return this.focus.start(this.pickedNodeId(), this.minutes());

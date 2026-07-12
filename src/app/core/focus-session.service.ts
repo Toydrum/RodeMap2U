@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { SessionsRepo } from './repos/sessions.repo';
+import { SettingsService } from './repos/settings.service';
 import { ToastService } from '../shared/ui/toast.service';
 import { I18nService } from './i18n/i18n.service';
+import { BirdState, birdStateFrom } from './bird-state';
 
 export interface ActiveFocus {
   nodeId: string | null;
@@ -60,6 +62,22 @@ export class FocusSessionService {
 
   readonly overtime = computed(
     () => this.state() !== null && this.elapsedMs() >= this.plannedMs(),
+  );
+
+  /** The golden approach-bridge window — user-widenable (2 or 5 min):
+   *  a hyperfocus exit-ramp / transition preparation. Visual only. */
+  private readonly settings = inject(SettingsService);
+  readonly bridgeMs = computed(() => (this.settings.settings().bridgeMinutes ?? 2) * 60_000);
+
+  /** THE shared pose — every surface hosting the parakeet reads this one
+   *  computed (timer ring, ahora card, corner + scene perches). */
+  readonly birdState = computed<BirdState>(() =>
+    birdStateFrom(
+      this.paused(),
+      this.overtime(),
+      this.plannedMs() - this.elapsedMs(),
+      this.bridgeMs(),
+    ),
   );
 
   readonly display = computed(() => {

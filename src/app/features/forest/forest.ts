@@ -1,4 +1,5 @@
 import { Component, DestroyRef, ElementRef, computed, effect, inject, signal } from '@angular/core';
+import { HintChip } from '../../shared/ui/hint-chip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -16,7 +17,8 @@ import { FlowerSpec, flowerFor } from './flora';
 import { FlowerGlyph } from './flower';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
-import { BirdState, CompanionBird, birdStateFrom } from '../timer/companion-bird';
+import { CompanionBird } from '../timer/companion-bird';
+import { FinderHit, findMatches } from './finder';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
 
@@ -68,7 +70,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird, HintChip],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -195,13 +197,33 @@ export class ForestPage {
   /** Crown top-center in `.plots`-band coordinates; null → corner fallback. */
   protected readonly crownPerchPos = signal<{ x: number; y: number } | null>(null);
 
-  protected readonly perchBirdState = computed<BirdState>(() =>
-    birdStateFrom(
-      this.focus.paused(),
-      this.focus.overtime(),
-      this.focus.plannedMs() - this.focus.elapsedMs(),
+  protected readonly perchBirdState = this.focus.birdState;
+
+  /* ----------------------------------------- «buscar una rama» (finder) */
+
+  protected readonly finderOpen = signal(false);
+  protected readonly finderQuery = signal('');
+
+  protected readonly finderHits = computed<FinderHit[]>(() =>
+    findMatches(this.finderQuery(), this.trees.active(), (treeId) =>
+      this.nodes.byTree().get(treeId) ?? [],
     ),
   );
+
+  protected closeFinder(): void {
+    this.finderOpen.set(false);
+    this.finderQuery.set('');
+  }
+
+  /** Tree hit → open it; branch hit → open its tree LOCATING the branch
+   *  (?locate= pans the canvas without opening any sheet). */
+  protected goHit(hit: FinderHit): void {
+    this.closeFinder();
+    void this.router.navigate(
+      ['/tree', hit.treeId],
+      hit.nodeId ? { queryParams: { locate: hit.nodeId } } : {},
+    );
+  }
 
   /** `?mood=` dev/demo override, else the latest check-in's feeling. */
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;

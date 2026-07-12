@@ -2,6 +2,8 @@
   <h1>{{ i18n.t().ahora.title }}</h1>
   <p class="sub">{{ i18n.t().ahora.subtitle }}</p>
 
+  <app-hint-chip surface="ahora" [text]="i18n.t().hints.ahora" />
+
   @if (pendingReviews().length && !reviewing()) {
     <button type="button" class="review-banner" (click)="reviewing.set(true)">
       🍂 {{ i18n.t().tree.dateReviewBanner }} — <strong>{{ i18n.t().tree.reviewNow }}</strong>

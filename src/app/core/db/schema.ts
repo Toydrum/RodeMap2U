@@ -172,7 +172,11 @@ export interface Settings {
   textSize: TextSize;
   dyslexiaFont: boolean;
   timerDefaultMinutes: number;
-  timerEndChime: boolean;
+  /** The golden approach-bridge fires this many minutes before the planted
+   *  time — hyperfocus exit-ramp / transition preparation. Visual only. */
+  bridgeMinutes: 2 | 5;
+  /** Surfaces whose first-visit «¿qué es esto?» hint was dismissed. */
+  hintsSeen: string[];
   /** 30-min cooldown so a PWA resume doesn't re-prompt the check-in. */
   lastCheckInAt: number | null;
   /** First-run flag for the welcome flow. */
@@ -199,7 +203,8 @@ export const DEFAULT_SETTINGS: Settings = {
   textSize: 'md',
   dyslexiaFont: false,
   timerDefaultMinutes: 20,
-  timerEndChime: false,
+  bridgeMinutes: 2,
+  hintsSeen: [],
   lastCheckInAt: null,
   onboarded: false,
   todayIntentions: null,

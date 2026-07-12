@@ -167,6 +167,12 @@ export class SettingsPage {
     if (value >= 1 && value <= 180) void this.settings.patch({ timerDefaultMinutes: value });
   }
 
+  /** The golden approach-bridge: how early the parakeet turns and the ring
+   *  warms. A hyperfocus exit-ramp — visual only, never a sound. */
+  protected setBridge(minutes: 2 | 5): void {
+    void this.settings.patch({ bridgeMinutes: minutes });
+  }
+
   protected exportData(): void {
     void this.backup.download();
   }

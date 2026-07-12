@@ -9,6 +9,20 @@ export const ES = {
     tagline: 'Tu ruta crece contigo',
     memoryOnly: 'Este dispositivo no pudo abrir su almacenamiento: tu bosque vive solo en esta sesión y se perderá al recargar. Cierra otras pestañas y recarga para reintentar.',
   },
+  finder: {
+    title: 'Buscar en mi bosque',
+    placeholder: 'Nombre de un árbol o una rama…',
+    empty: 'Nada con ese nombre por aquí — quizá vive con otras palabras.',
+    hint: 'Escribe dos letras o más y te llevo a esa rama.',
+  },
+  hints: {
+    forest: 'Cada árbol es un área de tu vida. Tócalo para entrar; mantenlo presionado para acomodarlo.',
+    tree: 'Tus metas viven en las puntas de las ramas. Toca una para verla; el «+» planta una nueva.',
+    ahora: 'Aquí te espera UNA sola idea a la vez — puedes pedir otra o simplemente mirar tu bosque.',
+    timer: 'Un tiempo suave con tu rama. Nada suena, nada corta: tú decides cuándo cerrar.',
+    gotIt: 'Entendido',
+    guideLink: 'Ver la guía',
+  },
   common: {
     save: 'Guardar',
     cancel: 'Cancelar',
@@ -330,6 +344,10 @@ export const ES = {
     dyslexiaFont: 'Fuente amigable para dislexia',
     focus: 'Enfoque',
     timerDefault: 'Duración predeterminada',
+    bridgeLabel: 'El puente dorado',
+    bridge2: '2 minutitos antes',
+    bridge5: '5 minutitos antes',
+    bridgeHint: 'Cuánto antes de cumplirse tu tiempo el anillo entibia a dorado y el periquito voltea a verte — un avisito de luz para aterrizar suave, sin sonidos.',
     minutes: 'min',
     data: 'Tus datos',
     dataHint:
