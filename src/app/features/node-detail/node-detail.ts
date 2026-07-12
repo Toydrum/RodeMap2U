@@ -146,6 +146,55 @@ export class NodeDetail {
     this.stepInput()?.nativeElement.focus();
   }
 
+  /* --------------------------- «desmenuzar» — the task-paralysis wizard */
+
+  /** Three compass questions, one at a time; each non-empty answer becomes
+   *  a pasito IN THE USER'S OWN WORDS (the cuando-entonces philosophy — no
+   *  AI, no templates). Every question is skippable; skipping all three
+   *  plants nothing and closes without a word. */
+  protected readonly crumbleStep = signal<number | null>(null);
+  protected readonly crumbleAnswer = signal('');
+  private crumbleAnswers: string[] = [];
+
+  /** Offered while the branch is live and still standing bare (≤1 pasito). */
+  protected readonly canCrumble = computed(() => {
+    const status = this.node().status;
+    return (status === 'seed' || status === 'growing') && this.children().length <= 1;
+  });
+
+  protected startCrumble(): void {
+    this.crumbleAnswers = [];
+    this.crumbleAnswer.set('');
+    this.crumbleStep.set(0);
+  }
+
+  protected async crumbleNext(skip: boolean): Promise<void> {
+    const answer = skip ? '' : this.crumbleAnswer().trim();
+    if (answer) this.crumbleAnswers.push(answer);
+    this.crumbleAnswer.set('');
+    const step = this.crumbleStep() ?? 0;
+    if (step < 2) {
+      this.crumbleStep.set(step + 1);
+      return;
+    }
+    this.crumbleStep.set(null);
+    for (const title of this.crumbleAnswers) {
+      await this.nodes.plant(this.node().treeId, this.node().id, { title });
+    }
+    if (this.crumbleAnswers.length) {
+      this.toast.show({
+        message: this.i18n.plural(this.crumbleAnswers.length, this.i18n.t().crumble.planted),
+      });
+    }
+    this.crumbleAnswers = [];
+  }
+
+  protected closeCrumble(): void {
+    this.crumbleStep.set(null);
+    this.crumbleAnswer.set('');
+    this.crumbleAnswers = [];
+  }
+
   /** The pasitos become (or stop being) an ordered path. Never forced. */
   protected async toggleFlow(): Promise<void> {
     await this.nodes.update(this.node(), { flow: this.flowSteps() ? 'free' : 'steps' });

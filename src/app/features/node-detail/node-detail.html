@@ -165,6 +165,12 @@
       >
       <button type="submit" class="btn btn-soft" [disabled]="!stepTitle().trim()">+</button>
     </form>
+    @if (canCrumble()) {
+      <button type="button" class="btn btn-ghost crumble-cta" (click)="startCrumble()">
+        🔪 {{ i18n.t().crumble.cta }}
+      </button>
+      <span class="hint">{{ i18n.t().crumble.ctaHint }}</span>
+    }
 
     <!-- Meta -->
     <p class="meta">
@@ -231,4 +237,42 @@
 
 @if (branching()) {
   <app-branch-flow [node]="node()" (closed)="branching.set(false); closed.emit()" />
+}
+
+<!-- «Desmenuzar» — three compass questions, one at a time; each answer
+     becomes a pasito in the user's own words. Everything skippable. -->
+@if (crumbleStep() !== null) {
+  <div class="sheet-backdrop" (click)="closeCrumble()">
+    <form
+      class="sheet card confirm crumble"
+      appSheet
+      (sheetClose)="closeCrumble()"
+      (click)="$event.stopPropagation()"
+      (submit)="$event.preventDefault(); crumbleNext(false)"
+      role="dialog" aria-modal="true"
+      [attr.aria-label]="i18n.t().crumble.title"
+    >
+      <span class="confirm-icon" aria-hidden="true">🔪</span>
+      <h2>{{ i18n.t().crumble.title }}</h2>
+      <p class="confirm-body">{{ i18n.t().crumble.questions[crumbleStep()!] }}</p>
+      <input
+        type="text"
+        autofocus
+        [value]="crumbleAnswer()"
+        (input)="crumbleAnswer.set($any($event.target).value)"
+        [placeholder]="i18n.t().crumble.placeholder"
+        maxlength="80"
+        [attr.aria-label]="i18n.t().crumble.questions[crumbleStep()!]"
+      >
+      <p class="hint">{{ i18n.t().crumble.stepHint }}</p>
+      <div class="row">
+        <button type="button" class="btn btn-ghost" (click)="crumbleNext(true)">
+          {{ i18n.t().crumble.skip }}
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="!crumbleAnswer().trim()">
+          {{ crumbleStep() === 2 ? i18n.t().crumble.finish : i18n.t().crumble.next }}
+        </button>
+      </div>
+    </form>
+  </div>
 }

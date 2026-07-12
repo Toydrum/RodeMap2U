@@ -105,10 +105,37 @@ export class AhoraPage {
     this.ideaOffset.update((n) => (n + 1) % Math.max(1, this.pool().length));
   }
 
-  /** The smallest possible door: touch it for two little minutes, in place. */
+  /** The smallest possible door: touch it for two little minutes, in place.
+   *  A BARE top-level goal (no pasitos yet — the classic task-paralysis
+   *  shape) gets one compass question first: «¿cuál sería el primer pasito
+   *  de dos minutitos?» — the answer is planted and becomes the session's
+   *  node. Skipping starts on the goal as always: a door, never a gate. */
+  protected readonly firstPasitoAsk = signal(false);
+  protected readonly firstPasitoText = signal('');
+
   protected async ramp2(): Promise<void> {
     const s = this.suggestion();
-    if (s) await this.focus.start(s.node.id, 2);
+    if (!s) return;
+    const bareGoal = s.node.parentId === null && this.nodes.childrenOf(s.node).length === 0;
+    if (bareGoal) {
+      this.firstPasitoAsk.set(true);
+      return;
+    }
+    await this.focus.start(s.node.id, 2);
+  }
+
+  protected async firstPasitoGo(skip: boolean): Promise<void> {
+    const s = this.suggestion();
+    this.firstPasitoAsk.set(false);
+    if (!s) return;
+    const title = skip ? '' : this.firstPasitoText().trim();
+    this.firstPasitoText.set('');
+    if (!title) {
+      await this.focus.start(s.node.id, 2);
+      return;
+    }
+    const pasito = await this.nodes.plant(s.node.treeId, s.node.id, { title });
+    await this.focus.start(pasito.id, 2);
   }
 
   protected goSession(): void {

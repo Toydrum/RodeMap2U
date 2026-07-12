@@ -160,3 +160,40 @@
     </section>
   </div>
 }
+
+<!-- The first-pasito door: one compass question before a 2-minutitos on a
+     bare goal — the answer sprouts and the session starts right on it. -->
+@if (firstPasitoAsk()) {
+  <div class="sheet-backdrop" (click)="firstPasitoGo(true)">
+    <form
+      class="sheet card confirm"
+      appSheet
+      (sheetClose)="firstPasitoGo(true)"
+      (click)="$event.stopPropagation()"
+      (submit)="$event.preventDefault(); firstPasitoGo(false)"
+      role="dialog" aria-modal="true"
+      [attr.aria-label]="i18n.t().crumble.firstTitle"
+    >
+      <span class="confirm-icon" aria-hidden="true">🌱</span>
+      <h2>{{ i18n.t().crumble.firstTitle }}</h2>
+      <p class="confirm-body">{{ i18n.t().crumble.firstBody }}</p>
+      <input
+        type="text"
+        autofocus
+        [value]="firstPasitoText()"
+        (input)="firstPasitoText.set($any($event.target).value)"
+        [placeholder]="i18n.t().crumble.placeholder"
+        maxlength="80"
+        [attr.aria-label]="i18n.t().crumble.firstTitle"
+      >
+      <div class="row">
+        <button type="button" class="btn btn-ghost" (click)="firstPasitoGo(true)">
+          {{ i18n.t().crumble.firstSkip }}
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="!firstPasitoText().trim()">
+          {{ i18n.t().crumble.firstGo }}
+        </button>
+      </div>
+    </form>
+  </div>
+}

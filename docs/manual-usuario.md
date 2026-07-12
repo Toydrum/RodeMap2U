@@ -77,6 +77,7 @@ Al abrirla encuentras, en este orden:
 - **"Ibas aquí"** — tu hilo: la rama donde estuviste la última vez, con su arbolito y cuándo fue ("Ayer estuviste aquí 22 min 🌱"). Tocarla te lleva directo a esa rama en su árbol.
 - **UNA sugerencia — nunca una lista.** "¿Y si seguimos por aquí?" te ofrece un solo pasito, y siempre te dice **por qué** ("Un pasito chiquito de «Mi primera canción»"). Si ese no te llama, **"Otra idea"** te muestra otro camino con calma — y tu bosque completo sigue a un toque en **"Ver mi bosque"**. La app sugiere; **tú decides siempre**. Las ramas que pusiste **«a pleno sol»** ☀️ van al frente de las ideas — justo después de tus ramas de hoy y tus cuando-entonces (tu ahora explícito siempre manda) — y las que están **«a la sombra»** ceden el turno sin desaparecer.
 - **Dos puertas para entrar**: **"Tocarla 2 minutitos"** (la puerta más chiquita que existe — empieza ahí mismo, y si te quedas más, mejor) o **"Una sesión"** completa en el temporizador.
+- **¿La meta está entera y sin pasitos?** Antes de los 2 minutitos, la app te hace UNA pregunta: *«¿Cuál sería el primer pasito?»* — lo que escribas brota como pasito y la sesión empieza justo ahí. También puedes «Empezar así nomás»: la pregunta es una puerta, nunca una reja.
 - **🌅 Tus ramas de hoy** *(opcional)*: elige hasta **tres** ramas para el día con "Elegir mis ramas de hoy". Aparecen como fichitas arriba y la sugerencia las respeta ("La elegiste para hoy 🌅"). **Mañana se sueltan solas** — sin arrastres, sin cuentas de cumplidas/no cumplidas: hoy es hoy.
 - **🧶 Cuando-entonces**: si a una rama le escribiste su ramita cuando-entonces (ver sección 6), Ahora te la recuerda **con tus propias palabras** — "🧶 «Cuando me sirva el café de la mañana»" — y esa rama pasa al frente de la fila. Es la técnica con más evidencia para arrancar en TDAH: tú escribes el plan, la app solo te lo vuelve a poner enfrente. Jamás con alarmas.
 - Si hay **fechas que quieren platicar contigo**, el aviso suave aparece arriba — la misma conversación digna de siempre, jamás un rojo.
@@ -152,6 +153,8 @@ Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo an
 | **Descansando** | Hoja recostada (lavanda) | Pausa a propósito — descansar también es parte |
 | **Florecida** | La flor de su especie, abierta 🌸 | ¡Floreció! |
 | **Ramificada** | Nudo dorado | De aquí nacieron caminos nuevos |
+
+> 🔪 **Desmenuzar**: si una rama viva sigue sin pasitos (o con uno solo), junto al «+» aparece **«Desmenuzar esta meta»** — tres preguntitas de brújula (la primera acción física · lo que se interpone · la versión de dos minutitos) y cada respuesta TUYA brota como pasito. Todas se pueden saltar sin pena. Es el antídoto a la parálisis de «¿y por dónde empiezo?».
 
 > 🌿 "Ramificada" no se elige a mano: es un estado que se *gana* cuando transformas una meta en caminos nuevos. Y no es un degradé — es el árbol contando su historia. Para empezar esa transformación tienes dos caminos: el chip dorado **"🌿 Ramificar…"** al final de la fila de estados, o el botón **"Brotar ramitas nuevas"** — ambos abren el mismo ritual.
 
