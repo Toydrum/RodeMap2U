@@ -348,4 +348,24 @@
     display: flex;
     gap: 0.4rem;
   }
+
+  /* The global .chip has no button affordance and NO selected state — a
+     tapped token used to change class invisibly ('los botones no
+     funcionan'). Make them look tappable and make the choice VISIBLE. */
+  .chip {
+    cursor: pointer;
+    min-height: 40px;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    &.selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+      color: var(--text);
+    }
+  }
 }
