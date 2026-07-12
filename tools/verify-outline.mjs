@@ -92,7 +92,7 @@ async function centers(p) {
     await input.press('Enter');
     await page.waitForTimeout(180);
   }
-  await page.locator('.flow-toggle input').check();
+  await page.locator('.order-toggle input').check();
   await page.waitForTimeout(250);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);

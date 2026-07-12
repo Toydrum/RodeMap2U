@@ -123,7 +123,7 @@ for (const t of ['Elegir tema', 'Ensayar', 'Grabar']) {
   await input.press('Enter');
   await page.waitForTimeout(160);
 }
-await page.locator('.flow-toggle input').check();
+await page.locator('.order-toggle input').check();
 await page.waitForTimeout(250);
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);

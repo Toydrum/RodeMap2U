@@ -52,7 +52,7 @@ for (const t of ['Paso 1', 'Paso 2', 'Paso 3', 'Paso 4']) {
   await input.press('Enter');
   await page.waitForTimeout(200);
 }
-await page.locator('.flow-toggle input').check();
+await page.locator('.order-toggle input').check();
 await page.waitForTimeout(300);
 
 // A — ordered list UI: numbers, next-tag, arrows
@@ -91,7 +91,7 @@ console.log(
 const rootC = (await centers(page)).find((n) => n.label.startsWith('Aprender piano'));
 await page.mouse.click(rootC.x, rootC.y);
 await page.waitForTimeout(450);
-const toggleOn = await page.locator('.flow-toggle input').isChecked();
+const toggleOn = await page.locator('.order-toggle input').isChecked();
 const firstPersist = (await page.locator('.steps li').first().textContent()).replace(/\s+/g, ' ');
 console.log(`C2 persisted: toggle=${toggleOn} first="${firstPersist.includes('Paso 2')}" | OK=${toggleOn && firstPersist.includes('Paso 2')}`);
 

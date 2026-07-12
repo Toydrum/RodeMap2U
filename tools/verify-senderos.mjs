@@ -41,11 +41,11 @@ for (const t of ['Despertar', 'Desayunar', 'Vestirme']) {
   await page.waitForTimeout(200);
 }
 // A — ordered + repeating (toggle appears only once steps mode is on)
-const repeatsBefore = await page.locator('.flow-toggle', { hasText: 'sendero' }).count();
-await page.locator('.flow-toggle input').first().check();
+const repeatsBefore = await page.locator('.repeats-toggle').count();
+await page.locator('.order-toggle input').check();
 await page.waitForTimeout(300);
-const repeatsAfter = await page.locator('.flow-toggle', { hasText: 'sendero' }).count();
-await page.locator('.flow-toggle', { hasText: 'sendero' }).locator('input').check();
+const repeatsAfter = await page.locator('.repeats-toggle').count();
+await page.locator('.repeats-toggle input').check();
 await page.waitForTimeout(300);
 // bloom the first two steps (today)
 for (let i = 0; i < 2; i++) {
@@ -57,7 +57,7 @@ await page.waitForTimeout(300);
 // re-open: repeats persisted?
 await page.mouse.click(center.x, center.y);
 await page.waitForTimeout(450);
-const persisted = await page.locator('.flow-toggle', { hasText: 'sendero' }).locator('input').isChecked();
+const persisted = await page.locator('.repeats-toggle input').isChecked();
 console.log(`A repeats toggle: hidden-before-steps=${repeatsBefore === 0} shows-after=${repeatsAfter === 1} persisted=${persisted} | OK=${repeatsBefore === 0 && repeatsAfter === 1 && persisted}`);
 const bloomedToday = await page.locator('.steps .step-name.done').count();
 await page.keyboard.press('Escape');
@@ -110,7 +110,7 @@ for (let i = 0; i < 2; i++) {
   await page.locator('.steps li button', { hasText: '🌸' }).first().click();
   await page.waitForTimeout(280);
 }
-await page.locator('.flow-toggle', { hasText: 'sendero' }).locator('input').uncheck();
+await page.locator('.repeats-toggle input').uncheck();
 await page.waitForTimeout(300);
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);

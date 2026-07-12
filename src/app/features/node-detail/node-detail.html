@@ -133,13 +133,13 @@
     <!-- Steps -->
     <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
     @if (children().length > 1 || flowSteps()) {
-      <label class="flow-toggle">
+      <label class="flow-toggle order-toggle">
         <input type="checkbox" [checked]="flowSteps()" (change)="toggleFlow()">
         {{ i18n.t().node.flowToggle }}
       </label>
       @if (flowSteps()) {
         <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
-        <label class="flow-toggle">
+        <label class="flow-toggle repeats-toggle">
           <input type="checkbox" [checked]="node().repeatsDaily === true" (change)="toggleRepeats()">
           🌄 {{ i18n.t().node.repeatsToggle }}
         </label>
