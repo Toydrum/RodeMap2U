@@ -269,11 +269,11 @@
      unreadable on desktop) — the viewBox does the math, capped so huge
      screens stay calm. */
   .glyphs {
-    width: 92%;
+    width: 86%;
     height: auto;
-    aspect-ratio: 40 / 20;
-    max-height: 64px;
-    margin: auto auto 0;
+    aspect-ratio: 44 / 26;
+    max-height: 52px;
+    margin: auto;
     display: block;
   }
 
