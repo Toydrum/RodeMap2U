@@ -325,21 +325,14 @@
 
   <!-- Archive-tree confirm -->
   @if (archiving(); as tree) {
-    <div class="sheet-backdrop" (click)="archiving.set(null)">
-      <div class="sheet card confirm" appSheet (sheetClose)="archiving.set(null)" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <span class="confirm-icon" aria-hidden="true">🗃</span>
-        <h2>{{ i18n.fill(i18n.t().tree.archiveTitle, { name: tree.name }) }}</h2>
-        <p class="confirm-body">{{ i18n.t().tree.archiveBody }}</p>
-        <div class="row">
-          <button type="button" class="btn btn-ghost" (click)="archiving.set(null)">
-            {{ i18n.t().common.cancel }}
-          </button>
-          <button type="button" class="btn btn-primary" (click)="archiveTree()">
-            {{ i18n.t().tree.archiveCta }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-confirm-sheet
+      icon="🗃"
+      [title]="i18n.fill(i18n.t().tree.archiveTitle, { name: tree.name })"
+      [body]="i18n.t().tree.archiveBody"
+      [confirmLabel]="i18n.t().tree.archiveCta"
+      (cancelled)="archiving.set(null)"
+      (confirmed)="archiveTree()"
+    />
   }
 
   <!-- Plant-a-tree sheet -->
@@ -353,7 +346,7 @@
             id="tree-name"
             type="text"
             [value]="newName()"
-            (input)="newName.set($any($event.target).value)"
+            (input)="newName.set(inputValue($event))"
             [placeholder]="i18n.t().forest.treeNamePlaceholder"
             maxlength="60"
             autofocus
@@ -401,7 +394,7 @@
             type="text"
             autofocus
             [value]="finderQuery()"
-            (input)="finderQuery.set($any($event.target).value)"
+            (input)="finderQuery.set(inputValue($event))"
             [placeholder]="i18n.t().finder.placeholder"
             maxlength="60"
             [attr.aria-label]="i18n.t().finder.title"

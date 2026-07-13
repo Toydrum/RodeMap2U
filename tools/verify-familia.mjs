@@ -76,13 +76,14 @@ await stage('Tu cuenta').waitFor({ timeout: 6000 });
 await openSettings();
 await page.locator('.fam-open', { hasText: 'Val' }).click();
 await sheetTitle('Val').waitFor();
-const socialBefore = await page.locator('.fam-switch-row .chip').textContent();
-await page.locator('.fam-switch-row .chip').click();
+// 0.0.77: the social boolean is an app-switch now (state = aria-checked).
+const socialBefore = await page.locator('.fam-switch-row .switch').getAttribute('aria-checked');
+await page.locator('.fam-switch-row .switch').click();
 await page.waitForTimeout(900);
-const socialAfter = await page.locator('.fam-switch-row .chip').textContent();
-const okD = socialBefore?.trim() !== socialAfter?.trim();
-console.log(`D social toggle: "${socialBefore?.trim()}" → "${socialAfter?.trim()}" | OK=${okD}`);
-await page.locator('.fam-switch-row .chip').click(); // leave Val social ON as seeded
+const socialAfter = await page.locator('.fam-switch-row .switch').getAttribute('aria-checked');
+const okD = socialBefore !== socialAfter;
+console.log(`D social toggle: ${socialBefore} → ${socialAfter} | OK=${okD}`);
+await page.locator('.fam-switch-row .switch').click(); // leave Val social ON as seeded
 await page.waitForTimeout(900);
 await page.locator('.familia-sheet button', { hasText: 'Cerrar' }).click();
 

@@ -1,4 +1,5 @@
 import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { NavigationExtras, Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
@@ -38,6 +39,7 @@ const DESTINATION_BRANCHES = 4;
   styleUrl: './check-in.scss',
 })
 export class CheckInPage {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly nodes = inject(NodesRepo);
   protected readonly trees = inject(TreesRepo);

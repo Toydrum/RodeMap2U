@@ -1,4 +1,6 @@
 import { Component, DestroyRef, ElementRef, computed, effect, inject, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -70,7 +72,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird, HintChip],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird, HintChip, ConfirmSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -82,6 +84,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
   },
 })
 export class ForestPage {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly trees = inject(TreesRepo);
   protected readonly nodes = inject(NodesRepo);

@@ -1,4 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
+import { Switch } from '../../shared/ui/switch';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -23,11 +25,12 @@ import { FamilyService } from '../../core/family.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard, ConfirmSheet],
+  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard, ConfirmSheet, Switch],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })
 export class SettingsPage {
+  protected readonly inputValue = inputValue;
   protected readonly version = APP_VERSION;
   protected readonly checkingUpdate = signal(false);
   private readonly swUpdate = inject(SwUpdate);
@@ -180,6 +183,19 @@ export class SettingsPage {
 
   protected exportData(): void {
     void this.backup.download();
+  }
+
+  protected toggleBackupReminders(): void {
+    void this.settings.patch({ backupReminders: !this.settings.settings().backupReminders });
+  }
+
+  /** «Última copia: …» — or the honest no-copy-yet line. */
+  protected lastBackupText(): string {
+    const at = this.settings.settings().lastBackupAt;
+    if (!at) return this.i18n.t().settings.noBackupYet;
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const date = new Date(at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    return this.i18n.fill(this.i18n.t().settings.lastBackupLine, { date });
   }
 
   protected branchCountOf(tree: Tree): number {

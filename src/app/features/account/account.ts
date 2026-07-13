@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -29,6 +30,7 @@ type Step =
   styleUrl: './account.scss',
 })
 export class AccountPage {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);

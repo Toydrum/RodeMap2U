@@ -69,16 +69,7 @@
 
     <div class="row">
       <label class="label" for="dys-toggle">{{ i18n.t().settings.dyslexiaFont }}</label>
-      <button
-        id="dys-toggle"
-        type="button"
-        class="switch"
-        role="switch"
-        [attr.aria-checked]="settings.dyslexiaFont()"
-        (click)="toggleDyslexia()"
-      >
-        <span class="knob" [class.on]="settings.dyslexiaFont()"></span>
-      </button>
+      <app-switch buttonId="dys-toggle" [checked]="settings.dyslexiaFont()" (toggled)="toggleDyslexia()" />
     </div>
   </section>
 
@@ -93,7 +84,7 @@
           class="num"
           type="number" min="1" max="180"
           [value]="settings.settings().timerDefaultMinutes"
-          (change)="setTimerDefault(+$any($event.target).value)"
+          (change)="setTimerDefault(+inputValue($event))"
         >
         <span class="unit">{{ i18n.t().settings.minutes }}</span>
       </div>
@@ -112,17 +103,11 @@
     <p class="hint">{{ i18n.t().settings.bridgeHint }}</p>
     <div class="row">
       <span class="label">🕐 {{ i18n.t().settings.timeCompassLabel }}</span>
-      <div class="opts">
-        <button
-          type="button"
-          class="chip opt"
-          [class.selected]="settings.settings().timeCompass"
-          (click)="toggleTimeCompass()"
-          [attr.aria-pressed]="settings.settings().timeCompass"
-        >
-          {{ settings.settings().timeCompass ? '✓' : '—' }}
-        </button>
-      </div>
+      <app-switch
+        [checked]="settings.settings().timeCompass"
+        [ariaLabel]="i18n.t().settings.timeCompassLabel"
+        (toggled)="toggleTimeCompass()"
+      />
     </div>
     <p class="hint">{{ i18n.t().settings.timeCompassHint }}</p>
   </section>
@@ -133,16 +118,7 @@
     <p class="hint">{{ i18n.t().whispers.settingsHint }}</p>
     <div class="row">
       <label class="label" for="whispers-toggle">{{ i18n.t().whispers.settingsTitle }}</label>
-      <button
-        id="whispers-toggle"
-        type="button"
-        class="switch"
-        role="switch"
-        [attr.aria-checked]="settings.settings().whispersEnabled"
-        (click)="toggleWhispers()"
-      >
-        <span class="knob" [class.on]="settings.settings().whispersEnabled"></span>
-      </button>
+      <app-switch buttonId="whispers-toggle" [checked]="settings.settings().whispersEnabled" (toggled)="toggleWhispers()" />
     </div>
     @if (settings.settings().whispersEnabled) {
       <div class="row">
@@ -265,6 +241,15 @@
       </label>
     </div>
     <p class="hint">{{ i18n.t().settings.importWarning }}</p>
+    <p class="hint backup-mark">{{ lastBackupText() }}</p>
+    <div class="row">
+      <span class="label">{{ i18n.t().settings.backupRemindersLabel }}</span>
+      <app-switch
+        [checked]="settings.settings().backupReminders"
+        [ariaLabel]="i18n.t().settings.backupRemindersLabel"
+        (toggled)="toggleBackupReminders()"
+      />
+    </div>
   </section>
 
   <!-- Archive -->

@@ -75,7 +75,7 @@
         <input
           type="number" min="1" max="180"
           [value]="minutes()"
-          (change)="setCustom($any($event.target).value)"
+          (change)="setCustom(inputValue($event))"
           [attr.aria-label]="i18n.t().timer.custom"
         >
       </label>

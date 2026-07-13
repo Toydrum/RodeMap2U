@@ -1,4 +1,6 @@
 import { Component, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { inputEl, inputValue } from '../../shared/ui/dom';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -19,11 +21,13 @@ import { VisitSession } from '../../core/visit/visit-session';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip],
+  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip, ConfirmSheet],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
 export class TreeViewPage {
+  protected readonly inputValue = inputValue;
+  protected readonly inputEl = inputEl;
   /** Route param via withComponentInputBinding. */
   readonly id = input.required<string>();
 
@@ -254,7 +258,7 @@ export class TreeViewPage {
   }
 
   /** Tab indents inside the sowing box instead of walking focus away. */
-  protected insertTab(el: HTMLTextAreaElement): void {
+  protected insertTab(el: HTMLInputElement | HTMLTextAreaElement): void {
     const start = el.selectionStart ?? el.value.length;
     const end = el.selectionEnd ?? start;
     el.value = el.value.slice(0, start) + '\t' + el.value.slice(end);

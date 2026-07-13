@@ -64,7 +64,7 @@ console.log(`B card hint: "${hint.trim()}" | OK=${okB}`);
 // earns the curiosity line after the momentum toast is dismissed.
 await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
-await page.locator('.row:has-text("Brújula del tiempo") .chip').click();
+await page.locator('.row:has-text("Brújula del tiempo") .switch').click(); // 0.0.77: app-switch
 await page.waitForTimeout(300);
 await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);

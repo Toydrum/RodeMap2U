@@ -63,6 +63,8 @@ console.log(`C baseline (no energy) captured: "${baseline.trim().slice(0, 44)}" 
 // A+B — check-in with regadera bajita.
 await page.goto(`${BASE}/check-in`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
+await page.locator('.energy-toggle').click(); // 0.0.75: la regadera folds like the notita
+await page.waitForTimeout(200);
 const energyRow = await page.locator('.energy-row .chip').count();
 await page.locator('.energy-row .chip', { hasText: 'Bajita' }).click();
 await page.waitForTimeout(150);

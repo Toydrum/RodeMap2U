@@ -1,4 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
+import { Switch } from '../../shared/ui/switch';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -29,11 +31,12 @@ type Sheet =
  */
 @Component({
   selector: 'app-familia-card',
-  imports: [SheetDirective],
+  imports: [SheetDirective, Switch],
   templateUrl: './familia-card.html',
   styleUrl: './familia-card.scss',
 })
 export class FamiliaCard {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthService);
   protected readonly fam = inject(FamilyService);

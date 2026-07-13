@@ -1,4 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -23,11 +25,12 @@ import { ToastService } from '../../shared/ui/toast.service';
  */
 @Component({
   selector: 'app-amigos-card',
-  imports: [SheetDirective],
+  imports: [SheetDirective, ConfirmSheet],
   templateUrl: './amigos-card.html',
   styleUrl: './amigos-card.scss',
 })
 export class AmigosCard {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthService);
   private readonly fam = inject(FamilyService);

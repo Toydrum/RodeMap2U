@@ -325,6 +325,7 @@ Desde la hojita de cada peque, **«Entrar a su bosque»** te lleva a su jardín 
 ## Tus datos
 
 - **Exportar mi copia**: descarga un archivo con todo tu bosque (árboles, ramas, check-ins, sesiones y ajustes). Hazlo seguido — es tu respaldo.
+- **Última copia y recordatorio**: debajo de esos botones, Ajustes muestra la fecha de tu última copia. Si pasan unos 30 días sin una, la app te lo recuerda con una sola línea (nunca insiste); puedes apagar el recordatorio con el interruptor «Recordarme bajar una copia cada tanto».
 - **Importar una copia**: restaura un archivo exportado. *Ojo:* reemplaza lo que haya en ese momento — pero antes de reemplazar, la app **descarga automáticamente un respaldo** de lo actual, así que siempre puedes volver atrás.
 
 ## Archivo

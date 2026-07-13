@@ -9,6 +9,7 @@ import { UpdateService } from './core/update.service';
 import { AccompanimentService } from './core/accompaniment.service';
 import { FocusSessionService } from './core/focus-session.service';
 import { DailyPathsService } from './core/daily-paths.service';
+import { BackupReminderService } from './core/backup-reminder.service';
 import { PerchAnchorService } from './core/perch-anchor.service';
 import { ToastService } from './shared/ui/toast.service';
 import { CompanionBird } from './features/timer/companion-bird';
@@ -57,5 +58,6 @@ export class App {
     inject(UpdateService).init();
     inject(AccompanimentService).init(); // gentle whisper rhythm (opt-in)
     inject(DailyPathsService); // «senderos»: quiet day-flip reset effect
+    inject(BackupReminderService); // «tu bosque, a salvo»: ~30-day gentle copy offer
   }
 }

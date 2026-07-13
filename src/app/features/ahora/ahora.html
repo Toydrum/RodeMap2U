@@ -181,7 +181,7 @@
         type="text"
         autofocus
         [value]="firstPasitoText()"
-        (input)="firstPasitoText.set($any($event.target).value)"
+        (input)="firstPasitoText.set(inputValue($event))"
         [placeholder]="i18n.t().crumble.placeholder"
         maxlength="80"
         [attr.aria-label]="i18n.t().crumble.firstTitle"

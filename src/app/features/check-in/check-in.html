@@ -73,7 +73,7 @@
             #noteBox
             class="note"
             [value]="note()"
-            (input)="note.set($any($event.target).value)"
+            (input)="note.set(inputValue($event))"
             [placeholder]="i18n.t().checkIn.notePlaceholder"
             maxlength="240"
             rows="2"

@@ -26,7 +26,7 @@
         [placeholder]="i18n.t().amigos.redeemPlaceholder"
         [attr.aria-label]="i18n.t().amigos.redeemPlaceholder"
         [value]="redeemCode()"
-        (input)="redeemCode.set($any($event.target).value)"
+        (input)="redeemCode.set(inputValue($event))"
       />
       <button type="submit" class="btn btn-soft" [disabled]="loading() || !redeemCode().trim()">
         {{ i18n.t().amigos.redeemCta }}
@@ -105,28 +105,17 @@
     }
   </section>
 
+  <!-- Soft leave-taking: `quiet` keeps CANCEL as the highlighted path. -->
   @if (removing(); as friend) {
-    <div class="confirm-backdrop" (click)="removing.set(null)">
-      <div
-        class="confirm card"
-        appSheet
-        (sheetClose)="removing.set(null)"
-        (click)="$event.stopPropagation()"
-        role="dialog"
-        aria-modal="true"
-      >
-        <span class="confirm-icon" aria-hidden="true">🍃</span>
-        <h2>{{ i18n.fill(i18n.t().amigos.removeTitle, { name: friend.user.displayName }) }}</h2>
-        <p class="confirm-body">{{ i18n.t().amigos.removeBody }}</p>
-        <div class="row">
-          <button type="button" class="btn btn-primary" (click)="removing.set(null)">
-            {{ i18n.t().common.cancel }}
-          </button>
-          <button type="button" class="btn btn-ghost" (click)="doRemove(friend)" [disabled]="loading()">
-            {{ i18n.t().amigos.removeConfirm }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-confirm-sheet
+      icon="🍃"
+      [title]="i18n.fill(i18n.t().amigos.removeTitle, { name: friend.user.displayName })"
+      [body]="i18n.t().amigos.removeBody"
+      [confirmLabel]="i18n.t().amigos.removeConfirm"
+      [quiet]="true"
+      [confirmDisabled]="loading()"
+      (cancelled)="removing.set(null)"
+      (confirmed)="doRemove(friend)"
+    />
   }
 }

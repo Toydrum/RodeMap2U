@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -30,6 +31,7 @@ import { Suggestion, ThreadContext, pickAt, resolveThread, suggestionPool } from
   styleUrl: './ahora.scss',
 })
 export class AhoraPage {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly focus = inject(FocusSessionService);
   protected readonly trees = inject(TreesRepo);

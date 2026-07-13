@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -25,6 +26,7 @@ const MAX_CHIPS = 6;
   styleUrl: './branch-flow.scss',
 })
 export class BranchFlow {
+  protected readonly inputValue = inputValue;
   readonly node = input.required<TreeNode>();
   readonly closed = output<void>();
 

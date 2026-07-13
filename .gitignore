@@ -51,6 +51,5 @@ Thumbs.db
 /undefined/
 
 # verify-script screenshot debris (written to the repo root by tools/verify-*.mjs)
-/ring-*.png
-/tap-*.png
+/*.png
 /tools/shots/

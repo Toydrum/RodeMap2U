@@ -43,6 +43,9 @@ export class BackupService {
     a.download = `${filenamePrefix}-${envelope.exportedAt.slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    // Every download IS a copy (manual, pre-delete, pre-import) — the
+    // gentle reminder counts from here.
+    await this.settings.patch({ lastBackupAt: Date.now() });
   }
 
   /**

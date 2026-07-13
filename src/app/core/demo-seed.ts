@@ -110,4 +110,7 @@ export const DEMO_SESSIONS: TimerSession[] = [
 export const DEMO_SETTINGS_PATCH: Partial<Settings> = {
   lastCheckInAt: now,
   onboarded: true,
+  // The showcase trees are backdated (40d) — without this stamp a fresh
+  // demo would open straight into the ~30-day backup offer.
+  lastBackupNudgeAt: now,
 };

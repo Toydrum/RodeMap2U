@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -34,6 +35,7 @@ interface NodeChoice {
   styleUrl: './timer.scss',
 })
 export class TimerPage {
+  protected readonly inputValue = inputValue;
   /** Optional ?node= query param (withComponentInputBinding). */
   readonly node = input<string | undefined>();
 

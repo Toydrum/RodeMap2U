@@ -1,4 +1,5 @@
 import { Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { inputValue } from '../../shared/ui/dom';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -29,6 +30,7 @@ const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '�
   styleUrl: './node-detail.scss',
 })
 export class NodeDetail {
+  protected readonly inputValue = inputValue;
   readonly node = input.required<TreeNode>();
   readonly tree = input.required<Tree>();
   readonly closed = output<void>();

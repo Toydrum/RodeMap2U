@@ -82,7 +82,7 @@
                 autocapitalize="none"
                 spellcheck="false"
                 [value]="newUsername()"
-                (input)="newUsername.set($any($event.target).value)"
+                (input)="newUsername.set(inputValue($event))"
               />
             </label>
             <label class="field">
@@ -90,7 +90,7 @@
               <input
                 type="text"
                 [value]="newDisplayName()"
-                (input)="newDisplayName.set($any($event.target).value)"
+                (input)="newDisplayName.set(inputValue($event))"
               />
             </label>
             @if (errorText()) {
@@ -133,7 +133,7 @@
                 <input
                   type="text"
                   [value]="renameValue()"
-                  (input)="renameValue.set($any($event.target).value)"
+                  (input)="renameValue.set(inputValue($event))"
                 />
               </label>
               <button type="submit" class="btn btn-soft" [disabled]="fam.loading()">
@@ -146,15 +146,12 @@
                 <strong>{{ i18n.t().familia.socialLabel }}</strong>
                 <span class="hint">{{ i18n.t().familia.socialHint }}</span>
               </span>
-              <button
-                type="button"
-                class="chip opt"
-                [class.selected]="s.link.user.socialEnabled"
-                (click)="toggleSocial(s.link)"
+              <app-switch
+                [checked]="s.link.user.socialEnabled ?? false"
+                [ariaLabel]="i18n.t().familia.socialLabel"
                 [disabled]="fam.loading()"
-              >
-                {{ s.link.user.socialEnabled ? i18n.t().familia.socialOn : i18n.t().familia.socialOff }}
-              </button>
+                (toggled)="toggleSocial(s.link)"
+              />
             </div>
 
             <div class="fam-tools">
@@ -274,7 +271,7 @@
                 autocapitalize="characters"
                 spellcheck="false"
                 [value]="acceptCode()"
-                (input)="acceptCode.set($any($event.target).value)"
+                (input)="acceptCode.set(inputValue($event))"
               />
             </label>
             @if (errorText()) {

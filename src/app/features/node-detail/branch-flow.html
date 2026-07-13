@@ -31,7 +31,7 @@
         <input
           type="text"
           [value]="alt"
-          (input)="setAlt($index, $any($event.target).value)"
+          (input)="setAlt($index, inputValue($event))"
           (keydown.enter)="$event.preventDefault(); valid() && confirm()"
           [placeholder]="i18n.t().branchFlow.altPlaceholder"
           maxlength="80"

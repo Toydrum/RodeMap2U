@@ -220,6 +220,12 @@ export interface Settings {
   startersHidden: boolean;
   /** The user's own quick-path chips for the branch flow (max 6). */
   customBranchChips: string[];
+  /** «Tu bosque, a salvo» (0.0.77): local-first means the forest lives and
+   *  dies with this device until the cloud arrives. One gentle opt-OUT
+   *  reminder line at most every ~30 days — never a nag, never counted. */
+  lastBackupAt: number | null;
+  lastBackupNudgeAt: number | null;
+  backupReminders: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -240,6 +246,9 @@ export const DEFAULT_SETTINGS: Settings = {
   lastWhisperAt: null,
   startersHidden: false,
   customBranchChips: [],
+  lastBackupAt: null,
+  lastBackupNudgeAt: null,
+  backupReminders: true,
 };
 
 /** Versioned backup file format. 'rodemap2u' = pre-rename id, import-only. */
