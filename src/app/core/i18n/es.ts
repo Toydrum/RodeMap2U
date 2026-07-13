@@ -152,6 +152,7 @@ export const ES = {
     title: 'El almanaque',
     subtitle: 'Los días de tu bosque, para mirar con calma lo que viene. Aquí nada apura.',
     settingsLink: 'El almanaque',
+    doorLabel: 'Almanaque',
     settingsHint: 'Tus días: lo que quiere florecer y lo que ya floreció',
     hint: 'Un almanaque de jardín: muestra lo que quiere florecer y lo que ya floreció. No agenda nada — solo te deja mirar.',
     todayIs: 'Hoy es {date}',

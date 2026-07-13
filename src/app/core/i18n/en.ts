@@ -150,6 +150,7 @@ export const EN: Dict = {
     title: 'The almanac',
     subtitle: "Your forest's days, to calmly look at what is coming. Nothing here hurries.",
     settingsLink: 'The almanac',
+    doorLabel: 'Almanac',
     settingsHint: 'Your days: what wants to bloom and what already did',
     hint: 'A garden almanac: it shows what wants to bloom and what already did. It schedules nothing — it just lets you look.',
     todayIs: 'Today is {date}',

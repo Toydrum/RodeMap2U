@@ -14,7 +14,7 @@
         class="btn btn-ghost almanac-btn"
         [attr.aria-label]="i18n.t().almanaque.title"
         [title]="i18n.t().almanaque.title"
-      >🌾</a>
+      >🌾 <span class="almanac-label">{{ i18n.t().almanaque.doorLabel }}</span></a>
       @if (trees.active().length) {
         <button
           type="button"
