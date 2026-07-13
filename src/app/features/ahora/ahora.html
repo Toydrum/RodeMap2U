@@ -164,11 +164,11 @@
 <!-- The first-pasito door: one compass question before a 2-minutitos on a
      bare goal — the answer sprouts and the session starts right on it. -->
 @if (firstPasitoAsk()) {
-  <div class="sheet-backdrop" (click)="firstPasitoGo(true)">
+  <div class="sheet-backdrop" (click)="firstPasitoCancel()">
     <form
       class="sheet card confirm"
       appSheet
-      (sheetClose)="firstPasitoGo(true)"
+      (sheetClose)="firstPasitoCancel()"
       (click)="$event.stopPropagation()"
       (submit)="$event.preventDefault(); firstPasitoGo(false)"
       role="dialog" aria-modal="true"

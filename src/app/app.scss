@@ -80,7 +80,7 @@ main {
   position: fixed;
   right: 0.9rem;
   bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 1500;
+  z-index: 400; /* above content + tab bar, BELOW every sheet/confirm (500+) */
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -138,6 +138,14 @@ export class AhoraPage {
     await this.focus.start(s.node.id, 2);
   }
 
+  /** Backdrop/Escape = changed my mind: close, plant nothing, START nothing.
+   *  Only the two explicit buttons commit («así nomás» skips the question but
+   *  still chose to begin) — dismissing a door must never start a session. */
+  protected firstPasitoCancel(): void {
+    this.firstPasitoAsk.set(false);
+    this.firstPasitoText.set('');
+  }
+
   protected async firstPasitoGo(skip: boolean): Promise<void> {
     const s = this.suggestion();
     this.firstPasitoAsk.set(false);

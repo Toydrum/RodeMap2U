@@ -103,7 +103,23 @@ export class BackupService {
     this.nodes.resetTo(nodes);
     this.checkins.resetTo(checkins);
     this.sessions.resetTo(sessions);
-    if (data.settings) await this.settings.patch(data.settings);
+    if (data.settings) {
+      // Preferences travel; DEVICE STATE does not (same law that keeps
+      // auth/sync out of the envelope): the whispers toggle is THIS
+      // device's permission gesture, and the backup/check-in/whisper
+      // timestamps belong to this device's clock — restoring a stale
+      // lastBackupAt would clobber the pre-import copy we JUST made and
+      // re-arm the 30-day nudge right after a restore.
+      const {
+        lastBackupAt: _a,
+        lastBackupNudgeAt: _b,
+        lastCheckInAt: _c,
+        lastWhisperAt: _d,
+        whispersEnabled: _e,
+        ...preferences
+      } = data.settings;
+      await this.settings.patch(preferences);
+    }
 
     // Other tabs re-read what the import replaced (same rail as every write);
     // ids no longer on disk get DROPPED from their memory by refreshFromDisk.

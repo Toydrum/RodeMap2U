@@ -121,18 +121,18 @@ describe('foliage', () => {
 
   it('leaves are deterministic and resting branches stay sparse', () => {
     const busy = geomFor([node('r', null), node('a', 'r')], 'a');
-    const one = leavesFor(busy.p, busy.parent, busy.geom, true, form);
-    const two = leavesFor(busy.p, busy.parent, busy.geom, true, form);
+    const one = leavesFor(busy.p, busy.parent, busy.geom, form);
+    const two = leavesFor(busy.p, busy.parent, busy.geom, form);
     expect(one).toEqual(two);
 
     const rest = geomFor([node('r', null), node('a', 'r', { status: 'resting' })], 'a');
-    const resting = leavesFor(rest.p, rest.parent, rest.geom, true, form);
+    const resting = leavesFor(rest.p, rest.parent, rest.geom, form);
     expect(resting.length).toBeLessThan(one.length);
   });
 
   it('an achieved branch opens its first slot as a blossom', () => {
     const done = geomFor([node('r', null), node('a', 'r', { status: 'achieved' })], 'a');
-    const leaves = leavesFor(done.p, done.parent, done.geom, true, form);
+    const leaves = leavesFor(done.p, done.parent, done.geom, form);
     expect(leaves[0].kind).toBe('blossom');
   });
 

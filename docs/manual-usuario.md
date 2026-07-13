@@ -181,6 +181,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 - **Estado** — tócalo para cambiarlo (semilla, creciendo, descansando, florecida).
 - **☀️ ¿Cuánta luz le toca?** *(solo en ramas vivas)* — la luz de una rama: **«A pleno sol»** es imposible de perder en el árbol: un **sol de verdad con rayos brilla detrás del nodo**, su capullo crece, su **nombre viaja sobre una pastilla dorada**, Ahora la tiene presente y su letrero en el prado gana un solecito. **«A su ritmo»** crece como todo el bosque. **«A la sombra»** lleva un **dosel de hojas** sobre el nodo y su nombre en **pastilla gris-verde** — sigue viva, solo cede el turno cuando la app susurra ideas (la sombra es un buen lugar, no un castigo). La luz **se queda hasta que tú la muevas** — a diferencia de tus ramas de hoy 🌅, que se sueltan solas mañana. En la **tablita** 📋 hay un solecito que activa **«Ver por luz»**: acomoda la lista por luz y te deja cambiar la de varias ramas de corrido — tu árbol no se mueve, es solo la lista.
 - **Fecha amable** *(opcional)* — una brújula, **no un contrato**. Puedes cambiarla o soltarla cuando quieras. Es solo el momento en el que te gustaría mirar esta rama de nuevo.
+- **▸ Más detalles**: la estimación de tamaño (🕐) y la ramita cuando-entonces (🧶) viven plegadas detrás de este botón — el botón muestra sus marcas cuando guardan algo.
 - **🧶 Ramita cuando-entonces** *(opcional)* — tu propio plan "cuando pase X, toco esta rama": *"Cuando me sirva el café de la mañana…"*. La app nunca lo interpreta ni lo agenda — solo te lo vuelve a mostrar en Ahora y en las tarjetitas del check-in, con tus palabras. Escribir el plan una vez es lo que hace la magia.
 - **Notas** — lo que quieras recordar. Las ramas que guardan una notita se marcan en el árbol con una **hojita de papel** 🍃: pasa el puntero por ella y una **cartita** te muestra la nota ahí mismo, sin abrir nada. Todas se pueden releer juntas en **"Tus huellas"** — tocando cualquiera vuelves directo a su rama.
 - **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
@@ -266,6 +267,8 @@ En la pestaña **Ajustes** puedes acomodar la app a tu sensorialidad. Arriba enc
 ## Enfoque
 
 - **Duración predeterminada** del temporizador.
+- **El puente dorado**: cuántos minutos antes del tiempo plantado el perico voltea y el anillo entibia (2 o 5) — una rampa de salida visual, jamás un sonido.
+- **🕐 Brújula del tiempo**: interruptor de la línea de curiosidad tras una sesión en una rama con tamaño estimado. Dato, jamás calificación — viene apagada.
 
 ## Susurros del bosque 🌬
 

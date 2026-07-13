@@ -244,7 +244,6 @@ export function leavesFor(
   point: LayoutPoint,
   start: { x: number; y: number },
   geometry: EdgeGeometry,
-  isTip: boolean,
   form: TreeForm,
 ): LeafDecoration[] {
   const status = point.node.status;

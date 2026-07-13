@@ -158,6 +158,8 @@ describe('getForest — permissions matrix', () => {
     expect(first.note).toBe('');
     expect(first.trigger).toBeNull();
     expect(first.targetDate).toBeNull();
+    expect(first.estimateMin ?? null).toBeNull(); // time guesses are intimate too (0.0.79)
+    expect(first.repeatsDaily ?? undefined).toBeUndefined();
     expect(first.priority).toBeNull(); // «la luz» is private — never travels to friends
   });
 

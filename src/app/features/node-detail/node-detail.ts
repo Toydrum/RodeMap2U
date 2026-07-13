@@ -64,7 +64,7 @@ export class NodeDetail {
       case 10080:
         return sizes.week1;
       default:
-        return minutes + ' min';
+        return minutes + ' ' + sizes.min;
     }
   }
   /** Sessions are the visitor's own — never offered inside someone else's forest. */
@@ -79,6 +79,14 @@ export class NodeDetail {
   protected readonly confirmingRevert = signal(false);
   /** «Más detalles» fold — estimate + trigger live behind it. */
   protected readonly moreOpen = signal(false);
+
+  /** The estimate editor only lives on live branches — the collapsed 🕐
+   *  mark must promise exactly what expanding reveals (a stale estimate on
+   *  an achieved/resting branch persists silently, but never advertises). */
+  protected readonly estimateEditable = computed(() => {
+    const status = this.node().status;
+    return status === 'seed' || status === 'growing';
+  });
 
   /** Every branch that would rest along with this one (self excluded). */
   protected readonly descendantCount = computed(() => {

@@ -83,11 +83,7 @@
       }
     }
 
-    &.selected {
-      border-color: var(--primary);
-      color: var(--text);
-      background: color-mix(in srgb, var(--primary) 12%, var(--surface));
-    }
+    /* .selected comes from the GLOBAL chip law (styles.scss) — never redeclare. */
   }
 }
 

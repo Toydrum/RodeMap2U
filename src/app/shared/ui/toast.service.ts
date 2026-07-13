@@ -6,6 +6,9 @@ export interface Toast {
   action?: () => void;
   /** Never auto-expires (the SW update offer). Everything else breathes out. */
   sticky?: boolean;
+  /** A gentle offer (the backup nudge): steps aside for ANY newcomer and
+   *  rejoins the back of the line — its action never blocks an Undo. */
+  yields?: boolean;
 }
 
 /** Undo offers stay long enough to not race anyone; then the commit stands. */
@@ -30,6 +33,12 @@ export class ToastService {
     if (cur?.sticky && !toast.sticky) {
       // The sticky offer yields but never dies — front of the line.
       this.queue.unshift({ toast: cur, durationMs: 0 });
+      this.display(toast, durationMs);
+      return;
+    }
+    if (cur?.yields && !toast.sticky) {
+      // A gentle offer steps aside and rejoins the back of the line.
+      this.queue.push({ toast: cur, durationMs: 0 });
       this.display(toast, durationMs);
       return;
     }

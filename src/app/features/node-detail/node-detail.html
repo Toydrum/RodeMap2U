@@ -104,9 +104,9 @@
       [attr.aria-expanded]="moreOpen()"
     >
       {{ moreOpen() ? '▾' : '▸' }} {{ i18n.t().node.moreDetails }}
-      @if (!moreOpen() && (node().estimateMin || node().trigger)) {
+      @if (!moreOpen() && ((node().estimateMin && estimateEditable()) || node().trigger)) {
         <span class="more-marks">
-          @if (node().estimateMin) { <span>🕐</span> }
+          @if (node().estimateMin && estimateEditable()) { <span>🕐</span> }
           @if (node().trigger) { <span>🧶</span> }
         </span>
       }
@@ -114,7 +114,7 @@
     @if (moreOpen()) {
       <!-- «Brújula del tiempo»: the user's own size guess — optional, with
            «ni idea» as a first-class answer. Dato, no calificación. -->
-      @if (node().status === 'seed' || node().status === 'growing') {
+      @if (estimateEditable()) {
         <div class="field">
           <label>🕐 {{ i18n.t().node.estimateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
           <div class="status-row" role="group" [attr.aria-label]="i18n.t().node.estimateLabel">

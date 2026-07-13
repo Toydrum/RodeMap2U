@@ -46,7 +46,7 @@ await page.evaluate(async () => {
   const old = Date.now() - 31 * 24 * 60 * 60 * 1000;
   await age('trees', (os, rows) => rows.forEach((r) => { r.createdAt = old; os.put(r); }));
   await age('meta', (os, rows) => rows.forEach((r) => {
-    if (r.key === 'settings') { r.value.lastBackupAt = null; r.value.lastBackupNudgeAt = null; os.put(r); }
+    if (r.key === 'settings') { r.value.lastBackupAt = null; r.value.lastBackupNudgeAt = old; os.put(r); }
   }));
   db.close();
 });
@@ -54,6 +54,43 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(9500); // BOOT_DELAY_MS + margin
 const toastText = (await page.locator('.toast').textContent().catch(() => '')) ?? '';
 ok('D gentle offer', toastText.includes('copia de tu bosque'), `"${toastText.trim().slice(0, 60)}"`);
+await page.locator('.toast .btn-ghost').click().catch(() => {});
+
+// E — 0.0.79 arm-first: with NO stamps at all (a synced-in or pre-0.0.77
+// forest), the first evaluation arms the 30-day clock SILENTLY — no toast,
+// stamp written.
+await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  await new Promise((res, rej) => {
+    const tx = db.transaction('meta', 'readwrite');
+    const os = tx.objectStore('meta');
+    const all = os.getAll();
+    all.onsuccess = () => {
+      for (const r of all.result) {
+        if (r.key === 'settings') { r.value.lastBackupAt = null; r.value.lastBackupNudgeAt = null; os.put(r); }
+      }
+      tx.oncomplete = () => res();
+    };
+    all.onerror = rej;
+  });
+  db.close();
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(9500);
+const quiet = ((await page.locator('.toast').textContent().catch(() => '')) ?? '').includes('copia de tu bosque');
+const armed = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const row = await new Promise((res, rej) => {
+    const rq = db.transaction('meta').objectStore('meta').get('settings');
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = rej;
+  });
+  db.close();
+  return typeof row?.value?.lastBackupNudgeAt === 'number';
+});
+ok('E arm-first is silent', !quiet && armed, `toast=${quiet} armed=${armed}`);
 
 console.log(`SUMMARY backup: ${anyFailed() ? 'OK=false' : 'ALL OK'}`);
 await browser.close();

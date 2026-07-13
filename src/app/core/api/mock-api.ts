@@ -528,7 +528,7 @@ export class MockApi implements ApiClient {
       .map((r) => r.record as TreeNode)
       .filter((n) => !n.deletedAt && !n.archivedAt && liveTreeIds.has(n.treeId))
       .map((n) =>
-        detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null, priority: null },
+        detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null, priority: null, estimateMin: null, repeatsDaily: undefined },
       );
 
     return {

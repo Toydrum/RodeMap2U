@@ -19,7 +19,6 @@ import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
 import { PerchBody } from '../../shared/ui/perch-body';
 import {
-  EdgeGeometry,
   LEVEL_H,
   LayoutPoint,
   branchRibbon,
@@ -230,7 +229,7 @@ export class TreeCanvas {
           d: branchRibbon(plan.start, p, plan.geom, plan.w0, plan.w1),
           fill: woodFill(p, this.wood()),
           isNew: this.bornThisSession.has(p.node.id),
-          leaves: leavesFor(p, plan.start, plan.geom, plan.isLeaf, this.form()),
+          leaves: leavesFor(p, plan.start, plan.geom, this.form()),
           pads: padsFor(p, plan.start, plan.geom, plan.isLeaf, this.form()),
           grain: plan.geom.d,
           grainWidth: Math.max(1.1, plan.w1 * 0.35),

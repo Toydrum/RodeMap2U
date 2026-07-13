@@ -1,5 +1,6 @@
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import { NodesRepo } from './repos/nodes.repo';
+import { TreesRepo } from './repos/trees.repo';
 import { stamp } from './db/schema';
 import { today } from './time';
 
@@ -20,6 +21,7 @@ function dayOf(epochMs: number): string {
 @Injectable({ providedIn: 'root' })
 export class DailyPathsService {
   private readonly nodes = inject(NodesRepo);
+  private readonly trees = inject(TreesRepo);
 
   constructor() {
     effect(() => {
@@ -29,9 +31,17 @@ export class DailyPathsService {
   }
 
   private async sweep(day: string): Promise<void> {
+    // nodes.visible() only knows node-level archives — archiving a TREE
+    // doesn't cascade, so without this set the sweep kept resetting paths
+    // inside archived trees forever (invisible writes + sync churn, and a
+    // restored tree found yesterday's progress silently erased).
+    const liveTrees = new Set(this.trees.active().map((t) => t.id));
     const parents = this.nodes
       .visible()
-      .filter((n) => n.repeatsDaily && n.flow === 'steps' && n.status !== 'branched');
+      .filter(
+        (n) =>
+          n.repeatsDaily && n.flow === 'steps' && n.status !== 'branched' && liveTrees.has(n.treeId),
+      );
     if (!parents.length) return;
     const now = Date.now();
     const resets = [];
