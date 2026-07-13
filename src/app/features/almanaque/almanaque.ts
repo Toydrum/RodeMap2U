@@ -251,6 +251,9 @@ export class AlmanaquePage {
     return m.capullos.some((c) => c.passed);
   }
 
+  /** A steady species for the legend art (moss classic — deterministic). */
+  protected readonly legendSpec: FlowerSpec = flowerFor('moss');
+
   private readonly specCache = new Map<string, FlowerSpec>();
 
   protected specOf(tree: Tree): FlowerSpec {
