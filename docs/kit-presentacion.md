@@ -50,3 +50,12 @@ RoadMap2U es una app donde las metas crecen como árboles. No es una lista de ta
 # Dónde está
 
 `https://toydrum.github.io/RoadMap2U/` — se puede instalar como app (Agregar a pantalla de inicio) y funciona sin conexión. La guía completa vive dentro de la app («Cómo usar la app», en Ajustes).
+
+## El almanaque en sesión y en casa 🌾
+
+El almanaque es la lente de tiempo del bosque: los días como parcelitas, con capullos (lo que quiere florecer), flores (lo que floreció) y nudos dorados (donde brotaron caminos nuevos). Nació de dos pedidos reales: una persona autista adulta y esta consulta clínica.
+
+- **Preparar transiciones (TEACCH)**: mirar el almanaque JUNTOS la noche anterior — «mira, mañana tiene un capullo» — convierte el mañana en algo visible en lugar de una emboscada. La app pone la superficie; el acompañante pone el aviso. Por diseño, la app nunca avisa sola: cero alarmas, cero notificaciones de fechas.
+- **«El caminito de hoy»**: los senderos diarios (rutinas como lavarse los dientes o la mochila) aparecen como piedritas de izquierda a derecha — el horario visual clásico. La piedra «siguiente» responde el ¿qué sigue? sin palabras; tocarla la hace florecer. Truco para pre-lectores: poner un emoji al inicio del título del paso («🦷 Lavarme los dientes») lo vuelve pictograma — elegirlos juntos es parte de la apropiación.
+- **Sin vergüenza estructural**: el caminito no muestra fracciones ni porcentajes, las piedras no se apagan al avanzar la tarde, y lo no caminado amanece limpio — no existe «ayer hiciste 2 de 5» en ningún lado. En el mes, los días vacíos se llaman barbecho, y una fecha pasada lleva solo una hojita 🍂 suave que abre una conversación, jamás un tache.
+

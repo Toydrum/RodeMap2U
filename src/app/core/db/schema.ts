@@ -137,6 +137,15 @@ export interface TreeNode extends SyncBase {
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
 export type Feeling = 'sunny' | 'calm' | 'foggy' | 'heavy' | 'stormy';
 
+/** The one weather-emoji vocabulary (trail, almanaque — never re-copied). */
+export const FEELING_EMOJI: Record<Feeling, string> = {
+  sunny: '☀️',
+  calm: '🌤',
+  foggy: '🌫',
+  heavy: '🌧',
+  stormy: '⛈',
+};
+
 export interface CheckIn extends SyncBase {
   feeling: Feeling;
   note: string;

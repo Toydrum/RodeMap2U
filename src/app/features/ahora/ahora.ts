@@ -11,7 +11,7 @@ import { SettingsService } from '../../core/repos/settings.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { TreeNode } from '../../core/db/schema';
-import { daysFromToday, today } from '../../core/time';
+import { dayOf, daysFromToday, today } from '../../core/time';
 import { MiniTree } from '../forest/mini-tree';
 import { DateReview } from '../check-in/date-review';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -82,8 +82,7 @@ export class AhoraPage {
   private readonly todayEnergy = computed(() => {
     const latest = this.checkins.latest();
     if (!latest || !latest.energy) return null;
-    const day = new Date(latest.createdAt);
-    return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}` === today()
+    return dayOf(latest.createdAt) === today()
       ? latest.energy
       : null;
   });
@@ -289,7 +288,7 @@ export class AhoraPage {
   protected threadLine(t: ThreadContext): string {
     const dict = this.i18n.t().ahora;
     const at = new Date(t.at);
-    const dateKey = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}`;
+    const dateKey = dayOf(t.at);
     const days = daysFromToday(dateKey);
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
     const date = at.toLocaleDateString(locale, { day: 'numeric', month: 'long' });

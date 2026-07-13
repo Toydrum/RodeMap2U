@@ -31,6 +31,13 @@ export function today(): string {
   return todayState();
 }
 
+/** Local day ('YYYY-MM-DD') of an epoch-ms stamp — the ONE conversion
+ *  (it used to be hand-copied in daily-paths, ahora and now almanac). */
+export function dayOf(epochMs: number): string {
+  const d = new Date(epochMs);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 /** True when the date-only string is strictly before local today. */
 export function isPast(date: string): boolean {
   return date < today();

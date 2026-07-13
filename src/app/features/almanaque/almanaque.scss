@@ -1,0 +1,395 @@
+.almanaque {
+  padding-bottom: 2rem;
+}
+
+.top {
+  padding-top: 0.6rem;
+}
+
+.hero {
+  margin: 0.4rem 0 0.8rem;
+
+  h1 {
+    margin: 0 0 0.2rem;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-dim);
+  }
+}
+
+.part {
+  margin-top: 1.4rem;
+}
+
+.part-title {
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.tree-name {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+/* ------------------------------------------------------------- Hoy -- */
+
+.alm-review {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 0.6rem 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--status-branched) 9%, var(--surface));
+  cursor: pointer;
+}
+
+.caminito {
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.6rem;
+
+  .caminito-name {
+    background: none;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    margin-bottom: 0.55rem;
+  }
+}
+
+/* The stone path: left → right, joined by a dirt gap. Stones never dim
+   with the hour and never show fractions — TEACCH without the scorecard. */
+.stones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
+.alm-stone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 46% 54% 52% 48% / 58% 46% 54% 42%;
+  background: color-mix(in srgb, var(--rm-bark) 14%, var(--surface-2));
+  border: 1.5px solid var(--border);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  &.bloomed {
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface-2));
+  }
+
+  &.next {
+    cursor: pointer;
+    padding: 0.3rem 0.7rem;
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    flex-direction: column;
+    gap: 0.1rem;
+
+    .stone-title {
+      font-weight: 600;
+      font-size: 0.88rem;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .next-tag {
+      font-size: 0.68rem;
+      text-transform: lowercase;
+      color: var(--primary);
+      font-weight: 700;
+    }
+  }
+
+  &.quiet .stone-num {
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+}
+
+.stone-gap {
+  width: 14px;
+  height: 3px;
+  margin: 0 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--rm-bark) 32%, transparent);
+}
+
+.today-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.alm-upcoming {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.upcoming-row,
+.day-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  .bud {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.alm-quiet {
+  margin-top: 0.8rem;
+}
+
+/* ------------------------------------------------------------- Mes -- */
+
+.month-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+
+  h2 {
+    margin: 0;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 0.6rem 0 0.25rem;
+
+  span {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+/* Soil plots: the empty day is meadow at rest — never a blank in a
+   scorecard. Wobble comes from hash(date): same day, same shape, forever. */
+.alm-cell {
+  position: relative;
+  aspect-ratio: 1 / 1.06;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--rm-grass, #9db98a) 10%, var(--surface));
+  cursor: pointer;
+  padding: 2px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .daynum {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.past {
+    background: color-mix(in srgb, var(--rm-grass, #9db98a) 17%, var(--surface));
+  }
+
+  &.out {
+    opacity: 0.38;
+  }
+
+  &:hover {
+    border-color: var(--primary);
+  }
+
+  /* Today: where you stand — green, «estás aquí» (gold stays the knot's). */
+  &.alm-today {
+    border: 2px solid var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+
+    .daynum {
+      color: var(--primary);
+      font-weight: 700;
+    }
+  }
+
+  .hoy-pill {
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: lowercase;
+  }
+
+  .glyphs {
+    width: 100%;
+    height: 18px;
+    margin-top: auto;
+  }
+
+  .leaf-mark {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    font-size: 0.66rem;
+  }
+
+  .paw-mark {
+    position: absolute;
+    left: 3px;
+    bottom: 2px;
+    font-size: 0.56rem;
+    opacity: 0.7;
+  }
+
+  .more-chip {
+    position: absolute;
+    right: 3px;
+    top: 16px;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+  }
+}
+
+.knot-ring {
+  fill: none;
+  stroke: var(--status-branched);
+  stroke-width: 1.6;
+}
+
+.knot-core {
+  fill: var(--status-branched);
+}
+
+/* ---------------------------------------------------- day page sheet -- */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(20, 26, 18, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  width: min(600px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 0.7rem 1.4rem calc(1.4rem + env(safe-area-inset-bottom));
+  animation: sheet-up 0.28s ease both;
+
+  h2 {
+    margin: 0.4rem 0 0.6rem;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  h3 {
+    font-size: 0.95rem;
+    margin: 0.9rem 0 0.4rem;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+
+.grabber {
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  margin: 0 auto;
+}
+
+.day-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  .row-text {
+    display: flex;
+    flex-direction: column;
+
+    .tree-name {
+      font-size: 0.78rem;
+    }
+
+    .passed-line {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 0.15rem;
+    }
+  }
+
+  .footprint-row {
+    padding: 0.35rem 0.2rem;
+
+    .fp-note {
+      display: block;
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 0.86rem;
+    }
+  }
+}
+
+.close-day {
+  margin-top: 1rem;
+}

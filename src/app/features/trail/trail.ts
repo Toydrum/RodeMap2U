@@ -6,15 +6,7 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
-import { CheckIn, Feeling, TreeNode } from '../../core/db/schema';
-
-const FEELING_EMOJI: Record<Feeling, string> = {
-  sunny: '☀️',
-  calm: '🌤',
-  foggy: '🌫',
-  heavy: '🌧',
-  stormy: '⛈',
-};
+import { CheckIn, FEELING_EMOJI, TreeNode } from '../../core/db/schema';
 
 interface Footprint {
   checkIn: CheckIn;

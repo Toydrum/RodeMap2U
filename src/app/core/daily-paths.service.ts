@@ -2,13 +2,7 @@ import { Injectable, effect, inject, untracked } from '@angular/core';
 import { NodesRepo } from './repos/nodes.repo';
 import { TreesRepo } from './repos/trees.repo';
 import { stamp } from './db/schema';
-import { today } from './time';
-
-/** Local day (YYYY-MM-DD) of an epoch-ms stamp. */
-function dayOf(epochMs: number): string {
-  const d = new Date(epochMs);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { dayOf, today } from './time';
 
 /**
  * «Senderos» — daily repeating step paths. A steps parent marked

@@ -121,5 +121,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/trail/trail').then((m) => m.TrailPage),
     title: 'RoadMap2U — Huellas',
   },
+  {
+    path: 'almanaque',
+    canActivate: [authRequiredGate],
+    loadComponent: () => import('./features/almanaque/almanaque').then((m) => m.AlmanaquePage),
+    title: 'RoadMap2U — Almanaque',
+  },
   { path: '**', redirectTo: 'ahora' },
 ];
