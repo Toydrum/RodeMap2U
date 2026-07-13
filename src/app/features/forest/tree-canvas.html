@@ -408,8 +408,7 @@
     [style.top.px]="pp.y"
     [attr.aria-label]="i18n.t().timer.title"
   >
-    <app-companion-bird [state]="perchBirdState()" [seed]="focus.active()!.sessionId" />
-    <span class="perch-time" role="timer">{{ focus.display() }}</span>
+    <app-perch-body />
   </a>
 }
 

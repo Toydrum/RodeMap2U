@@ -12,11 +12,11 @@ import { DailyPathsService } from './core/daily-paths.service';
 import { BackupReminderService } from './core/backup-reminder.service';
 import { PerchAnchorService } from './core/perch-anchor.service';
 import { ToastService } from './shared/ui/toast.service';
-import { CompanionBird } from './features/timer/companion-bird';
+import { PerchBody } from './shared/ui/perch-body';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CompanionBird],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PerchBody],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -49,8 +49,6 @@ export class App {
     return !url.startsWith('/timer') && !url.startsWith('/ahora');
   });
 
-  /** The ONE shared pose (bridge window included) lives on the service. */
-  protected readonly birdState = this.focus.birdState;
 
   constructor() {
     inject(ThemeService); // instantiates the <html> attribute effects

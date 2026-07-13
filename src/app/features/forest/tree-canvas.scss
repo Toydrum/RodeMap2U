@@ -277,20 +277,7 @@
   text-decoration: none;
   animation: letter-open 0.18s ease both;
 
-  app-companion-bird {
-    width: 32px;
-  }
-
-  .perch-time {
-    font-size: 0.72rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-dim);
-    background: color-mix(in srgb, var(--surface) 82%, transparent);
-    border-radius: 999px;
-    padding: 0.05rem 0.4rem;
-    margin-bottom: 4px;
-  }
+  /* Bird + time chip live in app-perch-body. */
 }
 
 :host-context(.reduce-motion) .session-perch.on-branch {

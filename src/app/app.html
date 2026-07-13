@@ -46,11 +46,7 @@
 
 @if (showPerch()) {
   <a class="session-perch card" routerLink="/timer" [attr.aria-label]="i18n.t().timer.title">
-    <app-companion-bird [state]="birdState()" [seed]="focus.active()!.sessionId" />
-    <svg class="twig" viewBox="0 0 34 6" aria-hidden="true">
-      <path d="M 1 3 Q 17 1 33 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
-    </svg>
-    <span class="perch-time" role="timer">{{ focus.display() }}</span>
+    <app-perch-body [twig]="true" />
   </a>
 }
 

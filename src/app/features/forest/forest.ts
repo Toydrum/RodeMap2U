@@ -1,4 +1,21 @@
 import { Component, DestroyRef, ElementRef, computed, effect, inject, signal } from '@angular/core';
+import { FinderSheet } from './finder-sheet';
+import {
+  CATTAILS,
+  CLOVERS,
+  BUSHES,
+  DAISIES,
+  GRASS,
+  PETAL_ANGLES,
+  RICH_TUFTS,
+  RIPPLE_1,
+  RIPPLE_2,
+  SPIKES,
+  STONES,
+  STREAM_PATH,
+  SUN_PATCHES,
+  SceneFlower,
+} from './meadow-scenery';
 import { inputValue } from '../../shared/ui/dom';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { HintChip } from '../../shared/ui/hint-chip';
@@ -10,7 +27,7 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
-import { hash, taperedRibbon } from './tree-layout';
+import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
@@ -19,51 +36,9 @@ import { FlowerSpec, flowerFor } from './flora';
 import { FlowerGlyph } from './flower';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
-import { CompanionBird } from '../timer/companion-bird';
-import { FinderHit, findMatches } from './finder';
+import { PerchBody } from '../../shared/ui/perch-body';
 
 const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand', 'rose', 'pine'];
-
-interface SceneFlower {
-  x: number;
-  y: number;
-  scale: number;
-  spec: FlowerSpec;
-  sway: number;
-}
-
-interface GrassTuft {
-  x: number;
-  y: number;
-  s: number;
-  rot: number;
-  variant: number;
-  shade: number;
-  flip: boolean;
-}
-
-interface MeadowDecor {
-  x: number;
-  y: number;
-  s: number;
-  flip: boolean;
-}
-
-/** Fixed-seed scatter helper — same meadow every session, forever.
- *  Items deeper in the band (higher y) grow larger: cheap depth. */
-function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin: number, ySpan: number): MeadowDecor[] {
-  return Array.from({ length: count }, (_, i) => {
-    const h = hash(kind + ':' + i);
-    const y = yMin + ((h >> 6) % ySpan);
-    const depth = 0.62 + ((y - yMin) / ySpan) * 0.45;
-    return {
-      x: xMin + (h % xSpan),
-      y,
-      s: (0.7 + ((h >> 3) % 55) / 100) * depth,
-      flip: h % 2 === 0,
-    };
-  });
-}
 
 /**
  * "El Prado" — the forest home as a living scene. Every tree is a real
@@ -72,7 +47,7 @@ function scatter(kind: string, count: number, xMin: number, xSpan: number, yMin:
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, CompanionBird, HintChip, ConfirmSheet],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -200,34 +175,10 @@ export class ForestPage {
   /** Crown top-center in `.plots`-band coordinates; null → corner fallback. */
   protected readonly crownPerchPos = signal<{ x: number; y: number } | null>(null);
 
-  protected readonly perchBirdState = this.focus.birdState;
 
   /* ----------------------------------------- «buscar una rama» (finder) */
 
   protected readonly finderOpen = signal(false);
-  protected readonly finderQuery = signal('');
-
-  protected readonly finderHits = computed<FinderHit[]>(() =>
-    findMatches(this.finderQuery(), this.trees.active(), (treeId) =>
-      this.nodes.byTree().get(treeId) ?? [],
-    ),
-  );
-
-  protected closeFinder(): void {
-    this.finderOpen.set(false);
-    this.finderQuery.set('');
-  }
-
-  /** Tree hit → open it; branch hit → open its tree LOCATING the branch
-   *  (?locate= pans the canvas without opening any sheet). */
-  protected goHit(hit: FinderHit): void {
-    this.closeFinder();
-    void this.router.navigate(
-      ['/tree', hit.treeId],
-      hit.nodeId ? { queryParams: { locate: hit.nodeId } } : {},
-    );
-  }
-
   /** `?mood=` dev/demo override, else the latest check-in's feeling. */
   private readonly moodOverride = new URLSearchParams(location.search).get('mood') as Feeling | null;
   protected readonly mood = computed<Feeling | null>(
@@ -237,9 +188,9 @@ export class ForestPage {
   /** The stream flows once the forest has three trees (winding ribbon + ripples). */
   protected readonly hasStream = computed(() => this.trees.active().length >= 3);
 
-  protected readonly streamPath = taperedRibbon(1060, 96, 700, 168, 400, 76, -60, 208, 22, 46);
-  protected readonly ripple1 = 'M 1040 104 C 720 170, 430 92, -40 202';
-  protected readonly ripple2 = 'M 1045 118 C 735 185, 445 110, -45 218';
+  protected readonly streamPath = STREAM_PATH;
+  protected readonly ripple1 = RIPPLE_1;
+  protected readonly ripple2 = RIPPLE_2;
 
   /** One meadow flower per achieved goal — each in ITS tree's species. */
   protected readonly flowers = computed<SceneFlower[]>(() => {
@@ -257,65 +208,19 @@ export class ForestPage {
     });
   });
 
-  /** Grass grows in overlapping patches of varied tufts — that's the trick
-   *  that reads as real grass instead of repeated stamps. Fixed-seed. */
-  protected readonly grass: GrassTuft[] = (() => {
-    const out: GrassTuft[] = [];
-    const tuft = (key: string, x: number, y: number, sBase: number): GrassTuft => {
-      const h = hash(key);
-      return {
-        x,
-        y,
-        s: sBase * (0.75 + ((h >> 9) % 55) / 100),
-        rot: -9 + ((h >> 4) % 19),
-        variant: h % 5,
-        shade: (h >> 7) % 3,
-        flip: (h >> 2) % 2 === 0,
-      };
-    };
-    // 12 dense patches: 3-6 tufts crowding one another
-    for (let p = 0; p < 12; p++) {
-      const hp = hash('patch:' + p);
-      const cx = 40 + (hp % 920);
-      const cy = 210 + ((hp >> 6) % 44);
-      const members = 3 + (hp % 4);
-      for (let m = 0; m < members; m++) {
-        const hm = hash('patch:' + p + ':' + m);
-        out.push(tuft('pt:' + p + ':' + m, cx - 26 + (hm % 53), cy - 7 + ((hm >> 5) % 15), 1));
-      }
-    }
-    // plus lone wanderers between the patches
-    for (let i = 0; i < 12; i++) {
-      const h = hash('lone:' + i);
-      out.push(tuft('lt:' + i, 15 + (h % 970), 206 + ((h >> 6) % 50), 0.85));
-    }
-    return out.sort((a, b) => a.y - b.y);
-  })();
+  /* Static scenery lives in meadow-scenery.ts (pure, fixed-seed). */
+  protected readonly grass = GRASS;
+  protected readonly sunPatches = SUN_PATCHES;
+  protected readonly bushes = BUSHES;
+  protected readonly richTufts = RICH_TUFTS;
+  protected readonly spikes = SPIKES;
+  protected readonly daisies = DAISIES;
+  protected readonly clovers = CLOVERS;
+  protected readonly cattails = CATTAILS;
+  protected readonly stones = STONES;
 
-  /* Meadow texture — all fixed-seed, never reshuffles (references: tall
-     silhouette tufts + seed-head spikes, shrubs, daisies, dappled light). */
-  protected readonly sunPatches = scatter('sunpatch', 4, 80, 820, 158, 66);
-  protected readonly bushes = scatter('bush', 9, 160, 800, 198, 42);
-  protected readonly richTufts = scatter('rich', 26, 10, 960, 198, 56);
-  protected readonly spikes = scatter('spike', 20, 20, 950, 198, 56);
-  protected readonly daisies = scatter('daisy', 14, 170, 790, 200, 52);
-  protected readonly clovers = scatter('clover', 18, 175, 790, 206, 48);
-  /** Hand-placed by the stream banks (only shown once the stream flows). */
-  protected readonly cattails: MeadowDecor[] = [
-    { x: 655, y: 152, s: 1, flip: false },
-    { x: 268, y: 146, s: 0.85, flip: true },
-    { x: 762, y: 150, s: 0.75, flip: true },
-    { x: 398, y: 138, s: 0.65, flip: false },
-  ];
-  protected readonly stones: MeadowDecor[] = [
-    { x: 868, y: 144, s: 1, flip: false },
-    { x: 505, y: 146, s: 0.75, flip: true },
-    { x: 122, y: 194, s: 0.9, flip: false },
-    { x: 700, y: 150, s: 0.55, flip: false },
-    { x: 232, y: 186, s: 0.65, flip: true },
-  ];
+  protected readonly petalAngles = PETAL_ANGLES;
 
-  protected readonly petalAngles = [0, 72, 144, 216, 288];
 
   /* -------------------------------------------- arrange your own forest */
 

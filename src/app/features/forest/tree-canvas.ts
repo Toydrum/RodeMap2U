@@ -17,22 +17,29 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
-import { CompanionBird } from '../timer/companion-bird';
+import { PerchBody } from '../../shared/ui/perch-body';
 import {
   EdgeGeometry,
   LEVEL_H,
   LayoutPoint,
   branchRibbon,
-  edgeGeometry,
-  edgePointAt,
   hash,
   layoutTree,
-  ribbonWidthAt,
-  taperedRibbon,
-  widthForMass,
 } from './tree-layout';
 import { FlowerSpec, flowerFor } from './flora';
 import { TreeForm, formFor } from './tree-forms';
+import {
+  LeafDecoration,
+  LimbPlan,
+  PadDecoration,
+  groundDecorFor,
+  leavesFor,
+  padsFor,
+  planLimbs,
+  trunkPath,
+  woodFill,
+  woodFor,
+} from './tree-silhouette';
 import { FlowerGlyph } from './flower';
 import {
   CHAR_W,
@@ -43,27 +50,6 @@ import {
   packLabels,
   wrapTitle,
 } from './tree-labels';
-
-interface LeafDecoration {
-  x: number;
-  y: number;
-  angle: number;
-  size: number;
-  kind: 'leaf' | 'blossom';
-  /** Shape family (almond / willow / round / asymmetric). */
-  variant: number;
-  /** Green shade (base / deep / warm) — overlap reads as real foliage. */
-  shade: number;
-}
-
-interface PadDecoration {
-  x: number;
-  y: number;
-  rx: number;
-  ry: number;
-  rot: number;
-  shade: number;
-}
 
 interface EdgeView {
   id: string;
@@ -79,15 +65,7 @@ interface EdgeView {
   grainOffset: number;
 }
 
-/** How one limb is drawn: where it starts (the parent point, or an anchor
- *  along the leader limb for side forks), its curve, and its wood widths. */
-interface LimbPlan {
-  start: { x: number; y: number };
-  geom: EdgeGeometry;
-  w0: number;
-  w1: number;
-  isLeaf: boolean;
-}
+
 
 /**
  * The living map: an SVG tree that actually looks like one — thick tapering
@@ -98,7 +76,7 @@ interface LimbPlan {
  */
 @Component({
   selector: 'app-tree-canvas',
-  imports: [FlowerGlyph, CompanionBird, RouterLink],
+  imports: [FlowerGlyph, PerchBody, RouterLink],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
   // Closes the little note letter when tapping anywhere else (never preventDefault).
@@ -166,7 +144,6 @@ export class TreeCanvas {
     return { x: this.tx() + p.x * this.k(), y: this.ty() + p.y * this.k() };
   });
 
-  protected readonly perchBirdState = this.focus.birdState;
 
   /** Mouse hovers; touch taps to toggle (hover events fight the tap there). */
   protected onMarkEnter(ev: PointerEvent, point: LayoutPoint): void {
@@ -226,163 +203,22 @@ export class TreeCanvas {
     return Math.max(...roots.map((r) => r.y)) + 64;
   });
 
-  /** World-space life around the base: grass clusters + a few flowers. */
-  protected readonly groundDecor = computed(() => {
-    const layout = this.layout();
-    const tree = this.tree();
-    if (!layout.points.length) return { grass: [], flowers: [] };
-    const centerX = layout.minX + layout.width / 2;
-    const spread = Math.max(240, layout.width * 0.9);
-    const gy = this.groundY();
+  /** World-space life around the base (pure: tree-silhouette.ts). */
+  protected readonly groundDecor = computed(() =>
+    groundDecorFor(this.layout(), this.tree().id, this.groundY()),
+  );
 
-    const grass = Array.from({ length: 7 }, (_, i) => {
-      const h = hash(tree.id + ':g' + i);
-      return {
-        x: centerX - spread + ((h % 1000) / 1000) * spread * 2,
-        y: gy - 8 + ((h >> 8) % 14),
-        flip: h % 2 === 0,
-      };
-    });
-
-    const flowers = Array.from({ length: 3 }, (_, i) => {
-      const h = hash(tree.id + ':f' + i);
-      return {
-        x: centerX - spread * 0.9 + ((h % 1000) / 1000) * spread * 1.8,
-        y: gy - 4 + ((h >> 6) % 10),
-        scale: 0.32 + ((h >> 4) % 14) / 100,
-        sway: -10 + (h % 21),
-      };
-    });
-
-    return { grass, flowers };
-  });
-
-  /** The silhouette brain: how every limb is drawn. Per parent, the child
-   *  carrying the most leaf-mass is the LEADER — its edge continues the
-   *  trunk line (calm bow, opposite hand, full width); the other children
-   *  fork off the leader limb at staggered heights (their wood starts at an
-   *  anchor along it, node positions untouched). Chains keep their classic
-   *  vertical treatment — they already ARE a continuation. */
-  private readonly limbPlan = computed<Map<string, LimbPlan>>(() => {
-    const plan = new Map<string, LimbPlan>();
-    const wood = this.wood();
-    const f = this.form();
-    const girth = wood.girth * f.girthMul;
-    const width = (p: LayoutPoint) => widthForMass(p.mass ?? 1, girth);
-    const tip = (p: LayoutPoint) => this.nodes.childrenOf(p.node).length === 0 && !p.chainNextId;
-
-    const byParent = new Map<string, LayoutPoint[]>();
-    for (const p of this.layout().points) {
-      if (!p.parent) continue;
-      const list = byParent.get(p.parent.node.id) ?? [];
-      list.push(p);
-      byParent.set(p.parent.node.id, list);
-    }
-
-    for (const children of byParent.values()) {
-      const parent = children[0].parent!;
-      const normal = children.filter((c) => !c.chain);
-
-      // Chain links: exactly the classic path — vertical, no leader math.
-      for (const c of children.filter((x) => x.chain)) {
-        const geom = edgeGeometry(parent, c, wood.bow);
-        plan.set(c.node.id, {
-          start: parent,
-          geom,
-          w0: width(parent) * 0.9,
-          w1: Math.max(2.4, width(c) * (tip(c) ? 0.45 : 0.95)),
-          isLeaf: tip(c),
-        });
-      }
-      if (!normal.length) continue;
-
-      // LEADER choice (0.0.62 — the left-lean fix). Mass still carries the
-      // trunk when a subtree is CLEARLY heavier (>15% over every rival — the
-      // da Vinci story stands). Near-ties go to the most CENTRAL child, so
-      // the trunk continues UPWARD instead of diving into the leftmost slot
-      // (the old `>` on tied masses always kept normal[0] — every fresh fork
-      // leaned left, every tree repeated one silhouette). Exact central ties
-      // break by per-tree hash: same structure, different tree, different —
-      // but equally plausible — leader.
-      const maxMass = Math.max(...normal.map((c) => c.mass ?? 1));
-      const contenders = normal.filter((c) => (c.mass ?? 1) >= maxMass * 0.85);
-      const centrality = (c: LayoutPoint) => Math.abs(c.x - parent.x);
-      const minCentrality = Math.min(...contenders.map(centrality));
-      const central = contenders.filter((c) => centrality(c) - minCentrality <= 0.5);
-      const leader = central[hash(this.tree().id + parent.node.id + ':leader') % central.length];
-
-      // zigzag habit (birch): the leader hand alternates by depth instead of
-      // by hash — the trunk kinks side to side on its way up.
-      const zigzag = f.habit === 'zigzag';
-      const parentHand: 1 | -1 = zigzag
-        ? parent.depth % 2 === 0
-          ? 1
-          : -1
-        : hash(parent.node.id) % 2 === 0
-          ? 1
-          : -1;
-      const leaderGeom = edgeGeometry(parent, leader, wood.bow, {
-        upBias: Math.min(0.95, f.upBias + 0.5 * f.leaderBias),
-        bowMul: f.bowMul * (1 - f.leaderBias) * (zigzag ? 1.25 : 1),
-        hand: (parentHand * -1) as 1 | -1,
-      });
-      const leaderW0 = width(parent) * 0.98;
-      const leaderW1 = Math.max(2.4, width(leader) * (tip(leader) ? 0.45 : 1));
-      plan.set(leader.node.id, {
-        start: parent,
-        geom: leaderGeom,
-        w0: leaderW0,
-        w1: leaderW1,
-        isLeaf: tip(leader),
-      });
-
-      // Real-tree fork order: the FARTHEST-reaching side limb leaves LOWEST
-      // (it needs the longest run), short twigs fork higher up — sorted by
-      // horizontal reach so ribbons never cross into parallel-rail tangles.
-      const sides = normal
-        .filter((c) => c !== leader)
-        .sort((a, b) => Math.abs(b.x - parent.x) - Math.abs(a.x - parent.x));
-      // Crowded forks spread over a wider window and slim their collars so
-      // the crotch never welds into one wooden blob.
-      const tMax = sides.length >= 4 ? Math.min(0.92, f.forkTMax + 0.12) : f.forkTMax;
-      const span = tMax - f.forkTMin;
-      const tiered = f.habit === 'tiered';
-      const collarMul = (sides.length >= 4 ? 0.78 : 0.9) * (tiered ? 0.8 : 1);
-      sides.forEach((c, i) => {
-        const h = hash(c.node.id + ':fork');
-        const t = f.forkTMin + span * ((i + 0.35 + (h % 31) / 120) / Math.max(1, sides.length));
-        const start = edgePointAt(parent, leader, leaderGeom, t);
-        // Habits bend the ARRIVAL only (positions untouched):
-        // weeping — tip limbs hang (negative upBias, the willow's fall);
-        // tiered — side limbs sweep out-and-slightly-down (conifer shelves).
-        let b = f.upBias + ((h >> 5) % 21) / 100 - 0.1;
-        let lo = 0.1;
-        let hi = 0.9;
-        if (f.habit === 'weeping' && tip(c)) {
-          b -= 0.55;
-          lo = -0.35;
-        } else if (tiered) {
-          b -= 0.9;
-          lo = -0.18;
-          hi = 0.08;
-        }
-        const geom = edgeGeometry(start, c, wood.bow, {
-          upBias: Math.max(lo, Math.min(hi, b)),
-          bowMul: f.bowMul * (tiered ? 0.6 : 1),
-        });
-        // A limb may flare at its collar but never outgrow the wood it forks from.
-        const collar = collarMul * ribbonWidthAt(leaderW0, leaderW1, t);
-        plan.set(c.node.id, {
-          start,
-          geom,
-          w0: Math.min(width(c) * 1.25, Math.max(2.6, collar)),
-          w1: Math.max(2.4, width(c) * (tip(c) ? 0.45 : 0.9)),
-          isLeaf: tip(c),
-        });
-      });
-    }
-    return plan;
-  });
+  /** The silhouette brain lives in tree-silhouette.ts (pure, vitest-able);
+   *  the tip test is the one live coupling — it needs the repo. */
+  private readonly limbPlan = computed<Map<string, LimbPlan>>(() =>
+    planLimbs(
+      this.layout().points,
+      this.form(),
+      this.wood(),
+      this.tree().id,
+      (p) => this.nodes.childrenOf(p.node).length === 0 && !p.chainNextId,
+    ),
+  );
 
   protected readonly edges = computed<EdgeView[]>(() =>
     this.layout()
@@ -392,10 +228,10 @@ export class TreeCanvas {
         return {
           id: p.node.id,
           d: branchRibbon(plan.start, p, plan.geom, plan.w0, plan.w1),
-          fill: this.woodFill(p),
+          fill: woodFill(p, this.wood()),
           isNew: this.bornThisSession.has(p.node.id),
-          leaves: this.leavesFor(p, plan.start, plan.geom, plan.isLeaf),
-          pads: this.padsFor(p, plan.start, plan.geom, plan.isLeaf),
+          leaves: leavesFor(p, plan.start, plan.geom, plan.isLeaf, this.form()),
+          pads: padsFor(p, plan.start, plan.geom, plan.isLeaf, this.form()),
           grain: plan.geom.d,
           grainWidth: Math.max(1.1, plan.w1 * 0.35),
           grainOffset: hash(p.node.id + ':grain') % 16,
@@ -403,145 +239,11 @@ export class TreeCanvas {
       }),
   );
 
-  /** Each tree grows its own wood: sinuosity, girth and bark family.
-   *  Birch identity: a pale wash mixed over whichever family it drew. */
-  protected readonly wood = computed(() => {
-    const h = hash(this.tree().id + ':wood');
-    const family = [
-      'var(--rm-bark)',
-      'color-mix(in srgb, var(--rm-bark) 68%, #4a3826)',
-      'color-mix(in srgb, var(--rm-bark) 72%, #94815f)',
-    ][h % 3];
-    return {
-      bow: 0.85 + (h % 46) / 100,
-      girth: 0.88 + ((h >> 5) % 28) / 100,
-      barkBase:
-        this.form().barkTint === 'pale'
-          ? `color-mix(in srgb, ${family} 42%, #e8e2d2)`
-          : family,
-    };
-  });
+  /** This tree's wood personality (pure: tree-silhouette.ts). */
+  protected readonly wood = computed(() => woodFor(this.tree().id, this.form()));
 
-  /** Bark near the trunk, greener toward the twigs; branch-children lean golden. */
-  private woodFill(point: LayoutPoint): string {
-    const jitter = (hash(point.node.id + ':barkjit') % 9) - 4;
-    const barkPct = Math.min(94, Math.max(28, 92 - point.depth * 16 + jitter));
-    const base = `color-mix(in srgb, ${this.wood().barkBase} ${barkPct}%, var(--rm-twig))`;
-    return point.node.origin === 'branch'
-      ? `color-mix(in srgb, ${base} 72%, var(--status-branched))`
-      : base;
-  }
-
-  /** Trunk ribbon: ground → root, with a gentle sway. Its top matches the
-   *  root's mass-width so trunk → leader limb reads as one column of wood. */
   protected trunkPath(root: LayoutPoint): string {
-    const gy = this.groundY();
-    const wood = this.wood();
-    const rootW = widthForMass(root.mass ?? 1, wood.girth * this.form().girthMul);
-    const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6 * wood.bow;
-    return taperedRibbon(
-      root.x + sway,
-      gy - 2,
-      root.x + sway * 0.4,
-      gy - (gy - root.y) * 0.4,
-      root.x - sway * 0.3,
-      root.y + (gy - root.y) * 0.35,
-      root.x,
-      root.y,
-      Math.min(34, rootW * 1.4),
-      rootW,
-    );
-  }
-
-  /** Deterministic foliage: leaf slots scale with limb length, some sprout
-   *  opposite twins (leaf pairs), and twig tips gather a tuft. */
-  private leavesFor(
-    point: LayoutPoint,
-    start: { x: number; y: number },
-    geometry: EdgeGeometry,
-    isTip: boolean,
-  ): LeafDecoration[] {
-    const status = point.node.status;
-    const f = this.form();
-    const h = hash(point.node.id + ':leaves');
-    const length = Math.hypot(point.x - start.x, point.y - start.y);
-    // One leaf slot every ~10-14px of limb; resting stays deliberately sparse;
-    // the form's density dial gives acacias their air between pads.
-    const spacing = status === 'achieved' ? 10 : status === 'growing' ? 11 : status === 'resting' ? 30 : 14;
-    const density = status === 'resting' ? 1 : f.leafDensityMul;
-    const slots = Math.max(
-      status === 'resting' ? 2 : 3,
-      Math.min(14, Math.round((length / spacing) * density)),
-    );
-    const leaves: LeafDecoration[] = [];
-    for (let i = 0; i < slots; i++) {
-      const hi = hash(point.node.id + ':leaf:' + i);
-      const t = Math.min(0.93, 0.16 + (i / slots) * 0.72 + ((hi % 10) / 100));
-      const at = edgePointAt(start, point, geometry, t);
-      const side = (i + (h % 2)) % 2 === 0 ? 1 : -1;
-      leaves.push({
-        x: at.x + side * (3 + (hi % 6)),
-        y: at.y,
-        angle: side * (26 + (hi % 55)),
-        size: 5 + ((hi >> 4) % 4),
-        kind: status === 'achieved' && i === 0 ? 'blossom' : 'leaf',
-        variant: hi % 4,
-        shade: (hi >> 5) % 3,
-      });
-      // Some slots sprout an opposite twin — pairs read as real foliage.
-      if (hi % 5 < 2 && status !== 'resting') {
-        leaves.push({
-          x: at.x - side * (3 + ((hi >> 3) % 5)),
-          y: at.y + 1,
-          angle: -side * (30 + ((hi >> 5) % 45)),
-          size: 4.5 + ((hi >> 7) % 3),
-          kind: 'leaf',
-          variant: (hi >> 8) % 4,
-          shade: (hi >> 11) % 3,
-        });
-      }
-    }
-    return leaves;
-  }
-
-  /** Foliage PADS: soft clustered volumes at branch tips — how real crowns
-   *  read from afar (the tuft, grown up). Resting stays winter-quiet;
-   *  growing keeps its sapling glyph clear. */
-  private padsFor(
-    point: LayoutPoint,
-    start: { x: number; y: number },
-    geometry: EdgeGeometry,
-    isTip: boolean,
-  ): PadDecoration[] {
-    const f = this.form();
-    const status = point.node.status;
-    if (!isTip || status === 'branched' || status === 'resting') return [];
-    const h = hash(point.node.id + ':pads');
-    const count = f.padCount[0] + (h % (f.padCount[1] - f.padCount[0] + 1));
-    const tLo = status === 'growing' ? 0.6 : 0.82;
-    const tHi = status === 'growing' ? 0.78 : 0.98;
-    // Weeping tips hang — their foliage gathers BELOW the tip, like a
-    // willow's curtain, instead of crowning above it.
-    const droop = f.habit === 'weeping' ? 1 : -1;
-    const pads: PadDecoration[] = [];
-    for (let i = 0; i < count; i++) {
-      const hi = hash(point.node.id + ':pad:' + i);
-      const t = tLo + ((i + (hi % 30) / 100) / count) * (tHi - tLo);
-      const at = edgePointAt(start, point, geometry, Math.min(0.99, t));
-      const x = at.x + (((hi >> 3) % (f.padSpread * 2 + 1)) - f.padSpread);
-      const y = at.y + droop * ((hi >> 6) % Math.max(2, Math.round(f.padSpread * 0.8)));
-      // The growing sapling glyph must stay visible through its crown.
-      if (status === 'growing' && Math.hypot(x - point.x, y - point.y) < 18) continue;
-      pads.push({
-        x,
-        y,
-        rx: f.padRx[0] + ((hi >> 9) % (f.padRx[1] - f.padRx[0] + 1)),
-        ry: f.padRy[0] + ((hi >> 12) % (f.padRy[1] - f.padRy[0] + 1)),
-        rot: f.id === 'acacia' ? ((hi >> 15) % 13) - 6 : ((hi >> 15) % 41) - 20,
-        shade: (hi >> 5) % 3,
-      });
-    }
-    return pads;
+    return trunkPath(root, this.groundY(), this.wood(), this.form());
   }
 
   private readonly pointers = new Map<number, { x: number; y: number }>();

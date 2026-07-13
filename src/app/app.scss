@@ -90,24 +90,7 @@ main {
   color: inherit;
   animation: perch-in 0.3s ease both;
 
-  app-companion-bird {
-    width: 30px;
-    margin-bottom: -2px;
-  }
-
-  .twig {
-    width: 34px;
-    height: 6px;
-    color: var(--status-branched);
-  }
-
-  .perch-time {
-    font-size: 0.78rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-dim);
-    margin-top: 0.15rem;
-  }
+  /* Bird + twig + time chip live in app-perch-body. */
 }
 
 @keyframes perch-in {
