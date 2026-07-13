@@ -12,6 +12,13 @@
   --border: #d8d2bf;
   --border-strong: #a9a289;
 
+  /* Forest material tokens — GLOBAL so lenses outside the meadow (the
+     almanaque) can paint wood and grass too; forest scopes re-declare the
+     same values locally. */
+  --rm-bark: #6f5640;
+  --rm-twig: #7f9a63;
+  --rm-grass: #9db98a;
+
   /* Text — deep green-grays, never pure black */
   --text: #2e3b32;
   --text-dim: #55645a;
@@ -55,6 +62,10 @@
   --surface-2: #182818;
   --border: #234023;
   --border-strong: #356035;
+
+  --rm-bark: #1f4a1f;
+  --rm-twig: #48c342;
+  --rm-grass: #2f6a2f;
 
   --text: #a9e5a2;
   --text-dim: #79b273;

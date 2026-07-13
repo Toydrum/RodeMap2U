@@ -219,7 +219,7 @@
   aspect-ratio: 1 / 1.06;
   min-height: 44px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--rm-grass, #9db98a) 10%, var(--surface));
+  background: color-mix(in srgb, var(--rm-grass) 10%, var(--surface));
   cursor: pointer;
   padding: 2px 3px;
   display: flex;
@@ -233,7 +233,7 @@
   }
 
   &.past {
-    background: color-mix(in srgb, var(--rm-grass, #9db98a) 17%, var(--surface));
+    background: color-mix(in srgb, var(--rm-grass) 17%, var(--surface));
   }
 
   &.out {
@@ -276,6 +276,10 @@
     right: 2px;
     bottom: 2px;
     font-size: 0.66rem;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    border-radius: 50%;
+    padding: 0 1px;
+    line-height: 1;
   }
 
   .paw-mark {

@@ -91,10 +91,14 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
   }
 
   async setStatus(node: TreeNode, status: NodeStatus): Promise<TreeNode> {
+    // Reopening a bloomed branch takes its bloom stamp with it — a stale
+    // achievedAt painted phantom flowers on the almanaque and survived
+    // stone-bloom undos forever. Branching keeps it (both events happened).
+    const reopened = status === 'seed' || status === 'growing' || status === 'resting';
     return this.save({
       ...node,
       status,
-      achievedAt: status === 'achieved' ? Date.now() : node.achievedAt,
+      achievedAt: status === 'achieved' ? Date.now() : reopened ? null : node.achievedAt,
     });
   }
 

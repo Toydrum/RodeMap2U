@@ -30,11 +30,17 @@ export class DailyPathsService {
     // inside archived trees forever (invisible writes + sync churn, and a
     // restored tree found yesterday's progress silently erased).
     const liveTrees = new Set(this.trees.active().map((t) => t.id));
+    // Only LIVE senderos reset: «descansando» PAUSES the path (yesterday's
+    // blooms stay put until it wakes), achieved retires it, branched
+    // dissolved it — matching the caminito lens in almanac.ts.
     const parents = this.nodes
       .visible()
       .filter(
         (n) =>
-          n.repeatsDaily && n.flow === 'steps' && n.status !== 'branched' && liveTrees.has(n.treeId),
+          n.repeatsDaily &&
+          n.flow === 'steps' &&
+          (n.status === 'seed' || n.status === 'growing') &&
+          liveTrees.has(n.treeId),
       );
     if (!parents.length) return;
     const now = Date.now();

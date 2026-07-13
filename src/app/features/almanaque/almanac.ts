@@ -96,17 +96,32 @@ export function monthMatrix(year: number, month: number, weekStart: 0 | 1 = 1): 
   return weeks;
 }
 
-/** Ids of every sendero step — excluded from ALL month marks (see header). */
+/** Ids of every sendero step — excluded from ALL month marks (see header).
+ *  Recursive: a step's own sub-steps vanish with it. A BRANCHED former
+ *  sendero parent stops excluding — its branch-born alternatives are
+ *  ordinary branches and deserve their marks. */
 export function senderoStepIds(
   trees: Tree[],
   nodesByTree: Map<string, TreeNode[]>,
 ): Set<string> {
   const ids = new Set<string>();
   for (const tree of trees) {
-    for (const node of nodesByTree.get(tree.id) ?? []) {
-      if (!(node.repeatsDaily && node.flow === 'steps')) continue;
-      for (const child of nodesByTree.get(tree.id) ?? []) {
-        if (child.parentId === node.id) ids.add(child.id);
+    const nodes = nodesByTree.get(tree.id) ?? [];
+    const childrenOf = new Map<string, TreeNode[]>();
+    for (const n of nodes) {
+      if (!n.parentId) continue;
+      childrenOf.set(n.parentId, [...(childrenOf.get(n.parentId) ?? []), n]);
+    }
+    const sweep = (parentId: string) => {
+      for (const child of childrenOf.get(parentId) ?? []) {
+        if (ids.has(child.id)) continue;
+        ids.add(child.id);
+        sweep(child.id);
+      }
+    };
+    for (const node of nodes) {
+      if (node.repeatsDaily && node.flow === 'steps' && node.status !== 'branched') {
+        sweep(node.id);
       }
     }
   }
@@ -143,8 +158,12 @@ export function marksFor(
       ) {
         at(node.targetDate).capullos.push({ node, tree, passed: node.targetDate < today });
       }
-      // Flowers: the day a bloom actually opened.
-      if (node.achievedAt) at(dayOf(node.achievedAt)).flowers.push({ node, tree });
+      // Flowers: the day a bloom actually opened — only while the bloom
+      // STANDS (reopening a branch takes its flower with it; a branched
+      // node's day shows the knot, its transformation, not the old bloom).
+      if (node.achievedAt && node.status === 'achieved') {
+        at(dayOf(node.achievedAt)).flowers.push({ node, tree });
+      }
       // Golden knots: the day a branch transformed into new paths.
       if (node.branchedAt && node.status === 'branched') {
         at(dayOf(node.branchedAt)).knots.push({ node, tree });
@@ -182,6 +201,27 @@ export function upcoming(
     .map((o) => o.entry);
 }
 
+/** Branches whose fecha amable is exactly TODAY — the Hoy section's own
+ *  list (they are in nobody else's: the 🍂 talk is strictly-past and
+ *  «lo que se acerca» is strictly-future). */
+export function todayDated(
+  trees: Tree[],
+  nodesByTree: Map<string, TreeNode[]>,
+  today: string,
+): DatedBranch[] {
+  const out: DatedBranch[] = [];
+  const excluded = senderoStepIds(trees, nodesByTree);
+  for (const tree of trees) {
+    for (const node of nodesByTree.get(tree.id) ?? []) {
+      if (excluded.has(node.id)) continue;
+      if (node.targetDate !== today) continue;
+      if (node.status !== 'seed' && node.status !== 'growing' && node.status !== 'resting') continue;
+      out.push({ node, tree, passed: false });
+    }
+  }
+  return out.sort((a, b) => (a.node.id < b.node.id ? -1 : 1));
+}
+
 /** Word distance for a FUTURE date: mañana / en unos días / la próxima
  *  semana / más adelante. Words, never numbers — counters escalate. */
 export function whenWord(today: string, date: string): UpcomingDate['when'] {
@@ -203,7 +243,9 @@ export function caminitos(
   for (const tree of trees) {
     const nodes = nodesByTree.get(tree.id) ?? [];
     for (const parent of nodes) {
-      if (!(parent.repeatsDaily && parent.flow === 'steps' && parent.status !== 'branched')) continue;
+      // Only LIVE senderos walk today: resting pauses the path (and the
+      // sweep — see daily-paths), achieved retires it, branched dissolved it.
+      if (!(parent.repeatsDaily && parent.flow === 'steps' && (parent.status === 'seed' || parent.status === 'growing'))) continue;
       const steps = nodes
         .filter((n) => n.parentId === parent.id)
         .sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1));

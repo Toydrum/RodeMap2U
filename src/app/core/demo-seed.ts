@@ -1,4 +1,5 @@
 import { CheckIn, Settings, TimerSession, Tree, TreeNode } from './db/schema';
+import { dayOf } from './time';
 
 /**
  * Demo forest for `?seed=demo`: fixed ids so routes are predictable
@@ -9,13 +10,9 @@ import { CheckIn, Settings, TimerSession, Tree, TreeNode } from './db/schema';
 const now = Date.now();
 const day = 86_400_000;
 
-function dateOnly(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 /** Yesterday — so demos showcase the gentle date-review conversation. */
-const yesterday = dateOnly(now - day);
+const yesterday = dayOf(now - day);
 
 function base(id: string, offsetDays: number) {
   return {

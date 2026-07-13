@@ -95,6 +95,38 @@ await page.waitForTimeout(300);
 const todayBack = (await page.locator('.alm-cell.alm-today').count()) === 1;
 ok('D today ring + Volver a hoy', todayCell === 1 && todayGone && todayBack, `cell=${todayCell}`);
 
+// E2 — a branch dated exactly TODAY gets its own «Hoy quiere florecer» row
+// (0.0.82: it lives in no other list — 🍂 is strictly past, upcoming is
+// strictly future).
+await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  await new Promise((res, rej) => {
+    const tx = db.transaction('nodes', 'readwrite');
+    const os = tx.objectStore('nodes');
+    const all = os.getAll();
+    all.onsuccess = () => {
+      // Root branches only — section B turned one demo parent into a
+      // sendero, and its steps are (correctly) excluded from todayDated.
+      const row = all.result.find(
+        (r) => !r.deletedAt && !r.archivedAt && !r.parentId && !r.repeatsDaily && (r.status === 'seed' || r.status === 'growing') && !r.targetDate,
+      );
+      if (!row) throw new Error('no dateless live ROOT branch in demo');
+      row.targetDate = todayKey;
+      os.put(row);
+      tx.oncomplete = () => res();
+    };
+    all.onerror = rej;
+  });
+  db.close();
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+const todayRows = await page.locator('.alm-today-dated .upcoming-row').count();
+ok('E2 today-dated branch gets its Hoy row', todayRows >= 1, `rows=${todayRows}`);
+
 // E — the forest-header door.
 await page.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);

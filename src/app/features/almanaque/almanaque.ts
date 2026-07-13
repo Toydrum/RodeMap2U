@@ -17,10 +17,12 @@ import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { HintChip } from '../../shared/ui/hint-chip';
 import {
   Caminito,
+  DatedBranch,
   DayMarks,
   caminitos,
   marksFor,
   monthMatrix,
+  todayDated,
   upcoming,
 } from './almanac';
 
@@ -92,6 +94,11 @@ export class AlmanaquePage {
     upcoming(this.trees.active(), this.nodes.byTree(), today()),
   );
 
+  /** Fechas amables landing exactly TODAY — the Hoy section's own list. */
+  protected readonly todayDatedRows = computed<DatedBranch[]>(() =>
+    todayDated(this.trees.active(), this.nodes.byTree(), today()),
+  );
+
   protected upcomingText(entry: { node: TreeNode; when: string }): string {
     const dict = this.i18n.t().almanaque;
     const when =
@@ -109,15 +116,26 @@ export class AlmanaquePage {
     () =>
       !this.paths().length &&
       !this.todayChips().length &&
+      !this.todayDatedRows().length &&
       !this.upcomingDates().length &&
       !this.pendingReviews().length,
   );
 
   /** Bloom the «siguiente» stone right on the path — same verb as the tree,
    *  with the undo law (re-read the LIVE record; never re-save a capture). */
+  private bloomingStone = false;
+
   protected async bloomStone(step: TreeNode): Promise<void> {
-    const prevStatus = step.status;
-    await this.nodes.setStatus(step, 'achieved');
+    if (this.bloomingStone) return;
+    const live = this.nodes.byId().get(step.id);
+    if (!live || live.deletedAt || live.status === 'achieved') return;
+    this.bloomingStone = true;
+    const prevStatus = live.status;
+    try {
+      await this.nodes.setStatus(live, 'achieved');
+    } finally {
+      this.bloomingStone = false;
+    }
     this.toast.show(
       {
         message: this.i18n.fill(this.i18n.t().almanaque.stoneBloomed, { title: step.title }),
@@ -135,16 +153,23 @@ export class AlmanaquePage {
 
   /* ------------------------------------------------------------- Mes -- */
 
-  private readonly viewYear = signal(Number(today().slice(0, 4)));
-  private readonly viewMonth = signal(Number(today().slice(5, 7)));
+  /** null = follow today (so a midnight month-flip moves the grid too);
+   *  set only by explicit ‹ › navigation. */
+  private readonly view = signal<{ y: number; m: number } | null>(null);
+
+  private readonly viewYM = computed(() => {
+    const pinned = this.view();
+    if (pinned) return pinned;
+    return { y: Number(today().slice(0, 4)), m: Number(today().slice(5, 7)) };
+  });
 
   protected readonly weeks = computed(() =>
-    monthMatrix(this.viewYear(), this.viewMonth(), this.i18n.lang() === 'en' ? 0 : 1),
+    monthMatrix(this.viewYM().y, this.viewYM().m, this.i18n.lang() === 'en' ? 0 : 1),
   );
 
   protected readonly monthLabel = computed(() => {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
-    const label = new Date(this.viewYear(), this.viewMonth() - 1, 1, 12).toLocaleDateString(locale, {
+    const label = new Date(this.viewYM().y, this.viewYM().m - 1, 1, 12).toLocaleDateString(locale, {
       month: 'long',
       year: 'numeric',
     });
@@ -165,39 +190,40 @@ export class AlmanaquePage {
     marksFor(this.trees.active(), this.nodes.byTree(), this.checkins.all(), today()),
   );
 
-  protected readonly viewingToday = computed(
-    () =>
-      this.viewYear() === Number(today().slice(0, 4)) &&
-      this.viewMonth() === Number(today().slice(5, 7)),
-  );
+  protected readonly viewingToday = computed(() => {
+    const ym = this.viewYM();
+    return ym.y === Number(today().slice(0, 4)) && ym.m === Number(today().slice(5, 7));
+  });
 
   protected prevMonth(): void {
-    if (this.viewMonth() === 1) {
-      this.viewMonth.set(12);
-      this.viewYear.update((y) => y - 1);
-    } else {
-      this.viewMonth.update((m) => m - 1);
-    }
+    const { y, m } = this.viewYM();
+    this.view.set(m === 1 ? { y: y - 1, m: 12 } : { y, m: m - 1 });
   }
 
   protected nextMonth(): void {
-    if (this.viewMonth() === 12) {
-      this.viewMonth.set(1);
-      this.viewYear.update((y) => y + 1);
-    } else {
-      this.viewMonth.update((m) => m + 1);
-    }
+    const { y, m } = this.viewYM();
+    this.view.set(m === 12 ? { y: y + 1, m: 1 } : { y, m: m + 1 });
   }
 
   protected backToToday(): void {
-    this.viewYear.set(Number(today().slice(0, 4)));
-    this.viewMonth.set(Number(today().slice(5, 7)));
+    this.view.set(null);
   }
 
   /* ------------------------------------------------- cell rendering -- */
 
   protected dayNum(date: string): number {
     return Number(date.slice(8, 10));
+  }
+
+  /** Localized long form of a date key — cell aria + the day page title. */
+  protected dateLine(date: string): string {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const [y, m, d] = date.split('-').map(Number);
+    return new Date(y, m - 1, d, 12).toLocaleDateString(locale, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
   }
 
   /** Deterministic soil-plot wobble — same day, same little shape, forever. */
@@ -247,7 +273,7 @@ export class AlmanaquePage {
     const delta = deltas[event.key];
     if (!delta) return;
     const cells = Array.from(
-      (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('.alm-cell'),
+      (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('.alm-cell:not(.out)'),
     );
     const index = cells.indexOf(event.target as HTMLButtonElement);
     if (index === -1) return;
@@ -272,14 +298,7 @@ export class AlmanaquePage {
 
   protected readonly openDateLine = computed(() => {
     const date = this.openDate();
-    if (!date) return '';
-    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
-    const [y, m, d] = date.split('-').map(Number);
-    return new Date(y, m - 1, d, 12).toLocaleDateString(locale, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
+    return date ? this.dateLine(date) : '';
   });
 
   /** That day's footprints — feeling + notita, trail-style, day-scoped. */

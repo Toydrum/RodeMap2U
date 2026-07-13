@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CheckIn, Tree, TreeNode } from '../../core/db/schema';
-import { caminitos, marksFor, monthMatrix, upcoming, whenWord } from './almanac';
+import { caminitos, marksFor, monthMatrix, senderoStepIds, todayDated, upcoming, whenWord } from './almanac';
 
 function tree(id: string, name = id): Tree {
   return {
@@ -135,6 +135,35 @@ describe('marksFor — the golden rule', () => {
     expect(marks.get('2026-07-20')?.capullos ?? []).toHaveLength(0);
   });
 
+  it('a reopened bloom takes its flower with it (0.0.82: status-gated)', () => {
+    const t = tree('t1');
+    const reopened = node('r1', 't1', { status: 'growing', achievedAt: noonOf('2026-07-03') });
+    const marks = marksFor([t], byTree([t], [reopened]), [], TODAY);
+    expect(marks.get('2026-07-03')?.flowers ?? []).toHaveLength(0);
+    // and a branched node shows ONLY its knot, never the old bloom
+    const knotted = node('k1', 't1', {
+      status: 'branched',
+      achievedAt: noonOf('2026-07-02'),
+      branchedAt: noonOf('2026-07-08'),
+    });
+    const marks2 = marksFor([t], byTree([t], [knotted]), [], TODAY);
+    expect(marks2.get('2026-07-02')?.flowers ?? []).toHaveLength(0);
+    expect(marks2.get('2026-07-08')!.knots).toHaveLength(1);
+  });
+
+  it('a BRANCHED former sendero stops hiding its children; sub-steps stay hidden recursively', () => {
+    const t = tree('t1');
+    const branchedParent = node('bp', 't1', { flow: 'steps', repeatsDaily: true, status: 'branched' });
+    const alt = node('alt', 't1', { parentId: 'bp' });
+    const liveParent = node('lp', 't1', { flow: 'steps', repeatsDaily: true });
+    const step = node('st', 't1', { parentId: 'lp' });
+    const subStep = node('sub', 't1', { parentId: 'st' });
+    const ids = senderoStepIds([t], byTree([t], [branchedParent, alt, liveParent, step, subStep]));
+    expect(ids.has('alt')).toBe(false);
+    expect(ids.has('st')).toBe(true);
+    expect(ids.has('sub')).toBe(true);
+  });
+
   it('check-ins mark presence only', () => {
     const t = tree('t1');
     const marks = marksFor([t], byTree([t], []), [checkin('c1', noonOf('2026-07-05'))], TODAY);
@@ -171,7 +200,27 @@ describe('upcoming — soft words, never numbers', () => {
   });
 });
 
+describe('todayDated', () => {
+  it('lists ONLY branches dated exactly today (past → 🍂 talk, future → upcoming)', () => {
+    const t = tree('t1');
+    const nodes = [
+      node('hoy', 't1', { targetDate: TODAY }),
+      node('past', 't1', { targetDate: '2026-07-01' }),
+      node('future', 't1', { targetDate: '2026-07-20' }),
+    ];
+    const rows = todayDated([t], byTree([t], nodes), TODAY);
+    expect(rows.map((r) => r.node.id)).toEqual(['hoy']);
+  });
+});
+
 describe('caminitos', () => {
+  it('a RESTING sendero pauses — it leaves today\'s path until it wakes', () => {
+    const t = tree('t1');
+    const parent = node('camino', 't1', { flow: 'steps', repeatsDaily: true, status: 'resting' });
+    const s1 = node('s1', 't1', { parentId: 'camino' });
+    expect(caminitos([t], byTree([t], [parent, s1]))).toHaveLength(0);
+  });
+
   it('orders steps by walking order and points «siguiente» at the first open stone', () => {
     const t = tree('t1');
     const parent = node('camino', 't1', { flow: 'steps', repeatsDaily: true });
