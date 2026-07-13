@@ -59,11 +59,8 @@
 }
 
 .trunk {
+  /* Fallback only — the template binds the tree's own bark family. */
   fill: var(--rm-bark);
-
-  &.flare {
-    opacity: 0.85;
-  }
 }
 
 .grass {

@@ -52,8 +52,10 @@
           </g>
         }
         @for (root of roots(); track root.node.id) {
-          <!-- Trunk: tapered ribbon from ground to the root node -->
-          <path class="trunk" [attr.d]="trunkPath(root)" />
+          <!-- Trunk + root flare: same bark, proportional, hugging the
+               swayed foot — never two pieces at the soil line (0.0.80). -->
+          <path class="trunk" [attr.d]="trunkFlarePath(root)" [style.fill]="trunkFill(root)" />
+          <path class="trunk" [attr.d]="trunkPath(root)" [style.fill]="trunkFill(root)" />
           <!-- Trunk grain -->
           <path
             class="bark-grain"
@@ -64,13 +66,6 @@
             class="bark-grain"
             [attr.d]="'M ' + (root.x + 4) + ' ' + (groundY() - 6) + ' L ' + (root.x + 3) + ' ' + (root.y + 14)"
             style="stroke-width: 1.8; stroke-dashoffset: 9"
-          />
-          <!-- Root flare -->
-          <path
-            class="trunk flare"
-            [attr.d]="'M ' + (root.x - 22) + ' ' + (groundY() - 2) +
-                      ' Q ' + (root.x - 10) + ' ' + (groundY() - 14) + ' ' + root.x + ' ' + (groundY() - 12) +
-                      ' Q ' + (root.x + 10) + ' ' + (groundY() - 14) + ' ' + (root.x + 22) + ' ' + (groundY() - 2) + ' Z'"
           />
           <!-- Grass tufts at the base -->
           @for (i of [0, 1, 2, 3]; track i) {

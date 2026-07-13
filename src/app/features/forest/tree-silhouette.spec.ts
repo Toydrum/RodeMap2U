@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { TreeNode } from '../../core/db/schema';
 import { LayoutPoint, edgeGeometry, layoutTree } from './tree-layout';
 import { formFor } from './tree-forms';
-import { leavesFor, padsFor, planLimbs, woodFor } from './tree-silhouette';
+import {
+  leavesFor,
+  padsFor,
+  planLimbs,
+  trunkDims,
+  trunkFlarePath,
+  trunkPath,
+  woodFor,
+} from './tree-silhouette';
+import { widthForMass } from './tree-layout';
 
 function node(id: string, parentId: string | null, extra: Partial<TreeNode> = {}): TreeNode {
   return {
@@ -107,6 +116,52 @@ describe('planLimbs — the leader law (0.0.62)', () => {
     const parent = layout.byId.get('r')!;
     expect(s1.start.x).toBe(parent.x);
     expect(s1.start.y).toBe(parent.y);
+  });
+});
+
+describe('trunk (0.0.80 — one piece, thickens per branch)', () => {
+  const form = formFor('moss');
+  const setup = () => {
+    const layout = lay([node('r', null), node('a', 'r')]);
+    const root = layout.byId.get('r')!;
+    const wood = woodFor('tree-1', form);
+    return { root, wood };
+  };
+
+  it('every planted branch thickens a young trunk; mass rules a grown one', () => {
+    const { root, wood } = setup();
+    const n1 = trunkDims(root, wood, form, 1);
+    const n2 = trunkDims(root, wood, form, 2);
+    const n4 = trunkDims(root, wood, form, 4);
+    expect(n2.top).toBeGreaterThan(n1.top);
+    expect(n4.top).toBeGreaterThan(n2.top);
+    expect(n4.base).toBeGreaterThan(n4.top); // the base always flares
+    // a heavy grown tree is ruled by mass, not the counter
+    const heavy = { ...root, mass: 20 };
+    expect(trunkDims(heavy, wood, form, 2).top).toBe(widthForMass(20, wood.girth * form.girthMul));
+  });
+
+  it('the collar law: trunk top is never thinner than the mass width', () => {
+    const { root, wood } = setup();
+    for (const n of [1, 2, 5, 9]) {
+      expect(trunkDims(root, wood, form, n).top).toBeGreaterThanOrEqual(
+        widthForMass(root.mass ?? 1, wood.girth * form.girthMul),
+      );
+    }
+  });
+
+  it('ribbon and flare hug the SAME swayed foot, deterministically', () => {
+    const { root, wood } = setup();
+    const flare1 = trunkFlarePath(root, 100, wood, form, 3);
+    const flare2 = trunkFlarePath(root, 100, wood, form, 3);
+    expect(flare1).toBe(flare2);
+    const ribbon = trunkPath(root, 100, wood, form, 3);
+    // the ribbon starts at the foot x — the flare's M begins at foot - half
+    const footFromRibbon = Number(ribbon.split(' ')[1]);
+    const flareStartX = Number(flare1.split(' ')[1]);
+    const half = footFromRibbon - flareStartX;
+    expect(half).toBeGreaterThanOrEqual(12);
+    expect(half).toBeLessThanOrEqual(40);
   });
 });
 

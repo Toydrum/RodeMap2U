@@ -35,6 +35,7 @@ import {
   leavesFor,
   padsFor,
   planLimbs,
+  trunkFlarePath,
   trunkPath,
   woodFill,
   woodFor,
@@ -242,7 +243,17 @@ export class TreeCanvas {
   protected readonly wood = computed(() => woodFor(this.tree().id, this.form()));
 
   protected trunkPath(root: LayoutPoint): string {
-    return trunkPath(root, this.groundY(), this.wood(), this.form());
+    return trunkPath(root, this.groundY(), this.wood(), this.form(), this.layout().points.length);
+  }
+
+  protected trunkFlarePath(root: LayoutPoint): string {
+    return trunkFlarePath(root, this.groundY(), this.wood(), this.form(), this.layout().points.length);
+  }
+
+  /** The trunk wears the tree's own bark family (deepest mix) — a fixed
+   *  --rm-bark fill used to seam against the per-tree limb colors. */
+  protected trunkFill(root: LayoutPoint): string {
+    return woodFill(root, this.wood());
   }
 
   private readonly pointers = new Map<number, { x: number; y: number }>();

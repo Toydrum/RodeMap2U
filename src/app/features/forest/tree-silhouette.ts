@@ -87,12 +87,40 @@ export function woodFill(point: LayoutPoint, wood: TreeWood): string {
     : base;
 }
 
-/** Trunk ribbon: ground → root, with a gentle sway. Its top matches the
- *  root's mass-width so trunk → leader limb reads as one column of wood. */
-export function trunkPath(root: LayoutPoint, groundY: number, wood: TreeWood, form: TreeForm): string {
+/** Trunk width response (0.0.80): leaf-mass rules a grown tree, but EVERY
+ *  planted branch thickens a young trunk a little — mass counts LEAVES, so
+ *  the first child used to leave the trunk newborn-thin. The boosted top
+ *  is always ≥ the leader limb's mass-based w0, so the limb emerges from
+ *  inside the trunk (a natural collar, never a step up). */
+export function trunkDims(
+  root: LayoutPoint,
+  wood: TreeWood,
+  form: TreeForm,
+  branchCount: number,
+): { top: number; base: number } {
+  const girth = wood.girth * form.girthMul;
+  const effMass = Math.max(root.mass ?? 1, 1 + (branchCount - 1) * 0.6);
+  const top = widthForMass(effMass, girth);
+  return { top, base: Math.min(34, top * 1.8) };
+}
+
+/** The trunk's swayed foot x — ribbon and flare must share it. */
+function trunkFootX(root: LayoutPoint, wood: TreeWood): number {
+  return root.x + ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6 * wood.bow;
+}
+
+/** Trunk ribbon: ground → root, with a gentle sway (0.0.80 dims: every
+ *  planted branch thickens it a little, base flares 1.8×). */
+export function trunkPath(
+  root: LayoutPoint,
+  groundY: number,
+  wood: TreeWood,
+  form: TreeForm,
+  branchCount: number,
+): string {
   const gy = groundY;
-  const rootW = widthForMass(root.mass ?? 1, wood.girth * form.girthMul);
-  const sway = ((hash(root.node.id + ':trunk') % 21) - 10) * 0.6 * wood.bow;
+  const { top, base } = trunkDims(root, wood, form, branchCount);
+  const sway = trunkFootX(root, wood) - root.x;
   return taperedRibbon(
     root.x + sway,
     gy - 2,
@@ -102,8 +130,35 @@ export function trunkPath(root: LayoutPoint, groundY: number, wood: TreeWood, fo
     root.y + (gy - root.y) * 0.35,
     root.x,
     root.y,
-    Math.min(34, rootW * 1.4),
-    rootW,
+    base,
+    top,
+  );
+}
+
+/** Root flare (0.0.80): proportional toes hugging the trunk's REAL foot,
+ *  rendered as a sibling path with the SAME fill — the old hump was a
+ *  fixed 44px, differently-colored blob centered on root.x while the
+ *  swayed foot landed beside it (a stick pushed into a mound). Kept as a
+ *  separate element on purpose: merging both subpaths into one `d` made
+ *  their opposite windings cancel under fill-rule nonzero (a pale hole
+ *  where ribbon and flare overlap). */
+export function trunkFlarePath(
+  root: LayoutPoint,
+  groundY: number,
+  wood: TreeWood,
+  form: TreeForm,
+  branchCount: number,
+): string {
+  const gy = groundY;
+  const { base } = trunkDims(root, wood, form, branchCount);
+  const fx = trunkFootX(root, wood);
+  const half = Math.min(40, Math.max(base * 1.5, 12));
+  const h = Math.min(14, 4 + base * 0.45);
+  return (
+    `M ${fx - half} ${gy - 1}` +
+    ` Q ${fx - half * 0.42} ${gy - h} ${fx} ${gy - h * 0.9}` +
+    ` Q ${fx + half * 0.42} ${gy - h} ${fx + half} ${gy - 1}` +
+    ` Q ${fx} ${gy + 3} ${fx - half} ${gy - 1} Z`
   );
 }
 
