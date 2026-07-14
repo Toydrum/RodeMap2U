@@ -31,6 +31,11 @@ async function plantUpTo(n) {
     await page.locator('.clearing-nav.prev').click();
     await page.waitForTimeout(220);
   }
+  // Park the mouse OFF the meadow — the pagination clicks leave it hovering
+  // near the plots, and hover's z 200 can cover a neighbor's center just
+  // long enough to flake the hearts check (elementFromPoint reads stacking).
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(120);
 }
 
 const plotRects = () =>

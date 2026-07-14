@@ -1,4 +1,5 @@
 import { CheckIn, Tree, TreeNode } from '../../core/db/schema';
+import { isDailyPathParent } from '../../core/harvest';
 import { dayOf, isPast } from '../../core/time';
 
 /**
@@ -141,7 +142,9 @@ export function senderoStepIds(
       }
     };
     for (const node of nodes) {
-      if (node.repeatsDaily && node.flow === 'steps' && node.status !== 'branched') {
+      // ONE law with the fruit-minting guard (core/harvest.ts) — the month
+      // grid and the jar must never disagree about what a sendero step is.
+      if (isDailyPathParent(node)) {
         sweep(node.id);
       }
     }

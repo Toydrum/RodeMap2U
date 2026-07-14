@@ -2,6 +2,8 @@
 // line. B: the reminder switch persists. C: exporting stamps «Última copia».
 // D: with a 31-day-old forest and no copy, ONE gentle toast offers the
 // download after the boot delay (opt-out respected by B's round-trip).
+// F (0.0.88): the envelope carries the harvests and import restores them.
+import fs from 'node:fs/promises';
 import { BASE, launchPage, ok, anyFailed } from './lib/harness.mjs';
 const { browser, page } = await launchPage();
 
@@ -91,6 +93,49 @@ const armed = await page.evaluate(async () => {
   return typeof row?.value?.lastBackupNudgeAt === 'number';
 });
 ok('E arm-first is silent', !quiet && armed, `toast=${quiet} armed=${armed}`);
+
+// F — «la cosecha» rides the envelope: export carries the harvests (the
+// demo backfill seeded them), a wipe loses them, import brings them home.
+const dlF = page.waitForEvent('download');
+await page.locator('button', { hasText: 'Exportar' }).click();
+const fileF = await (await dlF).path();
+const envelope = JSON.parse(await fs.readFile(fileF, 'utf8'));
+const exportedHarvests = envelope.data?.harvests?.length ?? 0;
+ok(
+  'F1 envelope carries harvests',
+  envelope.schemaVersion === 5 && exportedHarvests > 0,
+  `v=${envelope.schemaVersion} harvests=${exportedHarvests}`,
+);
+
+await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  await new Promise((res, rej) => {
+    const tx = db.transaction('harvests', 'readwrite');
+    tx.objectStore('harvests').clear();
+    tx.oncomplete = () => res();
+    tx.onerror = rej;
+  });
+  db.close();
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+// The import auto-downloads a pre-import copy first — swallow it.
+page.on('download', () => {});
+await page.locator('input[type="file"]').setInputFiles(fileF);
+await page.waitForTimeout(2500);
+const restored = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const rq = db.transaction('harvests', 'readonly').objectStore('harvests').getAll();
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = rej;
+  });
+  db.close();
+  return rows.length;
+});
+ok('F2 import restores the pantry', restored === exportedHarvests, `restored=${restored}/${exportedHarvests}`);
 
 console.log(`SUMMARY backup: ${anyFailed() ? 'OK=false' : 'ALL OK'}`);
 await browser.close();

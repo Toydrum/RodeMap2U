@@ -11,7 +11,13 @@ import { SyncBase } from '@app/db/schema';
 import { Ctx, requireGuardianOf } from '../authz';
 import { K, PutCommand, QueryCommand, RecordItem, getItem } from '../db';
 
-const STORES: ReadonlySet<string> = new Set<SyncStore>(['trees', 'nodes', 'checkins', 'sessions']);
+const STORES: ReadonlySet<string> = new Set<SyncStore>([
+  'trees',
+  'nodes',
+  'checkins',
+  'sessions',
+  'harvests',
+]);
 
 /**
  * Additive schema evolution flows through untouched (the server stores

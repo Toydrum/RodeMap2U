@@ -59,3 +59,11 @@ El almanaque es la lente de tiempo del bosque: los días como parcelitas, con ca
 - **«El caminito de hoy»**: los senderos diarios (rutinas como lavarse los dientes o la mochila) aparecen como piedritas de izquierda a derecha — el horario visual clásico. La piedra «siguiente» responde el ¿qué sigue? sin palabras; tocarla la hace florecer. Truco para pre-lectores: poner un emoji al inicio del título del paso («🦷 Lavarme los dientes») lo vuelve pictograma — elegirlos juntos es parte de la apropiación.
 - **Sin vergüenza estructural**: el caminito no muestra fracciones ni porcentajes, las piedras no se apagan al avanzar la tarde, y lo no caminado amanece limpio — no existe «ayer hiciste 2 de 5» en ningún lado. En el mes, los días vacíos se llaman barbecho, y una fecha pasada lleva solo una hojita 🍂 suave que abre una conversación, jamás un tache.
 
+## La cosecha en sesión y en casa 🫙
+
+Nació de feedback directo de un paciente con TDAH: la recompensa tiene que **verse y acumularse**. Cuando una rama florece, hay celebración inmediata (estallido de pétalos + la fruta cayendo del árbol) — el refuerzo llega EN el momento, que es donde el cerebro TDAH lo necesita (economía de fichas, inmediatez del reforzador).
+
+- **La fruta es un recuerdo, no una moneda**: lleva el nombre del logro, su árbol y su fecha, y tocarla te regresa a esa rama. Nunca se gasta, nunca se cambia por nada, nunca desbloquea nada — así el refuerzo informa («esto pasó y fue tuyo») sin volverse control («haz esto para ganar aquello»), que es donde las apps gamificadas suelen romperse.
+- **El frasco se llena a su ritmo**: aparece en la pradera con la primera fruta (nunca hay un frasco vacío mirándote en temporadas lentas), la acumulación se lee como racimo — sin barras de progreso, sin metas de llenado, sin comparaciones entre semanas ni meses.
+- **En sesión**: revisar el frasco juntos es un ejercicio de saboreo/reminiscencia — releer logros con nombre y fecha contradice el «nada de lo que hago sirve». Los pasitos de rutinas diarias (senderos) deliberadamente NO dan fruta: una fruta diaria por rutina sería una racha disfrazada.
+

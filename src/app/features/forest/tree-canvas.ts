@@ -11,7 +11,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Tree, TreeNode } from '../../core/db/schema';
+import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
+import { underDailyPath } from '../../core/harvest';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
@@ -25,7 +26,7 @@ import {
   hash,
   layoutTree,
 } from './tree-layout';
-import { FlowerSpec, flowerFor } from './flora';
+import { FlowerSpec, FruitSpec, flowerFor, fruitFor } from './flora';
 import { TreeForm, formFor } from './tree-forms';
 import {
   LeafDecoration,
@@ -41,6 +42,7 @@ import {
   woodFor,
 } from './tree-silhouette';
 import { FlowerGlyph } from './flower';
+import { FruitGlyph } from './fruit';
 import {
   CHAR_W,
   LABEL_BASELINE,
@@ -50,6 +52,18 @@ import {
   packLabels,
   wrapTitle,
 } from './tree-labels';
+
+/** One falling fruit — «la cosecha»'s one-shot bloom celebration. */
+interface FruitDrop {
+  key: string;
+  x: number;
+  y: number;
+  /** World-units distance from the bloomed tip down to the ground rest. */
+  fall: number;
+  /** Deterministic sideways arc (hash of the node id — rule 4). */
+  drift: number;
+  spec: FruitSpec;
+}
 
 interface EdgeView {
   id: string;
@@ -76,7 +90,7 @@ interface EdgeView {
  */
 @Component({
   selector: 'app-tree-canvas',
-  imports: [FlowerGlyph, PerchBody, RouterLink],
+  imports: [FlowerGlyph, FruitGlyph, PerchBody, RouterLink],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
   // Closes the little note letter when tapping anywhere else (never preventDefault).
@@ -178,6 +192,12 @@ export class TreeCanvas {
   private knownIds: Set<string> | null = null;
   private knownTreeId: string | null = null;
 
+  /** «La cosecha» (0.0.88): last seen status per node — the diff that plays
+   *  the fruit drop on a transition INTO achieved, whoever caused it
+   *  (bloomStep, the status picker, even a cross-tab write). */
+  private knownStatus: Map<string, NodeStatus> | null = null;
+  protected readonly fruitDrops = signal<FruitDrop[]>([]);
+
   protected readonly layout = computed(() => {
     const tree = this.tree();
     const roots = this.nodes.rootsOf(tree.id);
@@ -256,6 +276,24 @@ export class TreeCanvas {
     return woodFill(root, this.wood());
   }
 
+  /** One-shot fruit drop at a just-bloomed tip; DOM-removed at 2600ms (the
+   *  highlight-timeout precedent). Re-bloom replaces its own drop only —
+   *  nothing else moves (rule 4). */
+  private dropFruit(p: LayoutPoint): void {
+    const drop: FruitDrop = {
+      key: p.node.id,
+      x: p.x,
+      y: p.y,
+      fall: Math.max(24, this.groundY() - p.y - 8),
+      drift: (hash(p.node.id + ':caida') % 17) - 8,
+      spec: fruitFor(this.tree().accent, this.tree().id),
+    };
+    this.fruitDrops.update((list) => [...list.filter((d) => d.key !== drop.key), drop]);
+    setTimeout(() => {
+      this.fruitDrops.update((list) => list.filter((d) => d !== drop));
+    }, 2600);
+  }
+
   private readonly pointers = new Map<number, { x: number; y: number }>();
   private pinchStart: { dist: number; k: number; midX: number; midY: number; tx: number; ty: number } | null = null;
   private panStart: { x: number; y: number; tx: number; ty: number } | null = null;
@@ -274,6 +312,7 @@ export class TreeCanvas {
         this.knownTreeId = treeId;
         this.knownIds = null;
         this.bornThisSession.clear();
+        this.knownStatus = null;
       }
       const ids = new Set(this.layout().points.map((p) => p.node.id));
       if (this.knownIds) {
@@ -290,6 +329,27 @@ export class TreeCanvas {
         }
       }
       this.knownIds = ids;
+
+      // «La cosecha»: a branch that just BLOOMED drops its fruit — one
+      // modest drop, identical for every bloom, whoever flipped the status
+      // (bloomStep, the picker, a cross-tab write). Sendero pasitos bear no
+      // fruit (core/harvest.ts — one law with the jar), and only a
+      // transition INTO achieved plays; reopening stays quiet.
+      const statuses = new Map<string, NodeStatus>();
+      for (const p of this.layout().points) statuses.set(p.node.id, p.node.status);
+      if (this.knownStatus) {
+        const bloomed: LayoutPoint[] = [];
+        for (const p of this.layout().points) {
+          const prev = this.knownStatus.get(p.node.id);
+          if (!prev || prev === 'achieved' || p.node.status !== 'achieved') continue;
+          if (underDailyPath(p.node, this.nodes.byId())) continue;
+          bloomed.push(p);
+        }
+        if (bloomed.length) {
+          queueMicrotask(() => bloomed.forEach((p) => this.dropFruit(p)));
+        }
+      }
+      this.knownStatus = statuses;
     });
 
     // Frame ONCE per tree (id-keyed): renames and status flips must never

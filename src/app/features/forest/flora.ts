@@ -91,3 +91,83 @@ export function flowerFor(accent: AccentToken, seedId?: string): FlowerSpec {
   if (!seedId) return variants[0];
   return variants[hash(seedId + ':flora') % variants.length];
 }
+
+/**
+ * «La cosecha» (0.0.88): every species also bears its FRUIT. Same law as
+ * FLORA — the accent fixes the KIND (a manzano always drops manzanas; hue +
+ * silhouette carry recognition), the seed id picks one of three cousins
+ * that vary only ripeness/tint. Fruit palettes anchor to the FLOWER family
+ * hexes (not the --accent-* tokens — pine's accent is teal but its blooms
+ * are magenta, and the fruit sits next to the bloom). NEVER shown as a
+ * catalog or taxonomy: a fruit is labeled by its branch's words only.
+ */
+export type FruitShape =
+  | 'manzana'
+  | 'pera'
+  | 'arandanos'
+  | 'naranja'
+  | 'uvas'
+  | 'durazno'
+  | 'cerezas'
+  | 'moras';
+
+export interface FruitSpec {
+  shape: FruitShape;
+  /** Body fill. */
+  skin: string;
+  /** Outline — same stroke DNA as petal/petalEdge. */
+  skinEdge: string;
+  /** Cheek / dusty bloom / shoulder-light accent, used at low opacity. */
+  blush: string;
+}
+
+const FRUTAS: Record<AccentToken, FruitSpec[]> = {
+  moss: [
+    { shape: 'manzana', skin: '#c9d18e', skinEdge: '#96a35c', blush: '#dfae6b' },
+    { shape: 'manzana', skin: '#e3c878', skinEdge: '#b59b4a', blush: '#d9a441' },
+    { shape: 'manzana', skin: '#d4cc8a', skinEdge: '#a8a05a', blush: '#d98f6b' },
+  ],
+  sage: [
+    { shape: 'pera', skin: '#e8d381', skinEdge: '#c2a94f', blush: '#f4e6a8' },
+    { shape: 'pera', skin: '#d9d488', skinEdge: '#aeb055', blush: '#eef0c0' },
+    { shape: 'pera', skin: '#e5c973', skinEdge: '#b89740', blush: '#f2e0a0' },
+  ],
+  sky: [
+    { shape: 'arandanos', skin: '#7f9ccb', skinEdge: '#5c77a8', blush: '#cfdcf2' },
+    { shape: 'arandanos', skin: '#8aa5d2', skinEdge: '#6681b0', blush: '#d8e3f5' },
+    { shape: 'arandanos', skin: '#7690c4', skinEdge: '#54709e', blush: '#c6d5ee' },
+  ],
+  clay: [
+    { shape: 'naranja', skin: '#e8964f', skinEdge: '#c26f35', blush: '#f4c290' },
+    { shape: 'naranja', skin: '#eda964', skinEdge: '#d28844', blush: '#f6d0a2' },
+    { shape: 'naranja', skin: '#dd8348', skinEdge: '#b05e2c', blush: '#efb385' },
+  ],
+  lavender: [
+    { shape: 'uvas', skin: '#a98fd6', skinEdge: '#7f63b0', blush: '#d9cbf0' },
+    { shape: 'uvas', skin: '#9c81cf', skinEdge: '#7257a6', blush: '#d0c0ec' },
+    { shape: 'uvas', skin: '#b49ade', skinEdge: '#8a6fbc', blush: '#e2d6f4' },
+  ],
+  sand: [
+    { shape: 'durazno', skin: '#f0b26a', skinEdge: '#cf8b3f', blush: '#e08a94' },
+    { shape: 'durazno', skin: '#ecc06f', skinEdge: '#cb9a45', blush: '#d97a86' },
+    { shape: 'durazno', skin: '#eeaa5f', skinEdge: '#c98436', blush: '#e494a0' },
+  ],
+  rose: [
+    { shape: 'cerezas', skin: '#d16487', skinEdge: '#a84463', blush: '#f0b8ca' },
+    { shape: 'cerezas', skin: '#c7789b', skinEdge: '#9e5378', blush: '#eac3d2' },
+    { shape: 'cerezas', skin: '#dd7194', skinEdge: '#b24e6f', blush: '#f4c4d4' },
+  ],
+  pine: [
+    { shape: 'moras', skin: '#a94d81', skinEdge: '#7e3560', blush: '#d497bb' },
+    { shape: 'moras', skin: '#9e4377', skinEdge: '#742f57', blush: '#cd8db2' },
+    { shape: 'moras', skin: '#b3588c', skinEdge: '#88406a', blush: '#dba2c4' },
+  ],
+};
+
+/** Salt ':fruta' — distinct from ':flora', so a tree's fruit cousin never
+ *  correlates with its flower cousin. Fallback = moss (flowerFor's law). */
+export function fruitFor(accent: AccentToken, seedId?: string): FruitSpec {
+  const variants = FRUTAS[accent] ?? FRUTAS.moss;
+  if (!seedId) return variants[0];
+  return variants[hash(seedId + ':fruta') % variants.length];
+}

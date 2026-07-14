@@ -127,5 +127,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/almanaque/almanaque').then((m) => m.AlmanaquePage),
     title: 'RoadMap2U — Almanaque',
   },
+  {
+    path: 'cosecha',
+    canActivate: [authRequiredGate],
+    loadComponent: () => import('./features/cosecha/cosecha').then((m) => m.CosechaPage),
+    title: 'RoadMap2U — Cosecha',
+  },
   { path: '**', redirectTo: 'ahora' },
 ];

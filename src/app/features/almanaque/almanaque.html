@@ -38,7 +38,7 @@
                 <button
                   type="button"
                   class="alm-stone next"
-                  (click)="bloomStone(step)"
+                  (click)="bloomStone(step, $event)"
                   [attr.aria-label]="step.title"
                 >
                   <span class="stone-title">{{ step.title }}</span>

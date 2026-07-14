@@ -287,6 +287,20 @@
           </div>
           <span class="sr-live" aria-live="polite">{{ i18n.fill(i18n.t().forest.clearingDot, { n: page() + 1 }) }}</span>
         }
+
+        <!-- «El frasco»: the harvest jar arrives with the FIRST fruit (the
+             stream precedent — scenery earned by growth, no empty vessel
+             staring in slow seasons). Pull-based: no badges, no counts. -->
+        @if (harvests.newestFirst().length) {
+          <a
+            class="meadow-jar"
+            [class.arrived]="jarCue()"
+            routerLink="/cosecha"
+            [attr.aria-label]="i18n.t().cosecha.jarAria"
+          >
+            <app-meadow-jar [fruits]="harvests.newestFirst()" [label]="i18n.t().cosecha.jarLabel" />
+          </a>
+        }
       </div>
     } @else if (!creating()) {
       <div class="clearing container">

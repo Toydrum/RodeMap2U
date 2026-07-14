@@ -9,7 +9,7 @@ import { DB_NAME, DB_VERSION, LEGACY_DB_NAME } from './schema';
  * atomic multi-record writes (branch-on-miss depends on this).
  */
 
-export type StoreName = 'trees' | 'nodes' | 'checkins' | 'sessions' | 'meta';
+export type StoreName = 'trees' | 'nodes' | 'checkins' | 'sessions' | 'harvests' | 'meta';
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -50,6 +50,12 @@ export function openDb(): Promise<IDBDatabase> {
         const sessions = db.createObjectStore('sessions', { keyPath: 'id' });
         sessions.createIndex('byCreatedAt', 'createdAt');
       }
+      // v2 (DB_VERSION): «la cosecha» — the contains() guards make this a
+      // pure add on lived-in devices.
+      if (!db.objectStoreNames.contains('harvests')) {
+        const harvests = db.createObjectStore('harvests', { keyPath: 'id' });
+        harvests.createIndex('byHarvestedAt', 'harvestedAt');
+      }
       if (!db.objectStoreNames.contains('meta')) {
         db.createObjectStore('meta', { keyPath: 'key' });
       }
@@ -66,7 +72,7 @@ export function openDb(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-const ALL_STORES: StoreName[] = ['trees', 'nodes', 'checkins', 'sessions', 'meta'];
+const ALL_STORES: StoreName[] = ['trees', 'nodes', 'checkins', 'sessions', 'harvests', 'meta'];
 
 /** Meta sentinel: present ⇔ the legacy question is settled for this device. */
 const MIGRATED_KEY = 'legacy.migratedAt';

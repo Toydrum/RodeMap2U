@@ -1,5 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { CheckIn, ExportEnvelope, SCHEMA_VERSION, Settings, TimerSession, Tree, TreeNode } from '../db/schema';
+import {
+  CheckIn,
+  ExportEnvelope,
+  Harvest,
+  SCHEMA_VERSION,
+  Settings,
+  TimerSession,
+  Tree,
+  TreeNode,
+} from '../db/schema';
 import { clear, getAll, putMany } from '../db/idb';
 import { broadcastChange } from '../db/broadcast';
 import { SyncService } from '../sync/sync.service';
@@ -7,6 +16,7 @@ import { TreesRepo } from './trees.repo';
 import { NodesRepo } from './nodes.repo';
 import { CheckinsRepo } from './checkins.repo';
 import { SessionsRepo } from './sessions.repo';
+import { HarvestsRepo } from './harvests.repo';
 import { SettingsService } from './settings.service';
 
 @Injectable({ providedIn: 'root' })
@@ -15,22 +25,24 @@ export class BackupService {
   private readonly nodes = inject(NodesRepo);
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
+  private readonly harvests = inject(HarvestsRepo);
   private readonly settings = inject(SettingsService);
   private readonly sync = inject(SyncService);
 
   async buildEnvelope(): Promise<ExportEnvelope> {
     // Read from disk (includes tombstones — a backup is a full copy).
-    const [trees, nodes, checkins, sessions] = await Promise.all([
+    const [trees, nodes, checkins, sessions, harvests] = await Promise.all([
       getAll<Tree>('trees'),
       getAll<TreeNode>('nodes'),
       getAll<CheckIn>('checkins'),
       getAll<TimerSession>('sessions'),
+      getAll<Harvest>('harvests'),
     ]);
     return {
       app: 'roadmap2u',
       schemaVersion: SCHEMA_VERSION,
       exportedAt: new Date().toISOString(),
-      data: { trees, nodes, checkins, sessions, settings: this.settings.settings() },
+      data: { trees, nodes, checkins, sessions, harvests, settings: this.settings.settings() },
     };
   }
 
@@ -72,7 +84,12 @@ export class BackupService {
     const nodes = data.nodes ?? [];
     const checkins = data.checkins ?? [];
     const sessions = data.sessions ?? [];
-    for (const list of [trees, nodes, checkins, sessions]) {
+    // Pre-v5 backups simply lack harvests — imported as an empty pantry
+    // (the backfill sentinel is device state and does NOT re-run; restored
+    // achieved branches without their harvests stay fruitless until they
+    // re-achieve, which is honest: the backup predates the jar).
+    const harvests = data.harvests ?? [];
+    for (const list of [trees, nodes, checkins, sessions, harvests]) {
       if (!Array.isArray(list) || list.some((r) => typeof r?.id !== 'string')) {
         throw new Error('backup data is malformed');
       }
@@ -87,22 +104,31 @@ export class BackupService {
       nodes: this.nodes.all().map((r) => r.id),
       checkins: this.checkins.all().map((r) => r.id),
       sessions: this.sessions.all().map((r) => r.id),
+      harvests: this.harvests.all().map((r) => r.id),
     };
 
     await this.download('roadmap2u-pre-import');
 
-    await Promise.all([clear('trees'), clear('nodes'), clear('checkins'), clear('sessions')]);
+    await Promise.all([
+      clear('trees'),
+      clear('nodes'),
+      clear('checkins'),
+      clear('sessions'),
+      clear('harvests'),
+    ]);
     await Promise.all([
       putMany('trees', trees),
       putMany('nodes', nodes),
       putMany('checkins', checkins),
       putMany('sessions', sessions),
+      putMany('harvests', harvests),
     ]);
 
     this.trees.resetTo(trees);
     this.nodes.resetTo(nodes);
     this.checkins.resetTo(checkins);
     this.sessions.resetTo(sessions);
+    this.harvests.resetTo(harvests);
     if (data.settings) {
       // Preferences travel; DEVICE STATE does not (same law that keeps
       // auth/sync out of the envelope): the whispers toggle is THIS
@@ -130,6 +156,7 @@ export class BackupService {
     broadcastChange({ store: 'nodes', ids: union(nodes, removedIds.nodes) });
     broadcastChange({ store: 'checkins', ids: union(checkins, removedIds.checkins) });
     broadcastChange({ store: 'sessions', ids: union(sessions, removedIds.sessions) });
+    broadcastChange({ store: 'harvests', ids: union(harvests, removedIds.harvests) });
 
     // An explicit restore must WIN over the cloud — without this, the next
     // pull silently resurrects whatever the backup rolled back (cloud revs

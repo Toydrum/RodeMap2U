@@ -353,6 +353,26 @@
       </g>
     }
 
+    <!-- «La cosecha»: the one-shot fruit drop of a just-bloomed branch.
+         The outer group carries the attr translate and animates OPACITY
+         only (a transform animation here would clobber the translate);
+         fall and drift live on the inner groups. -->
+    @for (drop of fruitDrops(); track drop.key) {
+      <g
+        class="fruit-drop"
+        aria-hidden="true"
+        [attr.transform]="'translate(' + drop.x + ' ' + drop.y + ')'"
+        [style.--fall]="drop.fall + 'px'"
+        [style.--drift]="drop.drift + 'px'"
+      >
+        <g class="fruit-fall">
+          <g class="fruit-swing">
+            <g appFruit [fruit]="drop.spec" [scale]="0.9" />
+          </g>
+        </g>
+      </g>
+    }
+
     <!-- Focused name — the FULL title, painted last (on top). Tabbing shows
          it here instead of reflowing the packed label field. -->
     @if (focusTag(); as tag) {

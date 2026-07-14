@@ -6,6 +6,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
+import { BloomBurstService } from '../../shared/ui/bloom-burst';
 import { FEELING_EMOJI, Tree, TreeNode } from '../../core/db/schema';
 import { dayOf, today } from '../../core/time';
 import { hash } from '../forest/tree-layout';
@@ -72,6 +73,7 @@ export class AlmanaquePage {
   private readonly checkins = inject(CheckinsRepo);
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
+  private readonly burst = inject(BloomBurstService);
   private readonly router = inject(Router);
 
   /* ------------------------------------------------------------- Hoy -- */
@@ -145,7 +147,9 @@ export class AlmanaquePage {
    *  with the undo law (re-read the LIVE record; never re-save a capture). */
   private bloomingStone = false;
 
-  protected async bloomStone(step: TreeNode): Promise<void> {
+  protected async bloomStone(step: TreeNode, ev?: Event): Promise<void> {
+    // Anchor captured before the await — currentTarget nulls after dispatch.
+    const anchor = (ev?.currentTarget as Element) ?? null;
     if (this.bloomingStone) return;
     const live = this.nodes.byId().get(step.id);
     if (!live || live.deletedAt || live.status === 'achieved') return;
@@ -155,6 +159,12 @@ export class AlmanaquePage {
       await this.nodes.setStatus(live, 'achieved');
     } finally {
       this.bloomingStone = false;
+    }
+    // «El estallido» celebrates the ACT (equal dignity — senderos too);
+    // fruit stays out: stones are sendero pasitos and the jar never lies.
+    const tree = this.trees.byId().get(step.treeId);
+    if (tree) {
+      this.burst.burstAt(anchor, flowerFor(tree.accent, tree.id));
     }
     this.toast.show(
       {

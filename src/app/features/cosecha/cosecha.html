@@ -1,0 +1,71 @@
+<div class="container page">
+  <header class="head">
+    <button type="button" class="btn btn-ghost" (click)="goBack()">← {{ i18n.t().common.back }}</button>
+  </header>
+
+  <div class="hero">
+    <h1>{{ i18n.t().cosecha.title }}</h1>
+    <p class="intro">{{ i18n.t().cosecha.subtitle }}</p>
+    <div class="hero-jar" aria-hidden="true">
+      <app-meadow-jar [fruits]="harvests.newestFirst()" [size]="1.8" />
+    </div>
+    @if (total()) {
+      <p class="total-line">{{ i18n.plural(total(), i18n.t().cosecha.total) }}</p>
+    }
+  </div>
+
+  <app-hint-chip surface="cosecha" [text]="i18n.t().hints.cosecha" />
+
+  @if (shelves().length) {
+    @for (shelf of shelves(); track shelf.key) {
+      <section class="part cosecha-month">
+        <h2 class="part-title">
+          <span aria-hidden="true">🫙</span>
+          {{ i18n.fill(i18n.t().cosecha.monthTitle, { month: shelf.monthWord }) }}
+        </h2>
+        <ol class="steps">
+          @for (row of shelf.rows; track row.harvest.id) {
+            <li class="card cosecha-card">
+              @if (row.live) {
+                <button type="button" class="cosecha-row" (click)="openBranch(row)">
+                  <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                    <g appFruit [fruit]="row.spec" [scale]="0.92" />
+                  </svg>
+                  <div class="body">
+                    <strong class="row-title">{{ row.harvest.title }}</strong>
+                    <div class="row-meta">
+                      <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                        {{ row.harvest.treeName }}
+                      </span>
+                      <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                    </div>
+                  </div>
+                  <span class="arrow" aria-hidden="true">→</span>
+                </button>
+              } @else {
+                <!-- The branch has been let go or folded away — the memory
+                     stays, the door quietly doesn't (never a dead door). -->
+                <div class="cosecha-row still">
+                  <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                    <g appFruit [fruit]="row.spec" [scale]="0.92" />
+                  </svg>
+                  <div class="body">
+                    <strong class="row-title">{{ row.harvest.title }}</strong>
+                    <div class="row-meta">
+                      <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                        {{ row.harvest.treeName }}
+                      </span>
+                      <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      </section>
+    }
+  } @else {
+    <p class="part-empty">{{ i18n.t().cosecha.empty }} {{ i18n.t().cosecha.emptyHint }}</p>
+  }
+</div>

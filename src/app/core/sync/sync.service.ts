@@ -3,6 +3,7 @@ import { API_CLIENT } from '../api/api-client';
 import { ApiError, ApiErrorCode, SyncRecord, SyncStore, lwwBeats } from '../api/contracts';
 import {
   CheckIn,
+  Harvest,
   SCHEMA_VERSION,
   SyncBase,
   TimerSession,
@@ -18,6 +19,7 @@ import { TreesRepo } from '../repos/trees.repo';
 import { NodesRepo } from '../repos/nodes.repo';
 import { CheckinsRepo } from '../repos/checkins.repo';
 import { SessionsRepo } from '../repos/sessions.repo';
+import { HarvestsRepo } from '../repos/harvests.repo';
 
 /**
  * «Conectar mi bosque» — the sync engine. Strictly OPT-IN: nothing leaves the
@@ -67,6 +69,7 @@ export class SyncService {
   private readonly nodes = inject(NodesRepo);
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
+  private readonly harvests = inject(HarvestsRepo);
 
   private readonly linkSignal = signal<AccountLinkSnapshot | null>(null);
   private readonly busySignal = signal(false);
@@ -333,6 +336,7 @@ export class SyncService {
       ...this.gather('nodes', this.nodes),
       ...this.gather('checkins', this.checkins),
       ...this.gather('sessions', this.sessions),
+      ...this.gather('harvests', this.harvests),
     ];
   }
 
@@ -341,7 +345,10 @@ export class SyncService {
     const dirty = this.dirtyIds.get(store);
     for (const record of repo.byId().values()) {
       if (record.updatedAt > this.watermark || dirty?.has(record.id)) {
-        out.push({ store, record: record as unknown as Tree | TreeNode | CheckIn | TimerSession });
+        out.push({
+          store,
+          record: record as unknown as Tree | TreeNode | CheckIn | TimerSession | Harvest,
+        });
       }
     }
     return out;
@@ -409,6 +416,8 @@ export class SyncService {
         return this.checkins as unknown as RecordsRepo<SyncBase>;
       case 'sessions':
         return this.sessions as unknown as RecordsRepo<SyncBase>;
+      case 'harvests':
+        return this.harvests as unknown as RecordsRepo<SyncBase>;
     }
   }
 

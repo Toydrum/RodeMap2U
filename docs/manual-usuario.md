@@ -244,6 +244,15 @@ Los días de tu bosque, **solo para mirar** — nunca una agenda. Vive en la bar
 - Si una fecha amable pasó sin resolverse, su capullo **se queda en su día** con una hojita 🍂 suave — nunca rojo, nunca «atrasado». Tocar su día abre la página del día y de ahí llegas a su rama; la conversación digna de siempre te espera en el aviso 🍂 de la sección HOY (y en Ahora, como siempre).
 - Tocar cualquier día abre **la página del día**; tocar cualquier rama te lleva a su árbol. El almanaque nunca sustituye al bosque — solo lo mira desde los días.
 
+# 7c. La cosecha 🫙
+
+Cuando una rama florece, la app lo celebra ahí mismo: un **estallido de pétalos** del color de tu árbol justo donde tocaste, y en el árbol se ve **caer una fruta** hasta sus raíces. Cada árbol da su propia fruta (manzanas, peras, cerezas… según su especie).
+
+- Esa fruta se guarda en **el frasco de la cosecha**, un frasquito de vidrio que aparece en tu pradera **con tu primera fruta** (abajo a la izquierda). Verlo llenarse es ver todo lo que has logrado.
+- Tocar el frasco abre **La cosecha**: tus frutas juntitas por mes («La cosecha de julio»), cada una con el nombre de su rama y su fecha. Tocar una fruta te lleva a su rama.
+- Las frutas son **recuerdos**: se quedan en el frasco aunque después reabras, guardes o sueltes la rama. Nada se gasta, nada se pierde, nada se compara — el frasco solo junta lo bueno.
+- Los pasitos de un **sendero** no dan fruta (su celebración es el caminito de cada día); el sendero completo, cuando florece entero, sí deja la suya.
+
 # 8. Sesiones de enfoque
 
 En la pestaña **Enfoque** (o desde cualquier rama con *"Sesión de enfoque aquí"*, o con el **⏳** en la cabecera del árbol — llega con tu rama 📍 ya elegida):

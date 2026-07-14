@@ -20,7 +20,7 @@ import {
   UserProfile,
   lwwBeats,
 } from './contracts';
-import { CheckIn, ExportEnvelope, SCHEMA_VERSION, TimerSession, Tree, TreeNode } from '../db/schema';
+import { CheckIn, ExportEnvelope, Harvest, SCHEMA_VERSION, TimerSession, Tree, TreeNode } from '../db/schema';
 import { AuthProvider } from '../auth/auth-provider';
 import { USERNAME_PATTERN } from '../auth/auth-types';
 import { parseMockToken } from '../auth/mock-auth.provider';
@@ -169,6 +169,7 @@ export class MockApi implements ApiClient {
         nodes: of<TreeNode>('nodes'),
         checkins: of<CheckIn>('checkins'),
         sessions: of<TimerSession>('sessions'),
+        harvests: of<Harvest>('harvests'),
         settings: null, // device preferences never reach the cloud
       },
     };
@@ -586,7 +587,7 @@ export class MockApi implements ApiClient {
     if (typeof req.schemaVersion !== 'number' || req.schemaVersion > SCHEMA_VERSION) {
       throw new ApiError('SYNC_TOO_OLD');
     }
-    const STORES: readonly string[] = ['trees', 'nodes', 'checkins', 'sessions'];
+    const STORES: readonly string[] = ['trees', 'nodes', 'checkins', 'sessions', 'harvests'];
 
     const applied: string[] = [];
     const rejected: { id: string; reason: 'STALE_REV' }[] = [];

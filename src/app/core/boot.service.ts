@@ -3,6 +3,7 @@ import { TreesRepo } from './repos/trees.repo';
 import { NodesRepo } from './repos/nodes.repo';
 import { CheckinsRepo } from './repos/checkins.repo';
 import { SessionsRepo } from './repos/sessions.repo';
+import { HarvestsRepo } from './repos/harvests.repo';
 import { SettingsService } from './repos/settings.service';
 import { onDbChange } from './db/broadcast';
 import { storageAvailable } from './db/idb';
@@ -16,6 +17,7 @@ export class BootService {
   private readonly nodes = inject(NodesRepo);
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
+  private readonly harvests = inject(HarvestsRepo);
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
@@ -28,6 +30,7 @@ export class BootService {
       this.nodes.load(),
       this.checkins.load(),
       this.sessions.load(),
+      this.harvests.load(),
       this.settings.load(),
     ]);
 
@@ -44,11 +47,16 @@ export class BootService {
         : store === 'nodes' ? this.nodes
         : store === 'checkins' ? this.checkins
         : store === 'sessions' ? this.sessions
+        : store === 'harvests' ? this.harvests
         : null;
       void repo?.refreshFromDisk(ids);
     });
 
     await this.maybeSeedDemo();
+
+    // «La cosecha» v5 wake-up: AFTER the demo seed so a seeded showcase
+    // forest gets its pantry too. One-time, sentinel-sealed.
+    await this.harvests.backfillIfNeeded(this.nodes.byId(), this.trees.byId());
 
     // Memory-only degrade must never be SILENT: an empty forest over an
     // intact disk store reads as data loss, and work done in this session

@@ -117,5 +117,77 @@ await fresh.close();
 console.log(`invariants: pageErrors=${pageErrors.length} | OK=${pageErrors.length === 0}`);
 if (pageErrors.length) console.log(pageErrors.join('\n'));
 
+// E — the 0.0.88 DB upgrade: a LIVED-IN device (roadmap2u at DB v1, no
+// harvests store, one achieved branch) boots the new app → v2 adds the
+// harvests store, the backfill seeds the pantry, the forest is intact.
+{
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  const ctxErrors = [];
+  p.on('pageerror', (error) => ctxErrors.push(String(error)));
+  await p.goto(`${BASE}/manifest.webmanifest`, { waitUntil: 'domcontentloaded' });
+  await p.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const now = Date.now();
+        const open = indexedDB.open('roadmap2u', 1);
+        open.onupgradeneeded = () => {
+          const db = open.result;
+          db.createObjectStore('trees', { keyPath: 'id' });
+          db.createObjectStore('nodes', { keyPath: 'id' }).createIndex('byTree', 'treeId');
+          db.createObjectStore('checkins', { keyPath: 'id' }).createIndex('byCreatedAt', 'createdAt');
+          db.createObjectStore('sessions', { keyPath: 'id' }).createIndex('byCreatedAt', 'createdAt');
+          db.createObjectStore('meta', { keyPath: 'key' });
+        };
+        open.onsuccess = () => {
+          const db = open.result;
+          const tx = db.transaction(['trees', 'nodes', 'meta'], 'readwrite');
+          tx.objectStore('trees').put({
+            id: 'v1-tree', name: 'Roble vivido', accent: 'sage', order: 10,
+            currentNodeId: null, archivedAt: null,
+            createdAt: now, updatedAt: now, rev: 1, deletedAt: null,
+          });
+          tx.objectStore('nodes').put({
+            id: 'v1-bloom', treeId: 'v1-tree', parentId: null, title: 'Meta lograda',
+            note: '', status: 'achieved', order: 10, targetDate: null, achievedAt: now,
+            branchedAt: null, origin: 'planned', archivedAt: null,
+            createdAt: now, updatedAt: now, rev: 1, deletedAt: null,
+          });
+          tx.objectStore('meta').put({ key: 'settings', onboarded: true, lastCheckInAt: now });
+          tx.objectStore('meta').put({ key: 'legacy.migratedAt', at: now, how: 'lived-in' });
+          tx.oncomplete = () => { db.close(); resolve(true); };
+          tx.onerror = () => reject(tx.error);
+        };
+        open.onerror = () => reject(open.error);
+      }),
+  );
+  await p.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(1200);
+  const upgraded = await p.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const open = indexedDB.open('roadmap2u');
+        open.onsuccess = () => {
+          const db = open.result;
+          const hasStore = db.objectStoreNames.contains('harvests');
+          if (!hasStore) { db.close(); resolve({ hasStore, version: db.version, rows: -1 }); return; }
+          const req = db.transaction('harvests', 'readonly').objectStore('harvests').getAll();
+          req.onsuccess = () => { const rows = req.result.length; db.close(); resolve({ hasStore, version: db.version, rows }); };
+          req.onerror = () => { db.close(); resolve({ hasStore, version: db.version, rows: -2 }); };
+        };
+        open.onerror = () => resolve({ hasStore: false, version: -1, rows: -3 });
+      }),
+  );
+  const jarE = await p.locator('.meadow-jar').count();
+  const treeVisible = (await p.locator('.plot').allTextContents()).some((t) => t.includes('Roble vivido'));
+  const okE =
+    upgraded.hasStore && upgraded.version === 2 && upgraded.rows === 1 &&
+    jarE === 1 && treeVisible && ctxErrors.length === 0;
+  console.log(
+    `E lived-in v1→v2: store=${upgraded.hasStore} v=${upgraded.version} backfilled=${upgraded.rows} jar=${jarE} tree=${treeVisible} errors=${ctxErrors.length} | OK=${okE}`,
+  );
+  await ctx.close();
+}
+
 await browser.close();
 console.log('migration done');

@@ -5,9 +5,12 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
+import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { ESTIMATE_CHOICES, EstimateMin, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
+import { BloomBurstService } from '../../shared/ui/bloom-burst';
+import { flowerFor } from '../forest/flora';
 import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
@@ -41,6 +44,8 @@ export class NodeDetail {
   protected readonly sessions = inject(SessionsRepo);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly harvests = inject(HarvestsRepo);
+  private readonly burst = inject(BloomBurstService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly lights = LIGHTS;
@@ -156,8 +161,35 @@ export class NodeDetail {
     }
   }
 
-  protected async setStatus(status: NodeStatus): Promise<void> {
-    if (status !== this.node().status) await this.nodes.setStatus(this.node(), status);
+  /** The picker celebrates a bloom exactly like bloomStep does (0.0.88 —
+   *  it used to be SILENT: the same act celebrated or not depending on
+   *  which control was tapped, a predictability wound). The picker itself
+   *  is the undo affordance, so the toast carries no action; reopening
+   *  stays quiet. */
+  protected async setStatus(status: NodeStatus, ev?: Event): Promise<void> {
+    // Capture the anchor BEFORE any await — the DOM nulls currentTarget the
+    // moment the synchronous dispatch ends (the burst anchored to nothing
+    // for a day).
+    const anchor = (ev?.currentTarget as Element) ?? null;
+    if (status === this.node().status) return;
+    await this.nodes.setStatus(this.node(), status);
+    if (status === 'achieved') {
+      this.celebrateBloom(this.node(), anchor);
+      this.toast.show({
+        message: this.i18n.fill(this.i18n.t().ahora.bloomToast, { title: this.node().title }),
+      });
+    }
+  }
+
+  /** One celebration voice for every bloom in this sheet: the foreground
+   *  petal burst (the canvas fruit drop plays behind on its own diff) plus
+   *  the pantry mint. Visits burst but never mint — the pantry is the
+   *  owner's, not the visitor's. */
+  private celebrateBloom(node: TreeNode, anchor: Element | null): void {
+    this.burst.burstAt(anchor, flowerFor(this.tree().accent, this.tree().id));
+    if (!this.visiting) {
+      void this.harvests.recordBloom(node, this.tree(), this.nodes.byId());
+    }
   }
 
   /** «La luz» lives only on live branches (seed/growing) — a stale value on
@@ -248,8 +280,10 @@ export class NodeDetail {
   /** Blooming a pasito is an unambiguous "done!" — celebrate it and offer
    *  the next move right at the dopamine peak: on an ordered path that is
    *  the NEXT step; otherwise, planting another tiny one. */
-  protected async bloomStep(child: TreeNode): Promise<void> {
+  protected async bloomStep(child: TreeNode, ev?: Event): Promise<void> {
+    const anchor = (ev?.currentTarget as Element) ?? null;
     await this.nodes.setStatus(child, 'achieved');
+    this.celebrateBloom(child, anchor);
     const next = this.flowSteps()
       ? this.children().find((c) => c.status === 'seed' || c.status === 'growing')
       : null;

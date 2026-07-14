@@ -1,0 +1,131 @@
+.page {
+  padding: 1rem 0 2.4rem;
+}
+
+.head {
+  margin-bottom: 0.4rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 1.4rem;
+
+  h1 {
+    margin-bottom: 0.2rem;
+  }
+
+  .intro {
+    color: var(--text-dim);
+    max-width: 44ch;
+    margin-inline: auto;
+  }
+
+  .hero-jar {
+    margin-top: 0.9rem;
+  }
+
+  /* One quiet lifetime sentence — never windowed, never charted. */
+  .total-line {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+}
+
+.part {
+  margin-bottom: 1.7rem;
+}
+
+.part-title {
+  font-size: 1.02rem;
+  margin-bottom: 0.6rem;
+}
+
+.part-empty {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 0.2rem 0.2rem 0;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.cosecha-card {
+  padding: 0.9rem 1.05rem;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+
+  &:has(.cosecha-row:not(.still)):hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+}
+
+.cosecha-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &.still {
+    cursor: default;
+  }
+
+  .row-fruit {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+  }
+
+  .body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .row-title {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .row-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+  }
+
+  .tree-chip {
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 0.05rem 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    max-width: 22ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .when {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+  }
+
+  .arrow {
+    color: var(--text-faint);
+    margin-top: 0.15rem;
+  }
+}

@@ -161,6 +161,78 @@
   }
 }
 
+/* «La cosecha»: the one-shot fruit drop. The outer group animates OPACITY
+   only (its attr transform carries the world position); the fall rides
+   .fruit-fall, the sideways arc rides .fruit-swing. Equal dignity law:
+   one modest drop, identical for every bloom, forever. */
+.fruit-drop {
+  pointer-events: none;
+  animation: fruit-rest 2.6s ease both;
+
+  .fruit-fall {
+    animation: fruit-fall 1s 0.3s both;
+  }
+
+  .fruit-swing {
+    animation: fruit-drift 1s ease-out 0.3s both;
+  }
+}
+
+@keyframes fruit-rest {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fruit-fall {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.85, 0.4);
+  }
+  62% {
+    transform: translateY(var(--fall));
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+  80% {
+    transform: translateY(calc(var(--fall) - 9px));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5);
+  }
+  100% {
+    transform: translateY(var(--fall));
+  }
+}
+
+@keyframes fruit-drift {
+  to {
+    transform: translateX(var(--drift));
+  }
+}
+
+/* Reduced motion: the fruit simply appears at rest by the roots — the
+   reward exists for reduce-motion users too. */
+:host-context(.reduce-motion) .fruit-drop {
+  animation: soft-appear 0.2s ease both, fruit-rest 2.6s ease both;
+
+  .fruit-fall {
+    animation: none;
+    transform: translateY(var(--fall));
+  }
+
+  .fruit-swing {
+    animation: none;
+    transform: translateX(var(--drift));
+  }
+}
+
 .node {
   cursor: pointer;
   outline: none;

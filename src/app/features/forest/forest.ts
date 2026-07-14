@@ -24,11 +24,13 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
+import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
+import { MeadowJar } from './jar';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -47,7 +49,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
+  imports: [RouterLink, MiniTree, MeadowJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -63,7 +65,14 @@ export class ForestPage {
   protected readonly i18n = inject(I18nService);
   protected readonly trees = inject(TreesRepo);
   protected readonly nodes = inject(NodesRepo);
+  protected readonly harvests = inject(HarvestsRepo);
   protected readonly accents = ACCENTS;
+
+  /** «La cosecha» arrival cue — session-scoped like bornThisSession: when
+   *  the pantry grows while the app is open, the jar wiggles once on the
+   *  next meadow paint. No cross-session watermark, no badges, ever. */
+  private knownHarvestCount: number | null = null;
+  protected readonly jarCue = signal(false);
 
   protected readonly creating = signal(false);
   protected readonly newName = signal('');
@@ -88,6 +97,19 @@ export class ForestPage {
       const params = { ...this.route.snapshot.queryParams, plant: null };
       void this.router.navigate([], { queryParams: params, replaceUrl: true });
     }
+
+    // The jar wiggles once when a fruit arrives THIS session.
+    effect(() => {
+      const count = this.harvests.all().length;
+      const prev = this.knownHarvestCount;
+      this.knownHarvestCount = count;
+      if (prev !== null && count > prev) {
+        queueMicrotask(() => {
+          this.jarCue.set(true);
+          setTimeout(() => this.jarCue.set(false), 900);
+        });
+      }
+    });
 
     // The stream's on-screen geometry moves with the window — keep the
     // dry-feet clamp honest across resizes.

@@ -4,15 +4,19 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v4: additive TreeNode.priority («la luz» — optional; absent ≡ steady
+/** v5: NEW `harvests` store («la cosecha» 0.0.88) — the first new record
+ *  type since launch. Older backups simply lack data.harvests (imported as
+ *  empty; the backfill sentinel reconstructs the pantry from achieved
+ *  branches). DB_VERSION 2 creates the object store on lived-in devices.
+ *  v4: additive TreeNode.priority («la luz» — optional; absent ≡ steady
  *  default). Same policy as v2/v3: no migration pass, older backups import
  *  cleanly, newer backups are refused by older apps.
  *  v3: additive TreeNode.flow (optional — absent ≡ 'free'; 'steps' marks an
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 4;
-export const DB_VERSION = 1;
+export const SCHEMA_VERSION = 5;
+export const DB_VERSION = 2;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
  * storage identifiers moved with it. Two legacy literals remain FOREVER:
@@ -132,6 +136,36 @@ export interface TreeNode extends SyncBase {
    *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
    *  is the forever-default; `null` clears an earlier choice. */
   priority?: NodePriority | null;
+}
+
+/**
+ * «La cosecha» (0.0.88) — one fruit per bloomed branch, persisted at the
+ * moment of the bloom. THE PANTRY REGISTER: a harvest is a MEMORY of an
+ * achievement and survives reopen/archive/delete (like Trail footprints),
+ * while the almanaque/meadow keep showing only what STANDS — two registers,
+ * both deliberate (owner decision 2026-07-14). Laws: fruits are never
+ * spendable, never exchangeable, never gate anything; sendero daily steps
+ * never bear fruit (a durable fruit minted daily is a streak in a costume).
+ * Deterministic id 'h:' + nodeId — one row per branch, minting idempotent
+ * (status-toggling can never farm fruit); a re-achieve re-stamps
+ * harvestedAt + refreshes the snapshots (the row remembers the latest
+ * season). Minting happens ONLY at the user-action layer — sync, import
+ * and the daily sweep never mint.
+ */
+export interface Harvest extends SyncBase {
+  nodeId: string;
+  treeId: string;
+  /** Snapshots at harvest time — the memory survives rename/archive/delete. */
+  treeName: string;
+  accent: AccentToken;
+  title: string;
+  /** The branch's achievedAt at mint. */
+  harvestedAt: number;
+}
+
+/** The one place the harvest id law lives. */
+export function harvestIdFor(nodeId: string): string {
+  return 'h:' + nodeId;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
@@ -270,6 +304,8 @@ export interface ExportEnvelope {
     nodes: TreeNode[];
     checkins: CheckIn[];
     sessions: TimerSession[];
+    /** Absent on pre-v5 backups — imported as empty, never refused. */
+    harvests?: Harvest[];
     settings: Settings | null;
   };
 }

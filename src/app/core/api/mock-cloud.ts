@@ -1,4 +1,4 @@
-import { CheckIn, Tree, TreeNode, TimerSession } from '../db/schema';
+import { CheckIn, Harvest, Tree, TreeNode, TimerSession } from '../db/schema';
 import { GuardianLinkKind, SyncStore, UserProfile } from './contracts';
 
 /**
@@ -78,7 +78,7 @@ export interface MockRecordRow {
   key: string;
   ownerId: string;
   store: SyncStore;
-  record: Tree | TreeNode | CheckIn | TimerSession;
+  record: Tree | TreeNode | CheckIn | TimerSession | Harvest;
   /** Server receive order — the change-feed cursor (kv 'changeSeq'). */
   seq: number;
   syncedAt: number;

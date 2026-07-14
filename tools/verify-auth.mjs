@@ -18,7 +18,9 @@ const idbGet = (store, key) =>
   page.evaluate(
     ([s, k]) =>
       new Promise((resolve, reject) => {
-        const open = indexedDB.open('roadmap2u', 1);
+        // No explicit version — read at whatever the app created (a pinned
+        // version breaks on every DB_VERSION bump; it did on v2/0.0.88).
+        const open = indexedDB.open('roadmap2u');
         open.onsuccess = () => {
           const db = open.result;
           const os = db.transaction(s, 'readonly').objectStore(s);
