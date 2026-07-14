@@ -235,7 +235,7 @@ Tocas una idea y se escribe sola (editable); puedes abrir hasta **cinco caminos*
 
 # 7b. El almanaque 🌾
 
-Los días de tu bosque, **solo para mirar** — nunca una agenda. Se abre con la espiguita 🌾 en la cabecera del bosque (o desde Ajustes).
+Los días de tu bosque, **solo para mirar** — nunca una agenda. Vive en la barra de abajo: la espiga 🌾 de en medio, entre tu bosque y el enfoque (también desde Ajustes).
 
 - **Hoy**, arriba de todo: si alguna rama tiene sendero 🌄, aparece **«el caminito de hoy»** — sus pasos como piedritas de izquierda a derecha. La piedra que dice «siguiente» se puede tocar y florece ahí mismo (con «Deshacer»). Lo que quede sin caminar, mañana amanece limpio: el caminito no guarda cuentas ni rachas.
 - También en Hoy: tus **ramas de hoy** 🌅, la conversación de fechas 🍂 si hay alguna pendiente, y **«lo que se acerca»** — las próximas fechas amables dichas en palabras suaves («mañana», «la próxima semana»), nunca con contadores.

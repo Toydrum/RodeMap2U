@@ -54,6 +54,7 @@ export const ES = {
   nav: {
     ahora: 'Ahora',
     forest: 'Mi bosque',
+    almanaque: 'Almanaque',
     timer: 'Enfoque',
     settings: 'Ajustes',
     checkIn: 'Check-in',
@@ -152,7 +153,6 @@ export const ES = {
     title: 'El almanaque',
     subtitle: 'Los días de tu bosque, para mirar con calma lo que viene. Aquí nada apura.',
     settingsLink: 'El almanaque',
-    doorLabel: 'Almanaque',
     settingsHint: 'Tus días: lo que quiere florecer y lo que ya floreció',
     hint: 'Un almanaque de jardín: muestra lo que quiere florecer y lo que ya floreció. No agenda nada — solo te deja mirar.',
     todayIs: 'Hoy es {date}',
@@ -696,7 +696,7 @@ export const ES = {
       {
         icon: '🌾',
         title: 'El almanaque',
-        body: 'En tu bosque vive un almanaque de jardín (la espiguita 🌾 junto al buscador; también en Ajustes): los días de tu bosque, solo para mirar. Arriba está HOY: si alguna rama tiene sendero 🌄, ahí aparece «el caminito de hoy» — piedritas de izquierda a derecha; tocas la que dice «siguiente» y florece ahí mismo (con «Deshacer», como todo). Lo que quede sin caminar, mañana amanece limpio — el caminito no guarda cuentas. Debajo, el mes como parcelitas de tierra: capullos donde algo quiere florecer, flores 🌸 donde algo floreció, nudos dorados donde brotaron caminos nuevos, huellitas 🐾 donde te dejaste un check-in. Los días sin marcas son barbecho — tierra descansando, jamás un pendiente. Si una fecha amable pasó, su capullo se queda en su día con una hojita 🍂 suave (nunca rojo, nunca «atrasado») y la conversación de siempre te espera en HOY. El almanaque solo MIRA: no agenda, no avisa, no apura — para plantar fechas, cada rama tiene la suya en su hojita.',
+        body: 'En tu bosque vive un almanaque de jardín (su espiga 🌾 es la pestaña de en medio, abajo; también en Ajustes): los días de tu bosque, solo para mirar. Arriba está HOY: si alguna rama tiene sendero 🌄, ahí aparece «el caminito de hoy» — piedritas de izquierda a derecha; tocas la que dice «siguiente» y florece ahí mismo (con «Deshacer», como todo). Lo que quede sin caminar, mañana amanece limpio — el caminito no guarda cuentas. Debajo, el mes como parcelitas de tierra: capullos donde algo quiere florecer, flores 🌸 donde algo floreció, nudos dorados donde brotaron caminos nuevos, huellitas 🐾 donde te dejaste un check-in. Los días sin marcas son barbecho — tierra descansando, jamás un pendiente. Si una fecha amable pasó, su capullo se queda en su día con una hojita 🍂 suave (nunca rojo, nunca «atrasado») y la conversación de siempre te espera en HOY. El almanaque solo MIRA: no agenda, no avisa, no apura — para plantar fechas, cada rama tiene la suya en su hojita.',
       },
       {
         icon: '🍂',

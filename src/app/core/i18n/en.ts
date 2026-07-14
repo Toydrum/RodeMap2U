@@ -52,6 +52,7 @@ export const EN: Dict = {
   nav: {
     ahora: 'Now',
     forest: 'My forest',
+    almanaque: 'Almanac',
     timer: 'Focus',
     settings: 'Settings',
     checkIn: 'Check-in',
@@ -150,7 +151,6 @@ export const EN: Dict = {
     title: 'The almanac',
     subtitle: "Your forest's days, to calmly look at what is coming. Nothing here hurries.",
     settingsLink: 'The almanac',
-    doorLabel: 'Almanac',
     settingsHint: 'Your days: what wants to bloom and what already did',
     hint: 'A garden almanac: it shows what wants to bloom and what already did. It schedules nothing — it just lets you look.',
     todayIs: 'Today is {date}',
@@ -694,7 +694,7 @@ export const EN: Dict = {
       {
         icon: '🌾',
         title: 'The almanac',
-        body: 'A garden almanac lives in your forest (the little wheat 🌾 next to the finder; also in Settings): your forest\'s days, just for looking. TODAY sits on top: if any branch has a daily path 🌄, «today\'s little path» appears there — stepping stones left to right; tap the one that says «next» and it blooms right there (with «Undo», like everything). Whatever is left unwalked wakes up clean tomorrow — the path keeps no counts. Below, the month as little soil plots: buds where something wants to bloom, flowers 🌸 where something bloomed, golden knots where new paths sprouted, little paw prints 🐾 where you left a check-in. Days without marks are fallow ground — soil resting, never a to-do. If a gentle date passed, its bud stays on its day with a soft little leaf 🍂 (never red, never «overdue») and the usual conversation waits for you in TODAY. The almanac only LOOKS: it schedules nothing, alerts nothing, hurries nothing — to plant dates, each branch has its own in its sheet.',
+        body: 'A garden almanac lives in your forest (its wheat spike 🌾 is the middle tab at the bottom; also in Settings): your forest\'s days, just for looking. TODAY sits on top: if any branch has a daily path 🌄, «today\'s little path» appears there — stepping stones left to right; tap the one that says «next» and it blooms right there (with «Undo», like everything). Whatever is left unwalked wakes up clean tomorrow — the path keeps no counts. Below, the month as little soil plots: buds where something wants to bloom, flowers 🌸 where something bloomed, golden knots where new paths sprouted, little paw prints 🐾 where you left a check-in. Days without marks are fallow ground — soil resting, never a to-do. If a gentle date passed, its bud stays on its day with a soft little leaf 🍂 (never red, never «overdue») and the usual conversation waits for you in TODAY. The almanac only LOOKS: it schedules nothing, alerts nothing, hurries nothing — to plant dates, each branch has its own in its sheet.',
       },
       {
         icon: '🍂',

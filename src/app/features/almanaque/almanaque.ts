@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -52,7 +51,6 @@ export class AlmanaquePage {
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
-  private readonly location = inject(Location);
 
   /* ------------------------------------------------------------- Hoy -- */
 
@@ -348,11 +346,4 @@ export class AlmanaquePage {
     void this.router.navigate(['/tree', node.treeId], { queryParams: { node: node.id } });
   }
 
-  protected goBack(): void {
-    if (history.length > 1) {
-      this.location.back();
-    } else {
-      void this.router.navigate(['/forest']);
-    }
-  }
 }

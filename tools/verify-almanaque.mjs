@@ -127,12 +127,19 @@ await page.waitForTimeout(900);
 const todayRows = await page.locator('.alm-today-dated .upcoming-row').count();
 ok('E2 today-dated branch gets its Hoy row', todayRows >= 1, `rows=${todayRows}`);
 
-// E — the forest-header door.
+// E — the wheat TAB (0.0.86): 5 tabs, none wraps at 360px, and the middle
+// one navigates to the almanaque and lights up.
+await page.setViewportSize({ width: 360, height: 640 });
 await page.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
-await page.locator('.almanac-btn').click();
+const tabs = await page.locator('.tabbar .tab').count();
+const rows = await page.evaluate(() =>
+  new Set([...document.querySelectorAll('.tabbar .tab')].map((t) => Math.round(t.getBoundingClientRect().top))).size,
+);
+await page.locator('.tabbar a[href*="almanaque"]').click();
 await page.waitForTimeout(500);
-ok('E forest door navigates', page.url().includes('/almanaque'));
+const active = await page.locator('.tabbar a[href*="almanaque"].active').count();
+ok('E wheat tab: 5 tabs, one row, navigates + lights', tabs === 5 && rows === 1 && page.url().includes('/almanaque') && active === 1, `tabs=${tabs} rows=${rows}`);
 
 console.log('almanaque done');
 await browser.close();
