@@ -194,7 +194,7 @@
 
 .weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
   margin: 0.6rem 0 0.25rem;
 
@@ -208,7 +208,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -242,6 +242,12 @@
 
   &:hover {
     border-color: var(--primary);
+  }
+
+  /* Selected day: the open page of the almanac — dashed, so today's
+     solid ring stays unmistakable when both apply. */
+  &.selected {
+    border: 2px dashed var(--primary);
   }
 
   /* Today: where you stand — green, «estás aquí» (gold stays the knot's). */
@@ -331,6 +337,55 @@
   }
 }
 
+/* Wide cells speak: titled chips in each tree's own accent — the label
+   pill of the canvas, migrated to the calendar. Tint is CATEGORICAL,
+   never count-scaled (a 5-mark day and a 1-mark day wear the same wash).
+   The app's first min-width query. */
+@media (min-width: 720px) {
+  .alm-cell {
+    padding: 3px 4px;
+  }
+
+  .alm-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    margin-top: auto;
+    overflow: hidden;
+  }
+
+  .alm-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 19px;
+    padding: 0 6px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    font-size: 0.68rem;
+    max-width: 100%;
+    overflow: hidden;
+
+    .chip-glyph {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+    }
+
+    .chip-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chip-leaf {
+      flex-shrink: 0;
+      font-size: 0.62rem;
+    }
+  }
+}
+
 .knot-ring {
   fill: none;
   stroke: var(--status-branched);
@@ -341,29 +396,16 @@
   fill: var(--status-branched);
 }
 
-/* ---------------------------------------------------- day page sheet -- */
+/* ------------------------------------------- «la página del día» -- */
 
-.sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 600;
-  background: rgba(20, 26, 18, 0.45);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.sheet {
-  width: min(600px, 100%);
-  max-height: 86vh;
-  overflow-y: auto;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  padding: 0.7rem 1.4rem calc(1.4rem + env(safe-area-inset-bottom));
-  animation: sheet-up 0.28s ease both;
+.alm-day-panel {
+  margin-top: 0.7rem;
+  padding: 0.9rem 1.1rem;
+  animation: panel-in 0.22s ease both;
 
   h2 {
-    margin: 0.4rem 0 0.6rem;
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
 
     &::first-letter {
       text-transform: uppercase;
@@ -376,19 +418,15 @@
   }
 }
 
-@keyframes sheet-up {
+@keyframes panel-in {
   from {
-    transform: translateY(40px);
+    transform: translateY(6px);
     opacity: 0;
   }
 }
 
-.grabber {
-  width: 44px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--border-strong);
-  margin: 0 auto;
+.day-close {
+  margin-top: 0.8rem;
 }
 
 .day-rows {
@@ -426,6 +464,3 @@
   }
 }
 
-.close-day {
-  margin-top: 1rem;
-}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CheckIn, Tree, TreeNode } from '../../core/db/schema';
-import { caminitos, marksFor, monthMatrix, senderoStepIds, todayDated, upcoming, whenWord } from './almanac';
+import { caminitos, dayChips, marksFor, monthMatrix, senderoStepIds, todayDated, upcoming, whenWord } from './almanac';
 
 function tree(id: string, name = id): Tree {
   return {
@@ -197,6 +197,27 @@ describe('upcoming — soft words, never numbers', () => {
 
   it('whenWord maps the far future to «later»', () => {
     expect(whenWord(TODAY, '2026-08-30')).toBe('later');
+  });
+});
+
+describe('dayChips — one priority for both renderings', () => {
+  it('orders flowers > knots > capullos, caps, and carries passed', () => {
+    const t = tree('t1');
+    const m = marksFor(
+      [t],
+      byTree([t], [
+        node('c1', 't1', { targetDate: '2026-07-10' }),
+        node('c2', 't1', { targetDate: '2026-07-10' }),
+        node('f1', 't1', { status: 'achieved', achievedAt: noonOf('2026-07-10') }),
+        node('k1', 't1', { status: 'branched', branchedAt: noonOf('2026-07-10') }),
+      ]),
+      [],
+      TODAY,
+    ).get('2026-07-10')!;
+    const chips = dayChips(m, 3);
+    expect(chips.map((c) => c.kind)).toEqual(['flower', 'knot', 'capullo']);
+    expect(chips[2].passed).toBe(true); // 2026-07-10 < TODAY
+    expect(dayChips(m, 2)).toHaveLength(2);
   });
 });
 

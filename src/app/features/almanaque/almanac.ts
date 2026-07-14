@@ -48,6 +48,27 @@ export interface DayMarks {
   hasCheckin: boolean;
 }
 
+/** One cell mark, ready to render as glyph (narrow) or titled chip (wide).
+ *  ONE priority order for both modes — they can never disagree. */
+export interface DayChip {
+  kind: 'flower' | 'knot' | 'capullo';
+  node: TreeNode;
+  tree: Tree;
+  passed: boolean;
+}
+
+/** The cell's marks in render order (flowers > knots > capullos), capped.
+ *  The cap is DISCIPLINE, not ranking: overflow folds into the quiet (N)
+ *  and the day panel is the only full reader. */
+export function dayChips(m: DayMarks, cap = 3): DayChip[] {
+  const chips: DayChip[] = [
+    ...m.flowers.map((f) => ({ kind: 'flower' as const, node: f.node, tree: f.tree, passed: false })),
+    ...m.knots.map((k) => ({ kind: 'knot' as const, node: k.node, tree: k.tree, passed: false })),
+    ...m.capullos.map((c) => ({ kind: 'capullo' as const, node: c.node, tree: c.tree, passed: c.passed })),
+  ];
+  return chips.slice(0, cap);
+}
+
 /** «Lo que se acerca» — a coming fecha amable, in soft words. */
 export interface UpcomingDate {
   node: TreeNode;

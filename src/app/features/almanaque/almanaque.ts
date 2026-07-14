@@ -1,5 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -12,13 +12,14 @@ import { hash } from '../forest/tree-layout';
 import { FlowerSpec, flowerFor } from '../forest/flora';
 import { FlowerGlyph } from '../forest/flower';
 import { DateReview } from '../check-in/date-review';
-import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { HintChip } from '../../shared/ui/hint-chip';
 import {
   Caminito,
   DatedBranch,
+  DayChip,
   DayMarks,
   caminitos,
+  dayChips,
   marksFor,
   monthMatrix,
   todayDated,
@@ -39,12 +40,33 @@ interface CellGlyph {
  */
 @Component({
   selector: 'app-almanaque',
-  imports: [FlowerGlyph, DateReview, SheetDirective, HintChip],
+  imports: [FlowerGlyph, DateReview, HintChip],
   templateUrl: './almanaque.html',
   styleUrl: './almanaque.scss',
 })
 export class AlmanaquePage {
   protected readonly i18n = inject(I18nService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+
+  /** Wide mode (the app's FIRST min-width consumer): titled chips replace
+   *  the glyph marks when cells have room. Extract to a service only when
+   *  a second consumer appears. */
+  protected readonly wide = signal(
+    typeof matchMedia !== 'undefined' && matchMedia('(min-width: 720px)').matches,
+  );
+
+  constructor() {
+    if (typeof matchMedia !== 'undefined') {
+      const mq = matchMedia('(min-width: 720px)');
+      const onChange = (e: MediaQueryListEvent) => this.wide.set(e.matches);
+      mq.addEventListener('change', onChange);
+      this.destroyRef.onDestroy(() => mq.removeEventListener('change', onChange));
+    }
+    // ?day=YYYY-MM-DD deep link (reserved for the future week strip too).
+    const day = this.route.snapshot.queryParamMap.get('day');
+    if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) this.openDate.set(day);
+  }
   private readonly trees = inject(TreesRepo);
   private readonly nodes = inject(NodesRepo);
   private readonly checkins = inject(CheckinsRepo);
@@ -231,18 +253,42 @@ export class AlmanaquePage {
     return `${r(0)}px ${r(3)}px ${r(6)}px ${r(9)}px`;
   }
 
-  /** At most two glyphs per cell: flowers > knots > capullos. */
+  /** ONE priority order for both renderings (pure: almanac.dayChips). */
+  protected cellChips(m: DayMarks): DayChip[] {
+    return dayChips(m, this.wide() ? 3 : 2);
+  }
+
+  /** Narrow mode keeps the 0.0.85 glyph svg — same chips, first two. */
   protected cellGlyphs(m: DayMarks): CellGlyph[] {
-    const glyphs: CellGlyph[] = [
-      ...m.flowers.map((f) => ({ kind: 'flower' as const, spec: this.specOf(f.tree) })),
-      ...m.knots.map((k) => ({ kind: 'knot' as const, spec: this.specOf(k.tree) })),
-      ...m.capullos.map((c) => ({ kind: 'capullo' as const, spec: this.specOf(c.tree) })),
-    ];
-    return glyphs.slice(0, 2);
+    return dayChips(m, 2).map((c) => ({ kind: c.kind, spec: this.specOf(c.tree) }));
   }
 
   protected overflowCount(m: DayMarks): number {
-    return Math.max(0, m.flowers.length + m.knots.length + m.capullos.length - 2);
+    const total = m.flowers.length + m.knots.length + m.capullos.length;
+    return Math.max(0, total - (this.wide() ? 3 : 2));
+  }
+
+  /** The tree-pairing wash — categorical, NEVER count-scaled (anti-heatmap). */
+  protected chipWash(chip: DayChip): string {
+    if (chip.kind === 'knot') {
+      return 'color-mix(in srgb, var(--status-branched) 12%, var(--surface))';
+    }
+    return `color-mix(in srgb, var(--accent-${chip.tree.accent}) 14%, var(--surface))`;
+  }
+
+  protected chipBorder(chip: DayChip): string {
+    if (chip.kind === 'knot') {
+      return 'color-mix(in srgb, var(--status-branched) 32%, var(--border))';
+    }
+    return `color-mix(in srgb, var(--accent-${chip.tree.accent}) 32%, var(--border))`;
+  }
+
+  /** Wide cells speak their titles to the screen reader via the button. */
+  protected cellLabel(date: string, m: DayMarks | undefined): string {
+    const line = this.dateLine(date);
+    if (!m || !this.wide()) return line;
+    const titles = dayChips(m, 3).map((c) => c.node.title).join(', ');
+    return titles ? `${line}: ${titles}` : line;
   }
 
   protected hasPassedDate(m: DayMarks): boolean {
@@ -328,12 +374,37 @@ export class AlmanaquePage {
     );
   });
 
+  /** Disclosure, not dialog: second tap on the same day closes. */
   protected openDay(date: string): void {
+    if (this.openDate() === date) {
+      this.openDate.set(null);
+      return;
+    }
     this.openDate.set(date);
+    setTimeout(() => {
+      document
+        .getElementById('alm-day-panel')
+        ?.scrollIntoView({ block: 'nearest', behavior: this.motionReduced() ? 'auto' : 'smooth' });
+    }, 60);
+  }
+
+  private motionReduced(): boolean {
+    return document.documentElement.classList.contains('reduce-motion');
   }
 
   protected closeDay(): void {
     this.openDate.set(null);
+  }
+
+  /** Escape closes the panel and hands focus back to the selected cell.
+   *  Bound on the month section (NOT document) — it must never race the
+   *  date-review sheet's appSheet Escape stack. */
+  protected onMesEscape(): void {
+    const date = this.openDate();
+    if (!date) return;
+    this.openDate.set(null);
+    const cell = document.querySelector<HTMLButtonElement>(`.alm-cell[data-date="${date}"]`);
+    cell?.focus();
   }
 
   protected treeOf(node: TreeNode): Tree | undefined {

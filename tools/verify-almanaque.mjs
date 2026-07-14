@@ -12,9 +12,10 @@ const { browser, page } = await launchPage();
 await page.goto(`${BASE}/almanaque?seed=demo`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
 
-// A — yesterday's unresolved fecha amable: leaf on its own cell + Hoy banner.
+// A — yesterday's unresolved fecha amable stays on its own cell (at the
+// default 900px width that's a chip wearing the 🍂 suffix) + Hoy banner.
 const banner = await page.locator('.alm-review').count();
-const leafCells = await page.locator('.alm-cell .leaf-mark').count();
+const leafCells = (await page.locator('.alm-cell .chip-leaf').count()) + (await page.locator('.alm-cell .leaf-mark').count());
 ok('A passed date stays on its day + banner in Hoy', banner === 1 && leafCells >= 1, `banner=${banner} leafCells=${leafCells}`);
 
 // B — build a sendero via IDB (parent → steps+repeatsDaily), reload: the
@@ -71,17 +72,18 @@ const nextBack = (await page.locator('.alm-stone.next').count()) === 1;
 const bloomedAfterUndo = await page.locator('.alm-stone.bloomed').count();
 ok('B2 Deshacer restores the stone', nextBack && bloomedAfterUndo === 0, `next=${nextBack} bloomed=${bloomedAfterUndo}`);
 
-// C — the day page: open yesterday's cell (it holds the passed capullo) and
-// deep-link into the branch's tree.
-await page.locator('.alm-cell .leaf-mark').first().locator('..').click();
+// C — the day page: open yesterday's cell (it holds the passed capullo —
+// chip-leaf in wide mode) and deep-link into the branch's tree.
+await page.locator('.alm-cell:has(.chip-leaf), .alm-cell:has(.leaf-mark)').first().click();
 await page.waitForTimeout(500);
-const sheetUp = await page.locator('.alm-day-sheet').count();
-const passedLine = await page.locator('.alm-day-sheet .passed-line').count();
-await page.locator('.alm-day-sheet .day-row').first().click();
+const sheetUp = await page.locator('.alm-day-panel').count();
+const noBackdrop = (await page.locator('.sheet-backdrop').count()) === 0;
+const passedLine = await page.locator('.alm-day-panel .passed-line').count();
+await page.locator('.alm-day-panel .day-row').first().click();
 await page.waitForTimeout(900);
 const onTree = page.url().includes('/tree/');
 const branchSheet = await page.locator('.sheet').count();
-ok('C day page deep-links to the tree', sheetUp === 1 && passedLine >= 1 && onTree && branchSheet >= 1, `url=${page.url().slice(-30)}`);
+ok('C inline day panel deep-links to the tree', sheetUp === 1 && noBackdrop && passedLine >= 1 && onTree && branchSheet >= 1, `url=${page.url().slice(-30)}`);
 
 // D — today ring + «Volver a hoy» after month nav.
 await page.goto(`${BASE}/almanaque`, { waitUntil: 'networkidle' });
@@ -140,6 +142,37 @@ await page.locator('.tabbar a[href*="almanaque"]').click();
 await page.waitForTimeout(500);
 const active = await page.locator('.tabbar a[href*="almanaque"].active').count();
 ok('E wheat tab: 5 tabs, one row, navigates + lights', tabs === 5 && rows === 1 && page.url().includes('/almanaque') && active === 1, `tabs=${tabs} rows=${rows}`);
+
+// F — responsive information law (0.0.87): wide viewports render titled
+// accent chips; narrow viewports keep the 0.0.85 glyph svg (zero chips).
+await page.setViewportSize({ width: 1024, height: 800 });
+await page.goto(`${BASE}/almanaque`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(700);
+const chipsWide = await page.locator('.alm-chip').count();
+const chipTitle = ((await page.locator('.alm-chip .chip-title').first().textContent().catch(() => '')) ?? '').trim();
+await page.setViewportSize({ width: 390, height: 844 });
+await page.waitForTimeout(500);
+const chipsNarrow = await page.locator('.alm-chip').count();
+const glyphsNarrow = await page.locator('.alm-cell .glyphs').count();
+ok('F chips wide / glyphs narrow', chipsWide >= 1 && chipTitle.length > 0 && chipsNarrow === 0 && glyphsNarrow >= 1, `wide=${chipsWide} "${chipTitle.slice(0, 20)}" narrow=${chipsNarrow}/${glyphsNarrow}`);
+
+// G — disclosure behavior: second tap closes; Escape closes + refocuses the
+// cell; aria-expanded flips.
+const markedCell = page.locator('.alm-cell .leaf-mark').first().locator('..');
+await markedCell.click();
+await page.waitForTimeout(400);
+const expandedOn = (await markedCell.getAttribute('aria-expanded')) === 'true';
+await markedCell.click();
+await page.waitForTimeout(400);
+const closedByTap = (await page.locator('.alm-day-panel').count()) === 0;
+const expandedOff = (await markedCell.getAttribute('aria-expanded')) === 'false';
+await markedCell.click();
+await page.waitForTimeout(400);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+const closedByEsc = (await page.locator('.alm-day-panel').count()) === 0;
+const refocused = await page.evaluate(() => document.activeElement?.classList.contains('alm-cell'));
+ok('G disclosure: toggle + Escape + aria', expandedOn && closedByTap && expandedOff && closedByEsc && !!refocused, `esc=${closedByEsc} focus=${refocused}`);
 
 console.log('almanaque done');
 await browser.close();

@@ -114,7 +114,7 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════ El mes ═══ -->
-  <section class="part alm-mes">
+  <section class="part alm-mes" (keydown.escape)="onMesEscape()">
     <div class="month-bar">
       <h2>{{ monthLabel() }}</h2>
       <span class="month-nav">
@@ -142,10 +142,14 @@
             class="alm-cell"
             [class.out]="!cell.inMonth"
             [class.past]="cell.date < todayKey()"
+            [class.selected]="openDate() === cell.date"
             [class.alm-today]="cell.date === todayKey()"
             [style.border-radius]="wobble(cell.date)"
+            [attr.data-date]="cell.date"
             (click)="openDay(cell.date)"
-            [attr.aria-label]="dateLine(cell.date)"
+            [attr.aria-label]="cellLabel(cell.date, marks().get(cell.date))"
+            [attr.aria-expanded]="openDate() === cell.date"
+            aria-controls="alm-day-panel"
             [attr.tabindex]="cell.inMonth ? null : -1"
           >
             <span class="daynum">{{ dayNum(cell.date) }}</span>
@@ -153,6 +157,34 @@
               <span class="hoy-pill">{{ i18n.t().almanaque.todayPill }}</span>
             }
             @if (marks().get(cell.date); as m) {
+              @if (wide()) {
+                <span class="alm-chips" aria-hidden="true">
+                  @for (chip of cellChips(m); track chip.node.id) {
+                    <span
+                      class="alm-chip"
+                      [style.background]="chipWash(chip)"
+                      [style.border-color]="chipBorder(chip)"
+                    >
+                      <svg class="chip-glyph" viewBox="-8 -8 16 16">
+                        @switch (chip.kind) {
+                          @case ('flower') {
+                            <g appFlower [flower]="specOf(chip.tree)" [scale]="0.5" />
+                          }
+                          @case ('knot') {
+                            <circle r="4.6" class="knot-ring" />
+                            <circle r="1.8" class="knot-core" />
+                          }
+                          @case ('capullo') {
+                            <circle r="4.4" [attr.fill]="specOf(chip.tree).petal" [attr.stroke]="specOf(chip.tree).petalEdge" stroke-width="1.6" />
+                          }
+                        }
+                      </svg>
+                      <span class="chip-title">{{ chip.node.title }}</span>
+                      @if (chip.passed) { <span class="chip-leaf">🍂</span> }
+                    </span>
+                  }
+                </span>
+              } @else {
               <svg class="glyphs" viewBox="0 0 44 26" aria-hidden="true">
                 @for (glyph of cellGlyphs(m); track $index; let idx = $index) {
                   @switch (glyph.kind) {
@@ -174,7 +206,8 @@
                   }
                 }
               </svg>
-              @if (hasPassedDate(m)) {
+              }
+              @if (hasPassedDate(m) && !wide()) {
                 <span class="leaf-mark" aria-hidden="true">🍂</span>
               }
               @if (m.hasCheckin && cell.date <= todayKey()) {
@@ -189,48 +222,20 @@
       }
     </div>
 
-    <!-- Visual legend: what each mark means (owner ask — «info visual») -->
-    <div class="alm-legend" aria-hidden="false">
-      <span class="legend-item">
-        <svg viewBox="-12 -12 24 24"><g appFlower [flower]="legendSpec" [scale]="0.7" /></svg>
-        {{ i18n.t().almanaque.legendBloom }}
-      </span>
-      <span class="legend-item">
-        <svg viewBox="-10 -10 20 20">
-          <circle r="5.2" [attr.fill]="legendSpec.petal" [attr.stroke]="legendSpec.petalEdge" stroke-width="1.8" />
-          <circle r="1.6" [attr.fill]="legendSpec.heart" opacity="0.55" />
-        </svg>
-        {{ i18n.t().almanaque.legendBud }}
-      </span>
-      <span class="legend-item">
-        <svg viewBox="-10 -10 20 20">
-          <circle r="5.4" class="knot-ring" />
-          <circle r="2.2" class="knot-core" />
-        </svg>
-        {{ i18n.t().almanaque.legendKnot }}
-      </span>
-      <span class="legend-item"><span class="legend-emoji">🐾</span> {{ i18n.t().almanaque.legendPaw }}</span>
-      <span class="legend-item"><span class="legend-emoji">🍂</span> {{ i18n.t().almanaque.legendLeaf }}</span>
-    </div>
-    <p class="hint">{{ i18n.t().almanaque.fallowLegend }}</p>
-  </section>
-</div>
 
-<!-- La página del día -->
-@defer (when !!openDate()) {
-  @if (openDate()) {
-    <div class="sheet-backdrop" (click)="closeDay()">
-      <div
-        class="sheet card alm-day-sheet"
-        appSheet
-        (sheetClose)="closeDay()"
-        (click)="$event.stopPropagation()"
-        role="dialog"
-        aria-modal="true"
-        [attr.aria-label]="openDateLine()"
-      >
-        <div class="grabber" aria-hidden="true"></div>
-        <h2>{{ openDateLine() }}</h2>
+    <!-- «La página del día» — an inline DISCLOSURE under the grid (Apple's
+         agenda pattern): the month never disappears, no backdrop, no focus
+         trap. appSheet deliberately absent: rule 8 governs MODAL sheets and
+         this stopped being one. -->
+    @defer (when !!openDate()) {
+      @if (openDate()) {
+        <section
+          id="alm-day-panel"
+          class="card alm-day-panel"
+          role="region"
+          [attr.aria-label]="openDateLine()"
+        >
+          <h2>{{ openDateLine() }}</h2>
 
         @if (openIsEmpty()) {
           <p class="hint">
@@ -311,14 +316,41 @@
             </ol>
           }
         }
+          <button type="button" class="btn btn-ghost day-close" (click)="onMesEscape()">
+            {{ i18n.t().common.close }}
+          </button>
+        </section>
+      }
+    }
 
-        <button type="button" class="btn btn-ghost close-day" (click)="closeDay()">
-          {{ i18n.t().common.close }}
-        </button>
-      </div>
+    <!-- Visual legend: what each mark means (owner ask — «info visual») -->
+    <div class="alm-legend" aria-hidden="false">
+      <span class="legend-item">
+        <svg viewBox="-12 -12 24 24"><g appFlower [flower]="legendSpec" [scale]="0.7" /></svg>
+        {{ i18n.t().almanaque.legendBloom }}
+      </span>
+      <span class="legend-item">
+        <svg viewBox="-10 -10 20 20">
+          <circle r="5.2" [attr.fill]="legendSpec.petal" [attr.stroke]="legendSpec.petalEdge" stroke-width="1.8" />
+          <circle r="1.6" [attr.fill]="legendSpec.heart" opacity="0.55" />
+        </svg>
+        {{ i18n.t().almanaque.legendBud }}
+      </span>
+      <span class="legend-item">
+        <svg viewBox="-10 -10 20 20">
+          <circle r="5.4" class="knot-ring" />
+          <circle r="2.2" class="knot-core" />
+        </svg>
+        {{ i18n.t().almanaque.legendKnot }}
+      </span>
+      <span class="legend-item"><span class="legend-emoji">🐾</span> {{ i18n.t().almanaque.legendPaw }}</span>
+      <span class="legend-item"><span class="legend-emoji">🍂</span> {{ i18n.t().almanaque.legendLeaf }}</span>
     </div>
-  }
-}
+    <p class="hint">{{ i18n.t().almanaque.fallowLegend }}</p>
+  </section>
+</div>
+
+
 
 @if (reviewing()) {
   <app-date-review [nodesToReview]="pendingReviews()" (closed)="reviewing.set(false)" />
