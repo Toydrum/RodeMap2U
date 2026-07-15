@@ -1,4 +1,4 @@
-import { CheckIn, ExportEnvelope, Harvest, Tree, TreeNode, TimerSession } from '../db/schema';
+import { CheckIn, ExportEnvelope, Harvest, Preserve, Tree, TreeNode, TimerSession } from '../db/schema';
 
 /**
  * THE backend contract — normative and single-source. Three implementations
@@ -128,10 +128,11 @@ export interface FriendsResponse {
  *                     repeatsDaily→absent (attention allocation is
  *                     intimate — «la luz» travels only to guardians), stripped
  *                     SERVER-side. Both exclude archived and tombstoned
- *                     records. Check-ins, sessions, HARVESTS and settings are
- *                     NEVER served to anyone — visits render a neutral sky
- *                     (weather derives from private feelings), and the pantry
- *                     is personal (harvest titles are as intimate as trigger).
+ *                     records. Check-ins, sessions, HARVESTS, PRESERVES and
+ *                     settings are NEVER served to anyone — visits render a
+ *                     neutral sky (weather derives from private feelings),
+ *                     and the pantry is personal (harvest titles and jam
+ *                     names are as intimate as trigger).
  */
 export interface ForestSnapshot {
   owner: PublicProfile;
@@ -142,11 +143,11 @@ export interface ForestSnapshot {
 }
 
 /** Settings are device preferences (no rev) — deliberately NOT synced. */
-export type SyncStore = 'trees' | 'nodes' | 'checkins' | 'sessions' | 'harvests';
+export type SyncStore = 'trees' | 'nodes' | 'checkins' | 'sessions' | 'harvests' | 'preserves';
 
 export interface SyncRecord {
   store: SyncStore;
-  record: Tree | TreeNode | CheckIn | TimerSession | Harvest;
+  record: Tree | TreeNode | CheckIn | TimerSession | Harvest | Preserve;
 }
 
 export interface SyncPushRequest {

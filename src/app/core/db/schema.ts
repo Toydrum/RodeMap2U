@@ -4,7 +4,10 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v5: NEW `harvests` store («la cosecha» 0.0.88) — the first new record
+/** v6: NEW `preserves` store + additive Harvest.preserveId («la conservería»
+ *  0.0.89 — sealed jam batches). Older backups lack both (imported as
+ *  all-fresh, no jars); DB_VERSION 3 adds the store on lived-in devices.
+ *  v5: NEW `harvests` store («la cosecha» 0.0.88) — the first new record
  *  type since launch. Older backups simply lack data.harvests (imported as
  *  empty; the backfill sentinel reconstructs the pantry from achieved
  *  branches). DB_VERSION 2 creates the object store on lived-in devices.
@@ -15,8 +18,8 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 5;
-export const DB_VERSION = 2;
+export const SCHEMA_VERSION = 6;
+export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
  * storage identifiers moved with it. Two legacy literals remain FOREVER:
@@ -161,11 +164,43 @@ export interface Harvest extends SyncBase {
   title: string;
   /** The branch's achievedAt at mint. */
   harvestedAt: number;
+  /** «La conservería» (0.0.89) — THE SINGLE-HOME FIELD: absent/null ≡ fresh
+   *  (in the harvest jar); set = sealed into that jam batch. Membership
+   *  lives ON THE MEMBER (never an array on the batch — two devices jamming
+   *  different fruits touch different records; LWW stays conflict-free).
+   *  Additive like trigger/flow/priority; set ONLY by the seal ritual —
+   *  sync/import/backfill never set it. Nada se gasta; todo se conserva. */
+  preserveId?: string | null;
 }
 
 /** The one place the harvest id law lives. */
 export function harvestIdFor(nodeId: string): string {
   return 'h:' + nodeId;
+}
+
+/**
+ * «La conservería» (0.0.89) — a sealed jam batch. Made OF fruits, never an
+ * exchange: sealing changes each member's HOME (preserveId), never its
+ * existence or visibility — the register shows every fruit forever and the
+ * jar opens to its members' memory cards. Batches are FINAL after the undo
+ * toast window (preserves don't un-cook; nothing was lost, so permanence
+ * costs nothing). All jars render the same size and the same fullness —
+ * quantity is never visualized. Ids are randomUUID: every seal is a new
+ * batch (concurrent seals on two devices = two legitimate jars).
+ */
+export type PreserveKind = 'mermelada';
+
+export interface Preserve extends SyncBase {
+  kind: PreserveKind;
+  /** The user's own words — prefilled with the derived flavor, editable. */
+  name: string;
+  madeAt: number;
+  /** Snapshot at seal: the single species' accent, or null = mixed
+   *  («mermelada del bosque», first-class). */
+  accent: AccentToken | null;
+  /** The jam color — blended from the member fruits' skins at seal. */
+  tint: string;
+  tintEdge: string;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
@@ -306,6 +341,8 @@ export interface ExportEnvelope {
     sessions: TimerSession[];
     /** Absent on pre-v5 backups — imported as empty, never refused. */
     harvests?: Harvest[];
+    /** Absent on pre-v6 backups — imported as no jars, never refused. */
+    preserves?: Preserve[];
     settings: Settings | null;
   };
 }

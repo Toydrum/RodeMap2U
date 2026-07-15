@@ -4,6 +4,11 @@ import { fruitFor } from './flora';
 import { FruitGlyph } from './fruit';
 import { hash } from './tree-layout';
 
+/** THE glass geometry — one law shared by the fresh jar and every jam jar
+ *  (viewBox 0 0 44 54; interior x 8–36, y 9–51). */
+export const JAR_GLASS_D =
+  'M 12 9 C 10 12 8 14 8 18 L 8 44 C 8 49 12 51 22 51 C 32 51 36 49 36 44 L 36 18 C 36 14 34 12 32 9 Z';
+
 /**
  * «El frasco» (0.0.88) — the harvest jar: hand-drawn glass holding the
  * fruits of bloomed branches. Fullness reads as CLUSTER DENSITY, never as
@@ -73,10 +78,7 @@ import { hash } from './tree-layout';
           <g appFruit [fruit]="f.spec" [scale]="0.5" />
         </g>
       }
-      <path
-        class="jar-glass"
-        d="M 12 9 C 10 12 8 14 8 18 L 8 44 C 8 49 12 51 22 51 C 32 51 36 49 36 44 L 36 18 C 36 14 34 12 32 9 Z"
-      />
+      <path class="jar-glass" [attr.d]="glassD" />
       <path class="jar-shine" d="M 12 16 C 11 24 11 34 12 42" />
       <path class="jar-shine" d="M 32.5 18 C 33.3 26 33.3 32 32.5 40" />
     </svg>
@@ -86,6 +88,7 @@ import { hash } from './tree-layout';
   `,
 })
 export class MeadowJar {
+  protected readonly glassD = JAR_GLASS_D;
   /** Newest-first harvests (HarvestsRepo.newestFirst). */
   readonly fruits = input.required<Harvest[]>();
   /** Optional caption under the glass. */

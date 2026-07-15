@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { Harvest, TreeNode } from './db/schema';
-import { harvestMonths, isDailyPathParent, underDailyPath } from './harvest';
+import {
+  deriveAccent,
+  harvestMonths,
+  isDailyPathParent,
+  isFresh,
+  membersOf,
+  underDailyPath,
+} from './harvest';
 
 function node(id: string, extra: Partial<TreeNode> = {}): TreeNode {
   return {
@@ -92,6 +99,31 @@ describe('underDailyPath — pasitos (and sub-pasitos) bear no fruit', () => {
     const a = node('a', { parentId: 'b' });
     const b = node('b', { parentId: 'a' });
     expect(underDailyPath(a, byId([a, b]))).toBe(false);
+  });
+});
+
+describe('la conservería — single-home + flavor derivation', () => {
+  it('isFresh: absent and null both mean the harvest jar', () => {
+    expect(isFresh(harvest('a', 1))).toBe(true);
+    expect(isFresh({ ...harvest('b', 1), preserveId: null })).toBe(true);
+    expect(isFresh({ ...harvest('c', 1), preserveId: 'p1' })).toBe(false);
+  });
+
+  it('membersOf finds a jar’s fruits newest-first', () => {
+    const rows = [
+      { ...harvest('x', 10), preserveId: 'p1' },
+      { ...harvest('y', 30), preserveId: 'p1' },
+      { ...harvest('z', 20), preserveId: 'p2' },
+      harvest('w', 40),
+    ];
+    expect(membersOf('p1', rows).map((h) => h.nodeId)).toEqual(['y', 'x']);
+  });
+
+  it('deriveAccent: one species → its accent; mixed → null (del bosque, first-class)', () => {
+    const apple = { ...harvest('a', 1) };
+    const pear = { ...harvest('b', 1), accent: 'sage' as const };
+    expect(deriveAccent([apple, { ...harvest('c', 2) }])).toBe('moss');
+    expect(deriveAccent([apple, pear])).toBeNull();
   });
 });
 

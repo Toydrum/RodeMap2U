@@ -288,17 +288,22 @@
           <span class="sr-live" aria-live="polite">{{ i18n.fill(i18n.t().forest.clearingDot, { n: page() + 1 }) }}</span>
         }
 
-        <!-- «El frasco»: the harvest jar arrives with the FIRST fruit (the
-             stream precedent — scenery earned by growth, no empty vessel
-             staring in slow seasons). Pull-based: no badges, no counts. -->
-        @if (harvests.newestFirst().length) {
+        <!-- «La mesita» (0.0.89): the harvest still-life — the fresh jar +
+             the two most recent jam jars. Arrives with the first fruit and
+             never leaves; the corner only ever GROWS (jamming can never
+             make it look poorer). One link, pull-based: no badges, no
+             counts, ever. -->
+        @if (harvests.newestFirst().length || mesitaJams().length) {
           <a
             class="meadow-jar"
             [class.arrived]="jarCue()"
             routerLink="/cosecha"
             [attr.aria-label]="i18n.t().cosecha.jarAria"
           >
-            <app-meadow-jar [fruits]="harvests.newestFirst()" [label]="i18n.t().cosecha.jarLabel" />
+            <app-meadow-jar [fruits]="harvests.fresh()" [label]="i18n.t().cosecha.jarLabel" />
+            @for (jam of mesitaJams(); track jam.id) {
+              <app-jam-jar class="mesita-jam" [preserve]="jam" [size]="0.6" [label]="false" />
+            }
           </a>
         }
       </div>

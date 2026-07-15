@@ -4,6 +4,7 @@ import { ApiError, ApiErrorCode, SyncRecord, SyncStore, lwwBeats } from '../api/
 import {
   CheckIn,
   Harvest,
+  Preserve,
   SCHEMA_VERSION,
   SyncBase,
   TimerSession,
@@ -20,6 +21,7 @@ import { NodesRepo } from '../repos/nodes.repo';
 import { CheckinsRepo } from '../repos/checkins.repo';
 import { SessionsRepo } from '../repos/sessions.repo';
 import { HarvestsRepo } from '../repos/harvests.repo';
+import { PreservesRepo } from '../repos/preserves.repo';
 
 /**
  * «Conectar mi bosque» — the sync engine. Strictly OPT-IN: nothing leaves the
@@ -70,6 +72,7 @@ export class SyncService {
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly harvests = inject(HarvestsRepo);
+  private readonly preserves = inject(PreservesRepo);
 
   private readonly linkSignal = signal<AccountLinkSnapshot | null>(null);
   private readonly busySignal = signal(false);
@@ -337,6 +340,7 @@ export class SyncService {
       ...this.gather('checkins', this.checkins),
       ...this.gather('sessions', this.sessions),
       ...this.gather('harvests', this.harvests),
+      ...this.gather('preserves', this.preserves),
     ];
   }
 
@@ -347,7 +351,7 @@ export class SyncService {
       if (record.updatedAt > this.watermark || dirty?.has(record.id)) {
         out.push({
           store,
-          record: record as unknown as Tree | TreeNode | CheckIn | TimerSession | Harvest,
+          record: record as unknown as Tree | TreeNode | CheckIn | TimerSession | Harvest | Preserve,
         });
       }
     }
@@ -418,6 +422,8 @@ export class SyncService {
         return this.sessions as unknown as RecordsRepo<SyncBase>;
       case 'harvests':
         return this.harvests as unknown as RecordsRepo<SyncBase>;
+      case 'preserves':
+        return this.preserves as unknown as RecordsRepo<SyncBase>;
     }
   }
 

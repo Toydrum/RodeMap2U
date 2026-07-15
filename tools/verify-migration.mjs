@@ -170,21 +170,23 @@ if (pageErrors.length) console.log(pageErrors.join('\n'));
         open.onsuccess = () => {
           const db = open.result;
           const hasStore = db.objectStoreNames.contains('harvests');
-          if (!hasStore) { db.close(); resolve({ hasStore, version: db.version, rows: -1 }); return; }
+          const hasPreserves = db.objectStoreNames.contains('preserves');
+          if (!hasStore) { db.close(); resolve({ hasStore, hasPreserves, version: db.version, rows: -1 }); return; }
           const req = db.transaction('harvests', 'readonly').objectStore('harvests').getAll();
-          req.onsuccess = () => { const rows = req.result.length; db.close(); resolve({ hasStore, version: db.version, rows }); };
-          req.onerror = () => { db.close(); resolve({ hasStore, version: db.version, rows: -2 }); };
+          req.onsuccess = () => { const rows = req.result.length; db.close(); resolve({ hasStore, hasPreserves, version: db.version, rows }); };
+          req.onerror = () => { db.close(); resolve({ hasStore, hasPreserves, version: db.version, rows: -2 }); };
         };
-        open.onerror = () => resolve({ hasStore: false, version: -1, rows: -3 });
+        open.onerror = () => resolve({ hasStore: false, hasPreserves: false, version: -1, rows: -3 });
       }),
   );
   const jarE = await p.locator('.meadow-jar').count();
   const treeVisible = (await p.locator('.plot').allTextContents()).some((t) => t.includes('Roble vivido'));
+  // v3 (0.0.89): the same boot must also have created the preserves store.
   const okE =
-    upgraded.hasStore && upgraded.version === 2 && upgraded.rows === 1 &&
-    jarE === 1 && treeVisible && ctxErrors.length === 0;
+    upgraded.hasStore && upgraded.version === 3 && upgraded.rows === 1 &&
+    upgraded.hasPreserves && jarE === 1 && treeVisible && ctxErrors.length === 0;
   console.log(
-    `E lived-in v1→v2: store=${upgraded.hasStore} v=${upgraded.version} backfilled=${upgraded.rows} jar=${jarE} tree=${treeVisible} errors=${ctxErrors.length} | OK=${okE}`,
+    `E lived-in v1→v3: store=${upgraded.hasStore} preserves=${upgraded.hasPreserves} v=${upgraded.version} backfilled=${upgraded.rows} jar=${jarE} tree=${treeVisible} errors=${ctxErrors.length} | OK=${okE}`,
   );
   await ctx.close();
 }

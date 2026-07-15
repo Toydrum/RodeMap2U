@@ -15,7 +15,7 @@ import {
   UserProfile,
 } from '@app/api/contracts';
 import { USERNAME_PATTERN } from '@app/auth/auth-types';
-import { CheckIn, ExportEnvelope, Harvest, SCHEMA_VERSION, TimerSession, Tree, TreeNode } from '@app/db/schema';
+import { CheckIn, ExportEnvelope, Harvest, Preserve, SCHEMA_VERSION, TimerSession, Tree, TreeNode } from '@app/db/schema';
 import { Ctx, guardiansOf, minorsOf, profileOf, requireCreatedGuardianOf, requireGuardianOf, toPublic } from '../authz';
 import {
   BatchWriteCommand,
@@ -199,6 +199,7 @@ export async function exportChild(ctx: Ctx, minorId: string): Promise<ExportEnve
       checkins: of<CheckIn>('checkins'),
       sessions: of<TimerSession>('sessions'),
       harvests: of<Harvest>('harvests'),
+      preserves: of<Preserve>('preserves'),
       settings: null, // device preferences never reach the cloud
     },
   };

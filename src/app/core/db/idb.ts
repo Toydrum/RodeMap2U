@@ -9,7 +9,14 @@ import { DB_NAME, DB_VERSION, LEGACY_DB_NAME } from './schema';
  * atomic multi-record writes (branch-on-miss depends on this).
  */
 
-export type StoreName = 'trees' | 'nodes' | 'checkins' | 'sessions' | 'harvests' | 'meta';
+export type StoreName =
+  | 'trees'
+  | 'nodes'
+  | 'checkins'
+  | 'sessions'
+  | 'harvests'
+  | 'preserves'
+  | 'meta';
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -56,6 +63,11 @@ export function openDb(): Promise<IDBDatabase> {
         const harvests = db.createObjectStore('harvests', { keyPath: 'id' });
         harvests.createIndex('byHarvestedAt', 'harvestedAt');
       }
+      // v3: «la conservería» — sealed jam batches.
+      if (!db.objectStoreNames.contains('preserves')) {
+        const preserves = db.createObjectStore('preserves', { keyPath: 'id' });
+        preserves.createIndex('byMadeAt', 'madeAt');
+      }
       if (!db.objectStoreNames.contains('meta')) {
         db.createObjectStore('meta', { keyPath: 'key' });
       }
@@ -72,7 +84,15 @@ export function openDb(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-const ALL_STORES: StoreName[] = ['trees', 'nodes', 'checkins', 'sessions', 'harvests', 'meta'];
+const ALL_STORES: StoreName[] = [
+  'trees',
+  'nodes',
+  'checkins',
+  'sessions',
+  'harvests',
+  'preserves',
+  'meta',
+];
 
 /** Meta sentinel: present ⇔ the legacy question is settled for this device. */
 const MIGRATED_KEY = 'legacy.migratedAt';
@@ -209,6 +229,23 @@ export async function putMany<T>(store: StoreName, values: T[]): Promise<void> {
   const tx = db.transaction(store, 'readwrite');
   const objectStore = tx.objectStore(store);
   for (const value of values) objectStore.put(value);
+  return txDone(tx);
+}
+
+/** Atomic writes ACROSS stores in ONE transaction — the conservería seal
+ *  (a batch row + its members' home-stamps must land together or not at
+ *  all). The multi-store transaction precedent is the legacy-copy loop. */
+export async function putAcross(
+  entries: { store: StoreName; rows: unknown[] }[],
+): Promise<void> {
+  const nonEmpty = entries.filter((e) => e.rows.length);
+  if (!nonEmpty.length) return;
+  const db = await openDb();
+  const tx = db.transaction(nonEmpty.map((e) => e.store), 'readwrite');
+  for (const entry of nonEmpty) {
+    const os = tx.objectStore(entry.store);
+    for (const row of entry.rows) os.put(row);
+  }
   return txDone(tx);
 }
 

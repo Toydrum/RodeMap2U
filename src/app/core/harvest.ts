@@ -1,4 +1,4 @@
-import { Harvest, TreeNode } from './db/schema';
+import { AccentToken, Harvest, TreeNode } from './db/schema';
 import { dayOf } from './time';
 
 /**
@@ -37,6 +37,27 @@ export function underDailyPath(
     current = parent;
   }
   return false;
+}
+
+/** «La conservería» (0.0.89): fresh = still in the harvest jar. The
+ *  single-home law — a fruit lives in exactly ONE place. */
+export function isFresh(h: Harvest): boolean {
+  return !h.preserveId;
+}
+
+/** A sealed jar's member fruits, newest first (the disclosure panel's
+ *  order — same tiebreak as everywhere). */
+export function membersOf(preserveId: string, rows: Harvest[]): Harvest[] {
+  return rows
+    .filter((h) => h.preserveId === preserveId)
+    .sort((a, b) => b.harvestedAt - a.harvestedAt || (a.id < b.id ? -1 : 1));
+}
+
+/** The batch's flavor: one species → its accent; mixed → null =
+ *  «mermelada del bosque» (first-class, never a fallback). */
+export function deriveAccent(members: Harvest[]): AccentToken | null {
+  const accents = new Set(members.map((m) => m.accent));
+  return accents.size === 1 ? members[0].accent : null;
 }
 
 /** One shelf section of the pantry: a month and its fruits. */

@@ -3,6 +3,7 @@ import {
   CheckIn,
   ExportEnvelope,
   Harvest,
+  Preserve,
   SCHEMA_VERSION,
   Settings,
   TimerSession,
@@ -17,6 +18,7 @@ import { NodesRepo } from './nodes.repo';
 import { CheckinsRepo } from './checkins.repo';
 import { SessionsRepo } from './sessions.repo';
 import { HarvestsRepo } from './harvests.repo';
+import { PreservesRepo } from './preserves.repo';
 import { SettingsService } from './settings.service';
 
 @Injectable({ providedIn: 'root' })
@@ -26,23 +28,33 @@ export class BackupService {
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly harvests = inject(HarvestsRepo);
+  private readonly preserves = inject(PreservesRepo);
   private readonly settings = inject(SettingsService);
   private readonly sync = inject(SyncService);
 
   async buildEnvelope(): Promise<ExportEnvelope> {
     // Read from disk (includes tombstones — a backup is a full copy).
-    const [trees, nodes, checkins, sessions, harvests] = await Promise.all([
+    const [trees, nodes, checkins, sessions, harvests, preserves] = await Promise.all([
       getAll<Tree>('trees'),
       getAll<TreeNode>('nodes'),
       getAll<CheckIn>('checkins'),
       getAll<TimerSession>('sessions'),
       getAll<Harvest>('harvests'),
+      getAll<Preserve>('preserves'),
     ]);
     return {
       app: 'roadmap2u',
       schemaVersion: SCHEMA_VERSION,
       exportedAt: new Date().toISOString(),
-      data: { trees, nodes, checkins, sessions, harvests, settings: this.settings.settings() },
+      data: {
+        trees,
+        nodes,
+        checkins,
+        sessions,
+        harvests,
+        preserves,
+        settings: this.settings.settings(),
+      },
     };
   }
 
@@ -89,7 +101,10 @@ export class BackupService {
     // achieved branches without their harvests stay fruitless until they
     // re-achieve, which is honest: the backup predates the jar).
     const harvests = data.harvests ?? [];
-    for (const list of [trees, nodes, checkins, sessions, harvests]) {
+    // Pre-v6 backups lack preserves — imported as no jars (member fruits
+    // also lack preserveId in those backups, so the homes stay consistent).
+    const preserves = data.preserves ?? [];
+    for (const list of [trees, nodes, checkins, sessions, harvests, preserves]) {
       if (!Array.isArray(list) || list.some((r) => typeof r?.id !== 'string')) {
         throw new Error('backup data is malformed');
       }
@@ -105,6 +120,7 @@ export class BackupService {
       checkins: this.checkins.all().map((r) => r.id),
       sessions: this.sessions.all().map((r) => r.id),
       harvests: this.harvests.all().map((r) => r.id),
+      preserves: this.preserves.all().map((r) => r.id),
     };
 
     await this.download('roadmap2u-pre-import');
@@ -115,6 +131,7 @@ export class BackupService {
       clear('checkins'),
       clear('sessions'),
       clear('harvests'),
+      clear('preserves'),
     ]);
     await Promise.all([
       putMany('trees', trees),
@@ -122,6 +139,7 @@ export class BackupService {
       putMany('checkins', checkins),
       putMany('sessions', sessions),
       putMany('harvests', harvests),
+      putMany('preserves', preserves),
     ]);
 
     this.trees.resetTo(trees);
@@ -129,6 +147,7 @@ export class BackupService {
     this.checkins.resetTo(checkins);
     this.sessions.resetTo(sessions);
     this.harvests.resetTo(harvests);
+    this.preserves.resetTo(preserves);
     if (data.settings) {
       // Preferences travel; DEVICE STATE does not (same law that keeps
       // auth/sync out of the envelope): the whispers toggle is THIS
@@ -157,6 +176,7 @@ export class BackupService {
     broadcastChange({ store: 'checkins', ids: union(checkins, removedIds.checkins) });
     broadcastChange({ store: 'sessions', ids: union(sessions, removedIds.sessions) });
     broadcastChange({ store: 'harvests', ids: union(harvests, removedIds.harvests) });
+    broadcastChange({ store: 'preserves', ids: union(preserves, removedIds.preserves) });
 
     // An explicit restore must WIN over the cloud — without this, the next
     // pull silently resurrects whatever the backup rolled back (cloud revs

@@ -25,12 +25,14 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
+import { PreservesRepo } from '../../core/repos/preserves.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { MeadowJar } from './jar';
+import { JamJar } from './jam-jar';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -49,7 +51,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, MeadowJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
+  imports: [RouterLink, MiniTree, MeadowJar, JamJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -66,7 +68,12 @@ export class ForestPage {
   protected readonly trees = inject(TreesRepo);
   protected readonly nodes = inject(NodesRepo);
   protected readonly harvests = inject(HarvestsRepo);
+  protected readonly preserves = inject(PreservesRepo);
   protected readonly accents = ACCENTS;
+
+  /** «La mesita»: the two most recent jam jars stand beside the fresh jar
+   *  (deterministic — changes only when the user seals, never reshuffles). */
+  protected readonly mesitaJams = computed(() => this.preserves.newestFirst().slice(0, 2));
 
   /** «La cosecha» arrival cue — session-scoped like bornThisSession: when
    *  the pantry grows while the app is open, the jar wiggles once on the

@@ -171,3 +171,28 @@ export function fruitFor(accent: AccentToken, seedId?: string): FruitSpec {
   if (!seedId) return variants[0];
   return variants[hash(seedId + ':fruta') % variants.length];
 }
+
+/** «La conservería» (0.0.89): the jam tint — the numeric average of the
+ *  member species' classic skins (deterministic, order-free; CSS color-mix
+ *  only blends two). One species → its own skin; the forest jam gets the
+ *  true blend of everything in the pot. */
+export function jamTint(accents: AccentToken[]): { tint: string; tintEdge: string } {
+  const distinct = [...new Set(accents)];
+  const specs = distinct.map((a) => (FRUTAS[a] ?? FRUTAS.moss)[0]);
+  return { tint: blendHex(specs.map((s) => s.skin)), tintEdge: blendHex(specs.map((s) => s.skinEdge)) };
+}
+
+function blendHex(hexes: string[]): string {
+  if (hexes.length === 1) return hexes[0];
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  for (const hex of hexes) {
+    r += parseInt(hex.slice(1, 3), 16);
+    g += parseInt(hex.slice(3, 5), 16);
+    b += parseInt(hex.slice(5, 7), 16);
+  }
+  const n = hexes.length;
+  const to2 = (v: number) => Math.round(v / n).toString(16).padStart(2, '0');
+  return `#${to2(r)}${to2(g)}${to2(b)}`;
+}

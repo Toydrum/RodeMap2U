@@ -4,6 +4,7 @@ import { NodesRepo } from './repos/nodes.repo';
 import { CheckinsRepo } from './repos/checkins.repo';
 import { SessionsRepo } from './repos/sessions.repo';
 import { HarvestsRepo } from './repos/harvests.repo';
+import { PreservesRepo } from './repos/preserves.repo';
 import { SettingsService } from './repos/settings.service';
 import { onDbChange } from './db/broadcast';
 import { storageAvailable } from './db/idb';
@@ -18,6 +19,7 @@ export class BootService {
   private readonly checkins = inject(CheckinsRepo);
   private readonly sessions = inject(SessionsRepo);
   private readonly harvests = inject(HarvestsRepo);
+  private readonly preserves = inject(PreservesRepo);
   private readonly settings = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly i18n = inject(I18nService);
@@ -31,6 +33,7 @@ export class BootService {
       this.checkins.load(),
       this.sessions.load(),
       this.harvests.load(),
+      this.preserves.load(),
       this.settings.load(),
     ]);
 
@@ -48,6 +51,7 @@ export class BootService {
         : store === 'checkins' ? this.checkins
         : store === 'sessions' ? this.sessions
         : store === 'harvests' ? this.harvests
+        : store === 'preserves' ? this.preserves
         : null;
       void repo?.refreshFromDisk(ids);
     });

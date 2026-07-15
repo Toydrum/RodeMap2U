@@ -2,7 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import { Harvest, Tree, TreeNode, harvestIdFor, newSyncBase } from '../db/schema';
 import { StoreName, get, put } from '../db/idb';
 import { RecordsRepo } from './records.repo';
-import { underDailyPath } from '../harvest';
+import { isFresh, underDailyPath } from '../harvest';
 
 /**
  * «La cosecha» (0.0.88) — the pantry register. See the Harvest interface in
@@ -20,6 +20,10 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
   readonly newestFirst = computed(() =>
     [...this.all()].sort((a, b) => b.harvestedAt - a.harvestedAt || (a.id < b.id ? -1 : 1)),
   );
+
+  /** «La conservería»: fruits still in the harvest jar (single-home law —
+   *  sealed fruits live in their jam jar instead, never in both). */
+  readonly fresh = computed(() => this.newestFirst().filter(isFresh));
 
   /**
    * Mint (or re-stamp) the fruit for a branch that just bloomed. Idempotent:

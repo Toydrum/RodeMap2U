@@ -30,6 +30,83 @@
     font-size: 0.9rem;
     margin-top: 0.5rem;
   }
+
+  /* the fresh jar after a batch: READY, never empty */
+  .fresh-ready {
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+  }
+
+  .doors {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+  }
+}
+
+/* ── la alacena ── */
+.alacena {
+  .jam-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.9rem;
+  }
+
+  .jam-shelf-jar {
+    padding: 0.3rem;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background: none;
+    cursor: pointer;
+
+    &.selected {
+      border-color: var(--primary);
+      border-style: dashed;
+    }
+  }
+}
+
+.jar-panel {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1.05rem;
+  animation: panel-in 0.25s ease both;
+
+  .jar-panel-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+
+    .jar-month {
+      color: var(--text-faint);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+:host-context(.reduce-motion) .jar-panel {
+  animation: none;
+}
+
+/* the register's single-home chip — visible, never hidden */
+.jar-chip {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  border: 1px dashed color-mix(in srgb, var(--text) 25%, transparent);
+  border-radius: 7px;
+  padding: 0.02rem 0.4rem;
 }
 
 .part {

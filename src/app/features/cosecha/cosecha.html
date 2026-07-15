@@ -1,4 +1,4 @@
-<div class="container page">
+<div class="container page" (keydown.escape)="onJarEscape()">
   <header class="head">
     <button type="button" class="btn btn-ghost" (click)="goBack()">← {{ i18n.t().common.back }}</button>
   </header>
@@ -7,20 +7,104 @@
     <h1>{{ i18n.t().cosecha.title }}</h1>
     <p class="intro">{{ i18n.t().cosecha.subtitle }}</p>
     <div class="hero-jar" aria-hidden="true">
-      <app-meadow-jar [fruits]="harvests.newestFirst()" [size]="1.8" />
+      <app-meadow-jar [fruits]="harvests.fresh()" [size]="1.8" />
     </div>
     @if (total()) {
       <p class="total-line">{{ i18n.plural(total(), i18n.t().cosecha.total) }}</p>
+      @if (!harvests.fresh().length && jamShelf().length) {
+        <p class="fresh-ready">{{ i18n.t().cosecha.freshReady }}</p>
+      }
     }
+    <div class="doors">
+      @if (harvests.fresh().length) {
+        <button type="button" class="btn btn-primary jam-door" (click)="makingJam.set(true)">
+          🫙 {{ i18n.t().cosecha.makeJam }}
+        </button>
+      }
+      @if (total()) {
+        <button type="button" class="btn btn-soft tea-door" (click)="brewingTea.set(true)">
+          {{ i18n.t().cosecha.teaDoor }}
+        </button>
+      }
+    </div>
   </div>
 
   <app-hint-chip surface="cosecha" [text]="i18n.t().hints.cosecha" />
 
+  <!-- La alacena: sealed jams, chronological history of makings — never a
+       species grid, never counted, no empty shelf staring. -->
+  @if (jamShelf().length) {
+    <section class="part alacena">
+      <h2 class="part-title"><span aria-hidden="true">🫙</span> {{ i18n.t().cosecha.alacenaTitle }}</h2>
+      <div class="jam-row">
+        @for (item of jamShelf(); track item.preserve.id) {
+          <button
+            type="button"
+            class="jam-shelf-jar"
+            [class.selected]="openJarId() === item.preserve.id"
+            [attr.aria-expanded]="openJarId() === item.preserve.id"
+            aria-controls="jar-panel"
+            (click)="toggleJar(item.preserve.id)"
+          >
+            <app-jam-jar [preserve]="item.preserve" [monthWord]="item.monthWord" />
+          </button>
+        }
+      </div>
+
+      @if (openJar(); as jar) {
+        <section id="jar-panel" class="card jar-panel" role="region" [attr.aria-label]="jar.preserve.name">
+          <div class="jar-panel-head">
+            <strong>{{ jar.preserve.name }}</strong>
+            <span class="jar-month">{{ jar.monthWord }}</span>
+          </div>
+          <ol class="steps">
+            @for (row of openJarRows(); track row.harvest.id) {
+              <li class="card cosecha-card">
+                @if (row.live) {
+                  <button type="button" class="cosecha-row" (click)="openBranch(row)">
+                    <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                      <g appFruit [fruit]="row.spec" [scale]="0.92" />
+                    </svg>
+                    <div class="body">
+                      <strong class="row-title">{{ row.harvest.title }}</strong>
+                      <div class="row-meta">
+                        <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                          {{ row.harvest.treeName }}
+                        </span>
+                        <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                      </div>
+                    </div>
+                    <span class="arrow" aria-hidden="true">→</span>
+                  </button>
+                } @else {
+                  <div class="cosecha-row still">
+                    <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                      <g appFruit [fruit]="row.spec" [scale]="0.92" />
+                    </svg>
+                    <div class="body">
+                      <strong class="row-title">{{ row.harvest.title }}</strong>
+                      <div class="row-meta">
+                        <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                          {{ row.harvest.treeName }}
+                        </span>
+                        <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </li>
+            }
+          </ol>
+        </section>
+      }
+    </section>
+  }
+
+  <!-- The REGISTER: every fruit forever, whatever its home. -->
   @if (shelves().length) {
     @for (shelf of shelves(); track shelf.key) {
       <section class="part cosecha-month">
         <h2 class="part-title">
-          <span aria-hidden="true">🫙</span>
           {{ i18n.fill(i18n.t().cosecha.monthTitle, { month: shelf.monthWord }) }}
         </h2>
         <ol class="steps">
@@ -38,6 +122,9 @@
                         {{ row.harvest.treeName }}
                       </span>
                       <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                      @if (row.jarName) {
+                        <span class="jar-chip">{{ i18n.fill(i18n.t().cosecha.inJar, { name: row.jarName }) }}</span>
+                      }
                     </div>
                   </div>
                   <span class="arrow" aria-hidden="true">→</span>
@@ -56,6 +143,9 @@
                         {{ row.harvest.treeName }}
                       </span>
                       <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                      @if (row.jarName) {
+                        <span class="jar-chip">{{ i18n.fill(i18n.t().cosecha.inJar, { name: row.jarName }) }}</span>
+                      }
                     </div>
                   </div>
                 </div>
@@ -69,3 +159,15 @@
     <p class="part-empty">{{ i18n.t().cosecha.empty }} {{ i18n.t().cosecha.emptyHint }}</p>
   }
 </div>
+
+@defer (when makingJam()) {
+  @if (makingJam()) {
+    <app-mermelada-sheet (closed)="makingJam.set(false)" (sealed)="onSealed($event)" />
+  }
+}
+
+@defer (when brewingTea()) {
+  @if (brewingTea()) {
+    <app-te-sheet (closed)="brewingTea.set(false)" />
+  }
+}

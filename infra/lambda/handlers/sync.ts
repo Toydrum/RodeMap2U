@@ -17,6 +17,7 @@ const STORES: ReadonlySet<string> = new Set<SyncStore>([
   'checkins',
   'sessions',
   'harvests',
+  'preserves',
 ]);
 
 /**

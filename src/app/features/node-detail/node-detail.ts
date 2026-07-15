@@ -10,7 +10,8 @@ import { ESTIMATE_CHOICES, EstimateMin, NodePriority, NodeStatus, Tree, TreeNode
 import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
-import { flowerFor } from '../forest/flora';
+import { HarvestSkyService } from '../../shared/ui/harvest-sky';
+import { flowerFor, fruitFor } from '../forest/flora';
 import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
@@ -46,6 +47,7 @@ export class NodeDetail {
   private readonly toast = inject(ToastService);
   private readonly harvests = inject(HarvestsRepo);
   private readonly burst = inject(BloomBurstService);
+  private readonly sky = inject(HarvestSkyService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly lights = LIGHTS;
@@ -181,14 +183,21 @@ export class NodeDetail {
     }
   }
 
-  /** One celebration voice for every bloom in this sheet: the foreground
-   *  petal burst (the canvas fruit drop plays behind on its own diff) plus
-   *  the pantry mint. Visits burst but never mint — the pantry is the
-   *  owner's, not the visitor's. */
+  /** Two celebration layers, one voice each (0.0.89): the ACT layer — the
+   *  small petal burst at the tap point, every bloom, everywhere — and the
+   *  HARVEST layer — the full-screen petal fall + the earned-fruit card,
+   *  ONLY when a fruit actually mints (sendero pasitos return null; visits
+   *  never mint — the sky never lies). The canvas fruit drop plays behind
+   *  on its own status diff. */
   private celebrateBloom(node: TreeNode, anchor: Element | null): void {
-    this.burst.burstAt(anchor, flowerFor(this.tree().accent, this.tree().id));
+    const species = flowerFor(this.tree().accent, this.tree().id);
+    this.burst.burstAt(anchor, species);
     if (!this.visiting) {
-      void this.harvests.recordBloom(node, this.tree(), this.nodes.byId());
+      void this.harvests.recordBloom(node, this.tree(), this.nodes.byId()).then((minted) => {
+        if (minted) {
+          this.sky.celebrate(species, fruitFor(minted.accent, minted.treeId), minted.title);
+        }
+      });
     }
   }
 

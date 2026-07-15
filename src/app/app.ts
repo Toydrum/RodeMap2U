@@ -14,10 +14,11 @@ import { PerchAnchorService } from './core/perch-anchor.service';
 import { ToastService } from './shared/ui/toast.service';
 import { PerchBody } from './shared/ui/perch-body';
 import { BloomBurstHost } from './shared/ui/bloom-burst';
+import { HarvestSkyHost } from './shared/ui/harvest-sky';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PerchBody, BloomBurstHost],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PerchBody, BloomBurstHost, HarvestSkyHost],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

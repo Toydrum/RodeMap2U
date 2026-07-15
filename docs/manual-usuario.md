@@ -244,13 +244,14 @@ Los días de tu bosque, **solo para mirar** — nunca una agenda. Vive en la bar
 - Si una fecha amable pasó sin resolverse, su capullo **se queda en su día** con una hojita 🍂 suave — nunca rojo, nunca «atrasado». Tocar su día abre la página del día y de ahí llegas a su rama; la conversación digna de siempre te espera en el aviso 🍂 de la sección HOY (y en Ahora, como siempre).
 - Tocar cualquier día abre **la página del día**; tocar cualquier rama te lleva a su árbol. El almanaque nunca sustituye al bosque — solo lo mira desde los días.
 
-# 7c. La cosecha 🫙
+# 7c. La conservería 🫙
 
-Cuando una rama florece, la app lo celebra ahí mismo: un **estallido de pétalos** del color de tu árbol justo donde tocaste, y en el árbol se ve **caer una fruta** hasta sus raíces. Cada árbol da su propia fruta (manzanas, peras, cerezas… según su especie).
+Cuando una rama florece, la app lo celebra en grande: **llueven pétalos por toda la pantalla** en los colores de tu árbol, aparece una **tarjetita con la fruta que ganaste** («¡Una manzana!» y el nombre de tu rama), y en el árbol se ve **caer la fruta** hasta sus raíces. Cada árbol da su propia fruta (manzanas, peras, cerezas… según su especie). La regla de oro de todo este rincón: **nada se gasta; todo se conserva.**
 
-- Esa fruta se guarda en **el frasco de la cosecha**, un frasquito de vidrio que aparece en tu pradera **con tu primera fruta** (abajo a la izquierda). Verlo llenarse es ver todo lo que has logrado.
-- Tocar el frasco abre **La cosecha**: tus frutas juntitas por mes («La cosecha de julio»), cada una con el nombre de su rama y su fecha. Tocar una fruta te lleva a su rama.
-- Las frutas son **recuerdos**: se quedan en el frasco aunque después reabras, guardes o sueltes la rama. Nada se gasta, nada se pierde, nada se compara — el frasco solo junta lo bueno.
+- Las frutas caen en **el frasco de la cosecha**, en tu pradera (abajo a la izquierda, junto a **la mesita** donde también se paran tus mermeladas más recientes). Tocar la mesita abre **La conservería**.
+- **Hacer mermelada** es un pequeño ritual de tres pasos: eliges frutas de tu frasco (una por una — con una alcanza, ninguna mermelada es chica), las ves cocerse **a fuego lento** (puedes remover si te apetece, o no), y **envasas**: el frasco nuevo lleva un nombre que se escribe solo («Mermelada de manzana»; si mezclaste, «Mermelada del bosque») y **puedes cambiarlo por el tuyo** («La mermelada de mis exámenes»). El frasco se guarda en **la alacena**.
+- Hacer mermelada **no gasta nada**: la fruta solo cambia de casa. Tocar un frasco de la alacena te muestra todas sus frutas con sus nombres y fechas, y el registro por meses las sigue mostrando todas (con una notita de en qué frasco viven ahora). Tu conteo de frutas jamás baja.
+- **Preparar un té** es para saborear: eliges una, dos o tres frutas (o dejas que el día elija), la taza humea, y relees esas memorias sorbo a sorbo — incluso la notita de la rama si tiene una. El té no deja registro: algunas alegrías son para beberse.
 - Los pasitos de un **sendero** no dan fruta (su celebración es el caminito de cada día); el sendero completo, cuando florece entero, sí deja la suya.
 
 # 8. Sesiones de enfoque
