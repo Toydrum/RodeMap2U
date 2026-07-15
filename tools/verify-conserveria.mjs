@@ -163,8 +163,9 @@ ok('D2 lifetime count counts the register', totalLine.includes(String(after.harv
 const chip = await page.locator('.jar-chip').count();
 ok('D3 register shows the single-home chip', chip >= 1, `chips=${chip}`);
 
-// E — «Abrir el frasco» returns the fruits.
-await page.locator('.toast button', { hasText: 'Abrir el frasco' }).click();
+// E — the seal's «Deshacer» returns the fruits (0.0.90: «abrir» belongs
+// to the ceremony now).
+await page.locator('.toast button', { hasText: 'Deshacer' }).click();
 await page.waitForTimeout(700);
 const undone = await idbCounts();
 ok(
@@ -327,6 +328,174 @@ const centersOk = await page.evaluate(() =>
   }),
 );
 ok('J mesita shows the jam + plot centers hold', mesitaJams >= 1 && centersOk, `jams=${mesitaJams} centers=${centersOk}`);
+
+// ── 0.0.90 «el premio del frasco» ──────────────────────────────────────
+
+// L — seal ONE fruit WITH a premio: frasquito vessel + 🎀 ribbon + panel
+// chip + the open door. N (inside): the pot never speaks tiers forward.
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(700);
+await page.locator('.jam-door').click();
+await page.waitForTimeout(700);
+await page.locator('.fruit-pick').first().click();
+await page.waitForTimeout(400);
+const potText = ((await page.locator('.jam-sheet').textContent().catch(() => '')) ?? '');
+const antiQuota = !/frasquito|frascote|piden|pide un/i.test(potText);
+ok('N the pot never computes tiers forward', antiQuota, `"${potText.slice(0, 60).replace(/\s+/g, ' ')}"`);
+await page.locator('button', { hasText: 'Al fuego' }).click();
+await page.waitForTimeout(300);
+await page.locator('button', { hasText: 'Envasar' }).click();
+await page.waitForTimeout(400);
+const vesselLineL = ((await page.locator('.vessel-line').textContent().catch(() => '')) ?? '').trim();
+await page.locator('.premio-field input').fill('ver un capítulo extra');
+await page.waitForTimeout(200);
+const savedForVisible = await page.locator('.saved-for-field').count();
+await page.locator('.seal-btn').click();
+await page.waitForTimeout(900);
+const jarL = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('preserves', 'readonly').objectStore('preserves').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  db.close();
+  const live = rows.filter((r) => !r.deletedAt).sort((a, b) => b.madeAt - a.madeAt);
+  return live[0] ? { size: live[0].size, premio: live[0].premio, openedAt: live[0].openedAt } : null;
+});
+const ribbon = await page.locator('.jam-ribbon').count();
+ok(
+  'L premio seal: frasquito + ribbon + fields',
+  vesselLineL.includes('frasquito') && savedForVisible === 1 &&
+    jarL?.size === 'frasquito' && jarL?.premio === 'ver un capítulo extra' && !jarL?.openedAt && ribbon >= 1,
+  `vessel="${vesselLineL.slice(0, 34)}" size=${jarL?.size} ribbon=${ribbon}`,
+);
+// Put the SEAL toast away before the ceremony — its protected Deshacer
+// (unseal) would otherwise still own the slot when M's Deshacer clicks.
+await page.locator('.toast .btn-ghost').click().catch(() => {});
+await page.waitForTimeout(300);
+
+// Q — a memory jar (no premio) shows NO open door and never names the absence.
+await page.locator('.jam-shelf-jar').last().click(); // oldest = J's memory jar
+await page.waitForTimeout(400);
+const qPanel = ((await page.locator('.jar-panel').textContent().catch(() => '')) ?? '');
+const qOpenBtn = await page.locator('.open-jam-btn').count();
+ok('Q memory jar: no open door, absence unnamed', qOpenBtn === 0 && !/sin premio/i.test(qPanel), `btn=${qOpenBtn}`);
+
+// M — the claiming ceremony: openedAt stamps, the rain falls in the jam's
+// tint, «Te lo ganaste» speaks, and Deshacer re-closes.
+await page.locator('.jam-shelf-jar').first().click(); // newest = L's premio jar
+await page.waitForTimeout(400);
+const premioChip = await page.locator('.premio-chip').count();
+await page.locator('.open-jam-btn').click();
+await page.waitForTimeout(600);
+await page.locator('.open-it').click();
+await page.waitForTimeout(400);
+const rainM = await page.locator('.petal-fall').count();
+const earned = ((await page.locator('.earned').textContent().catch(() => '')) ?? '');
+await page.locator('.enjoy-it').click();
+await page.waitForTimeout(500);
+const openedStamp = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('preserves', 'readonly').objectStore('preserves').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  db.close();
+  return rows.find((r) => !r.deletedAt && r.premio === 'ver un capítulo extra')?.openedAt ?? null;
+});
+await page.locator('.toast button', { hasText: 'Deshacer' }).click();
+await page.waitForTimeout(500);
+const reclosedStamp = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('preserves', 'readonly').objectStore('preserves').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  db.close();
+  return rows.find((r) => !r.deletedAt && r.premio === 'ver un capítulo extra')?.openedAt ?? null;
+});
+ok(
+  'M ceremony: rain + Te lo ganaste + stamp + Deshacer re-closes',
+  premioChip === 1 && rainM === 1 && earned.includes('Te lo ganaste') &&
+    earned.includes('ver un capítulo extra') && !!openedStamp && reclosedStamp === null,
+  `rain=${rainM} stamp=${!!openedStamp}→${reclosedStamp}`,
+);
+
+// P — reduce-motion ceremony: the words stay (information), the sky steps aside.
+await page.emulateMedia({ reducedMotion: 'reduce' });
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(800);
+await page.locator('.jam-shelf-jar').first().click();
+await page.waitForTimeout(400);
+await page.locator('.open-jam-btn').click();
+await page.waitForTimeout(600);
+await page.locator('.open-it').click();
+await page.waitForTimeout(400);
+const skyHiddenP = await page.evaluate(() => {
+  const sky = document.querySelector('.petal-fall');
+  return sky ? getComputedStyle(sky).display === 'none' : true;
+});
+const earnedP = ((await page.locator('.earned').textContent().catch(() => '')) ?? '').includes('Te lo ganaste');
+await page.locator('.enjoy-it').click();
+await page.waitForTimeout(400);
+const disfrutada = ((await page.locator('.enjoyed-line').textContent().catch(() => '')) ?? '').trim();
+ok('P reduce-motion: words stay, sky aside, jar disfrutada', skyHiddenP && earnedP && disfrutada.length > 0, `"${disfrutada.slice(0, 26)}"`);
+await page.emulateMedia({ reducedMotion: null });
+
+// O — six fruits make a frascote («una mermelada poderosa»).
+await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const accents = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand'];
+  await new Promise((res, rej) => {
+    const tx = db.transaction('harvests', 'readwrite');
+    const os = tx.objectStore('harvests');
+    const now = Date.now();
+    for (let i = 0; i < 6; i++) {
+      os.put({
+        id: 'h:probe-o-' + i, createdAt: now, updatedAt: now, rev: 1, deletedAt: null,
+        nodeId: 'probe-o-' + i, treeId: 'probe-tree', treeName: 'Sonda', accent: accents[i],
+        title: 'Logro ' + (i + 1), harvestedAt: now - i * 1000, preserveId: null,
+      });
+    }
+    tx.oncomplete = () => res();
+    tx.onerror = rej;
+  });
+  db.close();
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(800);
+await page.locator('.jam-door').click();
+await page.waitForTimeout(700);
+for (let i = 0; i < 6; i++) {
+  await page.locator('.fruit-pick').nth(i).click();
+  await page.waitForTimeout(120);
+}
+await page.locator('button', { hasText: 'Al fuego' }).click();
+await page.waitForTimeout(300);
+await page.locator('button', { hasText: 'Envasar' }).click();
+await page.waitForTimeout(400);
+const vesselLineO = ((await page.locator('.vessel-line').textContent().catch(() => '')) ?? '').trim();
+await page.locator('.seal-btn').click();
+await page.waitForTimeout(900);
+const sizeO = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('preserves', 'readonly').objectStore('preserves').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  db.close();
+  return rows.filter((r) => !r.deletedAt).sort((a, b) => b.madeAt - a.madeAt)[0]?.size ?? null;
+});
+ok('O six fruits = frascote poderosa', vesselLineO.includes('poderosa') && sizeO === 'frascote', `"${vesselLineO.slice(0, 44)}" size=${sizeO}`);
 
 console.log('conserveria done');
 await browser.close();

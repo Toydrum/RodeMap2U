@@ -26,9 +26,13 @@ import { I18nService } from '../../core/i18n/i18n.service';
 export interface HarvestCelebration {
   id: number;
   species: FlowerSpec;
-  fruit: FruitSpec;
+  /** Null when only the sky plays (the jam-opening ceremony's tint rain). */
+  fruit: FruitSpec | null;
   /** The branch's words — the only label a fruit ever needs. */
   title: string;
+  /** The tarjetita renders only for mints; ceremony rains carry their own
+   *  sheet as the card. */
+  card: boolean;
 }
 
 /** Fixed forever — deterministic petal weather (left %, delay s, duration s,
@@ -59,7 +63,17 @@ export class HarvestSkyService {
 
   celebrate(species: FlowerSpec, fruit: FruitSpec, title: string): void {
     if (this.timer) clearTimeout(this.timer);
-    this.current.set({ id: ++this.seq, species, fruit, title });
+    this.current.set({ id: ++this.seq, species, fruit, title, card: true });
+    this.timer = setTimeout(() => this.current.set(null), 2600);
+  }
+
+  /** «Abrir la mermelada» (0.0.90): the same 14 fixed petals in the JAM'S
+   *  OWN TINT — no tarjetita (the ceremony sheet is the card), no
+   *  escalation by vessel (equal dignity per layer). */
+  rainTint(tint: string, tintEdge: string): void {
+    if (this.timer) clearTimeout(this.timer);
+    const species: FlowerSpec = { shape: 'petal5', petal: tint, petalEdge: tintEdge, heart: tintEdge };
+    this.current.set({ id: ++this.seq, species, fruit: null, title: '', card: false });
     this.timer = setTimeout(() => this.current.set(null), 2600);
   }
 
@@ -209,22 +223,24 @@ export class HarvestSkyService {
           </div>
         }
       </div>
-      <div class="fruit-card-layer">
-        <div
-          class="fruit-card"
-          role="status"
-          [style.border-color]="fest.fruit.skinEdge"
-          (click)="service.dismissCard()"
-        >
-          <svg class="card-fruit" viewBox="-15 -16 30 30" width="56" height="56" aria-hidden="true">
-            <g appFruit [fruit]="fest.fruit" [scale]="1.05" />
-          </svg>
-          <span class="card-words">
-            <span class="card-headline">{{ i18n.t().cosecha.fruitCardTitles[fest.fruit.shape] }}</span>
-            <span class="card-line">{{ i18n.fill(i18n.t().cosecha.fruitCardLine, { title: fest.title }) }}</span>
-          </span>
+      @if (fest.card && fest.fruit; as fruit) {
+        <div class="fruit-card-layer">
+          <div
+            class="fruit-card"
+            role="status"
+            [style.border-color]="fruit.skinEdge"
+            (click)="service.dismissCard()"
+          >
+            <svg class="card-fruit" viewBox="-15 -16 30 30" width="56" height="56" aria-hidden="true">
+              <g appFruit [fruit]="fruit" [scale]="1.05" />
+            </svg>
+            <span class="card-words">
+              <span class="card-headline">{{ i18n.t().cosecha.fruitCardTitles[fruit.shape] }}</span>
+              <span class="card-line">{{ i18n.fill(i18n.t().cosecha.fruitCardLine, { title: fest.title }) }}</span>
+            </span>
+          </div>
         </div>
-      </div>
+      }
     }
   `,
 })

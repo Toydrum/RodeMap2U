@@ -5,6 +5,7 @@ import {
   harvestMonths,
   isDailyPathParent,
   isFresh,
+  jarSizeFor,
   membersOf,
   underDailyPath,
 } from './harvest';
@@ -124,6 +125,15 @@ describe('la conservería — single-home + flavor derivation', () => {
     const pear = { ...harvest('b', 1), accent: 'sage' as const };
     expect(deriveAccent([apple, { ...harvest('c', 2) }])).toBe('moss');
     expect(deriveAccent([apple, pear])).toBeNull();
+  });
+
+  it('jarSizeFor — THE vessel threshold law: 1–2/3–5/6+', () => {
+    expect(jarSizeFor(1)).toBe('frasquito');
+    expect(jarSizeFor(2)).toBe('frasquito');
+    expect(jarSizeFor(3)).toBe('frasco');
+    expect(jarSizeFor(5)).toBe('frasco');
+    expect(jarSizeFor(6)).toBe('frascote');
+    expect(jarSizeFor(20)).toBe('frascote');
   });
 });
 

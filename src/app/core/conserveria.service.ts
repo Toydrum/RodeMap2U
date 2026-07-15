@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Harvest, Preserve, newSyncBase, stamp } from './db/schema';
 import { putAcross } from './db/idb';
 import { broadcastChange } from './db/broadcast';
-import { deriveAccent } from './harvest';
+import { deriveAccent, jarSizeFor } from './harvest';
 import { HarvestsRepo } from './repos/harvests.repo';
 import { PreservesRepo } from './repos/preserves.repo';
 
@@ -25,17 +25,26 @@ export class ConserveriaService {
    * Seal a batch: mint the Preserve + stamp every member's home in ONE
    * transaction. Members are re-read live (never captured rows — stale rev
    * loses LWW) and already-preserved fruits are skipped (idempotence).
+   * The vessel is a seal-time snapshot (jarSizeFor over the REAL member
+   * count); premio/savedFor are the user's own words, stored verbatim.
    * Returns the sealed jar, or null if nothing was left to seal.
    */
   async seal(
     memberIds: string[],
-    jar: { name: string; tint: string; tintEdge: string },
+    jar: {
+      name: string;
+      tint: string;
+      tintEdge: string;
+      premio?: string | null;
+      savedFor?: string | null;
+    },
   ): Promise<Preserve | null> {
     const members = memberIds
       .map((id) => this.harvests.byId().get(id))
       .filter((h): h is Harvest => !!h && !h.deletedAt && !h.preserveId);
     if (!members.length) return null;
 
+    const premio = jar.premio?.trim() || null;
     const preserve: Preserve = {
       ...newSyncBase(),
       kind: 'mermelada',
@@ -44,6 +53,10 @@ export class ConserveriaService {
       accent: deriveAccent(members),
       tint: jar.tint,
       tintEdge: jar.tintEdge,
+      size: jarSizeFor(members.length),
+      premio,
+      savedFor: premio ? jar.savedFor?.trim() || null : null,
+      openedAt: null,
     };
     // stamp() BEFORE the write — raw multi-store puts don't stamp for you
     // (the setOrder scar).
@@ -59,11 +72,33 @@ export class ConserveriaService {
     return preserve;
   }
 
-  /** «Abrir el frasco» — the undo-window unseal: tombstone the jar, return
-   *  every live member to the fresh jar. Same atomic shape as seal. */
+  /**
+   * «Abrir la mermelada» (0.0.90) — the claiming ceremony's one write:
+   * stamp openedAt on the LIVE record. No member rows move (nothing
+   * changes home — what is consumed is the real-world permission). The
+   * app never locks a jar; this is always the user's own moment.
+   */
+  async open(preserve: Preserve): Promise<Preserve | null> {
+    const live = this.preserves.byId().get(preserve.id);
+    if (!live || live.deletedAt || live.openedAt) return null;
+    return this.preserves.save({ ...live, openedAt: Date.now() });
+  }
+
+  /** The opening's undo (toast window only): re-read live, null the stamp. */
+  async reclose(preserve: Preserve): Promise<void> {
+    const live = this.preserves.byId().get(preserve.id);
+    if (!live || live.deletedAt || !live.openedAt) return;
+    await this.preserves.save({ ...live, openedAt: null });
+  }
+
+  /** The seal's undo (toast window only): tombstone the jar, return
+   *  every live member to the fresh jar. Same atomic shape as seal.
+   *  An OPENED jar never unseals — its story moved on (the seal toast can
+   *  outlive a whole claiming ceremony; each undo acts only on its own
+   *  moment). */
   async unseal(preserve: Preserve): Promise<void> {
     const jar = this.preserves.byId().get(preserve.id) ?? preserve;
-    if (jar.deletedAt) return;
+    if (jar.deletedAt || jar.openedAt) return;
     const tombstoned = stamp({ ...jar, deletedAt: Date.now() });
     const freed = [...this.harvests.byId().values()]
       .filter((h) => h.preserveId === jar.id && !h.deletedAt)

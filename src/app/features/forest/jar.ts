@@ -4,10 +4,23 @@ import { fruitFor } from './flora';
 import { FruitGlyph } from './fruit';
 import { hash } from './tree-layout';
 
-/** THE glass geometry — one law shared by the fresh jar and every jam jar
- *  (viewBox 0 0 44 54; interior x 8–36, y 9–51). */
+/** THE glass geometry — one law shared by the fresh jar and the middle
+ *  jam vessel (viewBox 0 0 44 54; interior x 8–36, y 9–51). */
 export const JAR_GLASS_D =
   'M 12 9 C 10 12 8 14 8 18 L 8 44 C 8 49 12 51 22 51 C 32 51 36 49 36 44 L 36 18 C 36 14 34 12 32 9 Z';
+
+/**
+ * «El frasco sirve a la fruta» (0.0.90): the closed THREE-VESSEL family.
+ * Distinct SILHOUETTES, never one glass scaled — a shelf of scales is a
+ * histogram; a shelf of shapes is a pantry. A frasquito is its own
+ * charming kind of jar, never a shrunken frasco. Same 0 0 44 54 viewBox.
+ */
+/** Squat, round-shouldered little pot (1–2 frutas). */
+export const FRASQUITO_GLASS_D =
+  'M 13 22 C 9 24 7 29 7 35 C 7 45 12 51 22 51 C 32 51 37 45 37 35 C 37 29 35 24 31 22 Z';
+/** Tall, broad-shouldered preserving jar (6+ frutas). */
+export const FRASCOTE_GLASS_D =
+  'M 10 8 C 7 11 5 13 5 17 L 5 45 C 5 50 10 52.5 22 52.5 C 34 52.5 39 50 39 45 L 39 17 C 39 13 37 11 34 8 Z';
 
 /**
  * «El frasco» (0.0.88) — the harvest jar: hand-drawn glass holding the

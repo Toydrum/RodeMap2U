@@ -1,4 +1,4 @@
-import { AccentToken, Harvest, TreeNode } from './db/schema';
+import { AccentToken, Harvest, JarVessel, TreeNode } from './db/schema';
 import { dayOf } from './time';
 
 /**
@@ -58,6 +58,15 @@ export function membersOf(preserveId: string, rows: Harvest[]): Harvest[] {
 export function deriveAccent(members: Harvest[]): AccentToken | null {
   const accents = new Set(members.map((m) => m.accent));
   return accents.size === 1 ? members[0].accent : null;
+}
+
+/** THE one vessel-threshold law (0.0.90 — «el frasco sirve a la fruta»):
+ *  1–2 frutas → frasquito · 3–5 → frasco · 6+ → frascote. Published in the
+ *  guide, NEVER computed forward on a working surface (no pot counters). */
+export function jarSizeFor(count: number): JarVessel {
+  if (count <= 2) return 'frasquito';
+  if (count <= 5) return 'frasco';
+  return 'frascote';
 }
 
 /** One shelf section of the pantry: a month and its fruits. */

@@ -57,6 +57,21 @@
             <strong>{{ jar.preserve.name }}</strong>
             <span class="jar-month">{{ jar.monthWord }}</span>
           </div>
+          @if (jar.preserve.premio) {
+            <p class="premio-chip">{{ i18n.fill(i18n.t().cosecha.premioChip, { premio: jar.preserve.premio ?? '' }) }}</p>
+            @if (jar.preserve.savedFor && !jar.preserve.openedAt) {
+              <p class="saved-for-line">{{ i18n.fill(i18n.t().cosecha.savedForLine, { savedFor: jar.preserve.savedFor ?? '' }) }}</p>
+            }
+            @if (jar.preserve.openedAt) {
+              <p class="enjoyed-line">{{ enjoyedLine(jar.preserve) }}</p>
+            } @else {
+              <div class="open-row">
+                <button type="button" class="btn btn-primary open-jam-btn" (click)="claiming.set(jar.preserve)">
+                  {{ i18n.t().cosecha.openJam }}
+                </button>
+              </div>
+            }
+          }
           <ol class="steps">
             @for (row of openJarRows(); track row.harvest.id) {
               <li class="card cosecha-card">
@@ -169,5 +184,16 @@
 @defer (when brewingTea()) {
   @if (brewingTea()) {
     <app-te-sheet (closed)="brewingTea.set(false)" />
+  }
+}
+
+@defer (when !!claiming()) {
+  @if (claiming(); as jar) {
+    <app-abrir-mermelada-sheet
+      [preserve]="jar"
+      [monthWord]="openJar()?.monthWord ?? ''"
+      (closed)="claiming.set(null)"
+      (opened)="onOpened($event)"
+    />
   }
 }

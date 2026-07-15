@@ -3,7 +3,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { Preserve } from '../../core/db/schema';
-import { deriveAccent } from '../../core/harvest';
+import { deriveAccent, jarSizeFor } from '../../core/harvest';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { inputValue } from '../../shared/ui/dom';
 import { FruitGlyph } from '../forest/fruit';
@@ -118,6 +118,10 @@ import { hash } from '../forest/tree-layout';
           @case (3) {
             <h2>{{ i18n.t().cosecha.beat3Title }}</h2>
 
+            <!-- the vessel speaks ONCE, here, past-facing: the jar serves
+                 the fruits («el frasco sirve a la fruta») — never a target -->
+            <p class="vessel-line">{{ vesselLine() }}</p>
+
             <div class="new-jar">
               <app-jam-jar class="pour-in" [preserve]="preview()" [size]="1.5" [label]="false" />
             </div>
@@ -132,6 +136,33 @@ import { hash } from '../forest/tree-layout';
                 [attr.aria-label]="i18n.t().cosecha.beat3Title"
               />
             </div>
+
+            <!-- «el premio del frasco»: optional, quiet — the absence is
+                 never named; the app never suggests or values rewards -->
+            <div class="field premio-field">
+              <label for="jam-premio">{{ i18n.t().cosecha.premioLabel }}</label>
+              <input
+                id="jam-premio"
+                type="text"
+                maxlength="120"
+                [value]="premio()"
+                (input)="premio.set(inputValue($event))"
+                [placeholder]="i18n.t().cosecha.premioPlaceholder"
+              />
+            </div>
+            @if (premio().trim()) {
+              <div class="field saved-for-field">
+                <label for="jam-saved-for">{{ i18n.t().cosecha.savedForLabel }}</label>
+                <input
+                  id="jam-saved-for"
+                  type="text"
+                  maxlength="120"
+                  [value]="savedFor()"
+                  (input)="savedFor.set(inputValue($event))"
+                  [placeholder]="i18n.t().cosecha.savedForPlaceholder"
+                />
+              </div>
+            }
 
             <div class="row-actions">
               <button type="button" class="btn btn-ghost" (click)="beat.set(2)">← {{ i18n.t().common.back }}</button>
@@ -361,6 +392,25 @@ import { hash } from '../forest/tree-layout';
       width: 100%;
     }
 
+    .vessel-line {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .premio-field,
+    .saved-for-field {
+      margin-top: 0.7rem;
+
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+    }
+
     :host-context(.reduce-motion) {
       .pot-fruit,
       .pour-in {
@@ -387,6 +437,8 @@ export class MermeladaSheet {
   protected readonly beat = signal<1 | 2 | 3>(1);
   protected readonly picked = signal<ReadonlySet<string>>(new Set());
   protected readonly jarName = signal('');
+  protected readonly premio = signal('');
+  protected readonly savedFor = signal('');
   protected readonly sealing = signal(false);
   protected readonly stirring = signal(false);
 
@@ -444,7 +496,19 @@ export class MermeladaSheet {
       accent: deriveAccent(members),
       tint: t.tint,
       tintEdge: t.tintEdge,
+      size: jarSizeFor(members.length),
+      premio: this.premio().trim() || null,
+      openedAt: null,
     };
+  });
+
+  /** The vessel line — spoken once, past-facing («tus N frutas piden…»). */
+  protected readonly vesselLine = computed(() => {
+    const n = this.pickedFruits().length;
+    const dict = this.i18n.t().cosecha.vesselLine;
+    const size = jarSizeFor(n);
+    if (size === 'frasquito') return this.i18n.plural(n, dict.frasquito);
+    return this.i18n.fill(size === 'frasco' ? dict.frasco : dict.frascote, { count: n });
   });
 
   protected toggle(id: string): void {
@@ -477,6 +541,8 @@ export class MermeladaSheet {
         name: this.jarName().trim() || this.derivedName(),
         tint: t.tint,
         tintEdge: t.tintEdge,
+        premio: this.premio(),
+        savedFor: this.savedFor(),
       });
       if (jar) this.sealed.emit(jar);
       else this.closed.emit();

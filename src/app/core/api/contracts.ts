@@ -132,7 +132,10 @@ export interface FriendsResponse {
  *                     settings are NEVER served to anyone — visits render a
  *                     neutral sky (weather derives from private feelings),
  *                     and the pantry is personal (harvest titles and jam
- *                     names are as intimate as trigger).
+ *                     names are as intimate as trigger; if preserves are
+ *                     EVER served in any future phase, premio/savedFor/
+ *                     openedAt strip FIRST — a self-granted permission is
+ *                     the most intimate sentence in the whole model).
  */
 export interface ForestSnapshot {
   owner: PublicProfile;

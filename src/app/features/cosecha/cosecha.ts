@@ -16,6 +16,7 @@ import { JamJar } from '../forest/jam-jar';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { MermeladaSheet } from './mermelada-sheet';
 import { TeSheet } from './te-sheet';
+import { AbrirMermeladaSheet } from './abrir-mermelada-sheet';
 
 interface HarvestRow {
   harvest: Harvest;
@@ -42,7 +43,7 @@ interface JamShelfItem {
  */
 @Component({
   selector: 'app-cosecha',
-  imports: [FruitGlyph, MeadowJar, JamJar, HintChip, MermeladaSheet, TeSheet],
+  imports: [FruitGlyph, MeadowJar, JamJar, HintChip, MermeladaSheet, TeSheet, AbrirMermeladaSheet],
   templateUrl: './cosecha.html',
   styleUrl: './cosecha.scss',
 })
@@ -56,9 +57,11 @@ export class CosechaPage {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
 
-  /** Ritual doors — @defer'd sheets; DOORS CANCEL applies to both. */
+  /** Ritual doors — @defer'd sheets; DOORS CANCEL applies to all. */
   protected readonly makingJam = signal(false);
   protected readonly brewingTea = signal(false);
+  /** The claiming ceremony's jar («abrir la mermelada»), or null. */
+  protected readonly claiming = signal<Preserve | null>(null);
   /** The alacena's inline disclosure (almanaque day-page pattern). */
   protected readonly openJarId = signal<string | null>(null);
 
@@ -130,17 +133,40 @@ export class CosechaPage {
     if (this.openJarId()) this.openJarId.set(null);
   }
 
-  /** Seal landed: close the ritual, offer the one undo window. */
+  /** Seal landed: close the ritual, offer the one undo window («abrir»
+   *  belongs to the ceremony now — undo says Deshacer, everywhere). */
   protected onSealed(preserve: Preserve): void {
     this.makingJam.set(false);
     this.toast.show(
       {
         message: this.i18n.t().cosecha.jamMadeToast,
-        actionLabel: this.i18n.t().cosecha.openJar,
+        actionLabel: this.i18n.t().common.undo,
         action: () => void this.conserveria.unseal(preserve),
       },
       UNDO_MS,
     );
+  }
+
+  /** Claim landed: the jar stands «disfrutada»; one undo window. */
+  protected onOpened(preserve: Preserve): void {
+    this.claiming.set(null);
+    this.toast.show(
+      {
+        message: this.i18n.t().cosecha.openedToast,
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.conserveria.reclose(preserve),
+      },
+      UNDO_MS,
+    );
+  }
+
+  protected enjoyedLine(preserve: Preserve): string {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const date = new Date(preserve.openedAt ?? 0).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'long',
+    });
+    return this.i18n.fill(this.i18n.t().cosecha.enjoyedOn, { date });
   }
 
   /** Accent-washed tree chip — the almanaque's categorical recipe. */

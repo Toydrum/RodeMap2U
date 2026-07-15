@@ -4,7 +4,10 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v6: NEW `preserves` store + additive Harvest.preserveId («la conservería»
+/** v7: additive Preserve.size/premio/savedFor/openedAt («el premio del
+ *  frasco» 0.0.90 — jam as self-granted reward + three vessels). No
+ *  migration pass; pre-v7 jars read as frasco/sealed/no-premio forever.
+ *  v6: NEW `preserves` store + additive Harvest.preserveId («la conservería»
  *  0.0.89 — sealed jam batches). Older backups lack both (imported as
  *  all-fresh, no jars); DB_VERSION 3 adds the store on lived-in devices.
  *  v5: NEW `harvests` store («la cosecha» 0.0.88) — the first new record
@@ -18,7 +21,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -190,6 +193,14 @@ export function harvestIdFor(nodeId: string): string {
  */
 export type PreserveKind = 'mermelada';
 
+/** «El frasco sirve a la fruta» (0.0.90, owner override of same-size):
+ *  the vessel reflects the BATCH — a seal-time snapshot via jarSizeFor
+ *  (1–2 frasquito · 3–5 frasco · 6+ frascote). Thresholds are PUBLISHED in
+ *  the guide (predictability) but never computed forward on a working
+ *  surface (no pot counters/previews — the tier speaks once, at Envasar,
+ *  past-facing). A frasquito is its own kind of jar, never a lesser one. */
+export type JarVessel = 'frasquito' | 'frasco' | 'frascote';
+
 export interface Preserve extends SyncBase {
   kind: PreserveKind;
   /** The user's own words — prefilled with the derived flavor, editable. */
@@ -201,6 +212,23 @@ export interface Preserve extends SyncBase {
   /** The jam color — blended from the member fruits' skins at seal. */
   tint: string;
   tintEdge: string;
+  /** Vessel snapshot at seal (absent ≡ 'frasco' — pre-v7 jars keep today's
+   *  glass forever; a jar must never resize when sync lands members late). */
+  size?: JarVessel;
+  /** «El premio del frasco» (0.0.90): the user's OWN reward/permission,
+   *  claimed by opening the jam. NEVER parsed, valued, priced, scheduled
+   *  or suggested by the app (the trigger law) — as intimate as trigger.
+   *  «La app es la alacena, nunca la caja registradora.» */
+  premio?: string | null;
+  /** Optional intención («para cuando termine el semestre») — free text,
+   *  re-spoken in the jar panel, NEVER enforced, never shown at opening
+   *  (no «you said you'd wait» energy exists anywhere in this app). */
+  savedFor?: string | null;
+  /** «Se abre una vez; se conserva siempre»: the claiming stamp. An opened
+   *  jar stays on its shelf «disfrutada» — lid off, never greyed; what was
+   *  consumed is the REAL-WORLD permission, never the memories. The app
+   *  never locks, expires or nudges a jar. */
+  openedAt?: number | null;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
