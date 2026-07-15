@@ -134,7 +134,6 @@ await page.waitForTimeout(700);
 await page.locator('.fruit-pick').first().click();
 await page.waitForTimeout(600);
 const potCount = await page.locator('.pot-fruit').count();
-await page.locator('button', { hasText: 'Al fuego' }).click();
 await page.waitForTimeout(400);
 await page.locator('button', { hasText: 'Remover' }).click();
 await page.waitForTimeout(300);
@@ -311,7 +310,6 @@ await page.waitForTimeout(700);
 await page.locator('.jam-door').click();
 await page.waitForTimeout(700);
 await page.locator('.fruit-pick').first().click();
-await page.locator('button', { hasText: 'Al fuego' }).click();
 await page.waitForTimeout(300);
 await page.locator('button', { hasText: 'Envasar' }).click();
 await page.waitForTimeout(300);
@@ -342,7 +340,6 @@ await page.waitForTimeout(400);
 const potText = ((await page.locator('.jam-sheet').textContent().catch(() => '')) ?? '');
 const antiQuota = !/frasquito|frascote|piden|pide un/i.test(potText);
 ok('N the pot never computes tiers forward', antiQuota, `"${potText.slice(0, 60).replace(/\s+/g, ' ')}"`);
-await page.locator('button', { hasText: 'Al fuego' }).click();
 await page.waitForTimeout(300);
 await page.locator('button', { hasText: 'Envasar' }).click();
 await page.waitForTimeout(400);
@@ -487,7 +484,6 @@ for (let i = 0; i < 6; i++) {
   await page.locator('.fruit-pick').nth(i).click();
   await page.waitForTimeout(120);
 }
-await page.locator('button', { hasText: 'Al fuego' }).click();
 await page.waitForTimeout(300);
 await page.locator('button', { hasText: 'Envasar' }).click();
 await page.waitForTimeout(400);
@@ -825,6 +821,53 @@ ok(
   'Z reconcile seals an over-full pending jar silently (deterministic madeAt, no ceremony)',
   !!sealedZ && sealedZ.sealedAt != null && sealedZ.madeAt === maxHarvestedAt && noToastZ,
   `sealedAt=${sealedZ?.sealedAt != null} madeAt==maxH=${sealedZ?.madeAt === maxHarvestedAt} noToast=${noToastZ}`,
+);
+
+// ── 0.0.94 «la cocina despejada» ─────────────────────────────────────────
+// AA: the folded ritual — no separate fire step; «Envasar» sits on the first
+// (pick) screen. AB: one panel at a time — opening a sealed jar closes the
+// pending detail (single openId).
+
+// AA — open the pot: «Al fuego» is gone, «Envasar» is on the pick screen.
+await seedFresh(2, 'aa');
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(500);
+await page.locator('.jam-door').click();
+await page.waitForTimeout(500);
+const alFuego = await page.locator('button', { hasText: 'Al fuego' }).count();
+await page.locator('.fruit-pick', { hasText: 'Fruta aa 1' }).click();
+await page.waitForTimeout(250);
+const envasarOnPick = await page.locator('.jam-sheet button', { hasText: 'Envasar' }).count();
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+ok(
+  'AA folded ritual: no «Al fuego» step, «Envasar» on the pick screen',
+  alFuego === 0 && envasarOnPick >= 1,
+  `alFuego=${alFuego} envasarOnPick=${envasarOnPick}`,
+);
+
+// AB — one panel at a time. Make a pending jar, open it, then open a sealed
+// jam: the pending panel must close (single openId).
+await page.locator('.promise-door').click();
+await page.waitForTimeout(300);
+await page.fill('#promise-premio', 'un premio AB');
+await page.locator('.premise-next').click();
+await page.locator('.vessel-chip').nth(1).click();
+await page.locator('.premise-next').click();
+await page.fill('#promise-name', 'Meta AB');
+await page.locator('.create-btn').click();
+await page.waitForTimeout(600);
+// the wizard auto-opens the new jar's detail — the pending panel is already up
+const panelsAfterPending = await page.locator('.jar-panel').count();
+await page.locator('.alacena .jam-shelf-jar').first().click();
+await page.waitForTimeout(400);
+const panelsAfterSealed = await page.locator('.jar-panel').count();
+const sealedPanel = await page.locator('#jar-panel').count();
+const pendingPanelGone = (await page.locator('#pending-panel').count()) === 0;
+ok(
+  'AB one panel at a time (opening a sealed jar closes the pending detail)',
+  panelsAfterPending === 1 && panelsAfterSealed === 1 && sealedPanel === 1 && pendingPanelGone,
+  `pending=${panelsAfterPending} sealed=${panelsAfterSealed} isSealed=${sealedPanel} pendingGone=${pendingPanelGone}`,
 );
 
 console.log('conserveria done');

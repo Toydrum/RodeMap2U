@@ -8,7 +8,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { Harvest, Preserve } from '../../core/db/schema';
-import { harvestMonths, isSealedJam, membersOf } from '../../core/harvest';
+import { harvestMonths, isPending, isSealedJam } from '../../core/harvest';
 import { FruitSpec, fruitFor } from '../forest/flora';
 import { FruitGlyph } from '../forest/fruit';
 import { MeadowJar } from '../forest/jar';
@@ -16,11 +16,11 @@ import { JamJar } from '../forest/jam-jar';
 import { PromiseJar } from '../forest/promise-jar';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
-import { inputValue } from '../../shared/ui/dom';
 import { MermeladaSheet } from './mermelada-sheet';
 import { TeSheet } from './te-sheet';
 import { AbrirMermeladaSheet } from './abrir-mermelada-sheet';
 import { PromesaSheet } from './promesa-sheet';
+import { JarDetail } from './jar-detail';
 import { PromiseService } from './promise.service';
 
 interface HarvestRow {
@@ -40,11 +40,12 @@ interface JamShelfItem {
 }
 
 /**
- * «La conservería» (0.0.89) — the pantry page: the fresh jar, the alacena
- * of sealed jams, the té door, and the month REGISTER (every fruit forever,
- * jammed or not — the lifetime count can never decrease; monotonicity is
- * the visible proof that nothing is ever spent). Master law: nada se
- * gasta; todo se conserva.
+ * «La conservería» (0.0.89) — the pantry page: the fresh jar, the shelves
+ * (filling / sealed / enjoyed), the ritual doors, and the month REGISTER
+ * (every fruit forever — the lifetime count can never decrease; monotonicity
+ * is the visible proof nothing is ever spent). Master law: nada se gasta; todo
+ * se conserva. 0.0.94 «la cocina despejada»: ONE jar-detail component + ONE
+ * `openId` (a single panel open at a time) replaced the two parallel panels.
  */
 @Component({
   selector: 'app-cosecha',
@@ -53,6 +54,7 @@ interface JamShelfItem {
     MeadowJar,
     JamJar,
     PromiseJar,
+    JarDetail,
     HintChip,
     ConfirmSheet,
     MermeladaSheet,
@@ -64,7 +66,6 @@ interface JamShelfItem {
   styleUrl: './cosecha.scss',
 })
 export class CosechaPage {
-  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly harvests = inject(HarvestsRepo);
   protected readonly preserves = inject(PreservesRepo);
@@ -82,16 +83,9 @@ export class CosechaPage {
   protected readonly promising = signal(false);
   /** The claiming ceremony's jar («abrir la mermelada»), or null. */
   protected readonly claiming = signal<Preserve | null>(null);
-  /** The alacena's inline disclosure (almanaque day-page pattern). */
-  protected readonly openJarId = signal<string | null>(null);
-  /** The pending goal jar's inline detail (separate panel from the alacena's). */
-  protected readonly openPendingId = signal<string | null>(null);
-  /** Within the open pending detail: the add-fruit tray + the edit form. */
-  protected readonly addOpen = signal(false);
-  protected readonly editOpen = signal(false);
-  protected readonly editName = signal('');
-  protected readonly editPremio = signal('');
-  protected readonly editSavedFor = signal('');
+  /** THE inline disclosure — one jar open at a time across all three shelves
+   *  (0.0.94: replaced the separate openJarId/openPendingId). */
+  protected readonly openId = signal<string | null>(null);
   /** The pending jar awaiting a «soltar» confirm, or null. */
   protected readonly releasing = signal<Preserve | null>(null);
 
@@ -137,8 +131,7 @@ export class CosechaPage {
   }
 
   /** The alacena: SEALED jars only (0.0.92 — the shelf of what waits),
-   *  chronological — never a species grid. Pending goal jars (0.0.93) have
-   *  their own shelf, so isSealedJam keeps them out of here. */
+   *  chronological. Pending goal jars have their own shelf (isSealedJam). */
   protected readonly jamShelf = computed<JamShelfItem[]>(() =>
     this.preserves
       .newestFirst()
@@ -147,8 +140,7 @@ export class CosechaPage {
   );
 
   /** «Las disfrutadas» (0.0.92): opened jars move HERE — history, never
-   *  deletion (nada se gasta): still tappable, memories forever, newest
-   *  enjoyment first, never counted. */
+   *  deletion; still tappable, memories forever, newest enjoyment first. */
   protected readonly enjoyedShelf = computed<JamShelfItem[]>(() =>
     this.preserves
       .newestFirst()
@@ -157,77 +149,42 @@ export class CosechaPage {
       .map((p) => this.shelfItemOf(p)),
   );
 
-  /** The open jar's member fruits (single-home, provably nothing lost). */
-  protected readonly openJarRows = computed(() => {
-    const id = this.openJarId();
-    if (!id) return [];
-    return membersOf(id, this.harvests.all()).map((h) => this.rowOf(h));
-  });
-
-  /** Panel lookup across BOTH shelves (the selected jar may live on either). */
-  protected readonly openJar = computed(() => {
-    const id = this.openJarId();
+  /** The one open jar (live), whatever shelf it belongs to. */
+  private readonly openPreserve = computed(() => {
+    const id = this.openId();
     if (!id) return null;
-    const preserve = this.preserves.byId().get(id);
-    return preserve && !preserve.deletedAt ? this.shelfItemOf(preserve) : null;
+    const p = this.preserves.byId().get(id);
+    return p && !p.deletedAt ? p : null;
   });
 
-  /** True when the selected jar belongs to the enjoyed shelf — the panel
-   *  renders beside the shelf its jar lives on. */
-  protected readonly openJarEnjoyed = computed(() => !!this.openJar()?.preserve.openedAt);
+  /** Per-shelf slots — only the shelf the open jar belongs to shows the panel,
+   *  which keeps the «expands under its shelf» feel with a single openId. */
+  protected readonly openInPending = computed(() => {
+    const p = this.openPreserve();
+    return p && isPending(p) ? p : null;
+  });
+  protected readonly openInAlacena = computed(() => {
+    const p = this.openPreserve();
+    return p && isSealedJam(p) && !p.openedAt ? p : null;
+  });
+  protected readonly openInDisfrutadas = computed(() => {
+    const p = this.openPreserve();
+    return p && !!p.openedAt ? p : null;
+  });
+
+  protected monthWordFor(preserve: Preserve): string {
+    return this.monthWordOf(preserve.madeAt);
+  }
 
   /** Lifetime register count — ALL fruits; it can never decrease. */
   protected readonly total = computed(() => this.harvests.all().length);
 
-  protected toggleJar(id: string): void {
-    this.openJarId.set(this.openJarId() === id ? null : id);
+  protected toggle(id: string): void {
+    this.openId.set(this.openId() === id ? null : id);
   }
 
-  protected onJarEscape(): void {
-    if (this.openPendingId()) {
-      this.openPendingId.set(null);
-      return;
-    }
-    if (this.openJarId()) this.openJarId.set(null);
-  }
-
-  // ── «La promesa» (0.0.93): goal jars ─────────────────────────────────────
-
-  /** The open pending jar (still pending — auto-seal closes the panel). */
-  protected readonly openPending = computed(() => {
-    const id = this.openPendingId();
-    if (!id) return null;
-    return this.promise.pending().find((p) => p.id === id) ?? null;
-  });
-
-  /** The open pending jar's placed fruits, as rows (newest first). */
-  protected readonly openPendingMembers = computed(() => {
-    const jar = this.openPending();
-    if (!jar) return [];
-    return membersOf(jar.id, this.harvests.all()).map((h) => this.rowOf(h));
-  });
-
-  /** Fresh fruits available to store into the open jar (the add tray). */
-  protected readonly freshRows = computed(() => this.harvests.fresh().map((h) => this.rowOf(h)));
-
-  /** The ONE forward-facing count line — lives ONLY here, on the jar's own
-   *  detail panel (owner carve-out to «la app es la alacena…»). */
-  protected pendingFillLine(preserve: Preserve): string {
-    const have = this.promise.membersOf(preserve.id).length;
-    const cap = this.promise.capacity(preserve.size);
-    const dict = this.i18n.t().cosecha.promise.fillLine;
-    return this.i18n.fill(have === 1 ? dict.one : dict.many, { count: have, cap });
-  }
-
-  protected premioAtFill(preserve: Preserve): string {
-    return this.i18n.fill(this.i18n.t().cosecha.promise.premioAtFill, { premio: preserve.premio ?? '' });
-  }
-
-  protected togglePending(id: string): void {
-    const next = this.openPendingId() === id ? null : id;
-    this.openPendingId.set(next);
-    this.addOpen.set(false);
-    this.editOpen.set(false);
+  protected onEscape(): void {
+    if (this.openId()) this.openId.set(null);
   }
 
   protected openWizard(): void {
@@ -235,43 +192,14 @@ export class CosechaPage {
     this.promising.set(true);
   }
 
-  /** Wizard sealed a new promise: close it and open its detail so the user
-   *  sees the empty jar waiting for its first fruit. */
+  /** Wizard minted a new promise: open its detail so the user sees the empty
+   *  jar waiting for its first fruit. */
   protected onPromiseCreated(preserve: Preserve): void {
     this.promising.set(false);
-    this.openPendingId.set(preserve.id);
+    this.openId.set(preserve.id);
   }
 
-  protected addFruit(harvestId: string): void {
-    const jar = this.openPending();
-    if (!jar) return;
-    void this.promise.placeAndCelebrate(harvestId, jar.id);
-    // A seal closes the panel (jar leaves pending); otherwise keep filling.
-    if (!this.harvests.fresh().length) this.addOpen.set(false);
-  }
-
-  protected removeFruit(harvestId: string): void {
-    void this.promise.unplace(harvestId);
-  }
-
-  protected startEdit(preserve: Preserve): void {
-    this.editName.set(preserve.name);
-    this.editPremio.set(preserve.premio ?? '');
-    this.editSavedFor.set(preserve.savedFor ?? '');
-    this.editOpen.set(true);
-  }
-
-  protected saveEdit(): void {
-    const jar = this.openPending();
-    if (!jar) return;
-    void this.promise.edit(jar.id, {
-      name: this.editName(),
-      premio: this.editPremio(),
-      savedFor: this.editSavedFor(),
-    });
-    this.editOpen.set(false);
-  }
-
+  /** jar-detail asked to release a pending jar → confirm + toast (page owns). */
   protected askRelease(preserve: Preserve): void {
     this.releasing.set(preserve);
   }
@@ -281,12 +209,11 @@ export class CosechaPage {
     if (!jar) return;
     void this.promise.release(jar);
     this.releasing.set(null);
-    if (this.openPendingId() === jar.id) this.openPendingId.set(null);
+    if (this.openId() === jar.id) this.openId.set(null);
     this.toast.show({ message: this.i18n.t().cosecha.promise.released }, UNDO_MS);
   }
 
-  /** Seal landed: close the ritual, offer the one undo window («abrir»
-   *  belongs to the ceremony now — undo says Deshacer, everywhere). */
+  /** Seal landed: close the ritual, offer the one undo window. */
   protected onSealed(preserve: Preserve): void {
     this.makingJam.set(false);
     this.toast.show(
@@ -312,16 +239,7 @@ export class CosechaPage {
     );
   }
 
-  protected enjoyedLine(preserve: Preserve): string {
-    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
-    const date = new Date(preserve.openedAt ?? 0).toLocaleDateString(locale, {
-      day: 'numeric',
-      month: 'long',
-    });
-    return this.i18n.fill(this.i18n.t().cosecha.enjoyedOn, { date });
-  }
-
-  /** Accent-washed tree chip — the almanaque's categorical recipe. */
+  /** Accent-washed tree chip — the almanaque's categorical recipe (register). */
   protected chipWash(row: HarvestRow): string {
     return `color-mix(in srgb, var(--accent-${row.harvest.accent}) 14%, var(--surface))`;
   }

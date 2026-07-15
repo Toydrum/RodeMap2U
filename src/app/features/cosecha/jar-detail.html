@@ -1,0 +1,175 @@
+<section
+  [attr.id]="panelId()"
+  class="card jar-panel"
+  [class.pending-detail]="pending()"
+  role="region"
+  [attr.aria-label]="preserve().name"
+>
+  <div class="jar-panel-head">
+    <strong>{{ preserve().name }}</strong>
+    @if (pending()) {
+      <button type="button" class="btn btn-ghost edit-toggle" (click)="editOpen() ? saveEdit() : startEdit()">
+        {{ editOpen() ? i18n.t().cosecha.promise.editDone : i18n.t().cosecha.promise.edit }}
+      </button>
+    } @else {
+      <span class="jar-month">{{ monthWord() }}</span>
+    }
+  </div>
+
+  @if (pending() && editOpen()) {
+    <div class="edit-form">
+      <input
+        class="edit-name-input"
+        type="text"
+        maxlength="60"
+        [value]="editName()"
+        (input)="editName.set(inputValue($event))"
+        [attr.aria-label]="i18n.t().cosecha.promise.beat3Title"
+        [placeholder]="i18n.t().cosecha.promise.namePlaceholder"
+      />
+      <input
+        class="edit-premio-input"
+        type="text"
+        maxlength="120"
+        [value]="editPremio()"
+        (input)="editPremio.set(inputValue($event))"
+        [attr.aria-label]="i18n.t().cosecha.premioLabel"
+        [placeholder]="i18n.t().cosecha.premioPlaceholder"
+      />
+      <input
+        class="edit-savedfor-input"
+        type="text"
+        maxlength="120"
+        [value]="editSavedFor()"
+        (input)="editSavedFor.set(inputValue($event))"
+        [attr.aria-label]="i18n.t().cosecha.savedForLabel"
+        [placeholder]="i18n.t().cosecha.savedForPlaceholder"
+      />
+    </div>
+  } @else if (preserve().premio) {
+    <!-- ONE reward vocabulary for both jar families (0.0.94). -->
+    <p class="premio-chip">{{ premioReward() }}</p>
+    @if (preserve().savedFor && !preserve().openedAt) {
+      <p class="saved-for-line">{{ savedForLine() }}</p>
+    }
+    @if (!pending()) {
+      @if (preserve().openedAt) {
+        <p class="enjoyed-line">{{ enjoyedLine() }}</p>
+      } @else {
+        <div class="open-row">
+          <button type="button" class="btn btn-primary open-jam-btn" (click)="claim.emit(preserve())">
+            {{ i18n.t().cosecha.openJam }}
+          </button>
+        </div>
+      }
+    }
+  }
+
+  @if (pending()) {
+    <div class="pending-jar-hero" aria-hidden="true">
+      <app-promise-jar [fruits]="promise.membersOf(preserve().id)" [vessel]="preserve().size ?? 'frasco'" [size]="1.6" />
+    </div>
+    <p class="fill-line">{{ fillLine() }}</p>
+
+    @if (members().length) {
+      <ol class="steps">
+        @for (row of members(); track row.harvest.id) {
+          <li class="card cosecha-card">
+            <div class="cosecha-row pending-member">
+              <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                <g appFruit [fruit]="row.spec" [scale]="0.92" />
+              </svg>
+              <div class="body">
+                <strong class="row-title">{{ row.harvest.title }}</strong>
+                <div class="row-meta">
+                  <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                    {{ row.harvest.treeName }}
+                  </span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-ghost remove-fruit-btn" (click)="removeFruit(row.harvest.id)">
+                {{ i18n.t().cosecha.promise.removeFruit }}
+              </button>
+            </div>
+          </li>
+        }
+      </ol>
+    }
+
+    <div class="pending-actions">
+      @if (harvests.fresh().length) {
+        <button
+          type="button"
+          class="btn btn-soft add-fruit-btn"
+          [class.selected]="addOpen()"
+          [attr.aria-expanded]="addOpen()"
+          (click)="addOpen.set(!addOpen())"
+        >
+          {{ i18n.t().cosecha.promise.addFruit }}
+        </button>
+      }
+      <button type="button" class="btn btn-ghost release-btn" (click)="release.emit(preserve())">
+        {{ i18n.t().cosecha.promise.release }}
+      </button>
+    </div>
+
+    @if (addOpen()) {
+      @if (freshRows().length) {
+        <p class="add-hint">{{ i18n.t().cosecha.promise.addHint }}</p>
+        <ul class="add-tray">
+          @for (row of freshRows(); track row.harvest.id) {
+            <li>
+              <button type="button" class="add-pick" (click)="addFruit(row.harvest.id)">
+                <svg viewBox="-14 -15 28 28" width="26" height="26" aria-hidden="true">
+                  <g appFruit [fruit]="row.spec" [scale]="0.9" />
+                </svg>
+                <span class="pick-title">{{ row.harvest.title }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="add-hint">{{ i18n.t().cosecha.promise.noFresh }}</p>
+      }
+    }
+  } @else {
+    <ol class="steps">
+      @for (row of members(); track row.harvest.id) {
+        <li class="card cosecha-card">
+          @if (row.live) {
+            <button type="button" class="cosecha-row" (click)="openBranch(row)">
+              <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                <g appFruit [fruit]="row.spec" [scale]="0.92" />
+              </svg>
+              <div class="body">
+                <strong class="row-title">{{ row.harvest.title }}</strong>
+                <div class="row-meta">
+                  <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                    {{ row.harvest.treeName }}
+                  </span>
+                  <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                </div>
+              </div>
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+          } @else {
+            <div class="cosecha-row still">
+              <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                <g appFruit [fruit]="row.spec" [scale]="0.92" />
+              </svg>
+              <div class="body">
+                <strong class="row-title">{{ row.harvest.title }}</strong>
+                <div class="row-meta">
+                  <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                    {{ row.harvest.treeName }}
+                  </span>
+                  <span class="when">{{ i18n.fill(i18n.t().cosecha.harvestedOn, { date: row.when }) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  }
+</section>

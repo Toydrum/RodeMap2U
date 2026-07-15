@@ -41,18 +41,31 @@ import { hash } from '../forest/tree-layout';
             <h2>{{ i18n.t().cosecha.beat1Title }}</h2>
             <p class="hint">{{ i18n.t().cosecha.beat1Hint }}</p>
 
-            <!-- the pot: picked fruits gather here, drop-in one by one -->
+            <!-- the pot simmers on the fire while you pick, one by one: the
+                 fruits gather AND cook here (0.0.94 — the old separate stove
+                 beat was a mandatory step that decided nothing). -->
             <div class="pot-zone">
-              <svg class="pot" viewBox="0 0 120 74" width="180" height="111" aria-hidden="true">
-                <path class="pot-body" d="M 18 22 L 102 22 C 104 46 94 66 60 66 C 26 66 16 46 18 22 Z" />
-                <ellipse class="pot-mouth" cx="60" cy="22" rx="42" ry="7" />
-                <path class="pot-handle" d="M 14 26 Q 2 28 8 38" />
-                <path class="pot-handle" d="M 106 26 Q 118 28 112 38" />
+              <svg class="pot on-fire" [class.stirring]="stirring()" viewBox="0 0 120 92" width="200" height="153" aria-hidden="true">
+                <g class="steam" aria-hidden="true">
+                  <path class="wisp w1" d="M 48 14 C 44 8 52 4 48 -2" />
+                  <path class="wisp w2" d="M 72 12 C 76 6 68 2 72 -4" />
+                </g>
+                <path class="pot-body" d="M 18 26 L 102 26 C 104 50 94 70 60 70 C 26 70 16 50 18 26 Z" />
+                <ellipse class="pot-mouth" cx="60" cy="26" rx="42" ry="7" />
+                @if (picked().size) {
+                  <ellipse class="jam-surface" cx="60" cy="26" rx="40" ry="6.4" [attr.fill]="tint().tint" opacity="0.5" />
+                  <ellipse class="jam-swirl" cx="60" cy="26" rx="26" ry="4" fill="none" [attr.stroke]="tint().tintEdge" stroke-width="1.4" opacity="0.55" />
+                }
                 @for (f of potFruits(); track f.key) {
                   <g class="pot-fruit" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.rot + ')'">
                     <g appFruit [fruit]="f.spec" [scale]="0.8" />
                   </g>
                 }
+                <path class="pot-handle" d="M 14 30 Q 2 32 8 42" />
+                <path class="pot-handle" d="M 106 30 Q 118 32 112 42" />
+                <g class="flame" aria-hidden="true">
+                  <path d="M 52 82 Q 56 74 60 82 Q 64 74 68 82" />
+                </g>
               </svg>
               <span class="pot-tag" [class.quiet]="!picked().size">
                 {{ picked().size ? derivedName() : i18n.t().cosecha.potEmpty }}
@@ -82,40 +95,15 @@ import { hash } from '../forest/tree-layout';
               <button type="button" class="btn btn-ghost" (click)="closed.emit()">
                 {{ i18n.t().common.cancel }}
               </button>
-              <button type="button" class="btn btn-primary" [disabled]="!picked().size" (click)="beat.set(2)">
-                {{ i18n.t().cosecha.toStove }}
+              <button type="button" class="btn btn-soft" [disabled]="!picked().size" (click)="stir()">
+                {{ i18n.t().cosecha.stir }}
+              </button>
+              <button type="button" class="btn btn-primary" [disabled]="!picked().size" (click)="toJar()">
+                {{ i18n.t().cosecha.jarIt }}
               </button>
             </div>
           }
           @case (2) {
-            <h2>{{ i18n.t().cosecha.beat2Title }}</h2>
-            <p class="hint">{{ i18n.t().cosecha.beat2Hint }}</p>
-
-            <div class="stove-zone">
-              <svg class="pot on-fire" [class.stirring]="stirring()" viewBox="0 0 120 92" width="200" height="153" aria-hidden="true">
-                <g class="steam" aria-hidden="true">
-                  <path class="wisp w1" d="M 48 14 C 44 8 52 4 48 -2" />
-                  <path class="wisp w2" d="M 72 12 C 76 6 68 2 72 -4" />
-                </g>
-                <path class="pot-body" d="M 18 26 L 102 26 C 104 50 94 70 60 70 C 26 70 16 50 18 26 Z" />
-                <ellipse class="jam-surface" cx="60" cy="26" rx="42" ry="7" [attr.fill]="tint().tint" />
-                <ellipse class="jam-swirl" cx="60" cy="26" rx="26" ry="4" fill="none" [attr.stroke]="tint().tintEdge" stroke-width="1.4" opacity="0.6" />
-                <path class="pot-handle" d="M 14 30 Q 2 32 8 42" />
-                <path class="pot-handle" d="M 106 30 Q 118 32 112 42" />
-                <g class="flame" aria-hidden="true">
-                  <path d="M 52 82 Q 56 74 60 82 Q 64 74 68 82" />
-                </g>
-              </svg>
-              <span class="pot-tag">{{ derivedName() }}</span>
-            </div>
-
-            <div class="row-actions">
-              <button type="button" class="btn btn-ghost" (click)="beat.set(1)">← {{ i18n.t().common.back }}</button>
-              <button type="button" class="btn btn-soft" (click)="stir()">{{ i18n.t().cosecha.stir }}</button>
-              <button type="button" class="btn btn-primary" (click)="toJar()">{{ i18n.t().cosecha.jarIt }}</button>
-            </div>
-          }
-          @case (3) {
             <h2>{{ i18n.t().cosecha.beat3Title }}</h2>
 
             <!-- the vessel speaks ONCE, here, past-facing: the jar serves
@@ -165,7 +153,7 @@ import { hash } from '../forest/tree-layout';
             }
 
             <div class="row-actions">
-              <button type="button" class="btn btn-ghost" (click)="beat.set(2)">← {{ i18n.t().common.back }}</button>
+              <button type="button" class="btn btn-ghost" (click)="beat.set(1)">← {{ i18n.t().common.back }}</button>
               <button type="button" class="btn btn-primary seal-btn" [disabled]="sealing()" (click)="seal()">
                 {{ i18n.t().cosecha.saveShelf }}
               </button>
@@ -434,7 +422,7 @@ export class MermeladaSheet {
   readonly closed = output<void>();
   readonly sealed = output<Preserve>();
 
-  protected readonly beat = signal<1 | 2 | 3>(1);
+  protected readonly beat = signal<1 | 2>(1);
   protected readonly picked = signal<ReadonlySet<string>>(new Set());
   protected readonly jarName = signal('');
   protected readonly premio = signal('');
@@ -529,7 +517,7 @@ export class MermeladaSheet {
 
   protected toJar(): void {
     this.jarName.set(this.derivedName());
-    this.beat.set(3);
+    this.beat.set(2);
   }
 
   protected async seal(): Promise<void> {

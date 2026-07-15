@@ -1,0 +1,149 @@
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { HarvestsRepo } from '../../core/repos/harvests.repo';
+import { NodesRepo } from '../../core/repos/nodes.repo';
+import { Harvest, Preserve } from '../../core/db/schema';
+import { isPending, membersOf } from '../../core/harvest';
+import { FruitSpec, fruitFor } from '../forest/flora';
+import { FruitGlyph } from '../forest/fruit';
+import { PromiseJar } from '../forest/promise-jar';
+import { PromiseService } from './promise.service';
+
+interface MemberRow {
+  harvest: Harvest;
+  spec: FruitSpec;
+  when: string;
+  live: boolean;
+}
+
+/**
+ * «El detalle del frasco» (0.0.94) — ONE inline panel for every jar, whatever
+ * its family. It replaced the two near-identical panels (sealed pot jam vs
+ * pending goal jar) that used to live inline in cosecha.html and could both be
+ * open at once. It renders the right mode from the record itself:
+ *   · PENDING goal jar (isPending): PromiseJar hero + the one «lleva n · le
+ *     caben cap» line + editable name/premio + members with «Sacar» + an add
+ *     tray + «Soltar».
+ *   · SEALED jam, un-opened WITH a premio: «Abrir» (memory jars — no premio —
+ *     keep no open door, 0.0.90 law) + members (deep-link to live branches).
+ *   · DISFRUTADA (openedAt): the enjoyed line + members.
+ * Pending mutations run through PromiseService directly (placeAndCelebrate owns
+ * the auto-seal toast); page-level moments (the claiming ceremony, the release
+ * confirm + toast) are emitted so cosecha keeps owning them. Class names are
+ * preserved from the old panels so the verify battery stays intact.
+ */
+@Component({
+  selector: 'app-jar-detail',
+  imports: [FruitGlyph, PromiseJar],
+  templateUrl: './jar-detail.html',
+  styleUrl: './cosecha.scss',
+})
+export class JarDetail {
+  protected readonly i18n = inject(I18nService);
+  protected readonly promise = inject(PromiseService);
+  protected readonly harvests = inject(HarvestsRepo);
+  private readonly nodes = inject(NodesRepo);
+  private readonly router = inject(Router);
+
+  readonly preserve = input.required<Preserve>();
+  /** Making-month word for the sealed header (blank for pending). */
+  readonly monthWord = input<string>('');
+  readonly claim = output<Preserve>();
+  readonly release = output<Preserve>();
+
+  protected readonly inputValue = (e: Event) => (e.target as HTMLInputElement).value;
+
+  protected readonly pending = computed(() => isPending(this.preserve()));
+  protected readonly panelId = computed(() => (this.pending() ? 'pending-panel' : 'jar-panel'));
+
+  /** Add-tray + edit-form local state (was on the page). */
+  protected readonly addOpen = signal(false);
+  protected readonly editOpen = signal(false);
+  protected readonly editName = signal('');
+  protected readonly editPremio = signal('');
+  protected readonly editSavedFor = signal('');
+
+  private rowOf(harvest: Harvest): MemberRow {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const node = this.nodes.byId().get(harvest.nodeId);
+    return {
+      harvest,
+      spec: fruitFor(harvest.accent, harvest.treeId),
+      when: new Date(harvest.harvestedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long' }),
+      live: !!node && !node.deletedAt && !node.archivedAt,
+    };
+  }
+
+  protected readonly members = computed(() =>
+    membersOf(this.preserve().id, this.harvests.all()).map((h) => this.rowOf(h)),
+  );
+  protected readonly freshRows = computed(() => this.harvests.fresh().map((h) => this.rowOf(h)));
+
+  /** The ONE forward count line — lives only here (owner carve-out). */
+  protected readonly fillLine = computed(() => {
+    const p = this.preserve();
+    const have = this.promise.membersOf(p.id).length;
+    const cap = this.promise.capacity(p.size);
+    const dict = this.i18n.t().cosecha.promise.fillLine;
+    return this.i18n.fill(have === 1 ? dict.one : dict.many, { count: have, cap });
+  });
+
+  protected premioReward(): string {
+    return this.i18n.fill(this.i18n.t().cosecha.premioReward, { premio: this.preserve().premio ?? '' });
+  }
+
+  protected savedForLine(): string {
+    return this.i18n.fill(this.i18n.t().cosecha.savedForLine, { savedFor: this.preserve().savedFor ?? '' });
+  }
+
+  protected enjoyedLine(): string {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const date = new Date(this.preserve().openedAt ?? 0).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'long',
+    });
+    return this.i18n.fill(this.i18n.t().cosecha.enjoyedOn, { date });
+  }
+
+  protected chipWash(row: MemberRow): string {
+    return `color-mix(in srgb, var(--accent-${row.harvest.accent}) 14%, var(--surface))`;
+  }
+  protected chipBorder(row: MemberRow): string {
+    return `color-mix(in srgb, var(--accent-${row.harvest.accent}) 32%, transparent)`;
+  }
+
+  protected openBranch(row: MemberRow): void {
+    if (!row.live) return;
+    void this.router.navigate(['/tree', row.harvest.treeId], {
+      queryParams: { node: row.harvest.nodeId },
+    });
+  }
+
+  // ── pending mutations ────────────────────────────────────────────────────
+  protected addFruit(harvestId: string): void {
+    void this.promise.placeAndCelebrate(harvestId, this.preserve().id);
+    if (!this.harvests.fresh().length) this.addOpen.set(false);
+  }
+
+  protected removeFruit(harvestId: string): void {
+    void this.promise.unplace(harvestId);
+  }
+
+  protected startEdit(): void {
+    const p = this.preserve();
+    this.editName.set(p.name);
+    this.editPremio.set(p.premio ?? '');
+    this.editSavedFor.set(p.savedFor ?? '');
+    this.editOpen.set(true);
+  }
+
+  protected saveEdit(): void {
+    void this.promise.edit(this.preserve().id, {
+      name: this.editName(),
+      premio: this.editPremio(),
+      savedFor: this.editSavedFor(),
+    });
+    this.editOpen.set(false);
+  }
+}

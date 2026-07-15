@@ -45,6 +45,16 @@
     flex-wrap: wrap;
     margin-top: 0.9rem;
   }
+
+  /* «Prometer un frasco» — a quieter secondary door (0.0.94). */
+  .doors-secondary {
+    margin-top: 0.5rem;
+
+    .promise-door {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+  }
 }
 
 /* ── la alacena ── */
