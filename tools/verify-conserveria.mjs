@@ -497,5 +497,90 @@ const sizeO = await page.evaluate(async () => {
 });
 ok('O six fruits = frascote poderosa', vesselLineO.includes('poderosa') && sizeO === 'frascote', `"${vesselLineO.slice(0, 44)}" size=${sizeO}`);
 
+// R — «segunda cosecha» (0.0.91): a sealed fruit is never re-offered in
+// the pot; re-achieving its branch leaves the jam UNTOUCHED (immutable
+// history) and mints a NEW season fruit into the fresh jar.
+const jammed = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const read = (s) =>
+    new Promise((res, rej) => {
+      const req = db.transaction(s, 'readonly').objectStore(s).getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+  const rows = await read('harvests');
+  const nodes = await read('nodes');
+  db.close();
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  // §B senderoized a demo parent mid-probe — its pasitos (correctly) bear
+  // no fruit, so R must pick a jammed fruit whose branch still mints.
+  const underDaily = (n) => {
+    let cur = n;
+    const seen = new Set();
+    while (cur?.parentId && !seen.has(cur.parentId)) {
+      seen.add(cur.parentId);
+      const parent = byId.get(cur.parentId);
+      if (!parent) return false;
+      if (parent.repeatsDaily && parent.flow === 'steps' && parent.status !== 'branched') return true;
+      cur = parent;
+    }
+    return false;
+  };
+  const row = rows.find((r) => {
+    if (r.deletedAt || !r.preserveId || r.nodeId.startsWith('probe-')) return false;
+    const node = byId.get(r.nodeId);
+    return !!node && !node.deletedAt && !node.archivedAt && !node.repeatsDaily && !underDaily(node);
+  });
+  return row
+    ? { id: row.id, nodeId: row.nodeId, treeId: row.treeId, title: row.title, harvestedAt: row.harvestedAt, preserveId: row.preserveId }
+    : null;
+});
+ok('R0 a real jammed fruit exists', !!jammed, jammed?.title ?? 'none');
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(700);
+await page.locator('.jam-door').click();
+await page.waitForTimeout(700);
+const trayBefore = (await page.locator('.fruit-pick .pick-title').allTextContents()).map((t) => t.trim());
+const excluded = !trayBefore.includes(jammed.title);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+ok('R1 the pot never re-offers a sealed fruit', excluded, `tray=${trayBefore.length}`);
+
+await page.goto(`${BASE}/tree/${jammed.treeId}?node=${jammed.nodeId}`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(800);
+await page.locator('.status-row .chip.pick', { hasText: 'Creciendo' }).click();
+await page.waitForTimeout(600);
+await page.locator('.status-row .chip.pick', { hasText: 'Florecida' }).click();
+await page.waitForTimeout(800);
+const seasons = await page.evaluate(async (info) => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('harvests', 'readonly').objectStore('harvests').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  db.close();
+  const original = rows.find((r) => r.id === info.id);
+  const fresh = rows.filter((r) => !r.deletedAt && r.nodeId === info.nodeId && !r.preserveId);
+  return {
+    jamUntouched: original.preserveId === info.preserveId && original.harvestedAt === info.harvestedAt,
+    freshSeasons: fresh.length,
+    seasonId: fresh[0]?.id ?? '',
+  };
+}, jammed);
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(700);
+await page.locator('.jam-door').click();
+await page.waitForTimeout(700);
+const trayAfter = (await page.locator('.fruit-pick .pick-title').allTextContents()).map((t) => t.trim());
+const offeredAgain = trayAfter.includes(jammed.title);
+ok(
+  'R2 re-achieve: jam immutable + a NEW season fruit is usable',
+  seasons.jamUntouched && seasons.freshSeasons === 1 && seasons.seasonId.includes(':s') && offeredAgain,
+  `jamUntouched=${seasons.jamUntouched} season=${seasons.seasonId.slice(-10)} offered=${offeredAgain}`,
+);
+
 console.log('conserveria done');
 await browser.close();

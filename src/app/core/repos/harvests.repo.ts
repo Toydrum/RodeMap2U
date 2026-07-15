@@ -26,10 +26,17 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
   readonly fresh = computed(() => this.newestFirst().filter(isFresh));
 
   /**
-   * Mint (or re-stamp) the fruit for a branch that just bloomed. Idempotent:
-   * one row per branch forever; a re-achieve refreshes harvestedAt and the
-   * snapshots (the row remembers the latest season). Returns null when the
+   * Mint the fruit for a branch that just bloomed. Returns null when the
    * bloom bears no fruit (a sendero pasito).
+   *
+   * Season law (0.0.91 «segunda cosecha»): a FRESH existing row re-stamps
+   * in place (one usable fruit per branch — toggling never farms); a row
+   * SEALED into a jam is HISTORY and is never touched (sealed jams are
+   * immutable — «se conserva siempre»): the re-achieve mints a NEW season
+   * row ('h:'+nodeId+':s2', ':s3'…) into the fresh jar instead. The
+   * register accumulates both honestly — used fruits stay locked in their
+   * jams, new work bears new fruit. Season ids are deterministic from the
+   * row count, so two devices re-achieving concurrently converge by LWW.
    */
   async recordBloom(
     node: TreeNode,
@@ -37,8 +44,6 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
     byId: ReadonlyMap<string, TreeNode>,
   ): Promise<Harvest | null> {
     if (underDailyPath(node, byId)) return null;
-    const id = harvestIdFor(node.id);
-    const existing = this.byId().get(id);
     const fields = {
       nodeId: node.id,
       treeId: tree.id,
@@ -47,10 +52,24 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
       title: node.title,
       harvestedAt: node.achievedAt ?? Date.now(),
     };
-    if (existing) {
-      // Re-achieve (or a revived memory): lift any tombstone with the fresh
-      // season — save() re-stamps rev/updatedAt for LWW.
-      return this.save({ ...existing, ...fields, deletedAt: null });
+    // The branch's current usable fruit, if any (fresh = re-stampable).
+    const rows = [...this.byId().values()].filter(
+      (h) => h.nodeId === node.id && !h.deletedAt,
+    );
+    const fresh = rows.find((h) => !h.preserveId);
+    if (fresh) {
+      return this.save({ ...fresh, ...fields, deletedAt: null });
+    }
+    if (!rows.length) {
+      return this.insert({ ...newSyncBase(), id: harvestIdFor(node.id), ...fields });
+    }
+    // Every earlier fruit is sealed away — a new season begins. Bounded
+    // probe keeps the id deterministic even after odd sync merges.
+    let season = rows.length + 1;
+    let id = harvestIdFor(node.id) + ':s' + season;
+    while (this.byId().has(id) && season < rows.length + 50) {
+      season++;
+      id = harvestIdFor(node.id) + ':s' + season;
     }
     return this.insert({ ...newSyncBase(), id, ...fields });
   }
