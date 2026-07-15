@@ -48,7 +48,8 @@
 }
 
 /* ── la alacena ── */
-.alacena {
+.alacena,
+.disfrutadas {
   .jam-row {
     display: flex;
     flex-wrap: wrap;
@@ -68,6 +69,22 @@
       border-style: dashed;
     }
   }
+}
+
+/* the enjoyed shelf sits quieter — history, not the working shelf */
+.disfrutadas {
+  .part-title {
+    color: var(--text-dim);
+    font-size: 0.94rem;
+  }
+
+  .enjoyed-jar {
+    opacity: 0.92;
+  }
+}
+
+.jar-panel-home {
+  margin-top: -0.8rem;
 }
 
 .jar-panel {

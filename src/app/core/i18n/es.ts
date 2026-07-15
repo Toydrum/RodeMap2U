@@ -204,6 +204,7 @@ export const ES = {
     makeJam: 'Hacer mermelada',
     teaDoor: 'Preparar un té',
     alacenaTitle: 'La alacena',
+    enjoyedTitle: 'Las disfrutadas',
     inJar: 'en «{name}»',
     potEmpty: 'La olla espera',
     beat1Title: '¿Cuáles van a la olla?',

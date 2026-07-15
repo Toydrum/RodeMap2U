@@ -31,8 +31,9 @@
 
   <app-hint-chip surface="cosecha" [text]="i18n.t().hints.cosecha" />
 
-  <!-- La alacena: sealed jams, chronological history of makings — never a
-       species grid, never counted, no empty shelf staring. -->
+  <!-- La alacena: SEALED jams only (0.0.92 — the shelf of what waits),
+       chronological — never a species grid, never counted, no empty shelf
+       staring. Opened jars live below, in «las disfrutadas». -->
   @if (jamShelf().length) {
     <section class="part alacena">
       <h2 class="part-title"><span aria-hidden="true">🫙</span> {{ i18n.t().cosecha.alacenaTitle }}</h2>
@@ -50,8 +51,35 @@
           </button>
         }
       </div>
+    </section>
+  }
 
-      @if (openJar(); as jar) {
+  <!-- «Las disfrutadas» (0.0.92): opened jars move here — history, never
+       deletion. Still tappable, memories forever, never counted. -->
+  @if (enjoyedShelf().length) {
+    <section class="part disfrutadas">
+      <h2 class="part-title">{{ i18n.t().cosecha.enjoyedTitle }}</h2>
+      <div class="jam-row">
+        @for (item of enjoyedShelf(); track item.preserve.id) {
+          <button
+            type="button"
+            class="jam-shelf-jar enjoyed-jar"
+            [class.selected]="openJarId() === item.preserve.id"
+            [attr.aria-expanded]="openJarId() === item.preserve.id"
+            aria-controls="jar-panel"
+            (click)="toggleJar(item.preserve.id)"
+          >
+            <app-jam-jar [preserve]="item.preserve" [monthWord]="item.monthWord" [size]="0.85" />
+          </button>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- The shared jar panel — renders right under the shelves, whichever
+       shelf its jar lives on. -->
+  @if (openJar(); as jar) {
+    <section class="part jar-panel-home">
         <section id="jar-panel" class="card jar-panel" role="region" [attr.aria-label]="jar.preserve.name">
           <div class="jar-panel-head">
             <strong>{{ jar.preserve.name }}</strong>
@@ -111,7 +139,6 @@
             }
           </ol>
         </section>
-      }
     </section>
   }
 

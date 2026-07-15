@@ -71,9 +71,14 @@ export class ForestPage {
   protected readonly preserves = inject(PreservesRepo);
   protected readonly accents = ACCENTS;
 
-  /** «La mesita»: the two most recent jam jars stand beside the fresh jar
-   *  (deterministic — changes only when the user seals, never reshuffles). */
-  protected readonly mesitaJams = computed(() => this.preserves.newestFirst().slice(0, 2));
+  /** «La mesita»: two jam jars beside the fresh jar — SEALED ones first
+   *  (the corner advertises what waits; 0.0.92), enjoyed ones fill in
+   *  only when fewer than two wait. Deterministic, never reshuffles. */
+  protected readonly mesitaJams = computed(() => {
+    const jams = this.preserves.newestFirst();
+    const sealed = jams.filter((p) => !p.openedAt);
+    return [...sealed, ...jams.filter((p) => !!p.openedAt)].slice(0, 2);
+  });
 
   /** «La cosecha» arrival cue — session-scoped like bornThisSession: when
    *  the pantry grows while the app is open, the jar wiggles once on the

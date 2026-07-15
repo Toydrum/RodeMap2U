@@ -448,6 +448,16 @@ const disfrutada = ((await page.locator('.enjoyed-line').textContent().catch(() 
 ok('P reduce-motion: words stay, sky aside, jar disfrutada', skyHiddenP && earnedP && disfrutada.length > 0, `"${disfrutada.slice(0, 26)}"`);
 await page.emulateMedia({ reducedMotion: null });
 
+// S — «las disfrutadas» (0.0.92): the opened jar LEFT the alacena and
+// stands on its own history shelf; the memory jar stays on the alacena.
+const alacenaJars = await page.locator('.alacena .jam-shelf-jar').count();
+const enjoyedJars = await page.locator('.disfrutadas .jam-shelf-jar').count();
+ok(
+  'S opened jars move to las disfrutadas',
+  alacenaJars === 1 && enjoyedJars === 1,
+  `alacena=${alacenaJars} disfrutadas=${enjoyedJars}`,
+);
+
 // O — six fruits make a frascote («una mermelada poderosa»).
 await page.evaluate(async () => {
   const open = indexedDB.open('roadmap2u');

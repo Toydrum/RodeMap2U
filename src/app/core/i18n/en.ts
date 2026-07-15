@@ -202,6 +202,7 @@ export const EN: Dict = {
     makeJam: 'Make jam',
     teaDoor: 'Brew a tea',
     alacenaTitle: 'The pantry shelf',
+    enjoyedTitle: 'The enjoyed ones',
     inJar: 'in "{name}"',
     potEmpty: 'The pot is waiting',
     beat1Title: 'Which ones go in the pot?',

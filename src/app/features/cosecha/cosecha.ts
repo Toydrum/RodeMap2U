@@ -102,12 +102,28 @@ export class CosechaPage {
     }),
   );
 
-  /** The alacena: sealed jars, chronological — never a species grid. */
+  private shelfItemOf(preserve: Preserve): JamShelfItem {
+    return { preserve, monthWord: this.monthWordOf(preserve.madeAt) };
+  }
+
+  /** The alacena: SEALED jars only (0.0.92 — the shelf of what waits),
+   *  chronological — never a species grid. */
   protected readonly jamShelf = computed<JamShelfItem[]>(() =>
-    this.preserves.newestFirst().map((preserve) => ({
-      preserve,
-      monthWord: this.monthWordOf(preserve.madeAt),
-    })),
+    this.preserves
+      .newestFirst()
+      .filter((p) => !p.openedAt)
+      .map((p) => this.shelfItemOf(p)),
+  );
+
+  /** «Las disfrutadas» (0.0.92): opened jars move HERE — history, never
+   *  deletion (nada se gasta): still tappable, memories forever, newest
+   *  enjoyment first, never counted. */
+  protected readonly enjoyedShelf = computed<JamShelfItem[]>(() =>
+    this.preserves
+      .newestFirst()
+      .filter((p) => !!p.openedAt)
+      .sort((a, b) => (b.openedAt ?? 0) - (a.openedAt ?? 0) || (a.id < b.id ? -1 : 1))
+      .map((p) => this.shelfItemOf(p)),
   );
 
   /** The open jar's member fruits (single-home, provably nothing lost). */
@@ -117,10 +133,17 @@ export class CosechaPage {
     return membersOf(id, this.harvests.all()).map((h) => this.rowOf(h));
   });
 
+  /** Panel lookup across BOTH shelves (the selected jar may live on either). */
   protected readonly openJar = computed(() => {
     const id = this.openJarId();
-    return id ? this.jamShelf().find((j) => j.preserve.id === id) ?? null : null;
+    if (!id) return null;
+    const preserve = this.preserves.byId().get(id);
+    return preserve && !preserve.deletedAt ? this.shelfItemOf(preserve) : null;
   });
+
+  /** True when the selected jar belongs to the enjoyed shelf — the panel
+   *  renders beside the shelf its jar lives on. */
+  protected readonly openJarEnjoyed = computed(() => !!this.openJar()?.preserve.openedAt);
 
   /** Lifetime register count — ALL fruits; it can never decrease. */
   protected readonly total = computed(() => this.harvests.all().length);
