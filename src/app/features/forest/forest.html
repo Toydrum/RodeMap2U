@@ -293,7 +293,7 @@
              never leaves; the corner only ever GROWS (jamming can never
              make it look poorer). One link, pull-based: no badges, no
              counts, ever. -->
-        @if (harvests.newestFirst().length || mesitaJams().length) {
+        @if (harvests.newestFirst().length || mesitaItems().length) {
           <a
             class="meadow-jar"
             [class.arrived]="jarCue()"
@@ -301,8 +301,12 @@
             [attr.aria-label]="i18n.t().cosecha.jarAria"
           >
             <app-meadow-jar [fruits]="harvests.fresh()" [label]="i18n.t().cosecha.jarLabel" />
-            @for (jam of mesitaJams(); track jam.id) {
-              <app-jam-jar class="mesita-jam" [preserve]="jam" [size]="0.6" [label]="false" />
+            @for (item of mesitaItems(); track item.preserve.id) {
+              @if (item.kind === 'pending') {
+                <app-promise-jar class="mesita-jam" [fruits]="item.fruits" [vessel]="item.preserve.size ?? 'frasco'" [size]="0.6" />
+              } @else {
+                <app-jam-jar class="mesita-jam" [preserve]="item.preserve" [size]="0.6" [label]="false" />
+              }
             }
           </a>
         }

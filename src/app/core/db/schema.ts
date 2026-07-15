@@ -4,7 +4,14 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v7: additive Preserve.size/premio/savedFor/openedAt («el premio del
+/** v8: additive Preserve.plannedAt/sealedAt («la promesa» 0.0.93 — frascos
+ *  prometidos / goal jars: an EMPTY jar created ahead of its fruit, filled by
+ *  completed tasks, auto-sealed at capacity). No migration pass; pre-v8 jars
+ *  lack both (plannedAt absent ≡ never a promise = pot jam; sealedAt absent ≡
+ *  «sealed at madeAt» = a legacy pot jam is already sealed). Pending promise ≡
+ *  plannedAt != null && sealedAt == null. Capacity is DERIVED from `size`
+ *  (jarCapacity), no stored field. No new store, DB_VERSION stays 3.
+ *  v7: additive Preserve.size/premio/savedFor/openedAt («el premio del
  *  frasco» 0.0.90 — jam as self-granted reward + three vessels). No
  *  migration pass; pre-v7 jars read as frasco/sealed/no-premio forever.
  *  v6: NEW `preserves` store + additive Harvest.preserveId («la conservería»
@@ -21,7 +28,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -229,6 +236,16 @@ export interface Preserve extends SyncBase {
    *  consumed is the REAL-WORLD permission, never the memories. The app
    *  never locks, expires or nudges a jar. */
   openedAt?: number | null;
+  /** «La promesa» (0.0.93): a goal jar is minted EMPTY at the wizard, before
+   *  any fruit. plannedAt = its birth (absent ≡ null = an ordinary pot jam,
+   *  never a promise). The user picks `size` (their OWN valuation of the
+   *  premio, never suggested by the app); capacity = jarCapacity(size). */
+  plannedAt?: number | null;
+  /** When the jar became a finished jam. Absent ≡ «sealed at madeAt» (legacy
+   *  pot jams are born sealed). A promise carries sealedAt = null while it
+   *  fills; it is stamped at capacity (auto-seal) — the ONE app-initiated
+   *  transition. Pending ≡ plannedAt != null && sealedAt == null. */
+  sealedAt?: number | null;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */

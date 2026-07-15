@@ -28,11 +28,13 @@ import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { PreservesRepo } from '../../core/repos/preserves.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
-import { AccentToken, Feeling, Tree } from '../../core/db/schema';
+import { AccentToken, Feeling, Harvest, Preserve, Tree } from '../../core/db/schema';
+import { isSealedJam, membersOf } from '../../core/harvest';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { MeadowJar } from './jar';
 import { JamJar } from './jam-jar';
+import { PromiseJar } from './promise-jar';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -51,7 +53,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, MeadowJar, JamJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
+  imports: [RouterLink, MiniTree, MeadowJar, JamJar, PromiseJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -71,13 +73,27 @@ export class ForestPage {
   protected readonly preserves = inject(PreservesRepo);
   protected readonly accents = ACCENTS;
 
-  /** «La mesita»: two jam jars beside the fresh jar — SEALED ones first
-   *  (the corner advertises what waits; 0.0.92), enjoyed ones fill in
-   *  only when fewer than two wait. Deterministic, never reshuffles. */
-  protected readonly mesitaJams = computed(() => {
-    const jams = this.preserves.newestFirst();
-    const sealed = jams.filter((p) => !p.openedAt);
-    return [...sealed, ...jams.filter((p) => !!p.openedAt)].slice(0, 2);
+  /** «La mesita»: up to two jars beside the fresh jar — a PENDING goal jar
+   *  leads (0.0.93 — the corner keeps the promise in sight), then SEALED jams
+   *  (0.0.92), then enjoyed ones fill in only when fewer than two wait.
+   *  Deterministic, never reshuffles, never a number. */
+  protected readonly mesitaItems = computed(() => {
+    const jams = this.preserves.newestFirst().filter(isSealedJam);
+    const ordered = [...jams.filter((p) => !p.openedAt), ...jams.filter((p) => !!p.openedAt)];
+    const rows = this.harvests.all();
+    const items: Array<
+      | { kind: 'pending'; preserve: Preserve; fruits: Harvest[] }
+      | { kind: 'jam'; preserve: Preserve }
+    > = [];
+    const pending = this.preserves.pending();
+    if (pending.length) {
+      items.push({ kind: 'pending', preserve: pending[0], fruits: membersOf(pending[0].id, rows) });
+    }
+    for (const p of ordered) {
+      if (items.length >= 2) break;
+      items.push({ kind: 'jam', preserve: p });
+    }
+    return items;
   });
 
   /** «La cosecha» arrival cue — session-scoped like bornThisSession: when

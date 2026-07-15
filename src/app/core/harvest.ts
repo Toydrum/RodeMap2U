@@ -1,4 +1,4 @@
-import { AccentToken, Harvest, JarVessel, TreeNode } from './db/schema';
+import { AccentToken, Harvest, JarVessel, Preserve, TreeNode } from './db/schema';
 import { dayOf } from './time';
 
 /**
@@ -67,6 +67,34 @@ export function jarSizeFor(count: number): JarVessel {
   if (count <= 2) return 'frasquito';
   if (count <= 5) return 'frasco';
   return 'frascote';
+}
+
+/** «La promesa» (0.0.93) — a goal jar's capacity: the TOP of each published
+ *  jarSizeFor band (frasquito 2 · frasco 5 · frascote 8). By construction a
+ *  full goal jar (N = jarCapacity(size)) satisfies jarSizeFor(N) === size, so
+ *  a filled+auto-sealed promise is indistinguishable at rest from a pot jam of
+ *  the same vessel. Published in the guide; the ONLY forward-facing count line
+ *  («lleva n · le caben cap») lives solely on the pending jar's detail panel. */
+export function jarCapacity(v: JarVessel): number {
+  return v === 'frasquito' ? 2 : v === 'frasco' ? 5 : 8;
+}
+
+/** A goal jar (born empty at the wizard) vs an ordinary pot jam. */
+export function isPromise(p: Preserve): boolean {
+  return p.plannedAt != null;
+}
+
+/** A goal jar still filling — the only jar family that is NOT immutable
+ *  history (its member fruits re-stamp in place; only a SEALED jar is final).
+ *  Assumes a live record (repos already filter tombstones). */
+export function isPending(p: Preserve): boolean {
+  return isPromise(p) && !p.sealedAt;
+}
+
+/** A finished jam belonging on the alacena: a legacy pot jam (plannedAt
+ *  absent) or a sealed promise. Everything that is NOT a pending goal jar. */
+export function isSealedJam(p: Preserve): boolean {
+  return !isPending(p);
 }
 
 /** One shelf section of the pantry: a month and its fruits. */

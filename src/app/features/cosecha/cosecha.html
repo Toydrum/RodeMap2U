@@ -21,15 +21,163 @@
           🫙 {{ i18n.t().cosecha.makeJam }}
         </button>
       }
+      @if (!promise.atLimit()) {
+        <button type="button" class="btn btn-soft promise-door" (click)="openWizard()">
+          🎁 {{ i18n.t().cosecha.promise.door }}
+        </button>
+      }
       @if (total()) {
         <button type="button" class="btn btn-soft tea-door" (click)="brewingTea.set(true)">
           {{ i18n.t().cosecha.teaDoor }}
         </button>
       }
     </div>
+    @if (promise.atLimit()) {
+      <p class="promise-limit">{{ i18n.t().cosecha.promise.limitReached }}</p>
+    }
   </div>
 
   <app-hint-chip surface="cosecha" [text]="i18n.t().hints.cosecha" />
+
+  <!-- «Lo que estás llenando» (0.0.93): goal jars still filling. No number on
+       the shelf (the count line lives only in the jar's detail). -->
+  @if (promise.pending().length) {
+    <section class="part pending-shelf">
+      <h2 class="part-title"><span aria-hidden="true">🎁</span> {{ i18n.t().cosecha.pendingShelfTitle }}</h2>
+      <div class="jam-row">
+        @for (jar of promise.pending(); track jar.id) {
+          <button
+            type="button"
+            class="jam-shelf-jar pending-jar"
+            [class.selected]="openPendingId() === jar.id"
+            [attr.aria-expanded]="openPendingId() === jar.id"
+            aria-controls="pending-panel"
+            (click)="togglePending(jar.id)"
+          >
+            <app-promise-jar [fruits]="promise.membersOf(jar.id)" [vessel]="jar.size ?? 'frasco'" [label]="jar.name" />
+          </button>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- The pending jar's detail — the ONE surface with a forward count line. -->
+  @if (openPending(); as jar) {
+    <section class="part pending-panel-home">
+      <section id="pending-panel" class="card jar-panel pending-detail" role="region" [attr.aria-label]="jar.name">
+        <div class="jar-panel-head">
+          <strong>{{ jar.name }}</strong>
+          <button type="button" class="btn btn-ghost edit-toggle" (click)="editOpen() ? saveEdit() : startEdit(jar)">
+            {{ editOpen() ? i18n.t().cosecha.promise.editDone : i18n.t().cosecha.promise.edit }}
+          </button>
+        </div>
+
+        @if (editOpen()) {
+          <div class="edit-form">
+            <input
+              class="edit-name-input"
+              type="text"
+              maxlength="60"
+              [value]="editName()"
+              (input)="editName.set(inputValue($event))"
+              [attr.aria-label]="i18n.t().cosecha.promise.beat3Title"
+              [placeholder]="i18n.t().cosecha.promise.namePlaceholder"
+            />
+            <input
+              class="edit-premio-input"
+              type="text"
+              maxlength="120"
+              [value]="editPremio()"
+              (input)="editPremio.set(inputValue($event))"
+              [attr.aria-label]="i18n.t().cosecha.premioLabel"
+              [placeholder]="i18n.t().cosecha.premioPlaceholder"
+            />
+            <input
+              class="edit-savedfor-input"
+              type="text"
+              maxlength="120"
+              [value]="editSavedFor()"
+              (input)="editSavedFor.set(inputValue($event))"
+              [attr.aria-label]="i18n.t().cosecha.savedForLabel"
+              [placeholder]="i18n.t().cosecha.savedForPlaceholder"
+            />
+          </div>
+        } @else {
+          <p class="premio-chip">{{ premioAtFill(jar) }}</p>
+          @if (jar.savedFor) {
+            <p class="saved-for-line">{{ i18n.fill(i18n.t().cosecha.savedForLine, { savedFor: jar.savedFor ?? '' }) }}</p>
+          }
+        }
+
+        <div class="pending-jar-hero" aria-hidden="true">
+          <app-promise-jar [fruits]="promise.membersOf(jar.id)" [vessel]="jar.size ?? 'frasco'" [size]="1.6" />
+        </div>
+        <p class="fill-line">{{ pendingFillLine(jar) }}</p>
+
+        @if (openPendingMembers().length) {
+          <ol class="steps">
+            @for (row of openPendingMembers(); track row.harvest.id) {
+              <li class="card cosecha-card">
+                <div class="cosecha-row pending-member">
+                  <svg class="row-fruit" viewBox="-14 -15 28 28" width="28" height="28" aria-hidden="true">
+                    <g appFruit [fruit]="row.spec" [scale]="0.92" />
+                  </svg>
+                  <div class="body">
+                    <strong class="row-title">{{ row.harvest.title }}</strong>
+                    <div class="row-meta">
+                      <span class="tree-chip" [style.background]="chipWash(row)" [style.border-color]="chipBorder(row)">
+                        {{ row.harvest.treeName }}
+                      </span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-ghost remove-fruit-btn" (click)="removeFruit(row.harvest.id)">
+                    {{ i18n.t().cosecha.promise.removeFruit }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+
+        <div class="pending-actions">
+          @if (harvests.fresh().length) {
+            <button
+              type="button"
+              class="btn btn-soft add-fruit-btn"
+              [class.selected]="addOpen()"
+              [attr.aria-expanded]="addOpen()"
+              (click)="addOpen.set(!addOpen())"
+            >
+              {{ i18n.t().cosecha.promise.addFruit }}
+            </button>
+          }
+          <button type="button" class="btn btn-ghost release-btn" (click)="askRelease(jar)">
+            {{ i18n.t().cosecha.promise.release }}
+          </button>
+        </div>
+
+        @if (addOpen()) {
+          @if (freshRows().length) {
+            <p class="add-hint">{{ i18n.t().cosecha.promise.addHint }}</p>
+            <ul class="add-tray">
+              @for (row of freshRows(); track row.harvest.id) {
+                <li>
+                  <button type="button" class="add-pick" (click)="addFruit(row.harvest.id)">
+                    <svg viewBox="-14 -15 28 28" width="26" height="26" aria-hidden="true">
+                      <g appFruit [fruit]="row.spec" [scale]="0.9" />
+                    </svg>
+                    <span class="pick-title">{{ row.harvest.title }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="add-hint">{{ i18n.t().cosecha.promise.noFresh }}</p>
+          }
+        }
+      </section>
+    </section>
+  }
 
   <!-- La alacena: SEALED jams only (0.0.92 — the shelf of what waits),
        chronological — never a species grid, never counted, no empty shelf
@@ -212,6 +360,24 @@
   @if (brewingTea()) {
     <app-te-sheet (closed)="brewingTea.set(false)" />
   }
+}
+
+@defer (when promising()) {
+  @if (promising()) {
+    <app-promesa-sheet (closed)="promising.set(false)" (created)="onPromiseCreated($event)" />
+  }
+}
+
+@if (releasing(); as jar) {
+  <app-confirm-sheet
+    icon="🍃"
+    [title]="i18n.fill(i18n.t().cosecha.promise.releaseConfirmTitle, { name: jar.name })"
+    [body]="i18n.t().cosecha.promise.releaseConfirmBody"
+    [confirmLabel]="i18n.t().cosecha.promise.releaseConfirm"
+    [quiet]="true"
+    (cancelled)="releasing.set(null)"
+    (confirmed)="doRelease()"
+  />
 }
 
 @defer (when !!claiming()) {

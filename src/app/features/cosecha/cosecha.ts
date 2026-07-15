@@ -8,15 +8,20 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { Harvest, Preserve } from '../../core/db/schema';
-import { harvestMonths, membersOf } from '../../core/harvest';
+import { harvestMonths, isSealedJam, membersOf } from '../../core/harvest';
 import { FruitSpec, fruitFor } from '../forest/flora';
 import { FruitGlyph } from '../forest/fruit';
 import { MeadowJar } from '../forest/jar';
 import { JamJar } from '../forest/jam-jar';
+import { PromiseJar } from '../forest/promise-jar';
 import { HintChip } from '../../shared/ui/hint-chip';
+import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
+import { inputValue } from '../../shared/ui/dom';
 import { MermeladaSheet } from './mermelada-sheet';
 import { TeSheet } from './te-sheet';
 import { AbrirMermeladaSheet } from './abrir-mermelada-sheet';
+import { PromesaSheet } from './promesa-sheet';
+import { PromiseService } from './promise.service';
 
 interface HarvestRow {
   harvest: Harvest;
@@ -43,14 +48,27 @@ interface JamShelfItem {
  */
 @Component({
   selector: 'app-cosecha',
-  imports: [FruitGlyph, MeadowJar, JamJar, HintChip, MermeladaSheet, TeSheet, AbrirMermeladaSheet],
+  imports: [
+    FruitGlyph,
+    MeadowJar,
+    JamJar,
+    PromiseJar,
+    HintChip,
+    ConfirmSheet,
+    MermeladaSheet,
+    TeSheet,
+    AbrirMermeladaSheet,
+    PromesaSheet,
+  ],
   templateUrl: './cosecha.html',
   styleUrl: './cosecha.scss',
 })
 export class CosechaPage {
+  protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly harvests = inject(HarvestsRepo);
   protected readonly preserves = inject(PreservesRepo);
+  protected readonly promise = inject(PromiseService);
   private readonly nodes = inject(NodesRepo);
   private readonly conserveria = inject(ConserveriaService);
   private readonly toast = inject(ToastService);
@@ -60,10 +78,22 @@ export class CosechaPage {
   /** Ritual doors — @defer'd sheets; DOORS CANCEL applies to all. */
   protected readonly makingJam = signal(false);
   protected readonly brewingTea = signal(false);
+  /** «La promesa» wizard door. */
+  protected readonly promising = signal(false);
   /** The claiming ceremony's jar («abrir la mermelada»), or null. */
   protected readonly claiming = signal<Preserve | null>(null);
   /** The alacena's inline disclosure (almanaque day-page pattern). */
   protected readonly openJarId = signal<string | null>(null);
+  /** The pending goal jar's inline detail (separate panel from the alacena's). */
+  protected readonly openPendingId = signal<string | null>(null);
+  /** Within the open pending detail: the add-fruit tray + the edit form. */
+  protected readonly addOpen = signal(false);
+  protected readonly editOpen = signal(false);
+  protected readonly editName = signal('');
+  protected readonly editPremio = signal('');
+  protected readonly editSavedFor = signal('');
+  /** The pending jar awaiting a «soltar» confirm, or null. */
+  protected readonly releasing = signal<Preserve | null>(null);
 
   private monthWordOf(epochMs: number): string {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
@@ -107,11 +137,12 @@ export class CosechaPage {
   }
 
   /** The alacena: SEALED jars only (0.0.92 — the shelf of what waits),
-   *  chronological — never a species grid. */
+   *  chronological — never a species grid. Pending goal jars (0.0.93) have
+   *  their own shelf, so isSealedJam keeps them out of here. */
   protected readonly jamShelf = computed<JamShelfItem[]>(() =>
     this.preserves
       .newestFirst()
-      .filter((p) => !p.openedAt)
+      .filter((p) => isSealedJam(p) && !p.openedAt)
       .map((p) => this.shelfItemOf(p)),
   );
 
@@ -153,7 +184,105 @@ export class CosechaPage {
   }
 
   protected onJarEscape(): void {
+    if (this.openPendingId()) {
+      this.openPendingId.set(null);
+      return;
+    }
     if (this.openJarId()) this.openJarId.set(null);
+  }
+
+  // ── «La promesa» (0.0.93): goal jars ─────────────────────────────────────
+
+  /** The open pending jar (still pending — auto-seal closes the panel). */
+  protected readonly openPending = computed(() => {
+    const id = this.openPendingId();
+    if (!id) return null;
+    return this.promise.pending().find((p) => p.id === id) ?? null;
+  });
+
+  /** The open pending jar's placed fruits, as rows (newest first). */
+  protected readonly openPendingMembers = computed(() => {
+    const jar = this.openPending();
+    if (!jar) return [];
+    return membersOf(jar.id, this.harvests.all()).map((h) => this.rowOf(h));
+  });
+
+  /** Fresh fruits available to store into the open jar (the add tray). */
+  protected readonly freshRows = computed(() => this.harvests.fresh().map((h) => this.rowOf(h)));
+
+  /** The ONE forward-facing count line — lives ONLY here, on the jar's own
+   *  detail panel (owner carve-out to «la app es la alacena…»). */
+  protected pendingFillLine(preserve: Preserve): string {
+    const have = this.promise.membersOf(preserve.id).length;
+    const cap = this.promise.capacity(preserve.size);
+    const dict = this.i18n.t().cosecha.promise.fillLine;
+    return this.i18n.fill(have === 1 ? dict.one : dict.many, { count: have, cap });
+  }
+
+  protected premioAtFill(preserve: Preserve): string {
+    return this.i18n.fill(this.i18n.t().cosecha.promise.premioAtFill, { premio: preserve.premio ?? '' });
+  }
+
+  protected togglePending(id: string): void {
+    const next = this.openPendingId() === id ? null : id;
+    this.openPendingId.set(next);
+    this.addOpen.set(false);
+    this.editOpen.set(false);
+  }
+
+  protected openWizard(): void {
+    if (this.promise.atLimit()) return;
+    this.promising.set(true);
+  }
+
+  /** Wizard sealed a new promise: close it and open its detail so the user
+   *  sees the empty jar waiting for its first fruit. */
+  protected onPromiseCreated(preserve: Preserve): void {
+    this.promising.set(false);
+    this.openPendingId.set(preserve.id);
+  }
+
+  protected addFruit(harvestId: string): void {
+    const jar = this.openPending();
+    if (!jar) return;
+    void this.promise.placeAndCelebrate(harvestId, jar.id);
+    // A seal closes the panel (jar leaves pending); otherwise keep filling.
+    if (!this.harvests.fresh().length) this.addOpen.set(false);
+  }
+
+  protected removeFruit(harvestId: string): void {
+    void this.promise.unplace(harvestId);
+  }
+
+  protected startEdit(preserve: Preserve): void {
+    this.editName.set(preserve.name);
+    this.editPremio.set(preserve.premio ?? '');
+    this.editSavedFor.set(preserve.savedFor ?? '');
+    this.editOpen.set(true);
+  }
+
+  protected saveEdit(): void {
+    const jar = this.openPending();
+    if (!jar) return;
+    void this.promise.edit(jar.id, {
+      name: this.editName(),
+      premio: this.editPremio(),
+      savedFor: this.editSavedFor(),
+    });
+    this.editOpen.set(false);
+  }
+
+  protected askRelease(preserve: Preserve): void {
+    this.releasing.set(preserve);
+  }
+
+  protected doRelease(): void {
+    const jar = this.releasing();
+    if (!jar) return;
+    void this.promise.release(jar);
+    this.releasing.set(null);
+    if (this.openPendingId() === jar.id) this.openPendingId.set(null);
+    this.toast.show({ message: this.i18n.t().cosecha.promise.released }, UNDO_MS);
   }
 
   /** Seal landed: close the ritual, offer the one undo window («abrir»

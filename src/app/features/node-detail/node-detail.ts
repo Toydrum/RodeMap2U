@@ -6,7 +6,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
-import { ESTIMATE_CHOICES, EstimateMin, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
+import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
@@ -16,6 +16,7 @@ import { BranchFlow } from './branch-flow';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { VisitSession } from '../../core/visit/visit-session';
+import { PromiseService } from '../cosecha/promise.service';
 
 // Life-cycle order, rest LAST (owner 2026-07-11): seed → growing → bloomed
 // reads as the branch's natural arc; resting is the aside, not a stage.
@@ -48,6 +49,7 @@ export class NodeDetail {
   private readonly harvests = inject(HarvestsRepo);
   private readonly burst = inject(BloomBurstService);
   private readonly sky = inject(HarvestSkyService);
+  private readonly promise = inject(PromiseService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly lights = LIGHTS;
@@ -196,8 +198,39 @@ export class NodeDetail {
       void this.harvests.recordBloom(node, this.tree(), this.nodes.byId()).then((minted) => {
         if (minted) {
           this.sky.celebrate(species, fruitFor(minted.accent, minted.treeId), minted.title);
+          this.offerToStore(minted);
         }
       });
+    }
+  }
+
+  /** «La promesa» (0.0.93): right after a fruit mints, offer to store it in a
+   *  goal jar (one tap for a single pending jar; the cross-page picker when
+   *  more than one). Never during a visit — but recordBloom already gates that,
+   *  so this only ever runs on the owner's own bloom. */
+  private offerToStore(fruit: Harvest): void {
+    if (this.visiting) return;
+    const jars = this.promise.pending();
+    if (!jars.length) return;
+    if (jars.length === 1) {
+      const jar = jars[0];
+      this.toast.show(
+        {
+          message: this.i18n.fill(this.i18n.t().cosecha.promise.storeAsk, { name: jar.name }),
+          actionLabel: this.i18n.t().cosecha.promise.storeAction,
+          action: () => void this.promise.placeAndCelebrate(fruit.id, jar.id),
+        },
+        UNDO_MS,
+      );
+    } else {
+      this.toast.show(
+        {
+          message: this.i18n.t().cosecha.promise.storeChoose,
+          actionLabel: this.i18n.t().cosecha.promise.storeChooseAction,
+          action: () => this.promise.requestPlacement(fruit),
+        },
+        UNDO_MS,
+      );
     }
   }
 

@@ -2,6 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import { Preserve } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
+import { isPending, isSealedJam } from '../harvest';
 
 /**
  * «La conservería» (0.0.89) — sealed jam batches. See the Preserve interface
@@ -19,4 +20,15 @@ export class PreservesRepo extends RecordsRepo<Preserve> {
   readonly newestFirst = computed(() =>
     [...this.all()].sort((a, b) => b.madeAt - a.madeAt || (a.id < b.id ? -1 : 1)),
   );
+
+  /** «La promesa» (0.0.93) — goal jars still filling, newest promise first. */
+  readonly pending = computed(() =>
+    [...this.all()]
+      .filter(isPending)
+      .sort((a, b) => (b.plannedAt ?? 0) - (a.plannedAt ?? 0) || (a.id < b.id ? -1 : 1)),
+  );
+
+  /** Finished jams for the alacena — legacy pot jams + sealed promises,
+   *  excluding opened (those move to «Las disfrutadas»). */
+  readonly sealed = computed(() => this.newestFirst().filter((p) => isSealedJam(p) && !p.openedAt));
 }

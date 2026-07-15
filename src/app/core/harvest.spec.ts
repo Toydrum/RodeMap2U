@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { Harvest, TreeNode } from './db/schema';
+import { Harvest, Preserve, TreeNode } from './db/schema';
 import {
   deriveAccent,
   harvestMonths,
   isDailyPathParent,
   isFresh,
+  isPending,
+  isPromise,
+  isSealedJam,
+  jarCapacity,
   jarSizeFor,
   membersOf,
   underDailyPath,
@@ -134,6 +138,56 @@ describe('la conservería — single-home + flavor derivation', () => {
     expect(jarSizeFor(5)).toBe('frasco');
     expect(jarSizeFor(6)).toBe('frascote');
     expect(jarSizeFor(20)).toBe('frascote');
+  });
+});
+
+describe('la promesa — goal jars (0.0.93)', () => {
+  function preserve(extra: Partial<Preserve> = {}): Preserve {
+    return {
+      id: 'p1',
+      createdAt: 0,
+      updatedAt: 0,
+      rev: 1,
+      deletedAt: null,
+      kind: 'mermelada',
+      name: 'Mi frasco',
+      madeAt: 0,
+      accent: null,
+      tint: '#000',
+      tintEdge: '#000',
+      ...extra,
+    };
+  }
+
+  it('jarCapacity — the TOP of each published band; a full jar re-derives its own size', () => {
+    expect(jarCapacity('frasquito')).toBe(2);
+    expect(jarCapacity('frasco')).toBe(5);
+    expect(jarCapacity('frascote')).toBe(8);
+    // The consistency invariant: a filled goal jar looks like a pot jam.
+    expect(jarSizeFor(jarCapacity('frasquito'))).toBe('frasquito');
+    expect(jarSizeFor(jarCapacity('frasco'))).toBe('frasco');
+    expect(jarSizeFor(jarCapacity('frascote'))).toBe('frascote');
+  });
+
+  it('isPromise: only a jar born at the wizard (plannedAt set)', () => {
+    expect(isPromise(preserve())).toBe(false); // legacy pot jam
+    expect(isPromise(preserve({ plannedAt: 100 }))).toBe(true);
+    expect(isPromise(preserve({ plannedAt: null }))).toBe(false);
+  });
+
+  it('isPending / isSealedJam across the three jar shapes', () => {
+    const potJam = preserve(); // plannedAt & sealedAt absent
+    const pendingPromise = preserve({ plannedAt: 100, sealedAt: null });
+    const sealedPromise = preserve({ plannedAt: 100, sealedAt: 200 });
+
+    expect(isPending(potJam)).toBe(false);
+    expect(isPending(pendingPromise)).toBe(true);
+    expect(isPending(sealedPromise)).toBe(false);
+
+    // The alacena keeps everything that is NOT a pending goal jar.
+    expect(isSealedJam(potJam)).toBe(true);
+    expect(isSealedJam(pendingPromise)).toBe(false);
+    expect(isSealedJam(sealedPromise)).toBe(true);
   });
 });
 

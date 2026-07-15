@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
-import { Harvest } from '../../core/db/schema';
-import { fruitFor } from './flora';
+import { Harvest, JarVessel } from '../../core/db/schema';
+import { FruitSpec, fruitFor } from './flora';
 import { FruitGlyph } from './fruit';
 import { hash } from './tree-layout';
 
@@ -21,6 +21,36 @@ export const FRASQUITO_GLASS_D =
 /** Tall, broad-shouldered preserving jar (6+ frutas). */
 export const FRASCOTE_GLASS_D =
   'M 10 8 C 7 11 5 13 5 17 L 5 45 C 5 50 10 52.5 22 52.5 C 34 52.5 39 50 39 45 L 39 17 C 39 13 37 11 34 8 Z';
+
+/** The glass silhouette for a vessel (absent ≡ frasco, the pre-v7 default). */
+export function glassFor(size: JarVessel | undefined): string {
+  return size === 'frasquito' ? FRASQUITO_GLASS_D : size === 'frascote' ? FRASCOTE_GLASS_D : JAR_GLASS_D;
+}
+
+export interface PlacedFruit {
+  key: string;
+  x: number;
+  y: number;
+  rot: number;
+  spec: FruitSpec;
+}
+
+/** Fruits at id-stable hash positions in the jar's lower belly (y 30–45 sits
+ *  inside all three vessels), painted lower-in-jar last. Arrivals/removals
+ *  only ever move their own fruit — nothing reshuffles (rule 4). Shared by the
+ *  fresh MeadowJar and the filling PromiseJar. */
+export function placeFruits(fruits: Harvest[], limit = 12): PlacedFruit[] {
+  return fruits
+    .slice(0, limit)
+    .map((h) => ({
+      key: h.id,
+      x: 14 + (hash(h.nodeId + ':jx') % 17),
+      y: 30 + (hash(h.nodeId + ':jy') % 15),
+      rot: -14 + (hash(h.nodeId + ':jr') % 29),
+      spec: fruitFor(h.accent, h.treeId),
+    }))
+    .sort((a, b) => a.y - b.y);
+}
 
 /**
  * «El frasco» (0.0.88) — the harvest jar: hand-drawn glass holding the
@@ -110,16 +140,5 @@ export class MeadowJar {
   readonly size = input(1);
 
   /** 12 most recent at id-stable positions, painted lower-in-jar last. */
-  protected readonly placed = computed(() =>
-    this.fruits()
-      .slice(0, 12)
-      .map((h) => ({
-        key: h.id,
-        x: 14 + (hash(h.nodeId + ':jx') % 17),
-        y: 30 + (hash(h.nodeId + ':jy') % 15),
-        rot: -14 + (hash(h.nodeId + ':jr') % 29),
-        spec: fruitFor(h.accent, h.treeId),
-      }))
-      .sort((a, b) => a.y - b.y),
-  );
+  protected readonly placed = computed(() => placeFruits(this.fruits()));
 }

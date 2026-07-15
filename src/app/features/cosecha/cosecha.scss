@@ -246,3 +246,115 @@
     margin-top: 0.15rem;
   }
 }
+
+/* «La promesa» (0.0.93) — goal jars */
+.promise-limit {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.pending-detail {
+  .pending-jar-hero {
+    display: flex;
+    justify-content: center;
+    margin: 0.4rem 0 0.2rem;
+  }
+
+  /* the ONE forward count line — lives only here */
+  .fill-line {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 0 0.8rem;
+  }
+
+  .edit-toggle {
+    margin-left: auto;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.82rem;
+  }
+
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+
+    input {
+      width: 100%;
+    }
+  }
+
+  .pending-member {
+    align-items: center;
+    cursor: default;
+  }
+
+  .remove-fruit-btn {
+    flex: 0 0 auto;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .pending-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+
+  .release-btn {
+    margin-left: auto;
+    color: var(--text-faint);
+  }
+
+  .add-hint {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 0.8rem 0 0.5rem;
+  }
+
+  .add-tray {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    max-height: 34vh;
+    overflow-y: auto;
+  }
+
+  .add-pick {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1.5px solid color-mix(in srgb, var(--text) 16%, transparent);
+    border-radius: 12px;
+    background: var(--surface);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    }
+
+    .pick-title {
+      min-width: 0;
+      font-size: 0.82rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+}

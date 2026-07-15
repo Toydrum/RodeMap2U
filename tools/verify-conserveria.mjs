@@ -592,5 +592,240 @@ ok(
   `jamUntouched=${seasons.jamUntouched} season=${seasons.seasonId.slice(-10)} offered=${offeredAgain}`,
 );
 
+// ── «La promesa» (0.0.93): goal jars ─────────────────────────────────────
+// T: the wizard creates an EMPTY pending jar. U: placement fills it + the
+// fruit leaves the pot tray + is re-placeable. V: reaching capacity auto-
+// seals + the toast's Deshacer reverts to pending. W: «soltar» frees fruits
+// + tombstones. X: the count line lives ONLY on the detail (shelves/mesita
+// numberless). Y: a sealed goal jar opens via the existing ceremony. Z:
+// reconcile seals an over-full pending jar silently (no ceremony).
+
+const seedFresh = (n, tag) =>
+  page.evaluate(async ({ n, tag }) => {
+    const open = indexedDB.open('roadmap2u');
+    const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+    const tx = db.transaction('harvests', 'readwrite');
+    const os = tx.objectStore('harvests');
+    const now = Date.now();
+    const ids = [];
+    for (let i = 0; i < n; i++) {
+      const id = 'h:' + tag + '-' + i;
+      ids.push(id);
+      os.put({
+        id, createdAt: now, updatedAt: now, rev: 1, deletedAt: null,
+        nodeId: tag + '-' + i, treeId: 'probe-tree', treeName: 'Probe', accent: 'moss',
+        title: 'Fruta ' + tag + ' ' + (i + 1), harvestedAt: now + i, preserveId: null,
+      });
+    }
+    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+    db.close();
+    return ids;
+  }, { n, tag });
+
+const readJars = () =>
+  page.evaluate(async () => {
+    const open = indexedDB.open('roadmap2u');
+    const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+    const read = (store) => new Promise((res, rej) => {
+      const req = db.transaction(store, 'readonly').objectStore(store).getAll();
+      req.onsuccess = () => res(req.result); req.onerror = rej;
+    });
+    const preserves = await read('preserves');
+    const harvests = await read('harvests');
+    db.close();
+    return preserves.filter((p) => !p.deletedAt).map((p) => ({
+      id: p.id, name: p.name, plannedAt: p.plannedAt ?? null, sealedAt: p.sealedAt ?? null,
+      size: p.size, premio: p.premio ?? null, madeAt: p.madeAt, openedAt: p.openedAt ?? null,
+      members: harvests.filter((h) => !h.deletedAt && h.preserveId === p.id).length,
+    }));
+  });
+
+// T — the wizard mints an empty pending jar (frasquito, capacity 2).
+await seedFresh(3, 'u');
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(500);
+await page.locator('.promise-door').click();
+await page.waitForTimeout(300);
+await page.fill('#promise-premio', 'un café tranquilo');
+await page.locator('.premise-next').click();
+await page.waitForTimeout(200);
+await page.locator('.vessel-chip').nth(0).click(); // frasquito
+await page.locator('.premise-next').click();
+await page.waitForTimeout(200);
+await page.fill('#promise-name', 'Meta chica');
+await page.locator('.create-btn').click();
+await page.waitForTimeout(600);
+let jarsT = await readJars();
+const promiseT = jarsT.find((j) => j.name === 'Meta chica');
+const fillT = ((await page.locator('.fill-line').textContent().catch(() => '')) ?? '').trim();
+ok(
+  'T wizard creates an empty pending jar (plannedAt, sealedAt null, size, premio)',
+  !!promiseT && promiseT.plannedAt != null && promiseT.sealedAt == null &&
+    promiseT.size === 'frasquito' && promiseT.premio === 'un café tranquilo' && promiseT.members === 0,
+  `jar=${JSON.stringify(promiseT ?? {}).slice(0, 90)}`,
+);
+ok('T2 the fill line shows 0 · caben 2 on the detail', /0/.test(fillT) && /2/.test(fillT), `"${fillT}"`);
+
+// U — place a SPECIFIC fruit; it leaves the pot tray and is re-placeable.
+await page.locator('.add-fruit-btn').click(); // open the tray once
+await page.waitForTimeout(250);
+await page.locator('.add-pick', { hasText: 'Fruta u 1' }).click();
+await page.waitForTimeout(600);
+let jarsU = await readJars();
+const promiseU = jarsU.find((j) => j.name === 'Meta chica');
+const fillU = ((await page.locator('.fill-line').textContent().catch(() => '')) ?? '').trim();
+// pot tray must NOT offer a placed (promised) fruit
+await page.locator('.jam-door').click();
+await page.waitForTimeout(500);
+const potTitles = (await page.locator('.fruit-pick .pick-title').allTextContents()).map((t) => t.trim());
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+ok(
+  'U placement fills the jar + the fruit leaves the pot tray',
+  promiseU.members === 1 && promiseU.sealedAt == null && /1/.test(fillU) &&
+    !potTitles.includes('Fruta u 1'),
+  `members=${promiseU.members} fill="${fillU}" potHasIt=${potTitles.includes('Fruta u 1')}`,
+);
+// re-placeable: take it back out (tray stays open — many fresh remain)
+await page.locator('.remove-fruit-btn').first().click();
+await page.waitForTimeout(500);
+const promiseUback = (await readJars()).find((j) => j.name === 'Meta chica');
+ok('U2 a placed fruit is re-placeable while pending', promiseUback.members === 0, `members=${promiseUback.members}`);
+
+// V — reaching capacity auto-seals; Deshacer reverts. Tray is still open.
+await page.locator('.add-pick', { hasText: 'Fruta u 1' }).click();
+await page.waitForTimeout(500);
+await page.locator('.add-pick', { hasText: 'Fruta u 2' }).click(); // 2nd fruit → capacity 2 → auto-seal
+await page.waitForTimeout(700);
+const sealedV = (await readJars()).find((j) => j.name === 'Meta chica');
+const sealToast = await page.locator('.toast', { hasText: 'Se llenó' }).count();
+ok(
+  'V capacity reached → auto-seal + toast',
+  sealedV.sealedAt != null && sealedV.members === 2 && sealToast >= 1,
+  `sealedAt=${sealedV.sealedAt != null} members=${sealedV.members} toast=${sealToast}`,
+);
+await page.locator('.toast button', { hasText: 'Deshacer' }).click();
+await page.waitForTimeout(700);
+const revertedV = (await readJars()).find((j) => j.name === 'Meta chica');
+ok(
+  'V2 Deshacer reverts to pending + returns the triggering fruit',
+  revertedV.sealedAt == null && revertedV.members === 1,
+  `sealedAt=${revertedV.sealedAt != null} members=${revertedV.members}`,
+);
+
+// W — «soltar» frees the fruits and tombstones the jar.
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(500);
+await page.locator('.pending-jar').first().click();
+await page.waitForTimeout(300);
+const freshBeforeW = (await readJars()).reduce((n, j) => n + j.members, 0);
+await page.locator('.release-btn').click();
+await page.waitForTimeout(300);
+await page.locator('.confirm button', { hasText: 'Soltarlo' }).click();
+await page.waitForTimeout(600);
+const jarsW = await readJars();
+const goneW = !jarsW.find((j) => j.name === 'Meta chica');
+const freedW = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const req = db.transaction('harvests', 'readonly').objectStore('harvests').getAll();
+    req.onsuccess = () => res(req.result); req.onerror = rej;
+  });
+  db.close();
+  return rows.filter((h) => !h.deletedAt && h.nodeId.startsWith('u-') && !h.preserveId).length;
+});
+ok('W soltar frees fruits + tombstones the jar', goneW && freedW >= 1 && freshBeforeW >= 1, `gone=${goneW} freed=${freedW}`);
+
+// X — the count line lives ONLY on the detail; shelves are numberless.
+await seedFresh(2, 'x');
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(400);
+await page.locator('.promise-door').click();
+await page.waitForTimeout(300);
+await page.fill('#promise-premio', 'un premio X');
+await page.locator('.premise-next').click();
+await page.locator('.vessel-chip').nth(0).click();
+await page.locator('.premise-next').click();
+await page.fill('#promise-name', 'Meta X');
+await page.locator('.create-btn').click();
+await page.waitForTimeout(600);
+const shelfText = ((await page.locator('.pending-shelf').textContent().catch(() => '')) ?? '').trim();
+const detailFill = await page.locator('.fill-line').count();
+ok(
+  'X the count line is on the detail only; the shelf is numberless',
+  !/le caben|lleva/.test(shelfText) && detailFill >= 1,
+  `shelfHasCount=${/le caben|lleva/.test(shelfText)} detailFill=${detailFill}`,
+);
+
+// Y — fill Meta X (frasquito, 2) and open it via the existing ceremony.
+await page.locator('.add-fruit-btn').click(); // open the tray once
+await page.waitForTimeout(250);
+await page.locator('.add-pick', { hasText: 'Fruta x 1' }).click();
+await page.waitForTimeout(400);
+await page.locator('.add-pick', { hasText: 'Fruta x 2' }).click();
+await page.waitForTimeout(700);
+// dismiss the auto-seal toast so it doesn't cover the shelf
+await page.locator('.toast button', { hasText: '✕' }).click().catch(() => {});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+await page.locator('.jam-shelf-jar', { hasText: '' }).first().click();
+await page.waitForTimeout(400);
+const premioChipY = await page.locator('.premio-chip').count();
+await page.locator('.open-jam-btn').click();
+await page.waitForTimeout(400);
+await page.locator('.sheet button', { hasText: 'Abrir' }).click();
+await page.waitForTimeout(500);
+const earnedY = await page.locator('.sheet', { hasText: 'Te lo ganaste' }).count();
+const rainY = await page.locator('.petal-fall .fall-petal').count();
+ok(
+  'Y a sealed goal jar opens via the existing ceremony (rain + «Te lo ganaste»)',
+  premioChipY >= 1 && earnedY >= 1 && rainY >= 1,
+  `premioChip=${premioChipY} earned=${earnedY} rain=${rainY}`,
+);
+await page.locator('.sheet button', { hasText: 'A disfrutarlo' }).click().catch(() => {});
+await page.waitForTimeout(400);
+
+// Z — reconcile seals an over-full pending jar silently (sync convergence).
+const zFresh = await seedFresh(5, 'z');
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(400);
+await page.locator('.promise-door').click();
+await page.waitForTimeout(300);
+await page.fill('#promise-premio', 'un premio Z');
+await page.locator('.premise-next').click();
+await page.locator('.vessel-chip').nth(1).click(); // frasco, capacity 5
+await page.locator('.premise-next').click();
+await page.fill('#promise-name', 'Meta Z');
+await page.locator('.create-btn').click();
+await page.waitForTimeout(500);
+const jarZ = (await readJars()).find((j) => j.name === 'Meta Z');
+// simulate a sync merge: place all 5 fruits directly (no local seal)
+const maxHarvestedAt = await page.evaluate(async ({ ids, jarId }) => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const tx = db.transaction('harvests', 'readwrite');
+  const os = tx.objectStore('harvests');
+  let maxH = 0;
+  for (const id of ids) {
+    const row = await new Promise((res, rej) => { const r = os.get(id); r.onsuccess = () => res(r.result); r.onerror = rej; });
+    row.preserveId = jarId; row.updatedAt = Date.now(); row.rev = (row.rev ?? 1) + 1;
+    maxH = Math.max(maxH, row.harvestedAt);
+    os.put(row);
+  }
+  await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+  db.close();
+  return maxH;
+}, { ids: zFresh, jarId: jarZ.id });
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(900); // let the reconciler effect run
+const sealedZ = (await readJars()).find((j) => j.name === 'Meta Z');
+const noToastZ = (await page.locator('.toast', { hasText: 'Se llenó' }).count()) === 0;
+ok(
+  'Z reconcile seals an over-full pending jar silently (deterministic madeAt, no ceremony)',
+  !!sealedZ && sealedZ.sealedAt != null && sealedZ.madeAt === maxHarvestedAt && noToastZ,
+  `sealedAt=${sealedZ?.sealedAt != null} madeAt==maxH=${sealedZ?.madeAt === maxHarvestedAt} noToast=${noToastZ}`,
+);
+
 console.log('conserveria done');
 await browser.close();
