@@ -8,6 +8,8 @@ import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
+import { Cadence, cadenceOf } from '../../core/cadence';
+import { CadencePicker } from './cadence-picker';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
 import { HarvestSkyService } from '../../shared/ui/harvest-sky';
@@ -30,7 +32,7 @@ const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '�
 
 @Component({
   selector: 'app-node-detail',
-  imports: [BranchFlow, SheetDirective, ConfirmSheet],
+  imports: [BranchFlow, CadencePicker, SheetDirective, ConfirmSheet],
   templateUrl: './node-detail.html',
   styleUrl: './node-detail.scss',
 })
@@ -310,9 +312,18 @@ export class NodeDetail {
     await this.nodes.update(this.node(), { flow: this.flowSteps() ? 'free' : 'steps' });
   }
 
-  /** «Sendero»: the path quietly starts over each day. No history kept. */
+  /** «El ritmo» (0.0.103): the branch's cadence, read ONLY via cadenceOf. */
+  protected readonly cadence = computed(() => cadenceOf(this.node()));
+
+  /** Toggle on = daily by default; toggle off = clearing the rhythm (a
+   *  ritual leaf RETIRES this way — its standing bloom then mints). Every
+   *  cadence write mirrors the repeatsDaily compat shadow. */
   protected async toggleRepeats(): Promise<void> {
-    await this.nodes.update(this.node(), { repeatsDaily: !this.node().repeatsDaily });
+    await this.setCadence(this.cadence() ? null : 'daily');
+  }
+
+  protected async setCadence(c: Cadence | null): Promise<void> {
+    await this.nodes.update(this.node(), { repeats: c, repeatsDaily: c != null });
   }
 
   protected async moveStep(child: TreeNode, dir: -1 | 1): Promise<void> {

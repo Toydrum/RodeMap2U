@@ -1,8 +1,11 @@
-// «Senderos» (0.0.72): daily repeating step paths. A: the toggle only shows
-// on steps parents and persists. B: steps bloomed on a PREVIOUS day quietly
+// «Senderos» (0.0.72) → «rituales» (0.0.103): repeating paths AND leaves.
+// A: the repeats toggle is ALWAYS visible (unburied) + the cadence picker
+// appears when on + persists. B: steps bloomed on a PREVIOUS day quietly
 // reset to seed at boot (backdated via IndexedDB — the sweep's real trigger
 // is the reactive today()); steps bloomed TODAY are never touched. C: a
-// non-repeating path never resets.
+// non-repeating path never resets. D: a ritual LEAF (lone branch with a
+// cadence) resets ITSELF and never mints fruit. E: weekday cadences —
+// today's weekday resets a stale bloom; tomorrow's weekday does not.
 import { chromium } from 'playwright-core';
 const BASE = 'http://localhost:' + (process.env.RM_PORT ?? '8826');
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -40,13 +43,15 @@ for (const t of ['Despertar', 'Desayunar', 'Vestirme']) {
   await input.press('Enter');
   await page.waitForTimeout(200);
 }
-// A — ordered + repeating (toggle appears only once steps mode is on)
-const repeatsBefore = await page.locator('.repeats-toggle').count();
+// A — the repeats toggle shows WITHOUT preconditions (0.0.103 unburied);
+// checking it reveals the cadence picker (daily preselected).
+const repeatsAlways = await page.locator('.repeats-toggle').count();
 await page.locator('.order-toggle input').check();
 await page.waitForTimeout(300);
-const repeatsAfter = await page.locator('.repeats-toggle').count();
 await page.locator('.repeats-toggle input').check();
 await page.waitForTimeout(300);
+const pickerShown = await page.locator('app-cadence-picker').count();
+const dailySelected = await page.locator('.cadence-daily.selected').count();
 // bloom the first two steps (today)
 for (let i = 0; i < 2; i++) {
   await page.locator('.steps li button', { hasText: '🌸' }).first().click();
@@ -58,7 +63,7 @@ await page.waitForTimeout(300);
 await page.mouse.click(center.x, center.y);
 await page.waitForTimeout(450);
 const persisted = await page.locator('.repeats-toggle input').isChecked();
-console.log(`A repeats toggle: hidden-before-steps=${repeatsBefore === 0} shows-after=${repeatsAfter === 1} persisted=${persisted} | OK=${repeatsBefore === 0 && repeatsAfter === 1 && persisted}`);
+console.log(`A repeats toggle: always-visible=${repeatsAlways === 1} picker=${pickerShown === 1} daily=${dailySelected === 1} persisted=${persisted} | OK=${repeatsAlways === 1 && pickerShown === 1 && dailySelected === 1 && persisted}`);
 const bloomedToday = await page.locator('.steps .step-name.done').count();
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
@@ -141,6 +146,121 @@ await page.mouse.click(center.x, center.y);
 await page.waitForTimeout(450);
 const doneC = await page.locator('.steps .step-name.done').count();
 console.log(`C non-repeating never resets: done=${doneC} | OK=${doneC === 2}`);
+
+// D — a ritual LEAF: planted via the plant-sheet chips («Se repite» → daily),
+// then a backdated bloom resets the BRANCH ITSELF and mints NO fruit.
+await page.keyboard.press('Escape'); // C left the node sheet open
+await page.waitForTimeout(400);
+await page.locator('.plant').first().click();
+await page.waitForTimeout(300);
+await page.fill('#root-title', 'Regar las plantas');
+await page.locator('.repeat-ritual').click();
+await page.waitForTimeout(200);
+const dailyChipD = await page.locator('.cadence-daily.selected').count();
+await page.locator('form.sheet button[type=submit]').click();
+await page.waitForTimeout(400);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+const leaf = await page.evaluate(async () => {
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  const yesterday = Date.now() - 26 * 3600 * 1000;
+  return new Promise((res) => {
+    const store = db.transaction('nodes', 'readwrite').objectStore('nodes');
+    const all = store.getAll();
+    all.onsuccess = () => {
+      const rec = all.result.find((n) => n.title === 'Regar las plantas');
+      if (!rec) { res(null); return; }
+      const shape = { repeats: rec.repeats, shadow: rec.repeatsDaily };
+      rec.status = 'achieved';
+      rec.achievedAt = yesterday;
+      store.put(rec);
+      res({ id: rec.id, ...shape });
+    };
+  });
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(1200); // boot sweep
+const afterD = await page.evaluate(async (leafId) => {
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  return new Promise((res) => {
+    const tx = db.transaction(['nodes', 'harvests'], 'readonly');
+    const nodes = tx.objectStore('nodes').getAll();
+    nodes.onsuccess = () => {
+      const harvests = tx.objectStore('harvests').getAll();
+      harvests.onsuccess = () => {
+        const leaf = nodes.result.find((n) => n.id === leafId);
+        const fruits = harvests.result.filter((h) => h.nodeId === leafId && !h.deletedAt).length;
+        res({ status: leaf?.status, achievedAt: leaf?.achievedAt, fruits });
+      };
+    };
+  });
+}, leaf?.id);
+console.log(
+  `D ritual leaf: repeats=${leaf?.repeats} shadow=${leaf?.shadow === true} chipDaily=${dailyChipD === 1} reset=${afterD.status === 'seed' && afterD.achievedAt === null} fruits=${afterD.fruits} | OK=${leaf?.repeats === 'daily' && leaf?.shadow === true && dailyChipD === 1 && afterD.status === 'seed' && afterD.fruits === 0}`,
+);
+
+// E — weekday cadences, deterministic on ANY run day: a leaf scheduled on
+// TODAY's weekday resets a stale bloom; one scheduled TOMORROW does not.
+const eSetup = await page.evaluate(async () => {
+  const WD = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const todayWd = WD[new Date().getDay()];
+  const tomorrowWd = WD[(new Date().getDay() + 1) % 7];
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  const yesterday = Date.now() - 26 * 3600 * 1000;
+  return new Promise((res) => {
+    const store = db.transaction('nodes', 'readwrite').objectStore('nodes');
+    const all = store.getAll();
+    all.onsuccess = () => {
+      const base = all.result.find((n) => n.title === 'Regar las plantas');
+      const mk = (id, title, wd) => ({
+        ...base,
+        id,
+        title,
+        repeats: [wd],
+        repeatsDaily: true,
+        status: 'achieved',
+        achievedAt: yesterday,
+        updatedAt: Date.now(),
+        rev: 1,
+      });
+      store.put(mk('vs-e-today', 'Ritual de hoy', todayWd));
+      store.put(mk('vs-e-tomorrow', 'Ritual de mañana', tomorrowWd));
+      res({ todayWd, tomorrowWd });
+    };
+  });
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(1200);
+const afterE = await page.evaluate(async () => {
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  return new Promise((res) => {
+    const all = db.transaction('nodes', 'readonly').objectStore('nodes').getAll();
+    all.onsuccess = () => {
+      const t = all.result.find((n) => n.id === 'vs-e-today');
+      const m = all.result.find((n) => n.id === 'vs-e-tomorrow');
+      res({ todayStatus: t?.status, tomorrowStatus: m?.status });
+    };
+  });
+});
+console.log(
+  `E weekday sweep (${eSetup.todayWd}/${eSetup.tomorrowWd}): today-reset=${afterE.todayStatus === 'seed'} tomorrow-held=${afterE.tomorrowStatus === 'achieved'} | OK=${afterE.todayStatus === 'seed' && afterE.tomorrowStatus === 'achieved'}`,
+);
 
 await browser.close();
 console.log('senderos done');

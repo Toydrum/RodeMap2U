@@ -8,7 +8,11 @@ import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
 import { FEELING_EMOJI, Tree, TreeNode } from '../../core/db/schema';
-import { dayOf, today } from '../../core/time';
+import { dayOf, today, weekdayOf } from '../../core/time';
+import { Cadence } from '../../core/cadence';
+import { inputValue } from '../../shared/ui/dom';
+import { SheetDirective } from '../../shared/ui/sheet.directive';
+import { CadencePicker } from '../node-detail/cadence-picker';
 import { hash } from '../forest/tree-layout';
 import { FlowerSpec, flowerFor } from '../forest/flora';
 import { FlowerGlyph } from '../forest/flower';
@@ -19,10 +23,14 @@ import {
   DatedBranch,
   DayChip,
   DayMarks,
+  Piedrita,
+  RestingRitual,
   caminitos,
   dayChips,
+  descansanHoy,
   marksFor,
   monthMatrix,
+  piedritas,
   todayDated,
   upcoming,
 } from './almanac';
@@ -41,7 +49,7 @@ interface CellGlyph {
  */
 @Component({
   selector: 'app-almanaque',
-  imports: [FlowerGlyph, DateReview, HintChip],
+  imports: [FlowerGlyph, DateReview, HintChip, SheetDirective, CadencePicker],
   templateUrl: './almanaque.html',
   styleUrl: './almanaque.scss',
 })
@@ -68,7 +76,7 @@ export class AlmanaquePage {
     const day = this.route.snapshot.queryParamMap.get('day');
     if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) this.openDate.set(day);
   }
-  private readonly trees = inject(TreesRepo);
+  protected readonly trees = inject(TreesRepo);
   private readonly nodes = inject(NodesRepo);
   private readonly checkins = inject(CheckinsRepo);
   private readonly settings = inject(SettingsService);
@@ -92,7 +100,17 @@ export class AlmanaquePage {
   });
 
   protected readonly paths = computed<Caminito[]>(() =>
-    caminitos(this.trees.active(), this.nodes.byTree()),
+    caminitos(this.trees.active(), this.nodes.byTree(), today()),
+  );
+
+  /** Today's loose stones — single-act rituals (0.0.103). */
+  protected readonly stones = computed<Piedrita[]>(() =>
+    piedritas(this.trees.active(), this.nodes.byTree(), today()),
+  );
+
+  /** Rituals off their day — the gentle rest line. */
+  protected readonly restingToday = computed<RestingRitual[]>(() =>
+    descansanHoy(this.trees.active(), this.nodes.byTree(), today()),
   );
 
   /** Today's chosen branches — silently empty once the date moves on. */
@@ -179,6 +197,50 @@ export class AlmanaquePage {
       },
       UNDO_MS,
     );
+  }
+
+  /* ------------------------------------- Sembrar una piedrita (0.0.103) */
+
+  protected readonly inputValue = inputValue;
+  protected readonly sowingStone = signal(false);
+  protected readonly stoneTitle = signal('');
+  protected readonly stoneTreeId = signal<string | null>(null);
+  protected readonly stoneCadence = signal<Cadence>('daily');
+
+  protected openSowing(): void {
+    // Default tree = the first standing one — always a VISIBLE picker choice.
+    this.stoneTreeId.set(this.trees.active()[0]?.id ?? null);
+    this.sowingStone.set(true);
+  }
+
+  protected closeSowing(): void {
+    this.sowingStone.set(false);
+    this.stoneTitle.set('');
+    this.stoneCadence.set('daily');
+  }
+
+  /** Plant a ritual leaf in the USER-PICKED tree (top level). The compat
+   *  shadow travels with it (nodes.plant mirrors repeatsDaily). */
+  protected async sowStone(): Promise<void> {
+    const title = this.stoneTitle().trim();
+    const treeId = this.stoneTreeId();
+    if (!title || !treeId) return;
+    await this.nodes.plant(treeId, null, { title, repeats: this.stoneCadence() });
+    this.toast.show({ message: this.i18n.fill(this.i18n.t().almanaque.piedritaSown, { title }) });
+    this.closeSowing();
+  }
+
+  /** The gentle rest line: words, never countdowns. Singular names the day
+   *  («vuelve el jueves»); several fold into one calm sentence. */
+  protected restingLine(): string {
+    const resting = this.restingToday();
+    const dict = this.i18n.t().almanaque;
+    if (resting.length === 1) {
+      const r = resting[0];
+      const day = this.i18n.t().cadence.weekdayNames[weekdayOf(r.nextDay)];
+      return this.i18n.fill(dict.restingOne, { title: r.node.title, day });
+    }
+    return this.i18n.fill(dict.restingMany, { names: resting.map((r) => r.node.title).join(', ') });
   }
 
   /* ------------------------------------------------------------- Mes -- */

@@ -153,6 +153,19 @@
       <textarea id="nd-note" [value]="node().note" (change)="setNote(inputValue($event))" [placeholder]="i18n.t().node.notePlaceholder" maxlength="240"></textarea>
     </div>
 
+    <!-- El ritmo (0.0.103): ANY branch can repeat — unburied from behind
+         «¿van en orden?» + 2 pasitos. A lone branch = ritual leaf (dawns
+         clean itself); a steps parent = classic sendero. -->
+    <label class="flow-toggle repeats-toggle">
+      <input type="checkbox" [checked]="!!cadence()" (change)="toggleRepeats()">
+      🌄 {{ i18n.t().node.repeatsToggle }}
+    </label>
+    @if (cadence(); as c) {
+      <app-cadence-picker class="node-cadence" [value]="c" (changed)="setCadence($event)" />
+      <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
+      <p class="hint fruit-law-hint">{{ i18n.t().node.ritualFruitLaw }}</p>
+    }
+
     <!-- Steps -->
     <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
     @if (children().length > 1 || flowSteps()) {
@@ -162,13 +175,6 @@
       </label>
       @if (flowSteps()) {
         <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
-        <label class="flow-toggle repeats-toggle">
-          <input type="checkbox" [checked]="node().repeatsDaily === true" (change)="toggleRepeats()">
-          🌄 {{ i18n.t().node.repeatsToggle }}
-        </label>
-        @if (node().repeatsDaily) {
-          <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
-        }
       }
     }
     @if (children().length) {

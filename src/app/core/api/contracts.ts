@@ -125,8 +125,9 @@ export interface FriendsResponse {
  * detail 'full'     — guardian → linked minor (co-gardening needs real nodes).
  * detail 'stripped' — friends and minor→guardian: note→'', trigger→null,
  *                     targetDate→null, priority→null, estimateMin→null,
- *                     repeatsDaily→absent (attention allocation is
- *                     intimate — «la luz» travels only to guardians), stripped
+ *                     repeatsDaily→absent, repeats→absent (attention
+ *                     allocation and routines are intimate — «la luz» and a
+ *                     weekday pattern travel only to guardians), stripped
  *                     SERVER-side. Both exclude archived and tombstoned
  *                     records. Check-ins, sessions, HARVESTS, PRESERVES and
  *                     settings are NEVER served to anyone — visits render a

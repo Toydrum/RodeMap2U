@@ -51,3 +51,29 @@ export function daysFromToday(date: string): number {
   const base = Date.UTC(ty, tm - 1, td, 12);
   return Math.round((target - base) / 86_400_000);
 }
+
+/* ── ritual-cadence helpers (0.0.103 «las piedritas») — all pure string-date
+   math via the UTC-noon trick; never new Date('YYYY-MM-DD') directly. ── */
+
+const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+
+/** Weekday token of a date-only string. */
+export function weekdayOf(date: string): (typeof WEEKDAYS)[number] {
+  const [y, m, d] = date.split('-').map(Number);
+  return WEEKDAYS[new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay()];
+}
+
+/** Date-only string n days away (n may be negative). */
+export function addDays(date: string, n: number): string {
+  const [y, m, d] = date.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + n, 12));
+  return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}-${String(t.getUTCDate()).padStart(2, '0')}`;
+}
+
+/** The Monday of a date's ISO week — the weekly-ritual reset line. Hardcoded
+ *  Monday (a rule you can read), never locale-dependent. */
+export function mondayOf(date: string): string {
+  const [y, m, d] = date.split('-').map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay(); // 0=sun
+  return addDays(date, dow === 0 ? -6 : 1 - dow);
+}

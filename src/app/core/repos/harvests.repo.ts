@@ -2,7 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { Harvest, Tree, TreeNode, harvestIdFor, newSyncBase } from '../db/schema';
 import { StoreName, get, put } from '../db/idb';
 import { RecordsRepo } from './records.repo';
-import { isFresh, isPending, underDailyPath } from '../harvest';
+import { bearsNoFruit, isFresh, isPending } from '../harvest';
 import { PreservesRepo } from './preserves.repo';
 
 /**
@@ -54,7 +54,7 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
     tree: Tree,
     byId: ReadonlyMap<string, TreeNode>,
   ): Promise<Harvest | null> {
-    if (underDailyPath(node, byId)) return null;
+    if (bearsNoFruit(node, byId)) return null;
     const fields = {
       nodeId: node.id,
       treeId: tree.id,
@@ -118,7 +118,7 @@ export class HarvestsRepo extends RecordsRepo<Harvest> {
         if (this.byId().has(harvestIdFor(node.id))) continue;
         const tree = treesById.get(node.treeId);
         if (!tree || tree.deletedAt) continue;
-        if (underDailyPath(node, nodesById)) continue;
+        if (bearsNoFruit(node, nodesById)) continue;
         rows.push({
           ...newSyncBase(),
           id: harvestIdFor(node.id),

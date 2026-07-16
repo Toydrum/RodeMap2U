@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
-import { underDailyPath } from '../../core/harvest';
+import { bearsNoFruit } from '../../core/harvest';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
@@ -342,7 +342,7 @@ export class TreeCanvas {
         for (const p of this.layout().points) {
           const prev = this.knownStatus.get(p.node.id);
           if (!prev || prev === 'achieved' || p.node.status !== 'achieved') continue;
-          if (underDailyPath(p.node, this.nodes.byId())) continue;
+          if (bearsNoFruit(p.node, this.nodes.byId())) continue;
           bloomed.push(p);
         }
         if (bloomed.length) {

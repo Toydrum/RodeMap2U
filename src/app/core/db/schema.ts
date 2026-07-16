@@ -4,7 +4,16 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v9: additive Preserve.kind='elixir' + carry + treeId («la despedida»
+/** v10: additive TreeNode.repeats («las piedritas» 0.0.103 — recurring
+ *  rituals grow up): cadence 'daily' | 'weekly' | Weekday[] | null on ANY
+ *  branch — a lone branch with a cadence is a «ritual leaf» that itself
+ *  dawns clean; a steps parent with one keeps the classic sendero. Absent ≡
+ *  no rhythm UNLESS legacy repeatsDaily (cadenceOf() in core/cadence.ts is
+ *  the ONE reader — nobody reads the raw fields). Writers mirror the compat
+ *  shadow repeatsDaily = (repeats != null) so pre-v10 devices keep
+ *  classifying ritual paths correctly (they never mint pasito fruit). No
+ *  migration pass; DB_VERSION stays 3.
+ *  v9: additive Preserve.kind='elixir' + carry + treeId («la despedida»
  *  0.0.95 — el elixir de despedida: archiving a fruited tree distills a
  *  commemorative vial named by the tree, carrying «lo que me llevo». It
  *  REFERENCES the tree (treeId) and savors its fruits like the tea — never
@@ -34,7 +43,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -107,6 +116,10 @@ export function lightRank(node: { priority?: NodePriority | null }): 0 | 1 | 2 {
   return 1;
 }
 
+/** Weekday tokens for ritual cadences — human-readable in backups; string
+ *  tokens (not 0-6) dodge the getDay()-vs-ISO numbering trap. */
+export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+
 /** «Brújula del tiempo» sizes, in minutes (60 = 1 h, 1440 = 1 día,
  *  10080 = 1 semana). The picker order; null = «ni idea». */
 export type EstimateMin = 2 | 10 | 30 | 60 | 1440 | 10080;
@@ -149,8 +162,19 @@ export interface TreeNode extends SyncBase {
    *  yesterday's bloomed steps reset to seed on the day flip. NO history,
    *  NO streaks, NO completion counts, NO times: today is today (TEACCH
    *  visual-schedule shape, doctrine-safe). Only meaningful with
-   *  flow === 'steps'. Optional + additive. */
+   *  flow === 'steps'. Optional + additive. Since v10 this is the COMPAT
+   *  SHADOW of `repeats` (mirrored on write: repeats != null) so pre-v10
+   *  devices keep classifying ritual paths; cadenceOf() reads both. */
   repeatsDaily?: boolean;
+  /** «Las piedritas» (0.0.103): the ritual cadence — 'daily' (every
+   *  morning) · 'weekly' (once a week, ANY day — the low-pressure cadence;
+   *  resets Monday) · Weekday[] (only those days, non-empty). Works on any
+   *  branch: a steps parent = classic sendero (children reset); a lone
+   *  branch = ritual leaf (the branch ITSELF dawns clean). Absent ≡ no
+   *  rhythm unless legacy repeatsDaily; `null` clears (the priority
+   *  precedent). Same laws as senderos: NO history, NO streaks, NO counts.
+   *  Read ONLY through cadenceOf() (core/cadence.ts). */
+  repeats?: 'daily' | 'weekly' | Weekday[] | null;
   /** «La luz» (see NodePriority). Optional: records born before v4 lack it
    *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
    *  is the forever-default; `null` clears an earlier choice. */

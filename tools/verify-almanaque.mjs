@@ -174,5 +174,53 @@ const closedByEsc = (await page.locator('.alm-day-panel').count()) === 0;
 const refocused = await page.evaluate(() => document.activeElement?.classList.contains('alm-cell'));
 ok('G disclosure: toggle + Escape + aria', expandedOn && closedByTap && expandedOff && closedByEsc && !!refocused, `esc=${closedByEsc} focus=${refocused}`);
 
+// H — «Las piedritas de hoy» (0.0.103): the strip always renders with its
+// ghost stone; sowing via the ghost creates a ritual leaf that appears as a
+// loose stone; blooming it carries Deshacer; a tomorrow-weekday ritual rests
+// with the gentle line (words, never countdowns).
+await page.keyboard.press('Escape');
+await page.waitForTimeout(200);
+const ghostAlways = await page.locator('.piedrita-add').count();
+await page.locator('.piedrita-add').click();
+await page.waitForTimeout(400);
+await page.fill('#stone-title', 'Regar las plantas');
+const treePicked = await page.locator('.stone-tree-chip.selected').count(); // default pre-picked
+await page.locator('.stone-create').click();
+await page.waitForTimeout(600);
+const sownStone = await page.locator('.piedrita-stone.next', { hasText: 'Regar las plantas' }).count();
+ok('H ghost stone sows a ritual leaf onto the strip', ghostAlways === 1 && treePicked === 1 && sownStone === 1, `ghost=${ghostAlways} picked=${treePicked} stone=${sownStone}`);
+
+await page.locator('.piedrita-stone.next', { hasText: 'Regar las plantas' }).click();
+await page.waitForTimeout(500);
+const stoneToast = (await page.locator('.toast').textContent().catch(() => '')) ?? '';
+const stoneBloomed = await page.locator('.piedrita-stone.bloomed', { hasText: 'Regar las plantas' }).count();
+await page.locator('.toast button', { hasText: 'Deshacer' }).click();
+await page.waitForTimeout(400);
+const stoneBack = await page.locator('.piedrita-stone.next', { hasText: 'Regar las plantas' }).count();
+ok('H2 a piedrita blooms with Deshacer and comes back', stoneToast.includes('floreció') && stoneBloomed === 1 && stoneBack === 1, `bloomed=${stoneBloomed} back=${stoneBack}`);
+
+// H3 — a tomorrow-only ritual rests today: not on the strip, named in the line.
+await page.evaluate(async () => {
+  const WD = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const tomorrowWd = WD[(new Date().getDay() + 1) % 7];
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  await new Promise((res) => {
+    const os = db.transaction('nodes', 'readwrite').objectStore('nodes');
+    const all = os.getAll();
+    all.onsuccess = () => {
+      const base = all.result.find((n) => n.title === 'Regar las plantas');
+      os.put({ ...base, id: 'va-h3-rest', title: 'Inventario semanal', repeats: [tomorrowWd], repeatsDaily: true, status: 'seed', achievedAt: null, updatedAt: Date.now() });
+      res(null);
+    };
+  });
+  db.close();
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+const restLine = ((await page.locator('.resting-line').textContent().catch(() => '')) ?? '').trim();
+const restingOnStrip = await page.locator('.piedrita-stone', { hasText: 'Inventario semanal' }).count();
+ok('H3 an off-day ritual rests with the gentle line, off the strip', restLine.includes('Inventario semanal') && restingOnStrip === 0, `line="${restLine.slice(0, 48)}" onStrip=${restingOnStrip}`);
+
 console.log('almanaque done');
 await browser.close();

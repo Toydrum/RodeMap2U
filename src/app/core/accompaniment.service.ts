@@ -213,6 +213,8 @@ export class AccompanimentService {
       this.checkins.all(),
       this.nodes.byId(),
       todayIds,
+      null,
+      today(), // ritual stones flow in — the ideal 2-minute door (0.0.103)
     );
     return pool.find((s) => this.nodes.childrenOf(s.node).length === 0) ?? pool[0] ?? null;
   }

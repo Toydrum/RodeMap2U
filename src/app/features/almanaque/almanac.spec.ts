@@ -170,6 +170,19 @@ describe('marksFor — the golden rule', () => {
     expect(marks.get('2026-07-05')!.hasCheckin).toBe(true);
     expect(marks.get('2026-07-05')!.flowers).toHaveLength(0);
   });
+
+  it('a ritual LEAF leaves NO month marks (0.0.103 — vanishing history is never painted)', () => {
+    const t = tree('t1');
+    const leaf = node('leaf', 't1', { repeats: 'daily', status: 'achieved', achievedAt: noonOf('2026-07-05') });
+    const ids = senderoStepIds([t], byTree([t], [leaf]));
+    expect(ids.has('leaf')).toBe(true);
+    const marks = marksFor([t], byTree([t], [leaf]), [], TODAY);
+    expect(marks.get('2026-07-05')?.flowers ?? []).toHaveLength(0);
+    // retiring it (cadence cleared) frees its marks again — ordinary branch
+    const retired = { ...leaf, repeats: null, repeatsDaily: false };
+    const marks2 = marksFor([t], byTree([t], [retired]), [], TODAY);
+    expect(marks2.get('2026-07-05')!.flowers).toHaveLength(1);
+  });
 });
 
 describe('upcoming — soft words, never numbers', () => {
@@ -239,7 +252,7 @@ describe('caminitos', () => {
     const t = tree('t1');
     const parent = node('camino', 't1', { flow: 'steps', repeatsDaily: true, status: 'resting' });
     const s1 = node('s1', 't1', { parentId: 'camino' });
-    expect(caminitos([t], byTree([t], [parent, s1]))).toHaveLength(0);
+    expect(caminitos([t], byTree([t], [parent, s1]), TODAY)).toHaveLength(0);
   });
 
   it('orders steps by walking order and points «siguiente» at the first open stone', () => {
@@ -248,7 +261,7 @@ describe('caminitos', () => {
     const s1 = node('s1', 't1', { parentId: 'camino', order: 10, status: 'achieved', achievedAt: 1 });
     const s2 = node('s2', 't1', { parentId: 'camino', order: 20 });
     const s3 = node('s3', 't1', { parentId: 'camino', order: 30, status: 'seed' });
-    const [c] = caminitos([t], byTree([t], [parent, s1, s2, s3]));
+    const [c] = caminitos([t], byTree([t], [parent, s1, s2, s3]), TODAY);
     expect(c.steps.map((s) => s.id)).toEqual(['s1', 's2', 's3']);
     expect(c.nextId).toBe('s2');
   });
@@ -259,7 +272,7 @@ describe('caminitos', () => {
     const p1 = node('p1', 't1', { parentId: 'plain' });
     const done = node('done', 't1', { flow: 'steps', repeatsDaily: true });
     const d1 = node('d1', 't1', { parentId: 'done', status: 'achieved', achievedAt: 1 });
-    const list = caminitos([t], byTree([t], [plain, p1, done, d1]));
+    const list = caminitos([t], byTree([t], [plain, p1, done, d1]), TODAY);
     expect(list).toHaveLength(1);
     expect(list[0].parent.id).toBe('done');
     expect(list[0].nextId).toBeNull();

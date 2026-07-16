@@ -30,7 +30,7 @@ export async function getForest(ctx: Ctx, userId: string): Promise<ForestSnapsho
     .map((i) => i.record as TreeNode)
     .filter((n) => !n.deletedAt && !n.archivedAt && liveTreeIds.has(n.treeId))
     .map((n) =>
-      detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null, priority: null, estimateMin: null, repeatsDaily: undefined },
+      detail === 'full' ? n : { ...n, note: '', trigger: null, targetDate: null, priority: null, estimateMin: null, repeatsDaily: undefined, repeats: undefined },
     );
 
   return {

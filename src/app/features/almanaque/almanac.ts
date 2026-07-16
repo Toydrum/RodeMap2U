@@ -1,5 +1,6 @@
 import { CheckIn, Tree, TreeNode } from '../../core/db/schema';
-import { isDailyPathParent } from '../../core/harvest';
+import { cadenceOf, isScheduledOn, nextScheduledAfter } from '../../core/cadence';
+import { ritualKind } from '../../core/harvest';
 import { dayOf, isPast } from '../../core/time';
 
 /**
@@ -86,6 +87,20 @@ export interface Caminito {
   nextId: string | null;
 }
 
+/** A loose stone (0.0.103): a single-act ritual leaf, walkable today. */
+export interface Piedrita {
+  node: TreeNode;
+  tree: Tree;
+  bloomed: boolean;
+}
+
+/** A ritual off its day — rests today, returns on `nextDay`. */
+export interface RestingRitual {
+  node: TreeNode;
+  tree: Tree;
+  nextDay: string;
+}
+
 /** Month grid as full weeks (rows of 7), padded with out-of-month cells.
  *  `month` is 1-based. `weekStart` 1 = Monday (es), 0 = Sunday (en). */
 export function monthMatrix(year: number, month: number, weekStart: 0 | 1 = 1): AlmanacCell[][] {
@@ -118,10 +133,11 @@ export function monthMatrix(year: number, month: number, weekStart: 0 | 1 = 1): 
   return weeks;
 }
 
-/** Ids of every sendero step — excluded from ALL month marks (see header).
- *  Recursive: a step's own sub-steps vanish with it. A BRANCHED former
- *  sendero parent stops excluding — its branch-born alternatives are
- *  ordinary branches and deserve their marks. */
+/** Ids of every ritual STEP and every ritual LEAF — excluded from ALL month
+ *  marks (see header): their achievedAt is erased by the sweep, and painting
+ *  vanishing history breaks predictability. Recursive for paths: a step's
+ *  own sub-steps vanish with it. A BRANCHED former ritual stops excluding —
+ *  its branch-born alternatives are ordinary branches and deserve marks. */
 export function senderoStepIds(
   trees: Tree[],
   nodesByTree: Map<string, TreeNode[]>,
@@ -142,11 +158,11 @@ export function senderoStepIds(
       }
     };
     for (const node of nodes) {
-      // ONE law with the fruit-minting guard (core/harvest.ts) — the month
-      // grid and the jar must never disagree about what a sendero step is.
-      if (isDailyPathParent(node)) {
-        sweep(node.id);
-      }
+      // ONE law with the fruit-minting guard (core/harvest.ts bearsNoFruit)
+      // — the month grid and the jar must never disagree about rituals.
+      const kind = ritualKind(node);
+      if (kind === 'path') sweep(node.id);
+      else if (kind === 'leaf') ids.add(node.id);
     }
   }
   return ids;
@@ -258,18 +274,24 @@ export function whenWord(today: string, date: string): UpcomingDate['when'] {
   return 'later';
 }
 
-/** Today's stone paths: every live sendero, steps in walking order. */
+/** Today's stone paths: every live ritual PATH scheduled today, steps in
+ *  walking order. */
 export function caminitos(
   trees: Tree[],
   nodesByTree: Map<string, TreeNode[]>,
+  today: string,
 ): Caminito[] {
   const out: Caminito[] = [];
   for (const tree of trees) {
     const nodes = nodesByTree.get(tree.id) ?? [];
     for (const parent of nodes) {
-      // Only LIVE senderos walk today: resting pauses the path (and the
-      // sweep — see daily-paths), achieved retires it, branched dissolved it.
-      if (!(parent.repeatsDaily && parent.flow === 'steps' && (parent.status === 'seed' || parent.status === 'growing'))) continue;
+      // Only LIVE ritual paths walk today: resting pauses the path (and the
+      // sweep — see rituals.service), achieved retires it, branched
+      // dissolved it. Weekday paths off their day rest (descansanHoy).
+      const cadence = cadenceOf(parent);
+      if (!cadence || parent.flow !== 'steps') continue;
+      if (!(parent.status === 'seed' || parent.status === 'growing')) continue;
+      if (!isScheduledOn(cadence, today)) continue;
       const steps = nodes
         .filter((n) => n.parentId === parent.id)
         .sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1));
@@ -279,4 +301,49 @@ export function caminitos(
     }
   }
   return out;
+}
+
+/** Today's loose stones: every live ritual LEAF scheduled today — pending
+ *  or bloomed-today (live status IS «done this period»; the sweep is the
+ *  one clock). */
+export function piedritas(
+  trees: Tree[],
+  nodesByTree: Map<string, TreeNode[]>,
+  today: string,
+): Piedrita[] {
+  const out: Piedrita[] = [];
+  for (const tree of trees) {
+    for (const node of nodesByTree.get(tree.id) ?? []) {
+      if (ritualKind(node) !== 'leaf') continue;
+      if (node.status === 'resting') continue; // descansando pauses the loop
+      const cadence = cadenceOf(node)!;
+      if (!isScheduledOn(cadence, today)) continue;
+      out.push({ node, tree, bloomed: node.status === 'achieved' });
+    }
+  }
+  return out.sort((a, b) => a.node.order - b.node.order || (a.node.id < b.node.id ? -1 : 1));
+}
+
+/** Rituals (paths + leaves) NOT scheduled today — the gentle rest line
+ *  («vuelve el jueves»), never a countdown. */
+export function descansanHoy(
+  trees: Tree[],
+  nodesByTree: Map<string, TreeNode[]>,
+  today: string,
+): RestingRitual[] {
+  const out: RestingRitual[] = [];
+  for (const tree of trees) {
+    for (const node of nodesByTree.get(tree.id) ?? []) {
+      const kind = ritualKind(node);
+      if (!kind) continue;
+      const restingEligible =
+        node.status === 'seed' || node.status === 'growing' || (kind === 'leaf' && node.status === 'achieved');
+      if (!restingEligible) continue;
+      const cadence = cadenceOf(node)!;
+      if (isScheduledOn(cadence, today)) continue;
+      const next = nextScheduledAfter(cadence, today);
+      if (next) out.push({ node, tree, nextDay: next });
+    }
+  }
+  return out.sort((a, b) => (a.nextDay < b.nextDay ? -1 : 1));
 }

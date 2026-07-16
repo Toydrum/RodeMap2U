@@ -10,6 +10,8 @@ import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
+import { Cadence } from '../../core/cadence';
+import { CadencePicker } from '../node-detail/cadence-picker';
 import { TreeCanvas } from './tree-canvas';
 import { TreeOutline } from './tree-outline';
 import { SceneBackdrop } from './scene-backdrop';
@@ -21,7 +23,7 @@ import { VisitSession } from '../../core/visit/visit-session';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip, ConfirmSheet],
+  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip, ConfirmSheet, CadencePicker],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
@@ -185,6 +187,7 @@ export class TreeViewPage {
     this.plantedCount.set(0);
     this.newTitle.set('');
     this.sowText.set('');
+    this.plantCadence.set(null); // «una vez» is always the fresh default
     this.burstFirstId = null;
     this.planting.set({ parent });
   }
@@ -207,13 +210,19 @@ export class TreeViewPage {
     }
   }
 
+  /** «El ritmo» at plant time (0.0.103): null = una vez (default). */
+  protected readonly plantCadence = signal<Cadence | null>(null);
+
   /** The sheet stays open: name, Enter, name, Enter — the tree grows behind it. */
   protected async plant(): Promise<void> {
     const tree = this.tree();
     const target = this.planting();
     const title = this.newTitle().trim();
     if (!tree || !target || !title) return;
-    const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, { title });
+    const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, {
+      title,
+      repeats: this.plantCadence() ?? undefined,
+    });
     if (!tree.currentNodeId) await this.trees.setCurrentNode(tree, node.id);
     this.burstFirstId ??= node.id;
     this.newTitle.set('');

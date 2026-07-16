@@ -130,6 +130,99 @@
   background: color-mix(in srgb, var(--rm-bark) 32%, transparent);
 }
 
+/* «Las piedritas de hoy» (0.0.103): loose single-ritual stones + the ghost
+   creation stone. Same stone grammar, no dirt gaps (they're loose). */
+.piedritas .stones.loose {
+  gap: 0.55rem;
+}
+
+.piedrita-stone {
+  &.bloomed {
+    flex-direction: column;
+    padding: 0.3rem 0.55rem;
+    gap: 0.1rem;
+
+    .stone-caption {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.piedrita-add {
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  border-style: dashed;
+  background: none;
+  padding: 0.3rem 0.7rem;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--text-dim);
+  }
+}
+
+.resting-line {
+  margin: 0.55rem 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+.stone-sheet {
+  .stone-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0.7rem 0 0.3rem;
+  }
+
+  .stone-tree-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .stone-tree-chip {
+    padding: 0.32rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.selected {
+      border-color: var(--primary);
+      color: var(--text);
+      background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    }
+  }
+
+  app-cadence-picker {
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+
+  .row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+}
+
 .today-chips {
   display: flex;
   flex-wrap: wrap;

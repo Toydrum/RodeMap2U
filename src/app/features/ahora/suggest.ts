@@ -1,4 +1,5 @@
 import { CheckIn, TimerSession, Tree, TreeNode, lightRank } from '../../core/db/schema';
+import { cadenceOf, isScheduledOn } from '../../core/cadence';
 import { hash } from '../forest/tree-layout';
 
 /**
@@ -16,6 +17,7 @@ export type SuggestKind =
   | 'today'
   | 'trigger'
   | 'sunlit'
+  | 'caminito'
   | 'step-of-current'
   | 'step-in-order'
   | 'current'
@@ -132,6 +134,7 @@ export function suggestionPool(
   nodesById: ReadonlyMap<string, TreeNode>,
   todayIds: string[] = [],
   energy: 'llena' | 'media' | 'bajita' | null = null,
+  day = '',
 ): Suggestion[] {
   const treeById = new Map(activeTrees.map((t) => [t.id, t]));
   const actionable = (n: TreeNode) => n.status === 'seed' || n.status === 'growing';
@@ -155,6 +158,32 @@ export function suggestionPool(
   for (const node of all.filter((n) => n.trigger?.trim()).sort(byFresh)) add(node, 'trigger');
 
   for (const node of all.filter((n) => n.priority === 'sunlit').sort(byFresh)) add(node, 'sunlit');
+
+  // P0.9 «el caminito de hoy» (0.0.103): exactly ONE ritual stone, day-stable
+  // — on a threadless morning it becomes the suggestion, but the user's
+  // explicit now (above) always outranks, «Otra idea» never becomes a chore
+  // list (one entry), and this is a STATE read (live status = done this
+  // period), never a schedule. Invitation, never a command.
+  if (day) {
+    const stones: { node: TreeNode; parent: TreeNode | null }[] = [];
+    for (const node of all) {
+      const cadence = cadenceOf(node);
+      if (!cadence || node.status === 'branched') continue;
+      if (!isScheduledOn(cadence, day)) continue;
+      if (node.flow === 'steps') {
+        if (node.status !== 'seed' && node.status !== 'growing') continue;
+        const next = childrenOf(node).find((c) => c.status === 'seed' || c.status === 'growing');
+        if (next) stones.push({ node: next, parent: node });
+      } else if (node.status === 'seed' || node.status === 'growing') {
+        stones.push({ node, parent: null });
+      }
+    }
+    if (stones.length) {
+      stones.sort((a, b) => a.node.id.localeCompare(b.node.id));
+      const pick = stones[hash(day + ':caminito') % stones.length];
+      add(pick.node, 'caminito', pick.parent);
+    }
+  }
 
   const thread = resolveThread(activeTrees, nodesById, sessions, checkins);
   if (thread) {

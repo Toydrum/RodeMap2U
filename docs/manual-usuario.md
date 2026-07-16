@@ -187,7 +187,7 @@ Se abre con un toque sobre la rama. Aquí vive todo lo suyo:
 - **Pasitos** — la respuesta a "¿y ahora qué hago?": pasos chiquitos y concretos ("sacar la guitarra del estuche"). Cada pasito es una rama hija de verdad: aparece dibujada en el árbol. Junto a cada uno hay un botón **🌸** para marcarlo como florecido de un toque.
 - **¿Van en orden?** *(opcional)* — si tus pasitos son un camino (paso 1 → paso 2 → …), marca esta casilla y se vuelven una **lista numerada** con flechitas ↑↓ para acomodarlos. En el árbol, esa rama se dibuja como un **caminito que va floreciendo**: lo completado lleva su flor, el paso donde vas es un brote que dice *"siguiente"*, y lo que falta espera como yemas. Al florecer un paso, el avisito ofrece **"¿Siguiente paso?"**; y en **Ahora**, la sugerencia dice *"El siguiente paso de «tu meta»"* con su **primero-y-luego** ("Primero: ensayarla → luego: grabar voz"). Nada te obliga a ir en orden — es tu mapa, no un contrato.
 
-> 🌄 Un camino en orden también puede marcarse **«Se repite cada día (sendero)»**: cada mañana amanece limpio para caminarse de nuevo. Nadie cuenta los días, nada se acumula — hoy es hoy.
+> 🌄 **Cualquier rama puede repetirse** (una rutina, un ritual): al plantarla eliges **«Una vez»** o **«Se repite»** — cada día, solo ciertos días (L/M/X…), o una vez por semana el día que tú quieras. Una rama suelta que se repite es una **piedrita**: amanece limpia cada vez que le toca. También puedes activarlo después, en la ficha de la rama. Nadie cuenta los días, nada se acumula — hoy es hoy.
 - **📍 Estoy aquí** — marca esta rama como tu posición actual (tu "estás aquí" del mapa).
 - **🌿 Brotar ramitas nuevas** — abre caminos nuevos desde esta rama, **en cualquier momento**: desde el triunfo, desde la pausa o desde el cambio de rumbo. No necesitas esperar a que pase ninguna fecha.
 - **⏳ Sesión de enfoque aquí** — abre el temporizador vinculado a esta rama.
@@ -238,6 +238,7 @@ Tocas una idea y se escribe sola (editable); puedes abrir hasta **cinco caminos*
 Los días de tu bosque, **solo para mirar** — nunca una agenda. Vive en la barra de abajo: la espiga 🌾 de en medio, entre tu bosque y el enfoque (también desde Ajustes).
 
 - **Hoy**, arriba de todo: si alguna rama tiene sendero 🌄, aparece **«el caminito de hoy»** — sus pasos como piedritas de izquierda a derecha. La piedra que dice «siguiente» se puede tocar y florece ahí mismo (con «Deshacer»). Lo que quede sin caminar, mañana amanece limpio: el caminito no guarda cuentas ni rachas.
+- Debajo viven **«las piedritas de hoy»**: tus rituales sueltos (regar las plantas, piano 5 min…), una piedra cada uno — tócala y florece. La piedra **＋** siembra un ritual nuevo ahí mismo (nombre, árbol y ritmo). Los rituales que hoy no les toca descansan con una línea amable («vuelve el jueves») — jamás un contador.
 - También en Hoy: tus **ramas de hoy** 🌅, la conversación de fechas 🍂 si hay alguna pendiente, y **«lo que se acerca»** — las próximas fechas amables dichas en palabras suaves («mañana», «la próxima semana»), nunca con contadores.
 - **El mes**, como parcelitas de tierra: un **capullo** donde algo quiere florecer, una **flor** 🌸 donde algo floreció, un **nudo dorado** donde brotaron caminos nuevos, una **huellita** 🐾 donde te dejaste un check-in. Hoy lleva su anillo verde: estás aquí.
 - Los días sin marcas son **barbecho**: tierra descansando. No son pendientes ni huecos — también así crece un bosque.
@@ -259,7 +260,7 @@ Cuando una rama florece, la app lo celebra en grande: **llueven pétalos por tod
 - **El elixir de despedida** 🍶: cuando **archivas un árbol que dio fruto** (cierras un capítulo entero de tu vida — un proyecto que terminó, una etapa que dejas atrás), la app te acompaña con una pequeña despedida y te pregunta **qué te llevas de ese capítulo** (una fuerza, una lección — opcional). De ahí destila un **elixir** con el nombre de ese árbol, que se guarda en **«Las despedidas»**. Cuando quieras, lo **bebes como un brindis de cierre**: la app te dice **«Esto te lo llevas»** con tus palabras, y saboreas todas las frutas que ese árbol te dejó. El elixir se queda contigo para siempre. Solo aparece cuando TÚ decides archivar — la app jamás te sugiere cerrar algo para ganártelo.
 - **Tu historia descansa plegada**: «Las disfrutadas», «Las despedidas» y los meses pasados del registro viven bajo flechitas ▸ con su conteo — un toque las abre. Solo el mes en curso se muestra abierto. Nada se pierde jamás; solo respira la página.
 - **Preparar un té** es para saborear: eliges una, dos o tres frutas (o dejas que el día elija), la taza humea, y relees esas memorias sorbo a sorbo — incluso la notita de la rama si tiene una. El té no deja registro: algunas alegrías son para beberse.
-- Los pasitos de un **sendero** no dan fruta (su celebración es el caminito de cada día); el sendero completo, cuando florece entero, sí deja la suya.
+- Las **piedritas** y los pasitos de un ritual no dan fruta (su celebración es el caminito — una fruta diaria sería un contador disfrazado); el ritual entero, cuando cierra su temporada (le quitas el ritmo y florece), sí deja la suya.
 
 # 8. Sesiones de enfoque
 

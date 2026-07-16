@@ -129,6 +129,22 @@
             </div>
           }
 
+          <!-- «El ritmo» (0.0.103): recurrence is answered where the thought
+               is born — one extra tap, zero extra screens. -->
+          @if (!sowMode()) {
+            <div class="repeat-chips" role="radiogroup" [attr.aria-label]="i18n.t().tree.repeatAria">
+              <button type="button" class="repeat-chip repeat-once" [class.selected]="!plantCadence()" [attr.aria-pressed]="!plantCadence()" (click)="plantCadence.set(null)">
+                {{ i18n.t().tree.repeatOnce }}
+              </button>
+              <button type="button" class="repeat-chip repeat-ritual" [class.selected]="!!plantCadence()" [attr.aria-pressed]="!!plantCadence()" (click)="plantCadence.set(plantCadence() ?? 'daily')">
+                🌄 {{ i18n.t().tree.repeatRitual }}
+              </button>
+            </div>
+            @if (plantCadence(); as c) {
+              <app-cadence-picker class="plant-cadence" [value]="c" (changed)="plantCadence.set($event)" />
+            }
+          }
+
           <!-- The planner's door: dump a whole list; growers never open it. -->
           <label class="sow-toggle">
             <input type="checkbox" [checked]="sowMode()" (change)="sowMode.set(!sowMode())">

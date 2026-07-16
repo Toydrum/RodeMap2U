@@ -1,29 +1,39 @@
 import { AccentToken, Harvest, JarVessel, Preserve, TreeNode } from './db/schema';
+import { cadenceOf } from './cadence';
 import { dayOf } from './time';
 
 /**
  * «La cosecha» — the PURE harvest brain (0.0.88). Sister of suggest.ts:
- * no Angular, fully vitest-able. It holds THE sendero law in one place
- * (the almanaque's step exclusion and the fruit-minting guard must never
+ * no Angular, fully vitest-able. It holds THE ritual law in one place
+ * (the almanaque's exclusion and the fruit-minting guard must never
  * disagree) and arranges harvests into months for the pantry page.
  *
- * The law, doctrine-grade: every achieved branch bears one fruit — except
- * the pasitos of a sendero. Los pasitos del caminito no dan fruta; el
- * sendero entero, sí. (A durable fruit minted daily by a routine is a
- * day-counter wearing a costume; the caminito is already their celebration.)
+ * The law, doctrine-grade (0.0.72 senderos → 0.0.103 piedritas): every
+ * achieved branch bears one fruit — except the recurring ones. Las
+ * piedritas no dan fruta; el ritual entero, al retirarse, sí. (A durable
+ * fruit minted per period by a routine is a day-counter wearing a costume;
+ * the caminito is already their celebration.) A ritual LEAF retires by
+ * CLEARING its cadence — its next/standing bloom then mints with honor.
  */
 
-/** A live sendero parent — its steps reset each morning and leave no
- *  history anywhere (month marks, fruit). A BRANCHED former sendero stops
- *  qualifying: its branch-born alternatives are ordinary branches. */
-export function isDailyPathParent(node: TreeNode): boolean {
-  return !!node.repeatsDaily && node.flow === 'steps' && node.status !== 'branched';
+/** What kind of ritual a node is: 'path' = a steps parent with a cadence
+ *  (its pasitos reset — the classic sendero); 'leaf' = a lone recurring
+ *  branch (it resets ITSELF); null = not recurring. A BRANCHED former
+ *  ritual stops qualifying: its branch-born alternatives are ordinary. */
+export function ritualKind(node: TreeNode): 'path' | 'leaf' | null {
+  if (!cadenceOf(node) || node.status === 'branched') return null;
+  return node.flow === 'steps' ? 'path' : 'leaf';
 }
 
-/** True when any ANCESTOR is a live sendero parent — the node is a pasito
- *  (or a sub-pasito) of a daily path. The sendero parent itself is NOT
- *  under a daily path: retiring the whole sendero bears fruit with honor. */
-export function underDailyPath(
+/** Back-compat name used across verifies and older call sites. */
+export function isDailyPathParent(node: TreeNode): boolean {
+  return ritualKind(node) === 'path';
+}
+
+/** True when any ANCESTOR is a live ritual path — the node is a pasito
+ *  (or a sub-pasito). The ritual parent itself is NOT under a path:
+ *  retiring the whole ritual bears fruit with honor. */
+export function underRitualPath(
   node: TreeNode,
   byId: ReadonlyMap<string, TreeNode>,
 ): boolean {
@@ -33,10 +43,24 @@ export function underDailyPath(
     seen.add(current.parentId);
     const parent = byId.get(current.parentId);
     if (!parent) return false;
-    if (isDailyPathParent(parent)) return true;
+    if (ritualKind(parent) === 'path') return true;
     current = parent;
   }
   return false;
+}
+
+/** Back-compat alias (pre-0.0.103 name). */
+export const underDailyPath = underRitualPath;
+
+/** THE consumer-facing law: a bloom on this node mints NO fruit — either
+ *  it's a pasito of a ritual path, or it's a ritual leaf still carrying
+ *  its cadence. One predicate, every consumer (fruit guard, month marks,
+ *  fruit-drop) — the grid and the jar must never disagree. */
+export function bearsNoFruit(
+  node: TreeNode,
+  byId: ReadonlyMap<string, TreeNode>,
+): boolean {
+  return ritualKind(node) === 'leaf' || underRitualPath(node, byId);
 }
 
 /** «La conservería» (0.0.89): fresh = still in the harvest jar. The

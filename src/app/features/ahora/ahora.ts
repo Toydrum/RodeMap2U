@@ -74,6 +74,7 @@ export class AhoraPage {
       this.nodes.byId(),
       this.todayNodes().map((n) => n.id),
       this.todayEnergy(),
+      today(),
     ),
   );
 
@@ -219,6 +220,8 @@ export class AhoraPage {
         return this.i18n.fill(t.reasonTrigger, { trigger: s.node.trigger ?? '' });
       case 'sunlit':
         return t.reasonSunlit;
+      case 'caminito':
+        return t.reasonCaminito;
       case 'step-of-current':
         return this.i18n.fill(t.reasonStepOfCurrent, { title: s.parent?.title ?? '' });
       case 'step-in-order':

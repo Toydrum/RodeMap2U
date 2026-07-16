@@ -8,6 +8,9 @@ export interface NewNodeDraft {
   title: string;
   note?: string;
   targetDate?: string | null;
+  /** «El ritmo» (0.0.103): plant a ritual right at intent time. Writers
+   *  must mirror the repeatsDaily compat shadow (plant() does). */
+  repeats?: TreeNode['repeats'];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,6 +89,8 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       origin: 'planned',
       archivedAt: null,
       trigger: null,
+      // A ritual planted at intent time — with the compat shadow mirrored.
+      ...(draft.repeats != null ? { repeats: draft.repeats, repeatsDaily: true } : {}),
     };
     return this.insert(node);
   }
@@ -104,7 +109,7 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
 
   async update(
     node: TreeNode,
-    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow' | 'priority' | 'estimateMin' | 'repeatsDaily'>>,
+    patch: Partial<Pick<TreeNode, 'title' | 'note' | 'targetDate' | 'trigger' | 'flow' | 'priority' | 'estimateMin' | 'repeatsDaily' | 'repeats'>>,
   ): Promise<TreeNode> {
     return this.save({ ...node, ...patch });
   }

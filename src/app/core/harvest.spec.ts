@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Harvest, Preserve, TreeNode } from './db/schema';
 import {
+  bearsNoFruit,
   deriveAccent,
   harvestMonths,
   isDailyPathParent,
@@ -12,6 +13,7 @@ import {
   jarCapacity,
   jarSizeFor,
   membersOf,
+  ritualKind,
   underDailyPath,
 } from './harvest';
 
@@ -105,6 +107,42 @@ describe('underDailyPath — pasitos (and sub-pasitos) bear no fruit', () => {
     const a = node('a', { parentId: 'b' });
     const b = node('b', { parentId: 'a' });
     expect(underDailyPath(a, byId([a, b]))).toBe(false);
+  });
+});
+
+describe('bearsNoFruit — the generalized ritual law (0.0.103)', () => {
+  it('a ritual LEAF (any cadence) mints nothing while it carries its rhythm', () => {
+    expect(bearsNoFruit(node('l', { repeats: 'daily' }), byId([]))).toBe(true);
+    expect(bearsNoFruit(node('l', { repeats: 'weekly' }), byId([]))).toBe(true);
+    expect(bearsNoFruit(node('l', { repeats: ['tue'] }), byId([]))).toBe(true);
+  });
+
+  it('retiring a leaf = clearing its cadence → its bloom mints again', () => {
+    expect(bearsNoFruit(node('l', { repeats: null, repeatsDaily: true }), byId([]))).toBe(false);
+    expect(bearsNoFruit(node('l', {}), byId([]))).toBe(false);
+  });
+
+  it('a ritual PATH parent is not a leaf — retiring the whole path mints', () => {
+    const path = node('p', { repeats: 'daily', flow: 'steps' });
+    expect(bearsNoFruit(path, byId([path]))).toBe(false);
+  });
+
+  it('pasitos of weekday/weekly ritual paths bear no fruit (legacy law extends)', () => {
+    const path = node('p', { repeats: ['mon'], flow: 'steps' });
+    const step = node('s', { parentId: 'p' });
+    expect(bearsNoFruit(step, byId([path, step]))).toBe(true);
+  });
+
+  it('accidental children of a ritual LEAF are ordinary one-time branches', () => {
+    const leaf = node('l', { repeats: 'daily' });
+    const child = node('c', { parentId: 'l' });
+    expect(bearsNoFruit(child, byId([leaf, child]))).toBe(false);
+  });
+
+  it('ritualKind: legacy repeatsDaily still classifies as a path', () => {
+    expect(ritualKind(node('s', { repeatsDaily: true, flow: 'steps' }))).toBe('path');
+    expect(ritualKind(node('l', { repeatsDaily: true }))).toBe('leaf');
+    expect(ritualKind(node('n', {}))).toBeNull();
   });
 });
 

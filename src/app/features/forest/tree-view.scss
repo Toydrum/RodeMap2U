@@ -199,6 +199,34 @@
   padding: 2rem 0;
 }
 
+/* «El ritmo» (0.0.103): once vs ritual, answered where the thought is born */
+.repeat-chips {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0.55rem;
+}
+
+.repeat-chip {
+  padding: 0.32rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  cursor: pointer;
+
+  &.selected {
+    border-color: var(--primary);
+    color: var(--text);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  }
+}
+
+.plant-cadence {
+  margin: 0 0 0.7rem;
+}
+
 /* --------------------------------- "Varios a la vez": the planner's door */
 
 .sow-toggle {
