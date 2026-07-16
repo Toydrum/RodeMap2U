@@ -179,12 +179,13 @@ if (pageErrors.length) console.log(pageErrors.join('\n'));
         open.onerror = () => resolve({ hasStore: false, hasPreserves: false, version: -1, rows: -3 });
       }),
   );
+  // 0.0.99: the meadow jar was removed — the meadow must render NONE.
   const jarE = await p.locator('.meadow-jar').count();
   const treeVisible = (await p.locator('.plot').allTextContents()).some((t) => t.includes('Roble vivido'));
   // v3 (0.0.89): the same boot must also have created the preserves store.
   const okE =
     upgraded.hasStore && upgraded.version === 3 && upgraded.rows === 1 &&
-    upgraded.hasPreserves && jarE === 1 && treeVisible && ctxErrors.length === 0;
+    upgraded.hasPreserves && jarE === 0 && treeVisible && ctxErrors.length === 0;
   console.log(
     `E lived-in v1→v3: store=${upgraded.hasStore} preserves=${upgraded.hasPreserves} v=${upgraded.version} backfilled=${upgraded.rows} jar=${jarE} tree=${treeVisible} errors=${ctxErrors.length} | OK=${okE}`,
   );

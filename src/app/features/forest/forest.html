@@ -288,28 +288,8 @@
           <span class="sr-live" aria-live="polite">{{ i18n.fill(i18n.t().forest.clearingDot, { n: page() + 1 }) }}</span>
         }
 
-        <!-- «La mesita» (0.0.89): the harvest still-life — the fresh jar +
-             the two most recent jam jars. Arrives with the first fruit and
-             never leaves; the corner only ever GROWS (jamming can never
-             make it look poorer). One link, pull-based: no badges, no
-             counts, ever. -->
-        @if (harvests.newestFirst().length || mesitaItems().length) {
-          <a
-            class="meadow-jar"
-            [class.arrived]="jarCue()"
-            routerLink="/cosecha"
-            [attr.aria-label]="i18n.t().cosecha.jarAria"
-          >
-            <app-meadow-jar [fruits]="harvests.fresh()" [label]="i18n.t().cosecha.jarLabel" />
-            @for (item of mesitaItems(); track item.preserve.id) {
-              @if (item.kind === 'pending') {
-                <app-promise-jar class="mesita-jam" [fruits]="item.fruits" [vessel]="item.preserve.size ?? 'frasco'" [size]="0.6" />
-              } @else {
-                <app-jam-jar class="mesita-jam" [preserve]="item.preserve" [size]="0.6" [label]="false" />
-              }
-            }
-          </a>
-        }
+        <!-- (0.0.99) The meadow jar was removed — the Conservería has its own
+             tab now, and the corner jar crowded the tree signs. -->
       </div>
     } @else if (!creating()) {
       <div class="clearing container">

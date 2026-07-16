@@ -48,23 +48,16 @@ const backfill = await page.evaluate(async () => {
 const countAfterBackfill = await harvestCount();
 ok('G backfill seals + seeds the demo pantry', backfill.sealed && countAfterBackfill > 0, `seeded=${backfill.seeded} rows=${countAfterBackfill}`);
 
-// C — the jar stands on the meadow, wins its own center tap, and walks
-// to /cosecha.
+// C (0.0.99 — the meadow jar was REMOVED): the meadow shows NO jar; the
+// Conservería TAB is the door and walks to /cosecha with the hero jar full.
 const jarCount = await page.locator('.meadow-jar').count();
-const jarFruit = await page.locator('.meadow-jar .jar-fruit').count();
-const jarWins = await page.evaluate(() => {
-  const jar = document.querySelector('.meadow-jar');
-  if (!jar) return false;
-  const r = jar.getBoundingClientRect();
-  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-  return !!hit?.closest('.meadow-jar');
-});
-await page.locator('.meadow-jar').click();
+await page.locator('nav.tabbar a[href*="cosecha"]').click();
 await page.waitForTimeout(600);
+const heroFruit = await page.locator('.hero-jar .jar-fruit').count();
 ok(
-  'C jar present, tappable, walks to /cosecha',
-  jarCount === 1 && jarFruit >= 1 && jarWins && page.url().includes('/cosecha'),
-  `jar=${jarCount} fruit=${jarFruit} wins=${jarWins} url=${page.url().slice(-16)}`,
+  'C meadow jar gone; the Conservería tab walks to /cosecha (hero jar full)',
+  jarCount === 0 && page.url().includes('/cosecha') && heroFruit >= 1,
+  `meadowJar=${jarCount} heroFruit=${heroFruit} url=${page.url().slice(-16)}`,
 );
 
 // D — month shelves + a live row deep-links into the branch's tree.
@@ -280,13 +273,14 @@ ok(
 
 await browser.close();
 
-// F — a fresh forest holds no jar before its first fruit.
+// F (0.0.99) — the meadow never holds a jar (removed for good; the
+// Conservería tab is the one door).
 {
   const { browser: b2, page: p2 } = await launchPage();
   await p2.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
   await p2.waitForTimeout(800);
   const jarFresh = await p2.locator('.meadow-jar').count();
-  ok('F fresh forest: no jar before the first fruit', jarFresh === 0, `jar=${jarFresh}`);
+  ok('F the meadow never holds a jar', jarFresh === 0, `jar=${jarFresh}`);
   await b2.close();
 }
 

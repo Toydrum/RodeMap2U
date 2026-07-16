@@ -6,7 +6,7 @@
 // lifetime count UNCHANGED (nada se gasta). E: «Abrir el frasco» undoes.
 // F: one fruit is a whole batch. G: a mixed pot derives «del bosque».
 // H: the edited name persists to the shelf + register chip. I: a tea
-// leaves NO residue anywhere. J: the mesita renders jars and the meadow
+// leaves NO residue anywhere. J: the meadow holds NO jar (0.0.99) and the
 // plot centers stay self-resolving. K: DOORS CANCEL — dismissing the
 // ritual mid-way changes nothing.
 import { BASE, launchPage, ok } from './lib/harness.mjs';
@@ -302,8 +302,9 @@ const skyHidden = await page.evaluate(() => {
 });
 ok('C reduce-motion: card stays, sky steps aside', cardRM === 1 && skyHidden, `card=${cardRM} skyHidden=${skyHidden}`);
 
-// J — the mesita: seal a real jar, then the meadow shows it and every plot
-// center still resolves to itself (the anchor law).
+// J (0.0.99 — the meadow jar was REMOVED; the Conservería tab is the door):
+// seal a real jar, then the meadow shows NO jar and every plot center still
+// resolves to itself (the anchor law), and the sealed jam waits on the alacena.
 await page.emulateMedia({ reducedMotion: null });
 await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
@@ -317,7 +318,7 @@ await page.locator('.seal-btn').click();
 await page.waitForTimeout(900);
 await page.goto(`${BASE}/forest`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
-const mesitaJams = await page.locator('.meadow-jar app-jam-jar').count();
+const meadowJarGone = (await page.locator('.meadow-jar').count()) === 0;
 const centersOk = await page.evaluate(() =>
   [...document.querySelectorAll('.plot')].every((p) => {
     const r = p.getBoundingClientRect();
@@ -325,7 +326,14 @@ const centersOk = await page.evaluate(() =>
     return el?.closest('[data-tree-id]') === p;
   }),
 );
-ok('J mesita shows the jam + plot centers hold', mesitaJams >= 1 && centersOk, `jams=${mesitaJams} centers=${centersOk}`);
+await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+const alacenaHasJam = (await page.locator('.alacena .jam-shelf-jar').count()) >= 1;
+ok(
+  'J meadow jar gone + plot centers hold + jam waits on the alacena',
+  meadowJarGone && centersOk && alacenaHasJam,
+  `jarGone=${meadowJarGone} centers=${centersOk} alacena=${alacenaHasJam}`,
+);
 
 // ── 0.0.90 «el premio del frasco» ──────────────────────────────────────
 

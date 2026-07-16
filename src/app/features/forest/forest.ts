@@ -25,18 +25,14 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
-import { PreservesRepo } from '../../core/repos/preserves.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
-import { AccentToken, Feeling, Harvest, Preserve, Tree } from '../../core/db/schema';
-import { deriveAccent, isSealedJam, membersOf } from '../../core/harvest';
+import { AccentToken, Feeling, Tree } from '../../core/db/schema';
+import { deriveAccent } from '../../core/harvest';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { DespedidaSheet } from './despedida-sheet';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
-import { MeadowJar } from './jar';
-import { JamJar } from './jam-jar';
-import { PromiseJar } from './promise-jar';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
@@ -55,7 +51,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, MeadowJar, JamJar, PromiseJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet, DespedidaSheet],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet, DespedidaSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -72,37 +68,7 @@ export class ForestPage {
   protected readonly trees = inject(TreesRepo);
   protected readonly nodes = inject(NodesRepo);
   protected readonly harvests = inject(HarvestsRepo);
-  protected readonly preserves = inject(PreservesRepo);
   protected readonly accents = ACCENTS;
-
-  /** «La mesita»: up to two jars beside the fresh jar — a PENDING goal jar
-   *  leads (0.0.93 — the corner keeps the promise in sight), then SEALED jams
-   *  (0.0.92), then enjoyed ones fill in only when fewer than two wait.
-   *  Deterministic, never reshuffles, never a number. */
-  protected readonly mesitaItems = computed(() => {
-    const jams = this.preserves.newestFirst().filter(isSealedJam);
-    const ordered = [...jams.filter((p) => !p.openedAt), ...jams.filter((p) => !!p.openedAt)];
-    const rows = this.harvests.all();
-    const items: Array<
-      | { kind: 'pending'; preserve: Preserve; fruits: Harvest[] }
-      | { kind: 'jam'; preserve: Preserve }
-    > = [];
-    const pending = this.preserves.pending();
-    if (pending.length) {
-      items.push({ kind: 'pending', preserve: pending[0], fruits: membersOf(pending[0].id, rows) });
-    }
-    for (const p of ordered) {
-      if (items.length >= 2) break;
-      items.push({ kind: 'jam', preserve: p });
-    }
-    return items;
-  });
-
-  /** «La cosecha» arrival cue — session-scoped like bornThisSession: when
-   *  the pantry grows while the app is open, the jar wiggles once on the
-   *  next meadow paint. No cross-session watermark, no badges, ever. */
-  private knownHarvestCount: number | null = null;
-  protected readonly jarCue = signal(false);
 
   protected readonly creating = signal(false);
   protected readonly newName = signal('');
@@ -130,19 +96,6 @@ export class ForestPage {
       const params = { ...this.route.snapshot.queryParams, plant: null };
       void this.router.navigate([], { queryParams: params, replaceUrl: true });
     }
-
-    // The jar wiggles once when a fruit arrives THIS session.
-    effect(() => {
-      const count = this.harvests.all().length;
-      const prev = this.knownHarvestCount;
-      this.knownHarvestCount = count;
-      if (prev !== null && count > prev) {
-        queueMicrotask(() => {
-          this.jarCue.set(true);
-          setTimeout(() => this.jarCue.set(false), 900);
-        });
-      }
-    });
 
     // The stream's on-screen geometry moves with the window — keep the
     // dry-feet clamp honest across resizes.
@@ -599,8 +552,8 @@ export class ForestPage {
   private static readonly ARRANGEMENTS: ReadonlyArray<ReadonlyArray<{ x: number; b: number }>> = [
     [],
     [{ x: 50, b: 10 }],
-    [{ x: 30, b: 8 }, { x: 70, b: 38 }],
-    [{ x: 24, b: 6 }, { x: 50, b: 38 }, { x: 78, b: 10 }],
+    [{ x: 28, b: 8 }, { x: 72, b: 38 }],
+    [{ x: 18, b: 6 }, { x: 50, b: 38 }, { x: 82, b: 10 }],
     // Back-row anchors sit mid-BETWEEN front ones: every tree's heart stays
     // clear of its taller front neighbors (tappable by construction).
     [{ x: 28, b: 8 }, { x: 72, b: 6 }, { x: 50, b: 38 }, { x: 13, b: 34 }],
@@ -657,7 +610,7 @@ export class ForestPage {
     const anchor = ForestPage.ARRANGEMENTS[Math.max(1, n)][Math.min(i, n - 1)] ?? { x: 50, b: 10 };
     const h = hash(tree.id + ':meadow');
     const growth = this.growthFor(tree.id);
-    const x = Math.min(89, Math.max(11, anchor.x + ((h % 7) - 3)));
+    const x = Math.min(89, Math.max(11, anchor.x + ((h % 5) - 2)));
     let b = Math.max(2, anchor.b + (((h >> 4) % 5) - 2));
     let s = Math.round((1.02 - (b / 40) * 0.2) * growth * 100) / 100;
     // Back rows hug the near bank — nobody ever stands in the water.
