@@ -15,9 +15,10 @@ export interface PotFruit {
  * both rituals. A copper-warm pot sits over a real log fire; the jam fills the
  * mouth as a rich, OPAQUE surface in the batch's own tint; the fruits float IN
  * the jam (clipped to the mouth, gently bobbing); a proper wooden spoon rests
- * dipped in, and on «Remover» it sweeps arcs while the surface swirls and the
- * simmer quickens. Steam curls up; flames flicker. Reduce-motion: everything
- * still. Class names (.pot-fruit/.spoon/.bubble/.jam-swirl/.fruit-swirl and
+ * dipped in, and on «Remover» its bowl rides an elliptical ORBIT around the
+ * surface (real stirring, not a metronome sweep) while the fruits drift along
+ * and the simmer quickens. Steam curls up; flames flicker. Reduce-motion:
+ * everything still. Class names (.pot-fruit/.spoon/.bubble/.fruit-swirl and
  * the .pot.stirring hook) are verify-critical — keep them. Self-styled.
  */
 @Component({
@@ -75,7 +76,6 @@ export interface PotFruit {
             }
           </g>
         </g>
-        <ellipse class="jam-swirl" cx="60" cy="30" rx="27" ry="4" fill="none" [attr.stroke]="tint().tintEdge" stroke-width="1.5" opacity="0.55" />
         <!-- the simmer: bubbles surfacing along the jam -->
         <g class="bubbles">
           <circle class="bubble b1" cx="46" cy="29.5" r="1.7" [attr.fill]="tint().tintEdge" />
@@ -298,8 +298,11 @@ export interface PotFruit {
       }
     }
 
-    /* ── the stir: the spoon pivots at its bowl and sweeps arcs; the surface
-       swirls; the fruits jostle; the simmer quickens ── */
+    /* ── the stir (0.0.102 «el remolino»): stirring jam means the BOWL rides
+       an elliptical orbit around the surface (the mouth is an ellipse seen at
+       an angle, so x sweeps wide and y barely), with the handle leaning into
+       the motion. Two laps per «Remover». The jam drags along: the fruits
+       drift a smaller counter-phase orbit; the simmer quickens. ── */
     .spoon {
       transform-box: view-box;
       transform-origin: 62px 32px;
@@ -321,46 +324,28 @@ export interface PotFruit {
       transform-origin: 60px 30px;
     }
 
-    .jam-swirl {
-      transform-box: view-box;
-      transform-origin: 60px 30px;
-    }
-
     .pot.stirring .spoon {
-      animation: spoon-stir 2.4s ease-in-out;
+      animation: spoon-orbit 1.2s linear 2;
     }
 
-    @keyframes spoon-stir {
-      0% { transform: rotate(0deg); }
-      14% { transform: rotate(-26deg); }
-      38% { transform: rotate(24deg); }
-      62% { transform: rotate(-22deg); }
-      86% { transform: rotate(18deg); }
-      100% { transform: rotate(0deg); }
+    @keyframes spoon-orbit {
+      0% { transform: translate(0px, 2.6px) rotate(0deg); }
+      25% { transform: translate(13px, 0px) rotate(7deg); }
+      50% { transform: translate(0px, -2.6px) rotate(0deg); }
+      75% { transform: translate(-13px, 0px) rotate(-7deg); }
+      100% { transform: translate(0px, 2.6px) rotate(0deg); }
     }
 
     .pot.stirring .fruit-swirl {
-      animation: fruit-jostle 2.4s ease-in-out;
+      animation: fruit-drift 1.2s linear 2;
     }
 
-    @keyframes fruit-jostle {
-      0% { transform: rotate(0deg); }
-      20% { transform: rotate(5deg); }
-      45% { transform: rotate(-4deg); }
-      70% { transform: rotate(4deg); }
-      100% { transform: rotate(0deg); }
-    }
-
-    .pot.stirring .jam-swirl {
-      animation: swirl 2.4s ease-in-out;
-    }
-
-    @keyframes swirl {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(26deg) scale(0.92); }
-      55% { transform: rotate(-20deg) scale(0.95); }
-      80% { transform: rotate(20deg) scale(0.93); }
-      100% { transform: rotate(0deg); }
+    @keyframes fruit-drift {
+      0% { transform: translate(0px, -1.2px); }
+      25% { transform: translate(-6px, 0px); }
+      50% { transform: translate(0px, 1.2px); }
+      75% { transform: translate(6px, 0px); }
+      100% { transform: translate(0px, -1.2px); }
     }
 
     .pot.stirring .bubble {
@@ -371,7 +356,6 @@ export interface PotFruit {
       .pot-fruit,
       .spoon,
       .fruit-swirl,
-      .jam-swirl,
       .bubble,
       .wisp,
       .flames path {
