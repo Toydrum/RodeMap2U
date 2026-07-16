@@ -470,16 +470,19 @@ const disfrutada = ((await page.locator('.enjoyed-line').textContent().catch(() 
 ok('P reduce-motion: words stay, sky aside, jar disfrutada', skyHiddenP && earnedP && disfrutada.length > 0, `"${disfrutada.slice(0, 26)}"`);
 await page.emulateMedia({ reducedMotion: null });
 
-// S — «las disfrutadas» (0.0.92) + empty glass (0.0.95): both opened jars (the
-// premio jar via P, the memory jar via Q) left the alacena; opened jars render
-// an EMPTY glass (the jelly drained; the memories/register are conserved).
+// S — «las disfrutadas» (0.0.92) + empty glass (0.0.95) + FOLDED by default
+// (0.0.100): the history shelf starts collapsed (no jars in the DOM); its
+// toggle opens it; both opened jars left the alacena and render EMPTY.
 const alacenaJars = await page.locator('.alacena .jam-shelf-jar').count();
+const foldedJars = await page.locator('.disfrutadas .jam-shelf-jar').count();
+await page.locator('.enjoyed-toggle').click();
+await page.waitForTimeout(300);
 const enjoyedJars = await page.locator('.disfrutadas .jam-shelf-jar').count();
 const enjoyedLiquid = await page.locator('.disfrutadas .jam-liquid').count();
 ok(
-  'S opened jars move to las disfrutadas + render empty',
-  alacenaJars === 0 && enjoyedJars === 2 && enjoyedLiquid === 0,
-  `alacena=${alacenaJars} disfrutadas=${enjoyedJars} liquid=${enjoyedLiquid}`,
+  'S disfrutadas fold by default, open on toggle, jars empty + off the alacena',
+  alacenaJars === 0 && foldedJars === 0 && enjoyedJars === 2 && enjoyedLiquid === 0,
+  `alacena=${alacenaJars} folded=${foldedJars} open=${enjoyedJars} liquid=${enjoyedLiquid}`,
 );
 
 // O — six fruits make a frascote («una mermelada poderosa»).
@@ -728,16 +731,19 @@ ok(
   fullV.sealedAt == null && fullV.members === 2 && makeBtn >= 1,
   `sealedAt=${fullV.sealedAt != null} members=${fullV.members} makeBtn=${makeBtn}`,
 );
-// V2 — the user MAKES the jam: cook ceremony → Envasar → sealed (premio kept).
+// V2 — the user MAKES the jam: cook ceremony → Envasar → the POUR scene plays
+// (0.0.100, ~2.4s) → sealed (premio kept).
 await page.locator('.make-jam-btn').first().click();
 await page.waitForTimeout(500);
 await page.locator('.make-sheet .make-btn').click(); // Envasar
 await page.waitForTimeout(700);
+const pourScene = await page.locator('.make-sheet app-envasar-scene').count();
+await page.waitForTimeout(2600); // the pour settles → made → seal
 const madeV = (await readJars()).find((j) => j.name === 'Meta chica');
 ok(
-  'V2 Hacer mermelada seals the full jar, premio kept',
-  madeV.sealedAt != null && madeV.members === 2 && madeV.premio === 'un café tranquilo',
-  `sealedAt=${madeV.sealedAt != null} members=${madeV.members} premio="${madeV.premio}"`,
+  'V2 Hacer mermelada: pour scene plays, then seals (premio kept)',
+  pourScene >= 1 && madeV.sealedAt != null && madeV.members === 2 && madeV.premio === 'un café tranquilo',
+  `pour=${pourScene} sealedAt=${madeV.sealedAt != null} members=${madeV.members} premio="${madeV.premio}"`,
 );
 // V3 — Deshacer un-makes → full pending again (all fruits kept).
 await page.locator('.toast button', { hasText: 'Deshacer' }).click();
@@ -802,11 +808,11 @@ await page.locator('.add-pick', { hasText: 'Fruta x 1' }).click();
 await page.waitForTimeout(400);
 await page.locator('.add-pick', { hasText: 'Fruta x 2' }).click();
 await page.waitForTimeout(600);
-// filling no longer auto-seals — the user makes the jam
+// filling no longer auto-seals — the user makes the jam (pour plays ~2.4s)
 await page.locator('.make-jam-btn').first().click();
 await page.waitForTimeout(400);
 await page.locator('.make-sheet .make-btn').click(); // Envasar
-await page.waitForTimeout(600);
+await page.waitForTimeout(3200);
 await page.locator('.toast button', { hasText: '✕' }).click().catch(() => {}); // dismiss made toast
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(600);

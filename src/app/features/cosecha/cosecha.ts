@@ -95,6 +95,42 @@ export class CosechaPage {
   /** A full goal jar being MADE into jam (the cook ceremony), or null. */
   protected readonly making = signal<Preserve | null>(null);
 
+  /** 0.0.100 «la alacena respira» — the HISTORY shelves fold by default
+   *  (session lenses, tablita-style; the (N) is a utility fold count, never a
+   *  celebration). The living shelves (pending, alacena) never fold. */
+  protected readonly enjoyedOpen = signal(false);
+  protected readonly farewellsOpen = signal(false);
+  /** Register months: the FIRST (most recent) opens by default; the rest fold.
+   *  XOR lens — a toggled key flips its default state, no seeding effect. */
+  private readonly toggledMonths = signal<ReadonlySet<string>>(new Set());
+
+  protected monthOpen(key: string, index: number): boolean {
+    return (index === 0) !== this.toggledMonths().has(key);
+  }
+
+  protected toggleMonth(key: string): void {
+    const next = new Set(this.toggledMonths());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.toggledMonths.set(next);
+  }
+
+  /** Folding a history shelf closes its own open panel (never an orphan). */
+  protected toggleEnjoyed(): void {
+    const open = !this.enjoyedOpen();
+    this.enjoyedOpen.set(open);
+    if (!open && this.openInDisfrutadas()) this.openId.set(null);
+  }
+
+  protected toggleFarewells(): void {
+    const open = !this.farewellsOpen();
+    this.farewellsOpen.set(open);
+    if (!open && this.openInElixir()) this.openId.set(null);
+  }
+
   private monthWordOf(epochMs: number): string {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
     const d = new Date(epochMs);

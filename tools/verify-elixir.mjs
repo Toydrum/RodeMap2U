@@ -55,12 +55,20 @@ ok(
 await page.locator('.toast .btn-ghost').click().catch(() => {});
 await page.waitForTimeout(300);
 
-// C — the vial stands on «Las despedidas»; the register still shows the fruit.
+// C — «Las despedidas» folds by default (0.0.100); its toggle opens it and the
+// vial stands there; the register still shows the fruit.
 await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
+const foldedVials = await page.locator('.despedidas-shelf .elixir-jar').count();
+await page.locator('.farewells-toggle').click();
+await page.waitForTimeout(300);
 const vials = await page.locator('.despedidas-shelf .elixir-jar').count();
 const registerHasGuitar = (await page.locator('.cosecha-month').allTextContents()).join(' ').includes('Conseguir una guitarra');
-ok('C the vial is on «Las despedidas»; the register still shows the tree\'s fruit', vials >= 1 && registerHasGuitar, `vials=${vials} register=${registerHasGuitar}`);
+ok(
+  'C despedidas fold by default; toggle opens; vial there + register intact',
+  foldedVials === 0 && vials >= 1 && registerHasGuitar,
+  `folded=${foldedVials} vials=${vials} register=${registerHasGuitar}`,
+);
 
 // D — the elixir detail: carry line + Brindar.
 await page.locator('.despedidas-shelf .elixir-jar').first().click();

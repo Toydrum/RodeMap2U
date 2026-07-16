@@ -4,9 +4,11 @@ import { Preserve } from '../../core/db/schema';
 import { membersOf } from '../../core/harvest';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
+import { deriveAccent } from '../../core/harvest';
 import { fruitFor, jamTint } from '../forest/flora';
 import { hash } from '../forest/tree-layout';
 import { CookingPot } from './cooking-pot';
+import { EnvasarScene } from './envasar-scene';
 
 /**
  * «Hacer tu mermelada» (0.0.96) — the cook ceremony for a FULL goal jar. When a
@@ -18,7 +20,7 @@ import { CookingPot } from './cooking-pot';
  */
 @Component({
   selector: 'app-hacer-mermelada-sheet',
-  imports: [SheetDirective, CookingPot],
+  imports: [SheetDirective, CookingPot, EnvasarScene],
   template: `
     <div class="sheet-backdrop" (click)="closed.emit()">
       <div
@@ -33,18 +35,25 @@ import { CookingPot } from './cooking-pot';
         <h2>{{ i18n.t().cosecha.promise.makeTitle }}</h2>
         <p class="hint">{{ i18n.t().cosecha.promise.makeHint }}</p>
 
-        <div class="pot-zone">
-          <app-cooking-pot [fruits]="potFruits()" [tint]="tint()" [stirring]="stirring()" />
-          <span class="pot-tag">{{ preserve().name }}</span>
-        </div>
+        @if (!pouring()) {
+          <div class="pot-zone">
+            <app-cooking-pot [fruits]="potFruits()" [tint]="tint()" [stirring]="stirring()" />
+            <span class="pot-tag">{{ preserve().name }}</span>
+          </div>
 
-        <div class="row-actions">
-          <button type="button" class="btn btn-ghost" (click)="closed.emit()">{{ i18n.t().common.cancel }}</button>
-          <button type="button" class="btn btn-soft" (click)="stir()">{{ i18n.t().cosecha.stir }}</button>
-          <button type="button" class="btn btn-primary make-btn" [disabled]="making()" (click)="make()">
-            {{ i18n.t().cosecha.jarIt }}
-          </button>
-        </div>
+          <div class="row-actions">
+            <button type="button" class="btn btn-ghost" (click)="closed.emit()">{{ i18n.t().common.cancel }}</button>
+            <button type="button" class="btn btn-soft" (click)="stir()">{{ i18n.t().cosecha.stir }}</button>
+            <button type="button" class="btn btn-primary make-btn" [disabled]="making()" (click)="make()">
+              {{ i18n.t().cosecha.jarIt }}
+            </button>
+          </div>
+        } @else {
+          <!-- «El vertido» (0.0.100): the pot pours the blend into the jar;
+               when it settles, the seal lands (made). -->
+          <app-envasar-scene [preserve]="pourPreview()" (done)="made.emit()" />
+          <span class="pot-tag">{{ preserve().name }}</span>
+        }
       </div>
     </div>
   `,
@@ -117,12 +126,23 @@ export class HacerMermeladaSheet {
 
   protected readonly making = signal(false);
   protected readonly stirring = signal(false);
+  /** «El vertido» plays before the seal lands (made emits on scene done). */
+  protected readonly pouring = signal(false);
 
   private readonly members = computed(() =>
     membersOf(this.preserve().id, this.harvests.all()),
   );
 
   protected readonly tint = computed(() => jamTint(this.members().map((m) => m.accent)));
+
+  /** The jar as it WILL look sealed (real blended tint, not the pending
+   *  placeholder) — NOT persisted; the seal itself happens on made. */
+  protected readonly pourPreview = computed<Preserve>(() => ({
+    ...this.preserve(),
+    accent: deriveAccent(this.members()),
+    tint: this.tint().tint,
+    tintEdge: this.tint().tintEdge,
+  }));
 
   /** The jar's fruits scattered over the pot's belly — id-stable. */
   protected readonly potFruits = computed(() =>
@@ -144,6 +164,7 @@ export class HacerMermeladaSheet {
   protected make(): void {
     if (this.making()) return;
     this.making.set(true);
-    this.made.emit();
+    // The pour plays first; the seal lands when the scene settles (done).
+    this.pouring.set(true);
   }
 }

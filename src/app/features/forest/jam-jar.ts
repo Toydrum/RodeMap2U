@@ -160,12 +160,60 @@ const VESSELS: Record<JarVessel, VesselGeo> = {
       font-size: 0.62rem;
       color: var(--text-faint);
     }
+
+    /* «El vertido» (0.0.100): with .pouring the jam body rises from the
+       bottom of the glass (the clip crops it), then the cap drops in and the
+       bow fades on. attr-transform caution: .jam-ribbon carries an inline
+       translate — animate its OPACITY only (a CSS transform would replace it). */
+    .pouring .jam-body {
+      transform-box: view-box;
+      animation: jam-rise 1.4s cubic-bezier(0.25, 0.8, 0.4, 1) both;
+    }
+
+    @keyframes jam-rise {
+      from {
+        transform: translateY(44px);
+      }
+    }
+
+    .pouring .jam-cap,
+    .pouring .jam-cap-tie {
+      transform-box: view-box;
+      animation: cap-drop 0.35s ease-out 1.6s both;
+    }
+
+    @keyframes cap-drop {
+      from {
+        transform: translateY(-9px);
+        opacity: 0;
+      }
+    }
+
+    .pouring .jam-ribbon {
+      animation: ribbon-in 0.4s ease 1.95s both;
+    }
+
+    @keyframes ribbon-in {
+      from {
+        opacity: 0;
+      }
+    }
+
+    :host-context(.reduce-motion) .pouring {
+      .jam-body,
+      .jam-cap,
+      .jam-cap-tie,
+      .jam-ribbon {
+        animation: none;
+      }
+    }
   `,
   template: `
     <svg
       [attr.viewBox]="'0 0 44 54'"
       [attr.width]="44 * size()"
       [attr.height]="54 * size()"
+      [class.pouring]="pour()"
       aria-hidden="true"
     >
       <defs>
@@ -177,29 +225,33 @@ const VESSELS: Record<JarVessel, VesselGeo> = {
         <!-- sealed = complete: full of its own jam. Consumed (0.0.95): the
              jelly drains — an opened jar keeps its glass, lid, bow and label
              but empties (the jam was the consumable; the FRUITS/memories/
-             register are conserved elsewhere — «nada se gasta»). -->
+             register are conserved elsewhere — «nada se gasta»). With [pour]
+             (0.0.100) the whole jam body RISES from the bottom (the clip
+             already crops it) — the jarring moment made visible. -->
         @if (!opened()) {
-          <rect
-            class="jam-liquid"
-            [attr.x]="geo().liquidX"
-            [attr.y]="geo().liquidY"
-            [attr.width]="geo().liquidW"
-            height="40"
-            [attr.fill]="preserve().tint"
-            opacity="0.8"
-          />
-          <path
-            [attr.d]="waveD()"
-            fill="none"
-            [attr.stroke]="preserve().tintEdge"
-            stroke-width="1.1"
-            opacity="0.6"
-          />
-          @for (chunk of chunks(); track chunk.key) {
-            <g [attr.transform]="'translate(' + chunk.x + ' ' + chunk.y + ') rotate(' + chunk.rot + ')'" opacity="0.5">
-              <g appFruit [fruit]="chunk.spec" [scale]="0.42" />
-            </g>
-          }
+          <g class="jam-body">
+            <rect
+              class="jam-liquid"
+              [attr.x]="geo().liquidX"
+              [attr.y]="geo().liquidY"
+              [attr.width]="geo().liquidW"
+              height="40"
+              [attr.fill]="preserve().tint"
+              opacity="0.8"
+            />
+            <path
+              [attr.d]="waveD()"
+              fill="none"
+              [attr.stroke]="preserve().tintEdge"
+              stroke-width="1.1"
+              opacity="0.6"
+            />
+            @for (chunk of chunks(); track chunk.key) {
+              <g [attr.transform]="'translate(' + chunk.x + ' ' + chunk.y + ') rotate(' + chunk.rot + ')'" opacity="0.5">
+                <g appFruit [fruit]="chunk.spec" [scale]="0.42" />
+              </g>
+            }
+          </g>
         } @else {
           <!-- a faint dreg at the very bottom — enjoyed, not sterile. -->
           <rect
@@ -265,6 +317,9 @@ export class JamJar {
   readonly label = input(true);
   /** Locale month word, computed by the caller. */
   readonly monthWord = input('');
+  /** «El vertido» (0.0.100): one-shot jarring animation — the jam body rises
+   *  from the bottom, then the cap drops and the bow ties. Decorative only. */
+  readonly pour = input(false);
 
   /** Pre-v7 jars read as frasco forever (no retro-resizing). */
   protected readonly geo = computed<VesselGeo>(() => VESSELS[this.preserve().size ?? 'frasco']);

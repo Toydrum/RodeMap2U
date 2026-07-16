@@ -97,24 +97,30 @@
   }
 
   <!-- «Las disfrutadas» (0.0.92): opened jars move here — history, never
-       deletion. Still tappable, memories forever, never counted. -->
+       deletion. Folded by default (0.0.100): the (N) is a utility fold count. -->
   @if (enjoyedShelf().length) {
     <section class="part disfrutadas">
-      <h2 class="part-title">{{ i18n.t().cosecha.enjoyedTitle }}</h2>
-      <div class="jam-row">
-        @for (item of enjoyedShelf(); track item.preserve.id) {
-          <button
-            type="button"
-            class="jam-shelf-jar enjoyed-jar"
-            [class.selected]="openId() === item.preserve.id"
-            [attr.aria-expanded]="openId() === item.preserve.id"
-            aria-controls="jar-panel"
-            (click)="toggle(item.preserve.id)"
-          >
-            <app-jam-jar [preserve]="item.preserve" [monthWord]="item.monthWord" [size]="0.85" />
-          </button>
-        }
-      </div>
+      <button type="button" class="enjoyed-toggle" [attr.aria-expanded]="enjoyedOpen()" (click)="toggleEnjoyed()">
+        <span class="tri" aria-hidden="true">{{ enjoyedOpen() ? '▾' : '▸' }}</span>
+        {{ i18n.t().cosecha.enjoyedTitle }}
+        <span class="fold-count">({{ enjoyedShelf().length }})</span>
+      </button>
+      @if (enjoyedOpen()) {
+        <div class="jam-row">
+          @for (item of enjoyedShelf(); track item.preserve.id) {
+            <button
+              type="button"
+              class="jam-shelf-jar enjoyed-jar"
+              [class.selected]="openId() === item.preserve.id"
+              [attr.aria-expanded]="openId() === item.preserve.id"
+              aria-controls="jar-panel"
+              (click)="toggle(item.preserve.id)"
+            >
+              <app-jam-jar [preserve]="item.preserve" [monthWord]="item.monthWord" [size]="0.85" />
+            </button>
+          }
+        </div>
+      }
     </section>
   }
   @if (openInDisfrutadas(); as jar) {
@@ -123,24 +129,31 @@
     </section>
   }
 
-  <!-- «Las despedidas» (0.0.95): elixir vials — chapters you closed. -->
+  <!-- «Las despedidas» (0.0.95): elixir vials — chapters you closed. Folded
+       by default (0.0.100). -->
   @if (elixirShelf().length) {
     <section class="part despedidas-shelf">
-      <h2 class="part-title"><span aria-hidden="true">🍶</span> {{ i18n.t().cosecha.despedidasTitle }}</h2>
-      <div class="jam-row">
-        @for (item of elixirShelf(); track item.preserve.id) {
-          <button
-            type="button"
-            class="jam-shelf-jar elixir-jar"
-            [class.selected]="openId() === item.preserve.id"
-            [attr.aria-expanded]="openId() === item.preserve.id"
-            aria-controls="elixir-panel"
-            (click)="toggle(item.preserve.id)"
-          >
-            <app-elixir-vial [preserve]="item.preserve" [label]="item.preserve.name" />
-          </button>
-        }
-      </div>
+      <button type="button" class="farewells-toggle" [attr.aria-expanded]="farewellsOpen()" (click)="toggleFarewells()">
+        <span class="tri" aria-hidden="true">{{ farewellsOpen() ? '▾' : '▸' }}</span>
+        <span aria-hidden="true">🍶</span> {{ i18n.t().cosecha.despedidasTitle }}
+        <span class="fold-count">({{ elixirShelf().length }})</span>
+      </button>
+      @if (farewellsOpen()) {
+        <div class="jam-row">
+          @for (item of elixirShelf(); track item.preserve.id) {
+            <button
+              type="button"
+              class="jam-shelf-jar elixir-jar"
+              [class.selected]="openId() === item.preserve.id"
+              [attr.aria-expanded]="openId() === item.preserve.id"
+              aria-controls="elixir-panel"
+              (click)="toggle(item.preserve.id)"
+            >
+              <app-elixir-vial [preserve]="item.preserve" [label]="item.preserve.name" />
+            </button>
+          }
+        </div>
+      }
     </section>
   }
   @if (openInElixir(); as jar) {
@@ -149,13 +162,23 @@
     </section>
   }
 
-  <!-- The REGISTER: every fruit forever, whatever its home. -->
+  <!-- The REGISTER: every fruit forever, whatever its home. Months fold
+       (0.0.100): only the most recent opens by default — the register stays
+       monotonic, only HOW it shows changes. -->
   @if (shelves().length) {
-    @for (shelf of shelves(); track shelf.key) {
+    @for (shelf of shelves(); track shelf.key; let mi = $index) {
       <section class="part cosecha-month">
-        <h2 class="part-title">
+        <button
+          type="button"
+          class="month-toggle"
+          [attr.aria-expanded]="monthOpen(shelf.key, mi)"
+          (click)="toggleMonth(shelf.key)"
+        >
+          <span class="tri" aria-hidden="true">{{ monthOpen(shelf.key, mi) ? '▾' : '▸' }}</span>
           {{ i18n.fill(i18n.t().cosecha.monthTitle, { month: shelf.monthWord }) }}
-        </h2>
+          <span class="fold-count">({{ shelf.rows.length }})</span>
+        </button>
+        @if (monthOpen(shelf.key, mi)) {
         <ol class="steps">
           @for (row of shelf.rows; track row.harvest.id) {
             <li class="card cosecha-card">
@@ -202,6 +225,7 @@
             </li>
           }
         </ol>
+        }
       </section>
     }
   } @else {

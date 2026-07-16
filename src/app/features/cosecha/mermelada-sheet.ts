@@ -7,10 +7,10 @@ import { deriveAccent, jarSizeFor } from '../../core/harvest';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { inputValue } from '../../shared/ui/dom';
 import { FruitGlyph } from '../forest/fruit';
-import { JamJar } from '../forest/jam-jar';
 import { fruitFor, jamTint } from '../forest/flora';
 import { hash } from '../forest/tree-layout';
 import { CookingPot } from './cooking-pot';
+import { EnvasarScene } from './envasar-scene';
 
 /**
  * «Hacer mermelada» (0.0.89) — the three-beat sealing ritual. DOORS CANCEL:
@@ -25,7 +25,7 @@ import { CookingPot } from './cooking-pot';
  */
 @Component({
   selector: 'app-mermelada-sheet',
-  imports: [SheetDirective, FruitGlyph, JamJar, CookingPot],
+  imports: [SheetDirective, FruitGlyph, CookingPot, EnvasarScene],
   template: `
     <div class="sheet-backdrop" (click)="closed.emit()">
       <div
@@ -90,9 +90,9 @@ import { CookingPot } from './cooking-pot';
                  the fruits («el frasco sirve a la fruta») — never a target -->
             <p class="vessel-line">{{ vesselLine() }}</p>
 
-            <div class="new-jar">
-              <app-jam-jar class="pour-in" [preserve]="preview()" [size]="1.5" [label]="false" />
-            </div>
+            <!-- «El vertido» (0.0.100): the pot pours the batch's own tint
+                 into the jar. Decorative — every field/button stays live. -->
+            <app-envasar-scene [preserve]="preview()" />
 
             <div class="field">
               <input
@@ -181,8 +181,7 @@ import { CookingPot } from './cooking-pot';
       margin-bottom: 0.9rem;
     }
 
-    .pot-zone,
-    .new-jar {
+    .pot-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -248,17 +247,6 @@ import { CookingPot } from './cooking-pot';
       flex-wrap: wrap;
     }
 
-    .pour-in {
-      animation: soft-grow 0.5s ease both;
-    }
-
-    @keyframes soft-grow {
-      from {
-        transform: scale(0.85);
-        opacity: 0;
-      }
-    }
-
     .field input {
       width: 100%;
     }
@@ -282,9 +270,6 @@ import { CookingPot } from './cooking-pot';
       }
     }
 
-    :host-context(.reduce-motion) .pour-in {
-      animation: none;
-    }
   `,
 })
 export class MermeladaSheet {
