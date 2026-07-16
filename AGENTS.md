@@ -151,7 +151,7 @@ cd infra && npm ci && npm test && npx cdk synth   # backend: 16 vitest + templat
 
 - Push to `main` → `.github/workflows/deploy.yml` (build with `--base-href /RoadMap2U/` — **exact casing**, copy `index.html→404.html`, `.nojekyll`, upload, deploy with an in-run 90s retry).
 - SW registration MUST stay relative (`'ngsw-worker.js'`); a leading slash breaks under the subpath. Manifest `start_url`/`scope` are `./`.
-- **Version tag**: pre-launch semver in `core/version.ts` — `'0.0.N · <date> — <release name>'`, bumped on every notable deploy (rendered twice in Settings).
+- **Version tag — STEP 1 of EVERY release, do this FIRST**: bump `core/version.ts` `APP_VERSION` to `'0.0.N · <date> — <release name>'` (rendered twice in Settings; the user's only visible proof an update landed). ⚠️ This was silently missed for releases 0.0.93→0.0.101 (frozen at `0.0.92`) — the code updated fine each time (ngsw tracks bundle hashes, not this string) but Settings kept showing `0.0.92`, so the user reported "the app won't update past .92". It's a display string only (no verify/logic depends on it), which is exactly why it's easy to forget — make it the first edit of the release, alongside choosing the release name.
 - **Pages flake playbook** (encountered repeatedly): `deploy-pages` fails with "Deployment failed, try again later" while status is operational. Reruns reuse the deployment id (= commit SHA) and keep failing — **push a fresh (empty) commit instead**. If no run appears after a push at all (dropped webhook), `workflow_dispatch` the workflow. Deep links returning HTTP 404 with the app body is expected Pages SPA behavior, not a bug.
 
 ## Deliberately NOT built (do not "fix" these)
