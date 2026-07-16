@@ -52,6 +52,11 @@ export class JarDetail {
   readonly monthWord = input<string>('');
   readonly claim = output<Preserve>();
   readonly release = output<Preserve>();
+  /** «Hacer mermelada» — the user seals a full goal jar (0.0.96). */
+  readonly make = output<Preserve>();
+
+  /** A pending goal jar that has gathered its capacity — ready to be made. */
+  protected readonly full = computed(() => this.pending() && this.promise.isFull(this.preserve()));
 
   protected readonly inputValue = (e: Event) => (e.target as HTMLInputElement).value;
 

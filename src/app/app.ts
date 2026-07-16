@@ -11,7 +11,6 @@ import { FocusSessionService } from './core/focus-session.service';
 import { DailyPathsService } from './core/daily-paths.service';
 import { BackupReminderService } from './core/backup-reminder.service';
 import { PerchAnchorService } from './core/perch-anchor.service';
-import { PromiseReconcilerService } from './features/cosecha/promise-reconciler.service';
 import { ToastService } from './shared/ui/toast.service';
 import { PerchBody } from './shared/ui/perch-body';
 import { BloomBurstHost } from './shared/ui/bloom-burst';
@@ -61,6 +60,5 @@ export class App {
     inject(AccompanimentService).init(); // gentle whisper rhythm (opt-in)
     inject(DailyPathsService); // «senderos»: quiet day-flip reset effect
     inject(BackupReminderService); // «tu bosque, a salvo»: ~30-day gentle copy offer
-    inject(PromiseReconcilerService); // «la promesa»: seals over-full goal jars (sync convergence)
   }
 }

@@ -12,7 +12,7 @@ import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
  * «La promesa» (0.0.93) — the goal-jar feature service. It owns the palette
  * (flora's jamTint) so core stays feature-free: the caller computes every seal
  * tint and hands it to ConserveriaService. It also enforces the ≤3 pending
- * limit and runs the convergence reconcile (boot + post-sync).
+ * limit. Filling never seals (0.0.96) — the user MAKES the jam themselves.
  *
  * Two jar families now share the Preserve store: frascos de la olla (size from
  * the fruit, past-facing — the mermelada ritual) vs frascos prometidos (size =
@@ -81,30 +81,23 @@ export class PromiseService {
     return { accent: deriveAccent(members), ...jamTint(members.map((m) => m.accent)) };
   }
 
-  /** Place a fresh fruit into a pending jar; auto-seals at capacity. Returns
-   *  the place() result. */
-  place(harvestId: string, preserveId: string) {
-    const jar = this.preserves.byId().get(preserveId);
-    const h = this.harvests.byId().get(harvestId);
-    if (!jar || !h) return Promise.resolve(null);
-    const prospective = this.membersOf(preserveId).filter((x) => x.id !== h.id);
-    prospective.push(h);
-    return this.conserveria.place(harvestId, preserveId, this.sealTintFor(prospective));
+  /** True when a goal jar has gathered its capacity — ready to be MADE. */
+  isFull(preserve: Preserve): boolean {
+    return this.membersOf(preserve.id).length >= this.capacity(preserve.size);
   }
 
-  /** Place a fruit and, if that placement fills the jar, run the ONE modest
-   *  auto-seal celebration (a toast with Undo — the big rain is reserved for
-   *  opening). Centralized so every entry point (manual /cosecha, the bloom
-   *  toast, the picker) celebrates identically. */
+  /** Place a fresh fruit into a pending jar (never seals — 0.0.96). */
+  place(harvestId: string, preserveId: string) {
+    return this.conserveria.place(harvestId, preserveId);
+  }
+
+  /** Place a fruit; if that placement FILLS the jar, celebrate the fill and
+   *  point to «Hacer mermelada» (the app never self-seals — the user makes it). */
   async placeAndCelebrate(harvestId: string, preserveId: string): Promise<void> {
     const res = await this.place(harvestId, preserveId);
-    if (!res?.sealed) return;
+    if (!res?.filled) return;
     this.toast.show(
-      {
-        message: this.i18n.fill(this.i18n.t().cosecha.promise.autoSealToast, { name: res.jar.name }),
-        actionLabel: this.i18n.t().common.undo,
-        action: () => void this.unfill(res.jar.id, res.fruit.id),
-      },
+      { message: this.i18n.fill(this.i18n.t().cosecha.promise.filledToast, { name: res.jar.name }) },
       UNDO_MS,
     );
   }
@@ -121,21 +114,15 @@ export class PromiseService {
     return this.conserveria.release(preserve);
   }
 
-  /** Undo an auto-seal: back to pending + the triggering fruit back to fresh. */
-  unfill(preserveId: string, fruitId: string) {
-    return this.conserveria.unfill(preserveId, fruitId);
+  /** «Hacer mermelada»: seal a full goal jar (the user's act). The caller runs
+   *  the cook ceremony; this computes the blended tint + seals. */
+  makeJam(preserveId: string) {
+    const members = this.membersOf(preserveId);
+    return this.conserveria.makeJam(preserveId, this.sealTintFor(members));
   }
 
-  /** Convergence: seal any pending jar already at capacity (multi-device edge
-   *  where neither device sealed locally). Silent + ceremony-free — called at
-   *  boot and after every sync pull, never on the local place() path (which
-   *  already sealed). */
-  async reconcile(): Promise<void> {
-    for (const jar of this.preserves.pending()) {
-      const members = this.membersOf(jar.id);
-      if (members.length >= this.capacity(jar.size)) {
-        await this.conserveria.reconcileSeal(jar.id, this.sealTintFor(members));
-      }
-    }
+  /** Undo of «Hacer mermelada»: back to a full pending jar. */
+  unmakeJam(preserveId: string) {
+    return this.conserveria.unmakeJam(preserveId);
   }
 }

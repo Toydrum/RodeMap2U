@@ -21,6 +21,7 @@ import { MermeladaSheet } from './mermelada-sheet';
 import { TeSheet } from './te-sheet';
 import { AbrirMermeladaSheet } from './abrir-mermelada-sheet';
 import { PromesaSheet } from './promesa-sheet';
+import { HacerMermeladaSheet } from './hacer-mermelada-sheet';
 import { JarDetail } from './jar-detail';
 import { PromiseService } from './promise.service';
 
@@ -63,6 +64,7 @@ interface JamShelfItem {
     TeSheet,
     AbrirMermeladaSheet,
     PromesaSheet,
+    HacerMermeladaSheet,
   ],
   templateUrl: './cosecha.html',
   styleUrl: './cosecha.scss',
@@ -90,6 +92,8 @@ export class CosechaPage {
   protected readonly openId = signal<string | null>(null);
   /** The pending jar awaiting a «soltar» confirm, or null. */
   protected readonly releasing = signal<Preserve | null>(null);
+  /** A full goal jar being MADE into jam (the cook ceremony), or null. */
+  protected readonly making = signal<Preserve | null>(null);
 
   private monthWordOf(epochMs: number): string {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
@@ -223,6 +227,22 @@ export class CosechaPage {
     this.releasing.set(null);
     if (this.openId() === jar.id) this.openId.set(null);
     this.toast.show({ message: this.i18n.t().cosecha.promise.released }, UNDO_MS);
+  }
+
+  /** «Hacer mermelada» (0.0.96): the user cooked a full goal jar → seal it (the
+   *  premio carries over) + one undo window (unmake → full pending again). */
+  protected async onMade(preserve: Preserve): Promise<void> {
+    const jar = await this.promise.makeJam(preserve.id);
+    this.making.set(null);
+    if (!jar) return;
+    this.toast.show(
+      {
+        message: this.i18n.t().cosecha.jamMadeToast,
+        actionLabel: this.i18n.t().common.undo,
+        action: () => void this.promise.unmakeJam(jar.id),
+      },
+      UNDO_MS,
+    );
   }
 
   /** Seal landed: close the ritual, offer the one undo window. */

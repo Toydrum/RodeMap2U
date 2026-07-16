@@ -139,6 +139,16 @@
     </div>
     <p class="fill-line">{{ fillLine() }}</p>
 
+    @if (full()) {
+      <!-- «Hacer mermelada» (0.0.96): filling is the achievement — the user
+           makes the jam themselves; the app never self-seals. -->
+      <div class="make-row">
+        <button type="button" class="btn btn-primary make-jam-btn" (click)="make.emit(preserve())">
+          🫙 {{ i18n.t().cosecha.promise.makeJam }}
+        </button>
+      </div>
+    }
+
     @if (members().length) {
       <ol class="steps">
         @for (row of members(); track row.harvest.id) {

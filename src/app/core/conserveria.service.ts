@@ -195,15 +195,14 @@ export class ConserveriaService {
 
   /** Place a fresh fruit into a pending goal jar (single-home: sets
    *  preserveId). Idempotent — refuses a fruit that already has a home or a
-   *  jar that isn't a pending promise. When this placement reaches capacity,
-   *  the jar auto-seals in the SAME transaction (`sealTint` precomputed by the
-   *  caller). Returns { sealed:true } so the caller runs the modest
-   *  celebration; the app never mints here — it only changes a fruit's home. */
+   *  jar that isn't a pending promise. Filling NEVER seals (0.0.96): reaching
+   *  capacity is the achievement, the user MAKES the jam themselves (makeJam) —
+   *  the app never self-seals. Returns { filled } so the caller can celebrate
+   *  the fill and offer «Hacer mermelada». */
   async place(
     harvestId: string,
     preserveId: string,
-    sealTint: SealTint,
-  ): Promise<{ jar: Preserve; fruit: Harvest; sealed: boolean } | null> {
+  ): Promise<{ jar: Preserve; fruit: Harvest; filled: boolean } | null> {
     const h = this.harvests.byId().get(harvestId);
     const jar = this.preserves.byId().get(preserveId);
     if (!h || h.deletedAt || h.preserveId) return null;
@@ -213,33 +212,12 @@ export class ConserveriaService {
     const members = [...this.harvests.byId().values()].filter(
       (x) => x.preserveId === jar.id && !x.deletedAt && x.id !== placed.id,
     );
-    members.push(placed);
-    const willFill = members.length >= jarCapacity(jar.size ?? 'frasco');
+    const filled = members.length + 1 >= jarCapacity(jar.size ?? 'frasco');
 
-    const entries: { store: StoreName; rows: unknown[] }[] = [
-      { store: 'harvests', rows: [placed] },
-    ];
-    let sealedJar = jar;
-    if (willFill) {
-      const now = Date.now();
-      sealedJar = stamp({
-        ...jar,
-        sealedAt: now,
-        madeAt: now,
-        accent: sealTint.accent,
-        tint: sealTint.tint,
-        tintEdge: sealTint.tintEdge,
-      });
-      entries.push({ store: 'preserves', rows: [sealedJar] });
-    }
-    await putAcross(entries);
+    await putAcross([{ store: 'harvests', rows: [placed] }]);
     this.harvests.applyExternal(placed);
     broadcastChange({ store: 'harvests', ids: [placed.id] });
-    if (willFill) {
-      this.preserves.applyExternal(sealedJar);
-      broadcastChange({ store: 'preserves', ids: [sealedJar.id] });
-    }
-    return { jar: sealedJar, fruit: placed, sealed: willFill };
+    return { jar, fruit: placed, filled };
   }
 
   /** Edit a pending goal jar's words (name/premio/savedFor) — editable while
@@ -291,54 +269,30 @@ export class ConserveriaService {
     if (freed.length) broadcastChange({ store: 'harvests', ids: freed.map((r) => r.id) });
   }
 
-  /** Undo of an auto-seal (toast window only): revert the jar to pending and
-   *  return the triggering fruit to fresh — undoes the placement that filled
-   *  it. Re-reads live records (never a captured copy — stale rev loses LWW);
-   *  madeAt returns to plannedAt (deterministic from the record itself). */
-  async unfill(preserveId: string, fruitId: string): Promise<void> {
+  /** «Hacer mermelada» (0.0.96): the user seals a FULL goal jar themselves —
+   *  the making is the reward, not an app-initiated transition. Stamps
+   *  sealedAt/madeAt + the blended tint over the jar's members. Guard: a
+   *  still-pending promise. The premio (set at the wizard) carries over, so the
+   *  sealed jar opens later with the usual ceremony. */
+  async makeJam(preserveId: string, sealTint: SealTint): Promise<Preserve | null> {
     const jar = this.preserves.byId().get(preserveId);
-    const fruit = this.harvests.byId().get(fruitId);
-    if (!jar || jar.deletedAt || !jar.sealedAt || jar.plannedAt == null) return;
-    const reopened = stamp({ ...jar, sealedAt: null, madeAt: jar.plannedAt });
-    const entries: { store: StoreName; rows: unknown[] }[] = [
-      { store: 'preserves', rows: [reopened] },
-    ];
-    let freed: Harvest | null = null;
-    if (fruit && !fruit.deletedAt && fruit.preserveId === jar.id) {
-      freed = stamp({ ...fruit, preserveId: null });
-      entries.push({ store: 'harvests', rows: [freed] });
-    }
-    await putAcross(entries);
-    this.preserves.applyExternal(reopened);
-    broadcastChange({ store: 'preserves', ids: [reopened.id] });
-    if (freed) {
-      this.harvests.applyExternal(freed);
-      broadcastChange({ store: 'harvests', ids: [freed.id] });
-    }
-  }
-
-  /** Convergence safety net (never a user reward): seal a pending goal jar
-   *  that is ALREADY at/over capacity — the rare multi-device case where two
-   *  devices each placed the "last" fruit and neither sealed locally. Silent,
-   *  ceremony-free, idempotent (guarded by sealedAt). Deterministic seal
-   *  stamps (madeAt = the latest member's harvest, no `now`) so both devices
-   *  converge by LWW. Changes the jar's HOME state; never mints fruit. */
-  async reconcileSeal(preserveId: string, sealTint: SealTint): Promise<boolean> {
-    const jar = this.preserves.byId().get(preserveId);
-    if (!jar || jar.deletedAt || jar.sealedAt || jar.plannedAt == null) return false;
-    const members = [...this.harvests.byId().values()].filter(
-      (h) => h.preserveId === jar.id && !h.deletedAt,
-    );
-    if (members.length < jarCapacity(jar.size ?? 'frasco')) return false;
-    const sealedAt = Math.max(...members.map((m) => m.harvestedAt));
-    await this.preserves.save({
+    if (!jar || jar.deletedAt || jar.sealedAt || jar.plannedAt == null) return null;
+    const now = Date.now();
+    return this.preserves.save({
       ...jar,
-      sealedAt,
-      madeAt: sealedAt,
+      sealedAt: now,
+      madeAt: now,
       accent: sealTint.accent,
       tint: sealTint.tint,
       tintEdge: sealTint.tintEdge,
     });
-    return true;
+  }
+
+  /** Undo of «Hacer mermelada» (toast window only): back to a full pending jar,
+   *  every fruit kept in place. madeAt returns to plannedAt (deterministic). */
+  async unmakeJam(preserveId: string): Promise<void> {
+    const jar = this.preserves.byId().get(preserveId);
+    if (!jar || jar.deletedAt || !jar.sealedAt || jar.plannedAt == null) return;
+    await this.preserves.save({ ...jar, sealedAt: null, madeAt: jar.plannedAt });
   }
 }

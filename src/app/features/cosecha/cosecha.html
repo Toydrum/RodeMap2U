@@ -65,7 +65,7 @@
   }
   @if (openInPending(); as jar) {
     <section class="part jar-panel-home">
-      <app-jar-detail [preserve]="jar" (claim)="claiming.set($event)" (release)="askRelease($event)" />
+      <app-jar-detail [preserve]="jar" (claim)="claiming.set($event)" (release)="askRelease($event)" (make)="making.set($event)" />
     </section>
   }
 
@@ -224,6 +224,12 @@
 @defer (when promising()) {
   @if (promising()) {
     <app-promesa-sheet (closed)="promising.set(false)" (created)="onPromiseCreated($event)" />
+  }
+}
+
+@defer (when !!making()) {
+  @if (making(); as jar) {
+    <app-hacer-mermelada-sheet [preserve]="jar" (closed)="making.set(null)" (made)="onMade(jar)" />
   }
 }
 

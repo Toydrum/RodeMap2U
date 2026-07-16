@@ -707,25 +707,38 @@ await page.waitForTimeout(500);
 const promiseUback = (await readJars()).find((j) => j.name === 'Meta chica');
 ok('U2 a placed fruit is re-placeable while pending', promiseUback.members === 0, `members=${promiseUback.members}`);
 
-// V — reaching capacity auto-seals; Deshacer reverts. Tray is still open.
+// V — filling NEVER seals (0.0.96): it fills, celebrates, and offers «Hacer
+// mermelada». Tray is still open.
 await page.locator('.add-pick', { hasText: 'Fruta u 1' }).click();
 await page.waitForTimeout(500);
-await page.locator('.add-pick', { hasText: 'Fruta u 2' }).click(); // 2nd fruit → capacity 2 → auto-seal
+await page.locator('.add-pick', { hasText: 'Fruta u 2' }).click(); // 2nd fruit → capacity 2 → FULL (not sealed)
 await page.waitForTimeout(700);
-const sealedV = (await readJars()).find((j) => j.name === 'Meta chica');
-const sealToast = await page.locator('.toast', { hasText: 'Se llenó' }).count();
+const fullV = (await readJars()).find((j) => j.name === 'Meta chica');
+const makeBtn = await page.locator('.make-jam-btn').count();
 ok(
-  'V capacity reached → auto-seal + toast',
-  sealedV.sealedAt != null && sealedV.members === 2 && sealToast >= 1,
-  `sealedAt=${sealedV.sealedAt != null} members=${sealedV.members} toast=${sealToast}`,
+  'V filling fills but does NOT seal; offers «Hacer mermelada»',
+  fullV.sealedAt == null && fullV.members === 2 && makeBtn >= 1,
+  `sealedAt=${fullV.sealedAt != null} members=${fullV.members} makeBtn=${makeBtn}`,
 );
+// V2 — the user MAKES the jam: cook ceremony → Envasar → sealed (premio kept).
+await page.locator('.make-jam-btn').first().click();
+await page.waitForTimeout(500);
+await page.locator('.make-sheet .make-btn').click(); // Envasar
+await page.waitForTimeout(700);
+const madeV = (await readJars()).find((j) => j.name === 'Meta chica');
+ok(
+  'V2 Hacer mermelada seals the full jar, premio kept',
+  madeV.sealedAt != null && madeV.members === 2 && madeV.premio === 'un café tranquilo',
+  `sealedAt=${madeV.sealedAt != null} members=${madeV.members} premio="${madeV.premio}"`,
+);
+// V3 — Deshacer un-makes → full pending again (all fruits kept).
 await page.locator('.toast button', { hasText: 'Deshacer' }).click();
 await page.waitForTimeout(700);
-const revertedV = (await readJars()).find((j) => j.name === 'Meta chica');
+const unmadeV = (await readJars()).find((j) => j.name === 'Meta chica');
 ok(
-  'V2 Deshacer reverts to pending + returns the triggering fruit',
-  revertedV.sealedAt == null && revertedV.members === 1,
-  `sealedAt=${revertedV.sealedAt != null} members=${revertedV.members}`,
+  'V3 Deshacer un-makes → full pending again (fruits kept)',
+  unmadeV.sealedAt == null && unmadeV.members === 2,
+  `sealedAt=${unmadeV.sealedAt != null} members=${unmadeV.members}`,
 );
 
 // W — «soltar» frees the fruits and tombstones the jar.
@@ -773,15 +786,20 @@ ok(
   `shelfHasCount=${/le caben|lleva/.test(shelfText)} detailFill=${detailFill}`,
 );
 
-// Y — fill Meta X (frasquito, 2) and open it via the existing ceremony.
+// Y — fill Meta X (frasquito, 2), MAKE the jam (0.0.96), then open it via the
+// existing ceremony.
 await page.locator('.add-fruit-btn').click(); // open the tray once
 await page.waitForTimeout(250);
 await page.locator('.add-pick', { hasText: 'Fruta x 1' }).click();
 await page.waitForTimeout(400);
 await page.locator('.add-pick', { hasText: 'Fruta x 2' }).click();
-await page.waitForTimeout(700);
-// dismiss the auto-seal toast so it doesn't cover the shelf
-await page.locator('.toast button', { hasText: '✕' }).click().catch(() => {});
+await page.waitForTimeout(600);
+// filling no longer auto-seals — the user makes the jam
+await page.locator('.make-jam-btn').first().click();
+await page.waitForTimeout(400);
+await page.locator('.make-sheet .make-btn').click(); // Envasar
+await page.waitForTimeout(600);
+await page.locator('.toast button', { hasText: '✕' }).click().catch(() => {}); // dismiss made toast
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
 await page.locator('.jam-shelf-jar', { hasText: '' }).first().click();
@@ -801,7 +819,8 @@ ok(
 await page.locator('.sheet button', { hasText: 'A disfrutarlo' }).click().catch(() => {});
 await page.waitForTimeout(400);
 
-// Z — reconcile seals an over-full pending jar silently (sync convergence).
+// Z — filling from OUTSIDE (a sync merge places all fruits) does NOT auto-seal
+// (0.0.96): the jar waits full + pending, offering «Hacer mermelada».
 const zFresh = await seedFresh(5, 'z');
 await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
@@ -815,31 +834,31 @@ await page.fill('#promise-name', 'Meta Z');
 await page.locator('.create-btn').click();
 await page.waitForTimeout(500);
 const jarZ = (await readJars()).find((j) => j.name === 'Meta Z');
-// simulate a sync merge: place all 5 fruits directly (no local seal)
-const maxHarvestedAt = await page.evaluate(async ({ ids, jarId }) => {
+// simulate a sync merge: place all 5 fruits directly (never through place())
+await page.evaluate(async ({ ids, jarId }) => {
   const open = indexedDB.open('roadmap2u');
   const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
   const tx = db.transaction('harvests', 'readwrite');
   const os = tx.objectStore('harvests');
-  let maxH = 0;
   for (const id of ids) {
     const row = await new Promise((res, rej) => { const r = os.get(id); r.onsuccess = () => res(r.result); r.onerror = rej; });
     row.preserveId = jarId; row.updatedAt = Date.now(); row.rev = (row.rev ?? 1) + 1;
-    maxH = Math.max(maxH, row.harvestedAt);
     os.put(row);
   }
   await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
   db.close();
-  return maxH;
 }, { ids: zFresh, jarId: jarZ.id });
 await page.reload({ waitUntil: 'networkidle' });
-await page.waitForTimeout(900); // let the reconciler effect run
-const sealedZ = (await readJars()).find((j) => j.name === 'Meta Z');
-const noToastZ = (await page.locator('.toast', { hasText: 'Se llenó' }).count()) === 0;
+await page.waitForTimeout(700);
+const zJar = (await readJars()).find((j) => j.name === 'Meta Z');
+await page.locator('.pending-jar').first().click(); // Meta Z (only pending jar left)
+await page.waitForTimeout(300);
+const zMakeBtn = await page.locator('.make-jam-btn').count();
+const zNoToast = (await page.locator('.toast', { hasText: 'Se llenó' }).count()) === 0;
 ok(
-  'Z reconcile seals an over-full pending jar silently (deterministic madeAt, no ceremony)',
-  !!sealedZ && sealedZ.sealedAt != null && sealedZ.madeAt === maxHarvestedAt && noToastZ,
-  `sealedAt=${sealedZ?.sealedAt != null} madeAt==maxH=${sealedZ?.madeAt === maxHarvestedAt} noToast=${noToastZ}`,
+  'Z an externally-filled jar waits (no auto-seal) + offers «Hacer mermelada»',
+  !!zJar && zJar.sealedAt == null && zJar.members === 5 && zMakeBtn >= 1 && zNoToast,
+  `sealedAt=${zJar?.sealedAt != null} members=${zJar?.members} makeBtn=${zMakeBtn}`,
 );
 
 // ── 0.0.94 «la cocina despejada» ─────────────────────────────────────────
