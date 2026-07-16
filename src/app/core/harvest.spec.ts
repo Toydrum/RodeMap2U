@@ -4,6 +4,7 @@ import {
   deriveAccent,
   harvestMonths,
   isDailyPathParent,
+  isElixir,
   isFresh,
   isPending,
   isPromise,
@@ -188,6 +189,14 @@ describe('la promesa — goal jars (0.0.93)', () => {
     expect(isSealedJam(potJam)).toBe(true);
     expect(isSealedJam(pendingPromise)).toBe(false);
     expect(isSealedJam(sealedPromise)).toBe(true);
+  });
+
+  it('isElixir: only kind==="elixir" (jams stay on their own shelves)', () => {
+    expect(isElixir(preserve())).toBe(false);
+    expect(isElixir(preserve({ kind: 'elixir', treeId: 't1', carry: 'constancia' }))).toBe(true);
+    // an elixir would look like a sealed jam by plannedAt/sealedAt — shelves
+    // must exclude it explicitly (that guard is in PreservesRepo/cosecha).
+    expect(isSealedJam(preserve({ kind: 'elixir' }))).toBe(true);
   });
 });
 

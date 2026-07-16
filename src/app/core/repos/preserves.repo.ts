@@ -2,7 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import { Preserve } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
-import { isPending, isSealedJam } from '../harvest';
+import { isElixir, isPending, isSealedJam } from '../harvest';
 
 /**
  * «La conservería» (0.0.89) — sealed jam batches. See the Preserve interface
@@ -24,11 +24,17 @@ export class PreservesRepo extends RecordsRepo<Preserve> {
   /** «La promesa» (0.0.93) — goal jars still filling, newest promise first. */
   readonly pending = computed(() =>
     [...this.all()]
-      .filter(isPending)
+      .filter((p) => !isElixir(p) && isPending(p))
       .sort((a, b) => (b.plannedAt ?? 0) - (a.plannedAt ?? 0) || (a.id < b.id ? -1 : 1)),
   );
 
   /** Finished jams for the alacena — legacy pot jams + sealed promises,
-   *  excluding opened (those move to «Las disfrutadas»). */
-  readonly sealed = computed(() => this.newestFirst().filter((p) => isSealedJam(p) && !p.openedAt));
+   *  excluding opened (those move to «Las disfrutadas») and elixirs. */
+  readonly sealed = computed(() =>
+    this.newestFirst().filter((p) => !isElixir(p) && isSealedJam(p) && !p.openedAt),
+  );
+
+  /** «La despedida» (0.0.95) — elixir vials, newest despedida first. Drunk and
+   *  un-drunk both live here (a brindado elixir is kept as a keepsake). */
+  readonly elixirs = computed(() => this.newestFirst().filter(isElixir));
 }

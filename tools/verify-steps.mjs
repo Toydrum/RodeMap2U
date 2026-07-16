@@ -107,7 +107,7 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 
 // E — Ahora: "El siguiente paso de…" + first→then footer
-await page.locator('nav a', { hasText: 'Ahora' }).click();
+await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
 const nextTitle = (await page.locator('.next-title').textContent()).trim();
 const reason = (await page.locator('.reason').textContent()).trim();

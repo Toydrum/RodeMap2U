@@ -345,7 +345,7 @@
 
   <app-weather-front [mood]="mood()" />
 
-  <!-- Archive-tree confirm -->
+  <!-- Archive-tree confirm (fruitless trees) -->
   @if (archiving(); as tree) {
     <app-confirm-sheet
       icon="🗃"
@@ -354,6 +354,15 @@
       [confirmLabel]="i18n.t().tree.archiveCta"
       (cancelled)="archiving.set(null)"
       (confirmed)="archiveTree()"
+    />
+  }
+
+  <!-- «La despedida» (0.0.95): fruited trees close with a distilled elixir. -->
+  @if (farewelling(); as tree) {
+    <app-despedida-sheet
+      [tree]="tree"
+      (closed)="farewelling.set(null)"
+      (keep)="keepFarewell($event)"
     />
   }
 

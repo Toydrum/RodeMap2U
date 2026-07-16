@@ -96,7 +96,7 @@ await page.waitForTimeout(300);
 
 // C — Ahora: 2-minutitos on the bare goal asks first; the answer becomes
 // the session's node.
-await page.locator('nav a', { hasText: 'Ahora' }).click();
+await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
 // make the bare goal today's intention so the suggestion lands on it
 // (simpler: cycle «Otra idea» until a bare goal surfaces — instead we just

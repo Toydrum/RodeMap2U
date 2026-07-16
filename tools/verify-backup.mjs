@@ -103,7 +103,7 @@ const envelope = JSON.parse(await fs.readFile(fileF, 'utf8'));
 const exportedHarvests = envelope.data?.harvests?.length ?? 0;
 ok(
   'F1 envelope carries harvests + preserves',
-  envelope.schemaVersion === 8 && exportedHarvests > 0 && Array.isArray(envelope.data?.preserves),
+  envelope.schemaVersion === 9 && exportedHarvests > 0 && Array.isArray(envelope.data?.preserves),
   `v=${envelope.schemaVersion} harvests=${exportedHarvests} preserves=${envelope.data?.preserves?.length}`,
 );
 

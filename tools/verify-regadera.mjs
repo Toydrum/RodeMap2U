@@ -55,7 +55,7 @@ await page.waitForTimeout(400);
 
 // C — without energy, note the leading suggestion (freshest bare goal wins
 // its bucket; whatever it is, capture the baseline).
-await page.locator('nav a', { hasText: 'Ahora' }).click();
+await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
 const baseline = (await page.locator('.card.next').first().textContent().catch(() => '')) ?? '';
 console.log(`C baseline (no energy) captured: "${baseline.trim().slice(0, 44)}" | OK=true`);
@@ -82,7 +82,7 @@ await page.waitForURL('**/forest**', { timeout: 5000 });
 await page.waitForTimeout(400);
 
 // B — Ahora now leads with the LEAF pasito + the low-energy reason.
-await page.locator('nav a', { hasText: 'Ahora' }).click();
+await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
 const card = (await page.locator('.card.next').first().textContent().catch(() => '')) ?? '';
 const leadsSmall = card.includes('Pasito chiquito');

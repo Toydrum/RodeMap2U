@@ -52,7 +52,7 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 
 // B — the suggestion card whispers the size.
-await page.locator('nav a', { hasText: 'Ahora' }).click();
+await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
 // 0.0.75: the ONE secondary line replaced .estimate-hint (estimate wins here:
 // the fresh branch has no priority and no shade).

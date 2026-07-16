@@ -4,11 +4,12 @@ import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { Preserve } from '../../core/db/schema';
-import { membersOf } from '../../core/harvest';
+import { isElixir, membersOf } from '../../core/harvest';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { HarvestSkyService } from '../../shared/ui/harvest-sky';
 import { FruitGlyph } from '../forest/fruit';
 import { JamJar } from '../forest/jam-jar';
+import { ElixirVial } from '../forest/elixir-vial';
 import { fruitFor } from '../forest/flora';
 
 /**
@@ -24,7 +25,7 @@ import { fruitFor } from '../forest/flora';
  */
 @Component({
   selector: 'app-abrir-mermelada-sheet',
-  imports: [SheetDirective, FruitGlyph, JamJar],
+  imports: [SheetDirective, FruitGlyph, JamJar, ElixirVial],
   template: `
     <div class="sheet-backdrop" (click)="onBackdrop()">
       <div
@@ -37,11 +38,19 @@ import { fruitFor } from '../forest/flora';
         [attr.aria-label]="i18n.fill(i18n.t().cosecha.openConfirmTitle, { name: preserve().name })"
       >
         @if (!claimed()) {
-          <h2>{{ i18n.fill(i18n.t().cosecha.openConfirmTitle, { name: preserve().name }) }}</h2>
+          <h2>{{ title() }}</h2>
           <div class="jar-hero">
-            <app-jam-jar [preserve]="preserve()" [size]="1.4" [label]="false" />
+            @if (elixir()) {
+              <app-elixir-vial [preserve]="preserve()" [size]="1.4" />
+            } @else {
+              <app-jam-jar [preserve]="preserve()" [size]="1.4" [label]="false" />
+            }
           </div>
-          @if (preserve().premio) {
+          @if (elixir()) {
+            @if (preserve().carry) {
+              <p class="premio-words">🌿 «{{ preserve().carry }}»</p>
+            }
+          } @else if (preserve().premio) {
             <p class="premio-words">🎀 «{{ preserve().premio }}»</p>
           }
           <p class="hint">{{ i18n.t().cosecha.openConfirmBody }}</p>
@@ -50,16 +59,22 @@ import { fruitFor } from '../forest/flora';
               {{ i18n.t().cosecha.notYet }}
             </button>
             <button type="button" class="btn btn-primary open-it" [disabled]="opening()" (click)="claim()">
-              {{ i18n.t().cosecha.openIt }}
+              {{ elixir() ? i18n.t().cosecha.brindisIt : i18n.t().cosecha.openIt }}
             </button>
           </div>
         } @else {
           <div class="earned">
             <div class="jar-hero">
-              <app-jam-jar [preserve]="claimedJar()!" [size]="1.4" [label]="false" />
+              @if (elixir()) {
+                <app-elixir-vial [preserve]="claimedJar()!" [size]="1.4" />
+              } @else {
+                <app-jam-jar [preserve]="claimedJar()!" [size]="1.4" [label]="false" />
+              }
             </div>
-            <p class="earned-headline">{{ i18n.t().cosecha.earnedHeadline }}</p>
-            <p class="earned-premio">«{{ preserve().premio }}»</p>
+            <p class="earned-headline">{{ headline() }}</p>
+            @if (rewardWord()) {
+              <p class="earned-premio">«{{ rewardWord() }}»</p>
+            }
             <p class="earned-sub">{{ i18n.fill(i18n.t().cosecha.earnedSub, { month: monthWord() }) }}</p>
           </div>
 
@@ -248,9 +263,39 @@ export class AbrirMermeladaSheet {
   protected readonly sipIndex = signal(0);
   protected readonly opening = signal(false);
 
+  /** «La despedida» (0.0.95): the same ceremony serves a jam (savor its
+   *  members) and an elixir (a brindis — savor the whole tree's fruits). */
+  protected readonly elixir = computed(() => isElixir(this.preserve()));
+
+  protected title(): string {
+    const key = this.elixir() ? this.i18n.t().cosecha.brindisTitle : this.i18n.t().cosecha.openConfirmTitle;
+    return this.i18n.fill(key, { name: this.preserve().name });
+  }
+
+  /** «Esto te lo llevas:» (elixir) · «Te lo ganaste:» (premio jam) · «Para
+   *  saborear:» (memory jar, no premio — never an empty reward). */
+  protected headline(): string {
+    const t = this.i18n.t().cosecha;
+    if (this.elixir()) return t.carryHeadline;
+    return this.preserve().premio ? t.earnedHeadline : t.savorHeadline;
+  }
+
+  /** The verbatim words spoken back — carry (elixir) or premio (jam); empty
+   *  for a memory jar (the @if hides the line). */
+  protected rewardWord(): string {
+    return (this.elixir() ? this.preserve().carry : this.preserve().premio) ?? '';
+  }
+
   protected readonly rows = computed(() => {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
-    return membersOf(this.preserve().id, this.harvests.all()).map((harvest) => ({
+    const p = this.preserve();
+    const source = this.elixir()
+      ? this.harvests
+          .all()
+          .filter((h) => h.treeId === p.treeId)
+          .sort((a, b) => b.harvestedAt - a.harvestedAt || (a.id < b.id ? -1 : 1))
+      : membersOf(p.id, this.harvests.all());
+    return source.map((harvest) => ({
       title: harvest.title,
       treeName: harvest.treeName,
       spec: fruitFor(harvest.accent, harvest.treeId),

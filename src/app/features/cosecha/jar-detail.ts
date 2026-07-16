@@ -4,10 +4,11 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { Harvest, Preserve } from '../../core/db/schema';
-import { isPending, membersOf } from '../../core/harvest';
+import { isElixir, isPending, membersOf } from '../../core/harvest';
 import { FruitSpec, fruitFor } from '../forest/flora';
 import { FruitGlyph } from '../forest/fruit';
 import { PromiseJar } from '../forest/promise-jar';
+import { ElixirVial } from '../forest/elixir-vial';
 import { PromiseService } from './promise.service';
 
 interface MemberRow {
@@ -35,7 +36,7 @@ interface MemberRow {
  */
 @Component({
   selector: 'app-jar-detail',
-  imports: [FruitGlyph, PromiseJar],
+  imports: [FruitGlyph, PromiseJar, ElixirVial],
   templateUrl: './jar-detail.html',
   styleUrl: './cosecha.scss',
 })
@@ -55,7 +56,10 @@ export class JarDetail {
   protected readonly inputValue = (e: Event) => (e.target as HTMLInputElement).value;
 
   protected readonly pending = computed(() => isPending(this.preserve()));
-  protected readonly panelId = computed(() => (this.pending() ? 'pending-panel' : 'jar-panel'));
+  protected readonly elixir = computed(() => isElixir(this.preserve()));
+  protected readonly panelId = computed(() =>
+    this.elixir() ? 'elixir-panel' : this.pending() ? 'pending-panel' : 'jar-panel',
+  );
 
   /** Add-tray + edit-form local state (was on the page). */
   protected readonly addOpen = signal(false);
@@ -75,10 +79,31 @@ export class JarDetail {
     };
   }
 
-  protected readonly members = computed(() =>
-    membersOf(this.preserve().id, this.harvests.all()).map((h) => this.rowOf(h)),
-  );
+  /** An elixir savors the whole TREE's fruits (by treeId, like the tea — never
+   *  moved); a jam shows its sealed members (by preserveId). */
+  protected readonly members = computed(() => {
+    const p = this.preserve();
+    const source = this.elixir()
+      ? this.harvests
+          .all()
+          .filter((h) => h.treeId === p.treeId)
+          .sort((a, b) => b.harvestedAt - a.harvestedAt || (a.id < b.id ? -1 : 1))
+      : membersOf(p.id, this.harvests.all());
+    return source.map((h) => this.rowOf(h));
+  });
   protected readonly freshRows = computed(() => this.harvests.fresh().map((h) => this.rowOf(h)));
+
+  protected carryLine(): string {
+    return this.i18n.fill(this.i18n.t().cosecha.carryLine, { carry: this.preserve().carry ?? '' });
+  }
+  protected brindadoLine(): string {
+    const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
+    const date = new Date(this.preserve().openedAt ?? 0).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'long',
+    });
+    return this.i18n.fill(this.i18n.t().cosecha.brindado, { date });
+  }
 
   /** The ONE forward count line — lives only here (owner carve-out). */
   protected readonly fillLine = computed(() => {

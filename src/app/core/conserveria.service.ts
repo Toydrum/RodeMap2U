@@ -124,6 +124,42 @@ export class ConserveriaService {
   // ── «La promesa» (0.0.93): goal jars — an empty jar created ahead of its
   //    fruit, filled by placements, auto-sealed at capacity. ────────────────
 
+  /** «La despedida» (0.0.95): distill a commemorative elixir when the user
+   *  archives a fruited tree. It REFERENCES the tree (treeId) and carries «lo
+   *  que me llevo» — it never moves the tree's fruits (no preserveId), so the
+   *  register is untouched. Tint is precomputed by the caller (flora). */
+  async distill(fields: {
+    name: string;
+    treeId: string;
+    carry: string;
+    accent: AccentToken | null;
+    tint: string;
+    tintEdge: string;
+  }): Promise<Preserve> {
+    const now = Date.now();
+    const carry = fields.carry.trim();
+    const preserve: Preserve = {
+      ...newSyncBase(now),
+      kind: 'elixir',
+      name: fields.name.trim() || 'Despedida',
+      madeAt: now,
+      accent: fields.accent,
+      tint: fields.tint,
+      tintEdge: fields.tintEdge,
+      openedAt: null,
+      carry: carry || null,
+      treeId: fields.treeId,
+    };
+    return this.preserves.insert(preserve);
+  }
+
+  /** Undo of a despedida (archive-undo window): tombstone the elixir. */
+  async undistill(preserveId: string): Promise<void> {
+    const jar = this.preserves.byId().get(preserveId);
+    if (!jar || jar.deletedAt) return;
+    await this.preserves.save({ ...jar, deletedAt: Date.now() });
+  }
+
   /** Mint an EMPTY goal jar at the wizard: plannedAt = madeAt = now, sealedAt
    *  null, no members yet. `size` is the user's own valuation of their premio
    *  (the app never suggests it); capacity = jarCapacity(size). premio is

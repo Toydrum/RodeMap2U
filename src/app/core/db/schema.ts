@@ -4,7 +4,13 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v8: additive Preserve.plannedAt/sealedAt («la promesa» 0.0.93 — frascos
+/** v9: additive Preserve.kind='elixir' + carry + treeId («la despedida»
+ *  0.0.95 — el elixir de despedida: archiving a fruited tree distills a
+ *  commemorative vial named by the tree, carrying «lo que me llevo». It
+ *  REFERENCES the tree (treeId) and savors its fruits like the tea — never
+ *  moves them (no preserveId), so «nada se gasta» stays intact. Additive:
+ *  pre-v9 preserves have kind absent ≡ 'mermelada', carry/treeId absent ≡ null.
+ *  v8: additive Preserve.plannedAt/sealedAt («la promesa» 0.0.93 — frascos
  *  prometidos / goal jars: an EMPTY jar created ahead of its fruit, filled by
  *  completed tasks, auto-sealed at capacity). No migration pass; pre-v8 jars
  *  lack both (plannedAt absent ≡ never a promise = pot jam; sealedAt absent ≡
@@ -28,7 +34,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -198,7 +204,7 @@ export function harvestIdFor(nodeId: string): string {
  * quantity is never visualized. Ids are randomUUID: every seal is a new
  * batch (concurrent seals on two devices = two legitimate jars).
  */
-export type PreserveKind = 'mermelada';
+export type PreserveKind = 'mermelada' | 'elixir';
 
 /** «El frasco sirve a la fruta» (0.0.90, owner override of same-size):
  *  the vessel reflects the BATCH — a seal-time snapshot via jarSizeFor
@@ -246,6 +252,15 @@ export interface Preserve extends SyncBase {
    *  fills; it is stamped at capacity (auto-seal) — the ONE app-initiated
    *  transition. Pending ≡ plannedAt != null && sealedAt == null. */
   sealedAt?: number | null;
+  /** «La despedida» (0.0.95): an elixir vial (kind==='elixir') carries «lo que
+   *  me llevo» — what the closed chapter GAVE you. Free text, never
+   *  parsed/valued (trigger/premio law); optional (absent ≡ null → the brindis
+   *  is just the toast + savor). Only elixirs use it. */
+  carry?: string | null;
+  /** «La despedida» (0.0.95): the archived tree an elixir commemorates. The
+   *  brindis savors this tree's fruits (read by treeId, like the tea — never
+   *  moved). Only elixirs use it (absent ≡ null on jams). */
+  treeId?: string | null;
 }
 
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */

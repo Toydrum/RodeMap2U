@@ -6,14 +6,17 @@
 
 @if (showTabs()) {
   <nav class="tabbar" [attr.aria-label]="i18n.t().a11y.mainNav">
-    <a routerLink="/ahora" routerLinkActive="active" class="tab">
+    <!-- 0.0.95: the Conservería took Ahora's tab slot (Ahora stays the app's
+         home + the compass rose «Buscarme…» is the way back to it). Jar glyph
+         (🫙 motif) in the house stroke style. -->
+    <a routerLink="/cosecha" routerLinkActive="active" class="tab">
       <span class="glyph" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M15.6 8.4 13.4 13.4 8.4 15.6 10.6 10.6 Z"/>
+          <rect x="7" y="3" width="10" height="3" rx="1"/>
+          <path d="M7.2 6C6.2 7.4 5.5 8.5 5.5 10v9c0 1.4 1 2 6.5 2s6.5-.6 6.5-2v-9c0-1.5-.7-2.6-1.7-4"/>
         </svg>
       </span>
-      <span class="label">{{ i18n.t().nav.ahora }}</span>
+      <span class="label">{{ i18n.t().nav.cosecha }}</span>
     </a>
     <a routerLink="/forest" routerLinkActive="active" class="tab">
       <span class="glyph" aria-hidden="true">

@@ -373,12 +373,29 @@ ok(
 await page.locator('.toast .btn-ghost').click().catch(() => {});
 await page.waitForTimeout(300);
 
-// Q — a memory jar (no premio) shows NO open door and never names the absence.
+// Q (0.0.95 — INVERTED): a memory jar (no premio) NOW opens to a gentle SAVOR
+// — it was stuck (no open, no remove). No «Te lo ganaste», no empty «»; it
+// empties and moves to «Las disfrutadas».
 await page.locator('.jam-shelf-jar').last().click(); // oldest = J's memory jar
 await page.waitForTimeout(400);
-const qPanel = ((await page.locator('.jar-panel').textContent().catch(() => '')) ?? '');
 const qOpenBtn = await page.locator('.open-jam-btn').count();
-ok('Q memory jar: no open door, absence unnamed', qOpenBtn === 0 && !/sin premio/i.test(qPanel), `btn=${qOpenBtn}`);
+const qNoChip = (await page.locator('.jar-panel .premio-chip').count()) === 0;
+await page.locator('.open-jam-btn').click();
+await page.waitForTimeout(400);
+await page.locator('.open-it').click();
+await page.waitForTimeout(500);
+const qHeadline = ((await page.locator('.earned-headline').textContent().catch(() => '')) ?? '').trim();
+const qRewardLine = await page.locator('.earned-premio').count();
+await page.keyboard.press('Escape'); // finish savoring (claimed → finish)
+await page.waitForTimeout(500);
+ok(
+  'Q memory jar opens to savor (no reward, no empty «»)',
+  qOpenBtn === 1 && qNoChip && qRewardLine === 0 &&
+    /saborear|savor/i.test(qHeadline) && !/te lo ganaste|you earned/i.test(qHeadline),
+  `btn=${qOpenBtn} chip=${qNoChip} reward=${qRewardLine} headline="${qHeadline}"`,
+);
+await page.locator('.toast .btn-ghost').click().catch(() => {}); // dismiss opened toast
+await page.waitForTimeout(300);
 
 // M — the claiming ceremony: openedAt stamps, the rain falls in the jam's
 // tint, «Te lo ganaste» speaks, and Deshacer re-closes.
@@ -445,14 +462,16 @@ const disfrutada = ((await page.locator('.enjoyed-line').textContent().catch(() 
 ok('P reduce-motion: words stay, sky aside, jar disfrutada', skyHiddenP && earnedP && disfrutada.length > 0, `"${disfrutada.slice(0, 26)}"`);
 await page.emulateMedia({ reducedMotion: null });
 
-// S — «las disfrutadas» (0.0.92): the opened jar LEFT the alacena and
-// stands on its own history shelf; the memory jar stays on the alacena.
+// S — «las disfrutadas» (0.0.92) + empty glass (0.0.95): both opened jars (the
+// premio jar via P, the memory jar via Q) left the alacena; opened jars render
+// an EMPTY glass (the jelly drained; the memories/register are conserved).
 const alacenaJars = await page.locator('.alacena .jam-shelf-jar').count();
 const enjoyedJars = await page.locator('.disfrutadas .jam-shelf-jar').count();
+const enjoyedLiquid = await page.locator('.disfrutadas .jam-liquid').count();
 ok(
-  'S opened jars move to las disfrutadas',
-  alacenaJars === 1 && enjoyedJars === 1,
-  `alacena=${alacenaJars} disfrutadas=${enjoyedJars}`,
+  'S opened jars move to las disfrutadas + render empty',
+  alacenaJars === 0 && enjoyedJars === 2 && enjoyedLiquid === 0,
+  `alacena=${alacenaJars} disfrutadas=${enjoyedJars} liquid=${enjoyedLiquid}`,
 );
 
 // O — six fruits make a frascote («una mermelada poderosa»).

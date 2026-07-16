@@ -10,7 +10,12 @@ const undoBtn = page.locator('.toast button', { hasText: 'Deshacer' });
 await page.goto(`${BASE}/forest?seed=demo`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 const before = await plots();
-await page.locator('.plot-archive').first().click();
+// A FRUITLESS tree keeps the plain confirm (fruited trees open the despedida
+// ritual now — 0.0.95). «Idea nueva» has no fruit in the demo. Hover first to
+// reveal the 🗃 button (raised z-index + opacity), like verify-forest-archive.
+await page.hover('.plot:has-text("Idea nueva")');
+await page.waitForTimeout(300);
+await page.click('.plot:has-text("Idea nueva") .plot-archive');
 await page.locator('.confirm button', { hasText: 'Que descanse' }).click();
 await page.waitForTimeout(400);
 const during = await plots();
@@ -61,7 +66,9 @@ console.log(`4 note-undo exact text: ${JSON.stringify(noteText)} == ${JSON.strin
 await page.goto(`${BASE}/forest?seed=demo`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
 const p0 = await plots();
-await page.locator('.plot-archive').first().click();
+await page.hover('.plot:has-text("Idea nueva")'); // fruitless → plain confirm
+await page.waitForTimeout(300);
+await page.click('.plot:has-text("Idea nueva") .plot-archive');
 await page.locator('.confirm button', { hasText: 'Que descanse' }).click();
 await page.waitForTimeout(400);
 await page.waitForTimeout(8600);

@@ -174,27 +174,43 @@ const VESSELS: Record<JarVessel, VesselGeo> = {
         </clipPath>
       </defs>
       <g [attr.clip-path]="'url(#' + clipId + ')'">
-        <!-- sealed = complete: full of its own jam, whatever the vessel -->
-        <rect
-          class="jam-liquid"
-          [attr.x]="geo().liquidX"
-          [attr.y]="geo().liquidY"
-          [attr.width]="geo().liquidW"
-          height="40"
-          [attr.fill]="preserve().tint"
-          [attr.opacity]="opened() ? 0.65 : 0.8"
-        />
-        <path
-          [attr.d]="waveD()"
-          fill="none"
-          [attr.stroke]="preserve().tintEdge"
-          stroke-width="1.1"
-          opacity="0.6"
-        />
-        @for (chunk of chunks(); track chunk.key) {
-          <g [attr.transform]="'translate(' + chunk.x + ' ' + chunk.y + ') rotate(' + chunk.rot + ')'" opacity="0.5">
-            <g appFruit [fruit]="chunk.spec" [scale]="0.42" />
-          </g>
+        <!-- sealed = complete: full of its own jam. Consumed (0.0.95): the
+             jelly drains — an opened jar keeps its glass, lid, bow and label
+             but empties (the jam was the consumable; the FRUITS/memories/
+             register are conserved elsewhere — «nada se gasta»). -->
+        @if (!opened()) {
+          <rect
+            class="jam-liquid"
+            [attr.x]="geo().liquidX"
+            [attr.y]="geo().liquidY"
+            [attr.width]="geo().liquidW"
+            height="40"
+            [attr.fill]="preserve().tint"
+            opacity="0.8"
+          />
+          <path
+            [attr.d]="waveD()"
+            fill="none"
+            [attr.stroke]="preserve().tintEdge"
+            stroke-width="1.1"
+            opacity="0.6"
+          />
+          @for (chunk of chunks(); track chunk.key) {
+            <g [attr.transform]="'translate(' + chunk.x + ' ' + chunk.y + ') rotate(' + chunk.rot + ')'" opacity="0.5">
+              <g appFruit [fruit]="chunk.spec" [scale]="0.42" />
+            </g>
+          }
+        } @else {
+          <!-- a faint dreg at the very bottom — enjoyed, not sterile. -->
+          <rect
+            class="jam-dreg"
+            [attr.x]="geo().liquidX"
+            y="47"
+            [attr.width]="geo().liquidW"
+            height="6"
+            [attr.fill]="preserve().tint"
+            opacity="0.32"
+          />
         }
       </g>
       <path class="jar-glass" [attr.d]="geo().glass" />

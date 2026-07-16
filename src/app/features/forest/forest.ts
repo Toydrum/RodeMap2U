@@ -29,7 +29,9 @@ import { PreservesRepo } from '../../core/repos/preserves.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Harvest, Preserve, Tree } from '../../core/db/schema';
-import { isSealedJam, membersOf } from '../../core/harvest';
+import { deriveAccent, isSealedJam, membersOf } from '../../core/harvest';
+import { ConserveriaService } from '../../core/conserveria.service';
+import { DespedidaSheet } from './despedida-sheet';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { MeadowJar } from './jar';
@@ -38,7 +40,7 @@ import { PromiseJar } from './promise-jar';
 import { SceneBackdrop } from './scene-backdrop';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
-import { FlowerSpec, flowerFor } from './flora';
+import { FlowerSpec, flowerFor, jamTint } from './flora';
 import { FlowerGlyph } from './flower';
 import { FocusSessionService } from '../../core/focus-session.service';
 import { PerchAnchorService } from '../../core/perch-anchor.service';
@@ -53,7 +55,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, MeadowJar, JamJar, PromiseJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet],
+  imports: [RouterLink, MiniTree, MeadowJar, JamJar, PromiseJar, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet, DespedidaSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -107,8 +109,11 @@ export class ForestPage {
   protected readonly newAccent = signal<AccentToken>('moss');
   /** Tree pending archive (confirm sheet open). */
   protected readonly archiving = signal<Tree | null>(null);
+  /** «La despedida» (0.0.95): a fruited tree pending its closing ritual. */
+  protected readonly farewelling = signal<Tree | null>(null);
   private readonly toast = inject(ToastService);
   private readonly settings = inject(SettingsService);
+  private readonly conserveria = inject(ConserveriaService);
 
   /** Prunable example saplings on the empty meadow — never a blank canvas. */
   protected readonly starterKinds = ['school', 'home', 'project'] as const;
@@ -678,6 +683,12 @@ export class ForestPage {
     );
   }
 
+  /** Did this tree bear fruit? (any live harvest with its treeId) — gates the
+   *  farewell ritual (elixir) vs the plain archive confirm. */
+  private boreFruit(tree: Tree): boolean {
+    return this.harvests.all().some((h) => h.treeId === tree.id);
+  }
+
   protected askArchive(event: Event, tree: Tree): void {
     // The button lives inside the plot link — don't navigate.
     event.preventDefault();
@@ -685,7 +696,10 @@ export class ForestPage {
     // A second finger tapping a 🗃 mid-drag must not pop the confirm sheet
     // over the gesture.
     if (this.draggingId()) return;
-    this.archiving.set(tree);
+    // A fruited tree closes with a despedida (elixir); a fruitless one with the
+    // plain confirm.
+    if (this.boreFruit(tree)) this.farewelling.set(tree);
+    else this.archiving.set(tree);
   }
 
   protected async archiveTree(): Promise<void> {
@@ -703,6 +717,38 @@ export class ForestPage {
         message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
         actionLabel: this.i18n.t().common.undo,
         action: () => void this.trees.restore(tree),
+      },
+      UNDO_MS,
+    );
+  }
+
+  /** «La despedida» (0.0.95): archive a fruited tree AND distill its elixir in
+   *  one gesture. Undo restores the tree and removes the elixir. */
+  protected async keepFarewell(carry: string): Promise<void> {
+    const asked = this.farewelling();
+    if (!asked) return;
+    const tree = this.trees.byId().get(asked.id) ?? asked;
+    this.farewelling.set(null);
+    if (tree.archivedAt) return;
+    const fruits = this.harvests.all().filter((h) => h.treeId === tree.id);
+    const tint = jamTint(fruits.map((f) => f.accent));
+    await this.trees.archive(tree);
+    const elixir = await this.conserveria.distill({
+      name: tree.name,
+      treeId: tree.id,
+      carry,
+      accent: deriveAccent(fruits),
+      tint: tint.tint,
+      tintEdge: tint.tintEdge,
+    });
+    this.toast.show(
+      {
+        message: this.i18n.t().cosecha.elixir.minted,
+        actionLabel: this.i18n.t().common.undo,
+        action: () => {
+          void this.trees.restore(tree);
+          void this.conserveria.undistill(elixir.id);
+        },
       },
       UNDO_MS,
     );

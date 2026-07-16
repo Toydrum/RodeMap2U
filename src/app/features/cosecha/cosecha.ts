@@ -8,12 +8,13 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { Harvest, Preserve } from '../../core/db/schema';
-import { harvestMonths, isPending, isSealedJam } from '../../core/harvest';
+import { harvestMonths, isElixir, isPending, isSealedJam } from '../../core/harvest';
 import { FruitSpec, fruitFor } from '../forest/flora';
 import { FruitGlyph } from '../forest/fruit';
 import { MeadowJar } from '../forest/jar';
 import { JamJar } from '../forest/jam-jar';
 import { PromiseJar } from '../forest/promise-jar';
+import { ElixirVial } from '../forest/elixir-vial';
 import { HintChip } from '../../shared/ui/hint-chip';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { MermeladaSheet } from './mermelada-sheet';
@@ -54,6 +55,7 @@ interface JamShelfItem {
     MeadowJar,
     JamJar,
     PromiseJar,
+    ElixirVial,
     JarDetail,
     HintChip,
     ConfirmSheet,
@@ -135,18 +137,24 @@ export class CosechaPage {
   protected readonly jamShelf = computed<JamShelfItem[]>(() =>
     this.preserves
       .newestFirst()
-      .filter((p) => isSealedJam(p) && !p.openedAt)
+      .filter((p) => !isElixir(p) && isSealedJam(p) && !p.openedAt)
       .map((p) => this.shelfItemOf(p)),
   );
 
-  /** «Las disfrutadas» (0.0.92): opened jars move HERE — history, never
-   *  deletion; still tappable, memories forever, newest enjoyment first. */
+  /** «Las disfrutadas» (0.0.92): opened JAMS move HERE — history, never
+   *  deletion; still tappable, memories forever, newest enjoyment first.
+   *  (Elixirs stay on their own «Las despedidas» shelf even when drunk.) */
   protected readonly enjoyedShelf = computed<JamShelfItem[]>(() =>
     this.preserves
       .newestFirst()
-      .filter((p) => !!p.openedAt)
+      .filter((p) => !isElixir(p) && !!p.openedAt)
       .sort((a, b) => (b.openedAt ?? 0) - (a.openedAt ?? 0) || (a.id < b.id ? -1 : 1))
       .map((p) => this.shelfItemOf(p)),
+  );
+
+  /** «Las despedidas» (0.0.95): elixir vials (drunk and un-drunk). */
+  protected readonly elixirShelf = computed<JamShelfItem[]>(() =>
+    this.preserves.elixirs().map((p) => this.shelfItemOf(p)),
   );
 
   /** The one open jar (live), whatever shelf it belongs to. */
@@ -165,11 +173,15 @@ export class CosechaPage {
   });
   protected readonly openInAlacena = computed(() => {
     const p = this.openPreserve();
-    return p && isSealedJam(p) && !p.openedAt ? p : null;
+    return p && !isElixir(p) && isSealedJam(p) && !p.openedAt ? p : null;
   });
   protected readonly openInDisfrutadas = computed(() => {
     const p = this.openPreserve();
-    return p && !!p.openedAt ? p : null;
+    return p && !isElixir(p) && !!p.openedAt ? p : null;
+  });
+  protected readonly openInElixir = computed(() => {
+    const p = this.openPreserve();
+    return p && isElixir(p) ? p : null;
   });
 
   protected monthWordFor(preserve: Preserve): string {

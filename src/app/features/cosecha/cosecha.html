@@ -123,6 +123,32 @@
     </section>
   }
 
+  <!-- «Las despedidas» (0.0.95): elixir vials — chapters you closed. -->
+  @if (elixirShelf().length) {
+    <section class="part despedidas-shelf">
+      <h2 class="part-title"><span aria-hidden="true">🍶</span> {{ i18n.t().cosecha.despedidasTitle }}</h2>
+      <div class="jam-row">
+        @for (item of elixirShelf(); track item.preserve.id) {
+          <button
+            type="button"
+            class="jam-shelf-jar elixir-jar"
+            [class.selected]="openId() === item.preserve.id"
+            [attr.aria-expanded]="openId() === item.preserve.id"
+            aria-controls="elixir-panel"
+            (click)="toggle(item.preserve.id)"
+          >
+            <app-elixir-vial [preserve]="item.preserve" [label]="item.preserve.name" />
+          </button>
+        }
+      </div>
+    </section>
+  }
+  @if (openInElixir(); as jar) {
+    <section class="part jar-panel-home">
+      <app-jar-detail [preserve]="jar" [monthWord]="monthWordFor(jar)" (claim)="claiming.set($event)" (release)="askRelease($event)" />
+    </section>
+  }
+
   <!-- The REGISTER: every fruit forever, whatever its home. -->
   @if (shelves().length) {
     @for (shelf of shelves(); track shelf.key) {

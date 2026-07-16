@@ -92,9 +92,18 @@ export function isPending(p: Preserve): boolean {
 }
 
 /** A finished jam belonging on the alacena: a legacy pot jam (plannedAt
- *  absent) or a sealed promise. Everything that is NOT a pending goal jar. */
+ *  absent) or a sealed promise. Everything that is NOT a pending goal jar.
+ *  NOTE: elixirs also satisfy this (no plannedAt/sealedAt) — jam shelves must
+ *  additionally exclude elixirs with !isElixir. */
 export function isSealedJam(p: Preserve): boolean {
   return !isPending(p);
+}
+
+/** «La despedida» (0.0.95): a commemorative elixir vial vs an ordinary jam.
+ *  Absent kind ≡ 'mermelada' (pre-v9 preserves). Elixirs live on their own
+ *  shelf and must be excluded from every jam/promise shelf. */
+export function isElixir(p: Preserve): boolean {
+  return p.kind === 'elixir';
 }
 
 /** One shelf section of the pantry: a month and its fruits. */
