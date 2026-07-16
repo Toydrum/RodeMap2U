@@ -386,7 +386,7 @@ export class MermeladaSheet {
   protected stir(): void {
     this.stirring.set(false);
     requestAnimationFrame(() => this.stirring.set(true));
-    setTimeout(() => this.stirring.set(false), 950);
+    setTimeout(() => this.stirring.set(false), 2500);
   }
 
   protected toJar(): void {

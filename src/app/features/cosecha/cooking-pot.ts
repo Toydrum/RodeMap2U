@@ -41,11 +41,13 @@ export interface PotFruit {
           <circle class="bubble b3" cx="74" cy="26" r="1.6" [attr.fill]="tint().tint" />
         </g>
       }
-      @for (f of fruits(); track f.key) {
-        <g class="pot-fruit" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.rot + ')'">
-          <g appFruit [fruit]="f.spec" [scale]="0.8" />
-        </g>
-      }
+      <g class="fruit-swirl">
+        @for (f of fruits(); track f.key) {
+          <g class="pot-fruit" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.rot + ')'">
+            <g appFruit [fruit]="f.spec" [scale]="0.8" />
+          </g>
+        }
+      </g>
       @if (hasFruits()) {
         <!-- the wooden spoon: handle from upper-right, bowl dipped in the jam -->
         <g class="spoon">
@@ -96,11 +98,17 @@ export interface PotFruit {
       }
     }
 
-    /* the wooden spoon */
+    /* the wooden spoon — pivots at its BOWL (in the jam) so the handle top
+       sweeps an arc, like the reference straw stirring a drink */
     .spoon {
       transform-box: view-box;
-      transform-origin: 60px 26px;
+      transform-origin: 59px 31px;
       animation: spoon-sway 4.5s ease-in-out infinite;
+    }
+
+    .fruit-swirl {
+      transform-box: view-box;
+      transform-origin: 60px 48px;
     }
 
     .spoon-handle {
@@ -158,43 +166,48 @@ export interface PotFruit {
       }
     }
 
-    /* the stir — the spoon sweeps around the jam center, bowl orbiting */
+    /* the stir (0.0.98) — several arc sweeps (the handle top swings side to
+       side while the bowl pivots) + the fruits swirl + the swirl spins, like
+       the reference. The .stirring window (~2.5s, set in the sheets) covers it. */
     .pot.stirring .spoon {
-      animation: stir 1.1s ease-in-out;
+      animation: spoon-stir 2.4s ease-in-out;
     }
 
-    @keyframes stir {
-      0% {
-        transform: rotate(0deg);
-      }
-      25% {
-        transform: rotate(-24deg);
-      }
-      60% {
-        transform: rotate(16deg);
-      }
-      85% {
-        transform: rotate(-6deg);
-      }
-      100% {
-        transform: rotate(0deg);
-      }
+    @keyframes spoon-stir {
+      0% { transform: rotate(0deg); }
+      14% { transform: rotate(-28deg); }
+      38% { transform: rotate(26deg); }
+      62% { transform: rotate(-24deg); }
+      86% { transform: rotate(20deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .pot.stirring .fruit-swirl {
+      animation: fruit-jostle 2.4s ease-in-out;
+    }
+
+    @keyframes fruit-jostle {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(6deg); }
+      45% { transform: rotate(-5deg); }
+      70% { transform: rotate(5deg); }
+      100% { transform: rotate(0deg); }
     }
 
     .pot.stirring .jam-swirl {
-      animation: swirl 1.1s ease-in-out;
+      animation: swirl 2.4s ease-in-out;
     }
 
     @keyframes swirl {
-      0% {
-        transform: rotate(0deg);
-      }
-      50% {
-        transform: rotate(20deg) scale(0.92);
-      }
-      100% {
-        transform: rotate(0deg);
-      }
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(28deg) scale(0.9); }
+      55% { transform: rotate(-22deg) scale(0.94); }
+      80% { transform: rotate(22deg) scale(0.92); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .pot.stirring .bubble {
+      animation-duration: 1.2s;
     }
 
     .jam-swirl {
@@ -250,6 +263,8 @@ export interface PotFruit {
     :host-context(.reduce-motion) {
       .pot-fruit,
       .spoon,
+      .fruit-swirl,
+      .jam-swirl,
       .bubble {
         animation: none;
       }
