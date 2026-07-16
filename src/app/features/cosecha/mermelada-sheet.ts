@@ -10,6 +10,7 @@ import { FruitGlyph } from '../forest/fruit';
 import { JamJar } from '../forest/jam-jar';
 import { fruitFor, jamTint } from '../forest/flora';
 import { hash } from '../forest/tree-layout';
+import { CookingPot } from './cooking-pot';
 
 /**
  * «Hacer mermelada» (0.0.89) — the three-beat sealing ritual. DOORS CANCEL:
@@ -24,7 +25,7 @@ import { hash } from '../forest/tree-layout';
  */
 @Component({
   selector: 'app-mermelada-sheet',
-  imports: [SheetDirective, FruitGlyph, JamJar],
+  imports: [SheetDirective, FruitGlyph, JamJar, CookingPot],
   template: `
     <div class="sheet-backdrop" (click)="closed.emit()">
       <div
@@ -45,28 +46,7 @@ import { hash } from '../forest/tree-layout';
                  fruits gather AND cook here (0.0.94 — the old separate stove
                  beat was a mandatory step that decided nothing). -->
             <div class="pot-zone">
-              <svg class="pot on-fire" [class.stirring]="stirring()" viewBox="0 0 120 92" width="200" height="153" aria-hidden="true">
-                <g class="steam" aria-hidden="true">
-                  <path class="wisp w1" d="M 48 14 C 44 8 52 4 48 -2" />
-                  <path class="wisp w2" d="M 72 12 C 76 6 68 2 72 -4" />
-                </g>
-                <path class="pot-body" d="M 18 26 L 102 26 C 104 50 94 70 60 70 C 26 70 16 50 18 26 Z" />
-                <ellipse class="pot-mouth" cx="60" cy="26" rx="42" ry="7" />
-                @if (picked().size) {
-                  <ellipse class="jam-surface" cx="60" cy="26" rx="40" ry="6.4" [attr.fill]="tint().tint" opacity="0.5" />
-                  <ellipse class="jam-swirl" cx="60" cy="26" rx="26" ry="4" fill="none" [attr.stroke]="tint().tintEdge" stroke-width="1.4" opacity="0.55" />
-                }
-                @for (f of potFruits(); track f.key) {
-                  <g class="pot-fruit" [attr.transform]="'translate(' + f.x + ' ' + f.y + ') rotate(' + f.rot + ')'">
-                    <g appFruit [fruit]="f.spec" [scale]="0.8" />
-                  </g>
-                }
-                <path class="pot-handle" d="M 14 30 Q 2 32 8 42" />
-                <path class="pot-handle" d="M 106 30 Q 118 32 112 42" />
-                <g class="flame" aria-hidden="true">
-                  <path d="M 52 82 Q 56 74 60 82 Q 64 74 68 82" />
-                </g>
-              </svg>
+              <app-cooking-pot [fruits]="potFruits()" [tint]="tint()" [stirring]="stirring()" />
               <span class="pot-tag" [class.quiet]="!picked().size">
                 {{ picked().size ? derivedName() : i18n.t().cosecha.potEmpty }}
               </span>
@@ -202,43 +182,12 @@ import { hash } from '../forest/tree-layout';
     }
 
     .pot-zone,
-    .stove-zone,
     .new-jar {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.3rem;
       margin-bottom: 1rem;
-    }
-
-    .pot-body {
-      fill: color-mix(in srgb, var(--rm-bark) 55%, var(--surface-2));
-      stroke: color-mix(in srgb, var(--text) 40%, transparent);
-      stroke-width: 1.4;
-    }
-
-    .pot-mouth {
-      fill: color-mix(in srgb, var(--rm-bark) 30%, var(--surface));
-      stroke: color-mix(in srgb, var(--text) 35%, transparent);
-      stroke-width: 1.2;
-    }
-
-    .pot-handle {
-      fill: none;
-      stroke: color-mix(in srgb, var(--text) 45%, transparent);
-      stroke-width: 2.2;
-      stroke-linecap: round;
-    }
-
-    .pot-fruit {
-      animation: pot-drop 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) both;
-    }
-
-    @keyframes pot-drop {
-      from {
-        transform: translate(var(--tx, 0), -26px) scale(0.5);
-        opacity: 0;
-      }
     }
 
     .pot-tag {
@@ -299,72 +248,6 @@ import { hash } from '../forest/tree-layout';
       flex-wrap: wrap;
     }
 
-    /* beat 2 — soft fire + steam; play, never a gate */
-    .flame path {
-      fill: none;
-      stroke: color-mix(in srgb, #e8964f 75%, var(--surface));
-      stroke-width: 2.4;
-      stroke-linecap: round;
-      animation: flame-breathe 2.6s ease-in-out infinite;
-    }
-
-    @keyframes flame-breathe {
-      0%,
-      100% {
-        opacity: 0.55;
-      }
-      50% {
-        opacity: 0.95;
-      }
-    }
-
-    .wisp {
-      fill: none;
-      stroke: color-mix(in srgb, var(--text) 25%, transparent);
-      stroke-width: 1.6;
-      stroke-linecap: round;
-      animation: wisp-rise 3.4s ease-in-out infinite;
-    }
-
-    .wisp.w2 {
-      animation-delay: 1.7s;
-    }
-
-    @keyframes wisp-rise {
-      0% {
-        transform: translateY(4px);
-        opacity: 0;
-      }
-      40% {
-        opacity: 0.6;
-      }
-      100% {
-        transform: translateY(-7px);
-        opacity: 0;
-      }
-    }
-
-    .pot.stirring .jam-swirl {
-      animation: swirl 0.9s ease-in-out;
-    }
-
-    @keyframes swirl {
-      0% {
-        transform: rotate(0deg);
-      }
-      50% {
-        transform: rotate(8deg) scale(0.94);
-      }
-      100% {
-        transform: rotate(0deg);
-      }
-    }
-
-    .jam-swirl {
-      transform-origin: 60px 26px;
-      transform-box: view-box;
-    }
-
     .pour-in {
       animation: soft-grow 0.5s ease both;
     }
@@ -399,17 +282,8 @@ import { hash } from '../forest/tree-layout';
       }
     }
 
-    :host-context(.reduce-motion) {
-      .pot-fruit,
-      .pour-in {
-        animation: none;
-      }
-
-      .flame path,
-      .wisp {
-        animation: none;
-        opacity: 0.5;
-      }
+    :host-context(.reduce-motion) .pour-in {
+      animation: none;
     }
   `,
 })
