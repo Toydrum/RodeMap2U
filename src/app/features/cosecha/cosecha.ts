@@ -228,8 +228,14 @@ export class CosechaPage {
     return this.monthWordOf(preserve.madeAt);
   }
 
-  /** Lifetime register count — ALL fruits; it can never decrease. */
+  /** Lifetime register count — ALL fruits; it can never decrease. Gates the
+   *  tea door (memories are sippable wherever they live); the hero line
+   *  speaks for the JAR instead (freshCount, 0.0.105). */
   protected readonly total = computed(() => this.harvests.all().length);
+
+  /** What the hero jar actually holds: fresh fruits — not yet jammed, not
+   *  stored in a promised jar. The number matches the picture. */
+  protected readonly freshCount = computed(() => this.harvests.fresh().length);
 
   protected toggle(id: string): void {
     this.openId.set(this.openId() === id ? null : id);

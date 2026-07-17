@@ -210,7 +210,7 @@ export const EN: Dict = {
     emptyHint: 'When you mark a branch as bloomed, its fruit will appear here.',
     monthTitle: 'The {month} harvest',
     harvestedOn: 'on {date}',
-    total: { one: '{count} fruit in your harvest', many: '{count} fruits in your harvest' },
+    total: { one: '{count} fruit waiting in the jar', many: '{count} fruits waiting in the jar' },
     settingsLink: 'The preserving house',
     settingsHint: 'Your fruits, your jams and your tea — nothing spent, everything kept',
     freshReady: 'The jar is ready for the next harvest.',

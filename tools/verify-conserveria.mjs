@@ -155,8 +155,15 @@ ok(
     shelfName === 'La mermelada de mis exámenes',
   `jars=${before.jars}→${after.jars} fruits=${before.harvests}→${after.harvests} name="${shelfName.slice(0, 22)}"`,
 );
+// D2 (0.0.105, owner ask): the hero line speaks for the JAR — fresh fruits
+// only (the picture it sits under); the lifetime count lives in the register.
+const freshAfter = after.harvests - after.preserved;
 const totalLine = ((await page.locator('.total-line').textContent().catch(() => '')) ?? '').trim();
-ok('D2 lifetime count counts the register', totalLine.includes(String(after.harvests)), `"${totalLine}"`);
+ok(
+  'D2 hero line counts the jar (fresh), not the lifetime register',
+  totalLine.includes(String(freshAfter)) && totalLine.includes('frasco') && !totalLine.includes(String(after.harvests)),
+  `"${totalLine}" fresh=${freshAfter} lifetime=${after.harvests}`,
+);
 
 // register chip: the jammed fruit says where it lives now
 const chip = await page.locator('.jar-chip').count();

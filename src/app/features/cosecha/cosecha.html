@@ -9,11 +9,13 @@
     <div class="hero-jar" aria-hidden="true">
       <app-meadow-jar [fruits]="harvests.fresh()" [size]="1.8" />
     </div>
-    @if (total()) {
-      <p class="total-line">{{ i18n.plural(total(), i18n.t().cosecha.total) }}</p>
-      @if (!harvests.fresh().length && jamShelf().length) {
-        <p class="fresh-ready">{{ i18n.t().cosecha.freshReady }}</p>
-      }
+    <!-- The line under the jar describes THE JAR (0.0.105, owner ask): the
+         fresh fruits it actually draws — jammed/promised ones live in their
+         jars, and the lifetime count keeps its home in the register below. -->
+    @if (freshCount()) {
+      <p class="total-line">{{ i18n.plural(freshCount(), i18n.t().cosecha.total) }}</p>
+    } @else if (jamShelf().length) {
+      <p class="fresh-ready">{{ i18n.t().cosecha.freshReady }}</p>
     }
     <!-- Primary doors: make jam + tea. «Prometer un frasco» is a quieter
          secondary affordance below (0.0.94 — both are fruit→jar). -->

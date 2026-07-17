@@ -212,7 +212,7 @@ export const ES = {
     emptyHint: 'Cuando marques una rama como florecida, su fruta aparecerá aquí.',
     monthTitle: 'La cosecha de {month}',
     harvestedOn: 'el {date}',
-    total: { one: '{count} fruta en tu cosecha', many: '{count} frutas en tu cosecha' },
+    total: { one: '{count} fruta esperando en el frasco', many: '{count} frutas esperando en el frasco' },
     settingsLink: 'La conservería',
     settingsHint: 'Tus frutas, tus mermeladas y tu té — nada se gasta, todo se conserva',
     freshReady: 'El frasco está listo para la próxima cosecha.',
