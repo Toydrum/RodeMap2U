@@ -26,7 +26,7 @@
         <button
           type="button"
           class="btn btn-ghost tree-archive"
-          (click)="archiving.set(true)"
+          (click)="askArchive()"
           [attr.aria-label]="i18n.t().tree.archiveAction"
           [title]="i18n.t().tree.archiveAction"
         >🗃</button>
@@ -189,6 +189,17 @@
         [confirmLabel]="i18n.t().tree.archiveCta"
         (cancelled)="archiving.set(false)"
         (confirmed)="archiveTree()"
+      />
+    }
+
+    <!-- «La despedida» (0.0.107): a fruited tree closes with the SAME elixir
+         ceremony as the meadow door — the farewell never depends on which
+         🗃 you touched. -->
+    @if (farewelling()) {
+      <app-despedida-sheet
+        [tree]="t"
+        (closed)="farewelling.set(false)"
+        (keep)="keepFarewell($event)"
       />
     }
   </div>

@@ -109,5 +109,59 @@ const plainF = await page.locator('.confirm').count();
 const despedidaF = await page.locator('.despedida-sheet').count();
 ok('F fruitless tree keeps the plain confirm (no despedida)', plainF === 1 && despedidaF === 0, `confirm=${plainF} despedida=${despedidaF}`);
 
+// G — «la despedida pareja» (0.0.107): the TREE-VIEW 🗃 walks the SAME
+// farewell as the meadow door (the 0.0.88 status-picker lesson — same act,
+// different control, same ceremony). Undo restores tree + removes the vial.
+await page.keyboard.press('Escape'); // leave F's plain confirm
+await page.waitForTimeout(300);
+await page.goto(`${BASE}/tree/demo-health`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+await page.locator('.tree-archive').click();
+await page.waitForTimeout(500);
+const despedidaG = await page.locator('.despedida-sheet').count();
+const plainG = await page.locator('.confirm').count();
+await page.fill('#carry-field', 'que cuidarme también cuenta');
+await page.locator('.keep-farewell').click();
+await page.waitForTimeout(800);
+const afterG = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const idb = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const get = (store) => new Promise((res, rej) => {
+    const req = idb.transaction(store, 'readonly').objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  const [trees, preserves] = await Promise.all([get('trees'), get('preserves')]);
+  idb.close();
+  return {
+    archived: !!trees.find((t) => t.id === 'demo-health')?.archivedAt,
+    elixir: preserves.find((p) => p.kind === 'elixir' && p.treeId === 'demo-health' && !p.deletedAt) ?? null,
+  };
+});
+// Deshacer: the tree comes back and the vial dissolves.
+await page.locator('.toast button', { hasText: 'Deshacer' }).click();
+await page.waitForTimeout(700);
+const undoneG = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const idb = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const get = (store) => new Promise((res, rej) => {
+    const req = idb.transaction(store, 'readonly').objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  });
+  const [trees, preserves] = await Promise.all([get('trees'), get('preserves')]);
+  idb.close();
+  return {
+    restored: !trees.find((t) => t.id === 'demo-health')?.archivedAt,
+    elixirGone: !preserves.find((p) => p.kind === 'elixir' && p.treeId === 'demo-health' && !p.deletedAt),
+  };
+});
+ok(
+  'G tree-view 🗃 walks the same despedida (distill + undo restores)',
+  despedidaG === 1 && plainG === 0 && afterG.archived && !!afterG.elixir &&
+    afterG.elixir.carry === 'que cuidarme también cuenta' && undoneG.restored && undoneG.elixirGone,
+  `despedida=${despedidaG} confirm=${plainG} archived=${afterG.archived} elixir=${!!afterG.elixir} undo=${undoneG.restored}/${undoneG.elixirGone}`,
+);
+
 console.log('elixir done');
 await browser.close();

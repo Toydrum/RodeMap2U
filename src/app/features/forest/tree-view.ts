@@ -12,6 +12,11 @@ import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { Feeling, TreeNode } from '../../core/db/schema';
 import { Cadence } from '../../core/cadence';
 import { CadencePicker } from '../node-detail/cadence-picker';
+import { HarvestsRepo } from '../../core/repos/harvests.repo';
+import { ConserveriaService } from '../../core/conserveria.service';
+import { deriveAccent } from '../../core/harvest';
+import { jamTint } from './flora';
+import { DespedidaSheet } from './despedida-sheet';
 import { TreeCanvas } from './tree-canvas';
 import { TreeOutline } from './tree-outline';
 import { SceneBackdrop } from './scene-backdrop';
@@ -23,7 +28,7 @@ import { VisitSession } from '../../core/visit/visit-session';
 
 @Component({
   selector: 'app-tree-view',
-  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip, ConfirmSheet, CadencePicker],
+  imports: [RouterLink, TreeCanvas, TreeOutline, SceneBackdrop, WeatherFront, NodeDetail, DateReview, SheetDirective, HintChip, ConfirmSheet, CadencePicker, DespedidaSheet],
   templateUrl: './tree-view.html',
   styleUrl: './tree-view.scss',
 })
@@ -279,6 +284,24 @@ export class TreeViewPage {
     void this.router.navigate(this.backLink());
   }
 
+  /** «La despedida» must not depend on the DOOR (0.0.107 — the 0.0.88
+   *  status-picker lesson: same act, different control, different ceremony =
+   *  predictability wound): archiving a FRUITED tree from its own page walks
+   *  the same farewell as the meadow's 🗃. */
+  private readonly harvests = inject(HarvestsRepo);
+  private readonly conserveria = inject(ConserveriaService);
+  protected readonly farewelling = signal(false);
+
+  private boreFruit(): boolean {
+    const tree = this.tree();
+    return !!tree && this.harvests.all().some((h) => h.treeId === tree.id);
+  }
+
+  protected askArchive(): void {
+    if (this.boreFruit()) this.farewelling.set(true);
+    else this.archiving.set(true);
+  }
+
   /** "Delete" the compass way: the tree rests in the archive, recoverable. */
   protected async archiveTree(): Promise<void> {
     const tree = this.tree();
@@ -290,6 +313,37 @@ export class TreeViewPage {
         message: this.i18n.fill(this.i18n.t().tree.archivedToast, { name: tree.name }),
         actionLabel: this.i18n.t().common.undo,
         action: () => void this.trees.restore(tree),
+      },
+      UNDO_MS,
+    );
+    void this.router.navigate(['/forest']);
+  }
+
+  /** Mirror of forest.keepFarewell: archive + distill in one gesture; undo
+   *  restores the tree and removes the elixir. */
+  protected async keepFarewell(carry: string): Promise<void> {
+    const tree = this.tree();
+    this.farewelling.set(false);
+    if (!tree || tree.archivedAt) return;
+    const fruits = this.harvests.all().filter((h) => h.treeId === tree.id);
+    const tint = jamTint(fruits.map((f) => f.accent));
+    await this.trees.archive(tree);
+    const elixir = await this.conserveria.distill({
+      name: tree.name,
+      treeId: tree.id,
+      carry,
+      accent: deriveAccent(fruits),
+      tint: tint.tint,
+      tintEdge: tint.tintEdge,
+    });
+    this.toast.show(
+      {
+        message: this.i18n.t().cosecha.elixir.minted,
+        actionLabel: this.i18n.t().common.undo,
+        action: () => {
+          void this.trees.restore(tree);
+          void this.conserveria.undistill(elixir.id);
+        },
       },
       UNDO_MS,
     );
