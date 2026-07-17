@@ -666,6 +666,13 @@
       color: var(--text-faint);
       white-space: nowrap;
     }
+
+    /* the still mini-spiral: this tree holds living rituals (0.0.104) */
+    .sign-spiral {
+      width: 13px;
+      height: 13px;
+      vertical-align: -2px;
+    }
   }
 
   &:hover .sign {

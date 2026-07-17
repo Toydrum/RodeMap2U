@@ -59,33 +59,37 @@
       <p class="hint">{{ i18n.t().almanaque.caminitoHint }}</p>
     }
 
-    <!-- Las piedritas de hoy (0.0.103): single-act rituals as loose stones.
-         The strip ALWAYS renders — the ghost stone is a creation door. -->
+    <!-- Las espirales de hoy (0.0.103, respun 0.0.104): single-act rituals
+         as touchable SPIRALS — the ritual symbol shared with the tree canvas.
+         The shelf ALWAYS renders — the ghost ＋ is a creation door. -->
     <h3 class="part-title">{{ i18n.t().almanaque.piedritasTitle }}</h3>
-    <div class="card piedritas">
-      <div class="stones loose" role="list">
+    <div class="card spiral-shelf">
+      <div class="spiral-row" role="list">
         @for (stone of stones(); track stone.node.id) {
           @if (stone.bloomed) {
-            <span class="alm-stone bloomed piedrita-stone" role="listitem" [attr.aria-label]="stone.node.title">
-              <svg viewBox="-10 -10 20 20" aria-hidden="true">
-                <g appFlower [flower]="specOf(stone.tree)" [scale]="0.62" />
+            <span class="spiral-stone bloomed" role="listitem" [attr.aria-label]="stone.node.title">
+              <svg viewBox="-14 -14 28 28" aria-hidden="true">
+                <g appFlower [flower]="specOf(stone.tree)" [scale]="0.72" />
               </svg>
-              <span class="stone-caption">{{ stone.node.title }}</span>
+              <span class="spiral-title">{{ stone.node.title }}</span>
             </span>
           } @else {
             <button
               type="button"
-              class="alm-stone next piedrita-stone"
+              class="spiral-stone next"
               (click)="bloomStone(stone.node, $event)"
               [attr.aria-label]="stone.node.title"
             >
-              <span class="stone-title">{{ stone.node.title }}</span>
+              <svg viewBox="-14 -14 28 28" aria-hidden="true">
+                <g appSpiral [tint]="specOf(stone.tree).petalEdge" />
+              </svg>
+              <span class="spiral-title">{{ stone.node.title }}</span>
             </button>
           }
         }
         <button
           type="button"
-          class="alm-stone piedrita-add"
+          class="spiral-add"
           (click)="openSowing()"
           [attr.aria-label]="i18n.t().almanaque.piedritaAdd"
         >＋</button>

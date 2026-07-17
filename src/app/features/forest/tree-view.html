@@ -137,7 +137,7 @@
                 {{ i18n.t().tree.repeatOnce }}
               </button>
               <button type="button" class="repeat-chip repeat-ritual" [class.selected]="!!plantCadence()" [attr.aria-pressed]="!!plantCadence()" (click)="plantCadence.set(plantCadence() ?? 'daily')">
-                🌄 {{ i18n.t().tree.repeatRitual }}
+                🌀 {{ i18n.t().tree.repeatRitual }}
               </button>
             </div>
             @if (plantCadence(); as c) {

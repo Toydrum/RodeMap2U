@@ -48,6 +48,18 @@
     border-color: var(--primary);
     color: var(--primary);
   }
+
+  /* the ritual chip: mini-spiral + the rhythm in words (0.0.104) */
+  .ritual-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    .chip-spiral {
+      width: 14px;
+      height: 14px;
+    }
+  }
 }
 
 .hint-line {

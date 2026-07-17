@@ -13,6 +13,7 @@ import { Cadence } from '../../core/cadence';
 import { inputValue } from '../../shared/ui/dom';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { CadencePicker } from '../node-detail/cadence-picker';
+import { SpiralGlyph } from '../forest/spiral';
 import { hash } from '../forest/tree-layout';
 import { FlowerSpec, flowerFor } from '../forest/flora';
 import { FlowerGlyph } from '../forest/flower';
@@ -49,7 +50,7 @@ interface CellGlyph {
  */
 @Component({
   selector: 'app-almanaque',
-  imports: [FlowerGlyph, DateReview, HintChip, SheetDirective, CadencePicker],
+  imports: [FlowerGlyph, SpiralGlyph, DateReview, HintChip, SheetDirective, CadencePicker],
   templateUrl: './almanaque.html',
   styleUrl: './almanaque.scss',
 })

@@ -9,7 +9,9 @@ import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { isPast } from '../../core/time';
 import { Cadence, cadenceOf } from '../../core/cadence';
+import { ritualKind } from '../../core/harvest';
 import { CadencePicker } from './cadence-picker';
+import { SpiralGlyph } from '../forest/spiral';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
 import { HarvestSkyService } from '../../shared/ui/harvest-sky';
@@ -32,7 +34,7 @@ const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '�
 
 @Component({
   selector: 'app-node-detail',
-  imports: [BranchFlow, CadencePicker, SheetDirective, ConfirmSheet],
+  imports: [BranchFlow, CadencePicker, SpiralGlyph, SheetDirective, ConfirmSheet],
   templateUrl: './node-detail.html',
   styleUrl: './node-detail.scss',
 })
@@ -314,6 +316,20 @@ export class NodeDetail {
 
   /** «El ritmo» (0.0.103): the branch's cadence, read ONLY via cadenceOf. */
   protected readonly cadence = computed(() => cadenceOf(this.node()));
+
+  /** «Un ritual no se desmenuza» (0.0.104, owner rule): a ritual LEAF is a
+   *  small act that repeats — the Pasitos section and Desmenuzar hide. */
+  protected readonly isRitualLeaf = computed(() => ritualKind(this.node()) === 'leaf');
+
+  /** The rhythm in words for the header chip — «Cada día», «L J», «Cada semana». */
+  protected cadenceWords(): string {
+    const c = this.cadence();
+    if (!c) return '';
+    const dict = this.i18n.t().cadence;
+    if (c === 'daily') return dict.daily;
+    if (c === 'weekly') return dict.weekly;
+    return c.map((d) => dict.weekdayLetters[d]).join(' ');
+  }
 
   /** Toggle on = daily by default; toggle off = clearing the rhythm (a
    *  ritual leaf RETIRES this way — its standing bloom then mints). Every

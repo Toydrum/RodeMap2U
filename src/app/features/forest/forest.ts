@@ -28,12 +28,13 @@ import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { SettingsService } from '../../core/repos/settings.service';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { AccentToken, Feeling, Tree } from '../../core/db/schema';
-import { deriveAccent } from '../../core/harvest';
+import { deriveAccent, ritualKind } from '../../core/harvest';
 import { ConserveriaService } from '../../core/conserveria.service';
 import { DespedidaSheet } from './despedida-sheet';
 import { hash } from './tree-layout';
 import { MiniTree } from './mini-tree';
 import { SceneBackdrop } from './scene-backdrop';
+import { SpiralGlyph } from './spiral';
 import { WeatherFront } from './weather-front';
 import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { FlowerSpec, flowerFor, jamTint } from './flora';
@@ -51,7 +52,7 @@ const ACCENTS: AccentToken[] = ['moss', 'sage', 'sky', 'clay', 'lavender', 'sand
  */
 @Component({
   selector: 'app-forest',
-  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet, DespedidaSheet],
+  imports: [RouterLink, MiniTree, SceneBackdrop, WeatherFront, FlowerGlyph, SpiralGlyph, SheetDirective, PerchBody, HintChip, ConfirmSheet, FinderSheet, DespedidaSheet],
   templateUrl: './forest.html',
   styleUrl: './forest.scss',
   // Drag listeners live on the document: live reordering moves the grip in
@@ -633,6 +634,14 @@ export class ForestPage {
   protected hasSun(treeId: string): boolean {
     return (this.nodes.byTree().get(treeId) ?? []).some(
       (n) => n.priority === 'sunlit' && (n.status === 'seed' || n.status === 'growing'),
+    );
+  }
+
+  /** «La espiral» (0.0.104): this tree holds living rituals — the sign wears
+   *  the still mini-spiral, same pattern as the ☀️. */
+  protected hasRituals(treeId: string): boolean {
+    return (this.nodes.byTree().get(treeId) ?? []).some(
+      (n) => ritualKind(n) !== null && n.status !== 'achieved' && n.status !== 'resting',
     );
   }
 

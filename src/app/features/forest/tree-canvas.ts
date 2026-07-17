@@ -12,7 +12,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
-import { bearsNoFruit } from '../../core/harvest';
+import { bearsNoFruit, ritualKind } from '../../core/harvest';
+import { SpiralGlyph } from './spiral';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
@@ -90,7 +91,7 @@ interface EdgeView {
  */
 @Component({
   selector: 'app-tree-canvas',
-  imports: [FlowerGlyph, FruitGlyph, PerchBody, RouterLink],
+  imports: [FlowerGlyph, FruitGlyph, SpiralGlyph, PerchBody, RouterLink],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
   // Closes the little note letter when tapping anywhere else (never preventDefault).
@@ -382,6 +383,13 @@ export class TreeCanvas {
 
   protected statusColor(node: TreeNode): string {
     return `var(--status-${node.status})`;
+  }
+
+  /** «La espiral» (0.0.104): a ritual (lone leaf OR sendero parent) wears
+   *  the spiral+star-dust glyph while pending — the SAME symbol walked in
+   *  the almanaque. One predicate with the fruit law (harvest.ts). */
+  protected isRitual(node: TreeNode): boolean {
+    return ritualKind(node) !== null;
   }
 
   /** Cosmetic hover zone only — taps resolve via the canvas-level nearest

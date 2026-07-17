@@ -11,6 +11,14 @@
       @if (isCurrent()) {
         <span class="chip here">📍 {{ i18n.t().tree.youAreHere }}</span>
       }
+      @if (cadence()) {
+        <span class="chip ritual-chip">
+          <svg class="chip-spiral" viewBox="-14 -14 28 28" aria-hidden="true">
+            <g appSpiral [animated]="false" [scale]="0.9" />
+          </svg>
+          {{ cadenceWords() }}
+        </span>
+      }
       <button type="button" class="btn btn-ghost close" (click)="closed.emit()" [attr.aria-label]="i18n.t().common.close">✕</button>
     </div>
 
@@ -158,7 +166,7 @@
          clean itself); a steps parent = classic sendero. -->
     <label class="flow-toggle repeats-toggle">
       <input type="checkbox" [checked]="!!cadence()" (change)="toggleRepeats()">
-      🌄 {{ i18n.t().node.repeatsToggle }}
+      🌀 {{ i18n.t().node.repeatsToggle }}
     </label>
     @if (cadence(); as c) {
       <app-cadence-picker class="node-cadence" [value]="c" (changed)="setCadence($event)" />
@@ -166,15 +174,19 @@
       <p class="hint fruit-law-hint">{{ i18n.t().node.ritualFruitLaw }}</p>
     }
 
-    <!-- Steps -->
-    <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
-    @if (children().length > 1 || flowSteps()) {
-      <label class="flow-toggle order-toggle">
-        <input type="checkbox" [checked]="flowSteps()" (change)="toggleFlow()">
-        {{ i18n.t().node.flowToggle }}
-      </label>
-      @if (flowSteps()) {
-        <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
+    <!-- Steps. A ritual LEAF is a small act that repeats — it doesn't
+         crumble into pasitos (0.0.104, owner rule): the whole section hides
+         (pre-existing children below still show; nothing is destroyed). -->
+    @if (!isRitualLeaf()) {
+      <h2 class="steps-title">{{ i18n.t().node.steps }}</h2>
+      @if (children().length > 1 || flowSteps()) {
+        <label class="flow-toggle order-toggle">
+          <input type="checkbox" [checked]="flowSteps()" (change)="toggleFlow()">
+          {{ i18n.t().node.flowToggle }}
+        </label>
+        @if (flowSteps()) {
+          <p class="hint flow-hint">{{ i18n.t().node.flowHint }}</p>
+        }
       }
     }
     @if (children().length) {
@@ -209,23 +221,25 @@
         }
       </ul>
     }
-    <form class="add-step" (submit)="$event.preventDefault(); addStep()">
-      <input
-        #stepInput
-        type="text"
-        [value]="stepTitle()"
-        (input)="stepTitle.set(inputValue($event))"
-        [placeholder]="i18n.t().node.stepPlaceholder"
-        maxlength="80"
-        [attr.aria-label]="i18n.t().node.addStep"
-      >
-      <button type="submit" class="btn btn-soft" [disabled]="!stepTitle().trim()">+</button>
-    </form>
-    @if (canCrumble()) {
-      <button type="button" class="btn btn-ghost crumble-cta" (click)="startCrumble()">
-        🔪 {{ i18n.t().crumble.cta }}
-      </button>
-      <span class="hint">{{ i18n.t().crumble.ctaHint }}</span>
+    @if (!isRitualLeaf()) {
+      <form class="add-step" (submit)="$event.preventDefault(); addStep()">
+        <input
+          #stepInput
+          type="text"
+          [value]="stepTitle()"
+          (input)="stepTitle.set(inputValue($event))"
+          [placeholder]="i18n.t().node.stepPlaceholder"
+          maxlength="80"
+          [attr.aria-label]="i18n.t().node.addStep"
+        >
+        <button type="submit" class="btn btn-soft" [disabled]="!stepTitle().trim()">+</button>
+      </form>
+      @if (canCrumble()) {
+        <button type="button" class="btn btn-ghost crumble-cta" (click)="startCrumble()">
+          🔪 {{ i18n.t().crumble.cta }}
+        </button>
+        <span class="hint">{{ i18n.t().crumble.ctaHint }}</span>
+      }
     }
 
     <!-- Meta -->

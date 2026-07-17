@@ -207,6 +207,41 @@ console.log(
   `D ritual leaf: repeats=${leaf?.repeats} shadow=${leaf?.shadow === true} chipDaily=${dailyChipD === 1} reset=${afterD.status === 'seed' && afterD.achievedAt === null} fruits=${afterD.fruits} | OK=${leaf?.repeats === 'daily' && leaf?.shadow === true && dailyChipD === 1 && afterD.status === 'seed' && afterD.fruits === 0}`,
 );
 
+// D2 — «un ritual no se desmenuza» (0.0.104): the ritual leaf's sheet hides
+// the Pasitos input and the Desmenuzar button (a steps sendero keeps both);
+// the header wears the ritual chip with the rhythm in words.
+await page.locator('.tree-outline-toggle').click();
+await page.waitForTimeout(400);
+const leafRow = page.locator('.outline-rail .row', { hasText: 'Regar las plantas' }).first();
+// the tablita spiral-mark must be read BEFORE opening the sheet (it closes the rail)
+const leafSpiralRow = await leafRow.locator('.spiral-mark').count();
+await leafRow.click();
+await page.waitForTimeout(250);
+await leafRow.click(); // second tap opens the sheet
+await page.waitForTimeout(500);
+const leafAddStep = await page.locator('.add-step').count();
+const leafCrumble = await page.locator('.crumble-cta').count();
+const leafChip = await page.locator('.ritual-chip').count();
+console.log(
+  `D2 ritual leaf: no add-step=${leafAddStep === 0} no crumble=${leafCrumble === 0} chip=${leafChip === 1} tablita-spiral=${leafSpiralRow === 1} | OK=${leafAddStep === 0 && leafCrumble === 0 && leafChip === 1 && leafSpiralRow === 1}`,
+);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+// the sendero path keeps its pasitos affordances (open via the tablita too —
+// planting the leaf reflowed the canvas, so the old center is stale; the
+// rail closed when the leaf sheet opened, so toggle it back on)
+await page.locator('.tree-outline-toggle').click();
+await page.waitForTimeout(400);
+const pathRow = page.locator('.outline-rail .row', { hasText: 'Mañanas' }).first();
+await pathRow.click();
+await page.waitForTimeout(250);
+await pathRow.click();
+await page.waitForTimeout(500);
+const pathAddStep = await page.locator('.add-step').count();
+console.log(`D3 sendero path keeps add-step: ${pathAddStep === 1} | OK=${pathAddStep === 1}`);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+
 // E — weekday cadences, deterministic on ANY run day: a leaf scheduled on
 // TODAY's weekday resets a stale bloom; one scheduled TOMORROW does not.
 const eSetup = await page.evaluate(async () => {

@@ -2,6 +2,8 @@ import { Component, computed, effect, inject, input, output, signal, untracked }
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { NodePriority, Tree, TreeNode, lightRank } from '../../core/db/schema';
+import { ritualKind } from '../../core/harvest';
+import { SpiralGlyph } from './spiral';
 
 interface OutlineRow {
   node: TreeNode;
@@ -26,6 +28,7 @@ const AUTO_COLLAPSE_AT = 12;
  */
 @Component({
   selector: 'app-tree-outline',
+  imports: [SpiralGlyph],
   template: `
     <div class="head">
       <h2>{{ i18n.t().tree.outlineTitle }}</h2>
@@ -76,6 +79,11 @@ const AUTO_COLLAPSE_AT = 12;
               <span class="idx">{{ row.index }}.</span>
             }
             <span class="name" [class.done]="row.node.status === 'achieved'">{{ row.node.title }}</span>
+            @if (isRitual(row.node)) {
+              <svg class="spiral-mark" viewBox="-14 -14 28 28" aria-hidden="true">
+                <g appSpiral [animated]="false" [scale]="0.9" />
+              </svg>
+            }
             @if (isSunlit(row.node)) {
               <span class="sun-badge" aria-hidden="true">☀️</span>
             }
@@ -221,6 +229,13 @@ const AUTO_COLLAPSE_AT = 12;
         font-size: 0.72rem;
       }
 
+      /* the still mini-spiral: this row is a living ritual (0.0.104) */
+      .spiral-mark {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 auto;
+      }
+
       .pin {
         font-size: 0.8rem;
       }
@@ -348,6 +363,11 @@ export class TreeOutline {
 
   protected isLive(node: TreeNode): boolean {
     return node.status === 'seed' || node.status === 'growing';
+  }
+
+  /** «La espiral» (0.0.104): this row is a ritual (leaf or sendero parent). */
+  protected isRitual(node: TreeNode): boolean {
+    return ritualKind(node) !== null;
   }
 
   /** The badge honors the ask: sun shows, shade deliberately doesn't (it

@@ -238,6 +238,11 @@
                 @if (hasSun(tree.id)) {
                   <span class="sign-sun" [title]="i18n.t().light.sunlit">☀️</span>
                 }
+                @if (hasRituals(tree.id)) {
+                  <svg class="sign-spiral" viewBox="-14 -14 28 28" aria-hidden="true">
+                    <g appSpiral [animated]="false" [scale]="0.9" />
+                  </svg>
+                }
               </span>
             </span>
           </a>

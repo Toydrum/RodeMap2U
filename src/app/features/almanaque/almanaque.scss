@@ -130,38 +130,76 @@
   background: color-mix(in srgb, var(--rm-bark) 32%, transparent);
 }
 
-/* «Las piedritas de hoy» (0.0.103): loose single-ritual stones + the ghost
-   creation stone. Same stone grammar, no dirt gaps (they're loose). */
-.piedritas .stones.loose {
-  gap: 0.55rem;
+/* «Las espirales de hoy» (0.0.104): touchable spiral chips — a fixed pill
+   (never a stretching blob) with the shared nebula glyph. The card carries
+   its OWN padding (base .card has none — the 0.0.103 bug). */
+.spiral-shelf {
+  padding: 0.7rem 0.9rem;
 }
 
-.piedrita-stone {
-  &.bloomed {
-    flex-direction: column;
-    padding: 0.3rem 0.55rem;
-    gap: 0.1rem;
+.spiral-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-    .stone-caption {
-      font-size: 0.72rem;
+.spiral-stone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.75rem 0.28rem 0.4rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+
+  svg {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+  }
+
+  .spiral-title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.next {
+    cursor: pointer;
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    }
+  }
+
+  &.bloomed {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+
+    .spiral-title {
       color: var(--text-dim);
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 500;
     }
   }
 }
 
-.piedrita-add {
-  cursor: pointer;
+.spiral-add {
+  width: 38px;
+  height: 38px;
+  border: 1.5px dashed var(--border);
+  border-radius: 50%;
+  background: none;
   font: inherit;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-faint);
-  border-style: dashed;
-  background: none;
-  padding: 0.3rem 0.7rem;
+  cursor: pointer;
 
   &:hover {
     border-color: var(--primary);
