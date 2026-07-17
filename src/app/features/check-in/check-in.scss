@@ -305,14 +305,16 @@
 
 @media (max-width: 560px) {
   .ring {
-    /* The radius must never outgrow the viewport: box = r·2 + 130px, so cap r
-       at the width that keeps the whole ring on screen (36vmin alone measured
-       410px of ring on a 390px phone — the page panned sideways). */
-    --ring-r: min(150px, 36vmin, calc((100vw - 140px) / 2));
+    /* The radius must never outgrow the viewport: box = r·2 + 130px AND the
+       page pads ~22px per side, so the chrome is ~174px total. 36vmin alone
+       measured 410px of ring on a 390px phone — the page panned sideways. */
+    --ring-r: min(150px, 36vmin, calc((100vw - 174px) / 2));
 
     &.crowded {
-      /* Same law for the interleaved rings: box = r·2.28 + 120px. */
-      --ring-r: min(150px, 30vmin, calc((100vw - 124px) / 2.28));
+      /* The interleaved rings keep their 0.0.39 radius: shrinking it to fit
+         the padding pushed mini overlap past verify-ring's bar — the two-ring
+         layout tolerates its slight bleed better than crushed minis. */
+      --ring-r: clamp(96px, 30vmin, 190px);
     }
   }
 
