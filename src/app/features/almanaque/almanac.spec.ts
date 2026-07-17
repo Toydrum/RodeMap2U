@@ -183,6 +183,25 @@ describe('marksFor — the golden rule', () => {
     const marks2 = marksFor([t], byTree([t], [retired]), [], TODAY);
     expect(marks2.get('2026-07-05')!.flowers).toHaveLength(1);
   });
+
+  it('«la historia se queda» (0.0.106): a bloom frozen before the cadence KEEPS its month mark', () => {
+    const t = tree('t1');
+    // Converted to a ritual on TODAY; s1 bloomed long before — frozen history.
+    const parent = node('camino', 't1', { flow: 'steps', repeats: 'daily', repeatsSetAt: noonOf(TODAY) });
+    const s1 = node('s1', 't1', { parentId: 'camino', status: 'achieved', achievedAt: noonOf('2026-07-03') });
+    const sub = node('sub', 't1', { parentId: 's1', status: 'achieved', achievedAt: noonOf('2026-07-02') });
+    const s2 = node('s2', 't1', { parentId: 'camino', status: 'seed' });
+    const ids = senderoStepIds([t], byTree([t], [parent, s1, sub, s2]));
+    expect(ids.has('s1')).toBe(false); // frozen — keeps its mark
+    expect(ids.has('sub')).toBe(false); // its subtree is the same old story
+    expect(ids.has('s2')).toBe(true); // the ritual's own walk stays markless
+    const marks = marksFor([t], byTree([t], [parent, s1, sub, s2]), [], TODAY);
+    expect(marks.get('2026-07-03')!.flowers).toHaveLength(1);
+    // Legacy ritual (no stamp): nothing frozen — pre-v11 behavior intact.
+    const legacy = node('camino', 't1', { flow: 'steps', repeatsDaily: true });
+    const legacyIds = senderoStepIds([t], byTree([t], [legacy, s1, s2]));
+    expect(legacyIds.has('s1')).toBe(true);
+  });
 });
 
 describe('upcoming — soft words, never numbers', () => {
@@ -253,6 +272,16 @@ describe('caminitos', () => {
     const parent = node('camino', 't1', { flow: 'steps', repeatsDaily: true, status: 'resting' });
     const s1 = node('s1', 't1', { parentId: 'camino' });
     expect(caminitos([t], byTree([t], [parent, s1]), TODAY)).toHaveLength(0);
+  });
+
+  it('frozen pre-cadence blooms are history, not stones — the walk shows only what came after', () => {
+    const t = tree('t1');
+    const parent = node('camino', 't1', { flow: 'steps', repeats: 'daily', repeatsSetAt: noonOf(TODAY) });
+    const frozen = node('f1', 't1', { parentId: 'camino', order: 10, status: 'achieved', achievedAt: noonOf('2026-07-03') });
+    const open = node('o1', 't1', { parentId: 'camino', order: 20, status: 'seed' });
+    const [c] = caminitos([t], byTree([t], [parent, frozen, open]), TODAY);
+    expect(c.steps.map((s) => s.id)).toEqual(['o1']);
+    expect(c.nextId).toBe('o1');
   });
 
   it('orders steps by walking order and points «siguiente» at the first open stone', () => {

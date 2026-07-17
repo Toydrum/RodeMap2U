@@ -2,6 +2,7 @@
   <section class="hero">
     <h1>🌾 {{ i18n.t().almanaque.title }}</h1>
     <p class="subtitle">{{ i18n.t().almanaque.subtitle }}</p>
+    <a routerLink="/ahora" class="btn btn-ghost ahora-door" [title]="i18n.t().nav.ahoraDoor">🧭 {{ i18n.t().nav.ahora }}</a>
   </section>
 
   <app-hint-chip surface="almanaque" [text]="i18n.t().hints.almanaque" />

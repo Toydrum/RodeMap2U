@@ -305,7 +305,15 @@
 
 @media (max-width: 560px) {
   .ring {
-    --ring-r: clamp(104px, 36vmin, 150px);
+    /* The radius must never outgrow the viewport: box = r·2 + 130px, so cap r
+       at the width that keeps the whole ring on screen (36vmin alone measured
+       410px of ring on a 390px phone — the page panned sideways). */
+    --ring-r: min(150px, 36vmin, calc((100vw - 140px) / 2));
+
+    &.crowded {
+      /* Same law for the interleaved rings: box = r·2.28 + 120px. */
+      --ring-r: min(150px, 30vmin, calc((100vw - 124px) / 2.28));
+    }
   }
 
   .ring-tree {

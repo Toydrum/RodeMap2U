@@ -20,10 +20,10 @@ ok('A passed date stays on its day + banner in Hoy', banner === 1 && leafCells >
 
 // B — build a sendero via IDB (parent → steps+repeatsDaily), reload: the
 // caminito appears; «siguiente» blooms with Deshacer.
-await page.evaluate(async () => {
+const senderoTitleB = await page.evaluate(async () => {
   const open = indexedDB.open('roadmap2u');
   const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
-  await new Promise((res, rej) => {
+  const title = await new Promise((res, rej) => {
     const tx = db.transaction('nodes', 'readwrite');
     const os = tx.objectStore('nodes');
     const all = os.getAll();
@@ -34,10 +34,13 @@ await page.evaluate(async () => {
         if (!r.parentId) continue;
         byParent.set(r.parentId, [...(byParent.get(r.parentId) ?? []), r]);
       }
+      // Skip parents that are already rituals — the 0.0.106 demo seed ships
+      // its own caminito; this probe builds a sendero of its OWN.
       const parent = rows.find(
         (r) =>
           (byParent.get(r.id) ?? []).length >= 2 &&
-          (r.status === 'seed' || r.status === 'growing'),
+          (r.status === 'seed' || r.status === 'growing') &&
+          !r.repeatsDaily && r.repeats == null,
       );
       if (!parent) throw new Error('no live parent with 2+ children in demo');
       parent.flow = 'steps';
@@ -48,28 +51,31 @@ await page.evaluate(async () => {
         child.achievedAt = null;
         os.put(child);
       }
-      tx.oncomplete = () => res();
+      tx.oncomplete = () => res(parent.title);
     };
     all.onerror = rej;
   });
   db.close();
+  return title;
 });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
 
-const stones = await page.locator('.alm-stone').count();
-const nextStone = page.locator('.alm-stone.next');
+// Scope to OUR caminito — the demo seed walks its own since 0.0.106.
+const ownCaminito = page.locator('.caminito', { hasText: senderoTitleB });
+const stones = await ownCaminito.locator('.alm-stone').count();
+const nextStone = ownCaminito.locator('.alm-stone.next');
 const hadNext = (await nextStone.count()) === 1;
 await nextStone.click();
 await page.waitForTimeout(500);
 const toastText = (await page.locator('.toast').textContent().catch(() => '')) ?? '';
-const bloomedNow = await page.locator('.alm-stone.bloomed').count();
+const bloomedNow = await ownCaminito.locator('.alm-stone.bloomed').count();
 ok('B caminito blooms from the stone', stones >= 2 && hadNext && toastText.includes('floreció') && bloomedNow >= 1, `stones=${stones} toast="${toastText.trim().slice(0, 40)}"`);
 
 await page.locator('.toast button', { hasText: 'Deshacer' }).click();
 await page.waitForTimeout(500);
-const nextBack = (await page.locator('.alm-stone.next').count()) === 1;
-const bloomedAfterUndo = await page.locator('.alm-stone.bloomed').count();
+const nextBack = (await ownCaminito.locator('.alm-stone.next').count()) === 1;
+const bloomedAfterUndo = await ownCaminito.locator('.alm-stone.bloomed').count();
 ok('B2 Deshacer restores the stone', nextBack && bloomedAfterUndo === 0, `next=${nextBack} bloomed=${bloomedAfterUndo}`);
 
 // C — the day page: open yesterday's cell (it holds the passed capullo —

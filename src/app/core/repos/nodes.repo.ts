@@ -2,6 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import { NodeStatus, TreeNode, lightRank, newSyncBase, stamp } from '../db/schema';
 import { StoreName } from '../db/idb';
 import { RecordsRepo } from './records.repo';
+import { Cadence, cadenceOf } from '../cadence';
 import { isPast } from '../time';
 
 export interface NewNodeDraft {
@@ -89,10 +90,29 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       origin: 'planned',
       archivedAt: null,
       trigger: null,
-      // A ritual planted at intent time — with the compat shadow mirrored.
-      ...(draft.repeats != null ? { repeats: draft.repeats, repeatsDaily: true } : {}),
+      // A ritual planted at intent time — compat shadow mirrored, freeze
+      // boundary stamped (a newborn has no history, but the stamp keeps
+      // every ritual under one law).
+      ...(draft.repeats != null ? { repeats: draft.repeats, repeatsDaily: true, repeatsSetAt: Date.now() } : {}),
     };
     return this.insert(node);
+  }
+
+  /** THE cadence writer (cadenceOf is the one reader; this + plant are the
+   *  only writers). Mirrors the repeatsDaily compat shadow; stamps
+   *  repeatsSetAt on the null→rhythm transition («la historia se queda» —
+   *  the freeze boundary), keeps it when the rhythm merely changes kind,
+   *  clears it with the cadence. `wake` re-seeds an anciently-bloomed leaf
+   *  IN THE USER'S HANDS (the caller asked first) — never overnight. */
+  async setCadence(node: TreeNode, c: Cadence | null, wake = false): Promise<TreeNode> {
+    const first = c != null && !cadenceOf(node);
+    return this.save({
+      ...node,
+      repeats: c,
+      repeatsDaily: c != null,
+      repeatsSetAt: c == null ? null : first ? Date.now() : (node.repeatsSetAt ?? null),
+      ...(wake ? { status: 'seed' as const, achievedAt: null } : {}),
+    });
   }
 
   async setStatus(node: TreeNode, status: NodeStatus): Promise<TreeNode> {

@@ -75,7 +75,7 @@ import { fruitFor } from '../forest/flora';
             @if (rewardWord()) {
               <p class="earned-premio">«{{ rewardWord() }}»</p>
             }
-            <p class="earned-sub">{{ i18n.fill(i18n.t().cosecha.earnedSub, { month: monthWord() }) }}</p>
+            <p class="earned-sub">{{ i18n.fill(elixir() ? i18n.t().cosecha.distilledSub : i18n.t().cosecha.earnedSub, { month: monthWord() }) }}</p>
           </div>
 
           @if (sipRow(); as row) {

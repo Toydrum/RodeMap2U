@@ -171,7 +171,7 @@
     @if (cadence(); as c) {
       <app-cadence-picker class="node-cadence" [value]="c" (changed)="setCadence($event)" />
       <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
-      <p class="hint fruit-law-hint">{{ i18n.t().node.ritualFruitLaw }}</p>
+      <p class="hint fruit-law-hint">{{ isRitualLeaf() ? i18n.t().node.ritualFruitLawLeaf : i18n.t().node.ritualFruitLawPath }}</p>
     }
 
     <!-- Steps. A ritual LEAF is a small act that repeats — it doesn't
@@ -272,6 +272,17 @@
     [confirmLabel]="i18n.t().tree.archiveCta"
     (cancelled)="confirmingArchive.set(false)"
     (confirmed)="archive()"
+  />
+}
+
+@if (confirmingWake()) {
+  <app-confirm-sheet
+    icon="🌀"
+    [title]="i18n.fill(i18n.t().node.wakeRitualTitle, { title: node().title })"
+    [body]="i18n.t().node.wakeRitualBody"
+    [confirmLabel]="i18n.t().node.wakeRitualCta"
+    (cancelled)="confirmingWake.set(null)"
+    (confirmed)="confirmWake()"
   />
 }
 

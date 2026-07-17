@@ -17,6 +17,14 @@
     margin: 0;
     color: var(--text-dim);
   }
+
+  // The quiet door home (0.0.106) — the almanac is a tab page, so it gets
+  // its compass chip in the hero instead of a «Volver» header.
+  .ahora-door {
+    display: inline-flex;
+    margin-top: 0.45rem;
+    text-decoration: none;
+  }
 }
 
 .part {

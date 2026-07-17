@@ -4,7 +4,14 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v10: additive TreeNode.repeats («las piedritas» 0.0.103 — recurring
+/** v11: additive TreeNode.repeatsSetAt («la historia se queda» 0.0.106):
+ *  stamped when a branch FIRST gains a cadence (kept when the rhythm merely
+ *  changes kind; cleared with the cadence). Blooms from BEFORE that day are
+ *  FROZEN HISTORY — the ritual sweep never resets them and the month keeps
+ *  painting them (converting a lived branch used to silently un-achieve its
+ *  past). Absent on legacy rituals ≡ nothing frozen (pre-v11 behavior). No
+ *  migration pass; DB_VERSION stays 3.
+ *  v10: additive TreeNode.repeats («las piedritas» 0.0.103 — recurring
  *  rituals grow up): cadence 'daily' | 'weekly' | Weekday[] | null on ANY
  *  branch — a lone branch with a cadence is a «ritual leaf» that itself
  *  dawns clean; a steps parent with one keeps the classic sendero. Absent ≡
@@ -43,7 +50,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -175,6 +182,14 @@ export interface TreeNode extends SyncBase {
    *  precedent). Same laws as senderos: NO history, NO streaks, NO counts.
    *  Read ONLY through cadenceOf() (core/cadence.ts). */
   repeats?: 'daily' | 'weekly' | Weekday[] | null;
+  /** «La historia se queda» (0.0.106, v11): when this branch FIRST gained
+   *  its cadence. Blooms stamped before that DAY are frozen history — the
+   *  sweep never resets them, the month keeps their marks, the caminito
+   *  walks only what came after (frozenBeforeCadence in core/cadence.ts is
+   *  the ONE reader). Kept when the rhythm changes kind; cleared with the
+   *  cadence; absent on legacy rituals ≡ nothing frozen. As intimate as
+   *  `repeats` — STRIPPED on non-guardian visits. */
+  repeatsSetAt?: number | null;
   /** «La luz» (see NodePriority). Optional: records born before v4 lack it
    *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
    *  is the forever-default; `null` clears an earlier choice. */

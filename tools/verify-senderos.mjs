@@ -97,6 +97,13 @@ const backdated = await page.evaluate(async () => {
           store.put(rec);
           n++;
         }
+        // «La historia se queda» (0.0.106): the UI stamped repeatsSetAt TODAY,
+        // which would freeze a backdated bloom — backdate the cadence too
+        // (the ritual existed before the bloom, the classic sweep scenario).
+        if (rec.repeatsSetAt) {
+          rec.repeatsSetAt = yesterday - 48 * 3600 * 1000;
+          store.put(rec);
+        }
       }
       res(n);
     };
@@ -295,6 +302,52 @@ const afterE = await page.evaluate(async () => {
 });
 console.log(
   `E weekday sweep (${eSetup.todayWd}/${eSetup.tomorrowWd}): today-reset=${afterE.todayStatus === 'seed'} tomorrow-held=${afterE.tomorrowStatus === 'achieved'} | OK=${afterE.todayStatus === 'seed' && afterE.tomorrowStatus === 'achieved'}`,
+);
+
+// F — «la historia se queda» (0.0.106): a bloom from BEFORE the cadence day
+// is FROZEN history (the sweep must not reset it); a bloom from AFTER the
+// cadence resets as always. Engine-level via IndexedDB (almanac marks are
+// vitest-covered in almanac.spec).
+await page.evaluate(async () => {
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  const now = Date.now();
+  return new Promise((res) => {
+    const store = db.transaction('nodes', 'readwrite').objectStore('nodes');
+    const all = store.getAll();
+    all.onsuccess = () => {
+      const base = all.result.find((n) => n.title === 'Regar las plantas');
+      const mk = (extra) => ({ ...base, updatedAt: now, rev: 1, targetDate: null, ...extra });
+      // Cadence set TWO days ago; one bloom predates it (frozen), one follows it (resets).
+      store.put(mk({ id: 'vs-f-parent', title: 'Ritual con pasado', parentId: null, flow: 'steps', status: 'growing', achievedAt: null, repeats: 'daily', repeatsDaily: true, repeatsSetAt: now - 48 * 3600 * 1000 }));
+      store.put(mk({ id: 'vs-f-frozen', title: 'Paso ya vivido', parentId: 'vs-f-parent', flow: null, repeats: null, repeatsDaily: false, repeatsSetAt: null, status: 'achieved', achievedAt: now - 72 * 3600 * 1000, order: 10 }));
+      store.put(mk({ id: 'vs-f-new', title: 'Paso del ritual', parentId: 'vs-f-parent', flow: null, repeats: null, repeatsDaily: false, repeatsSetAt: null, status: 'achieved', achievedAt: now - 26 * 3600 * 1000, order: 20 }));
+      res(null);
+    };
+  });
+});
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForTimeout(1200); // boot sweep
+const afterF = await page.evaluate(async () => {
+  const db = await new Promise((res, rej) => {
+    const r = indexedDB.open('roadmap2u');
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+  return new Promise((res) => {
+    const all = db.transaction('nodes', 'readonly').objectStore('nodes').getAll();
+    all.onsuccess = () => {
+      const frozen = all.result.find((n) => n.id === 'vs-f-frozen');
+      const fresh = all.result.find((n) => n.id === 'vs-f-new');
+      res({ frozenStatus: frozen?.status, frozenAt: frozen?.achievedAt, newStatus: fresh?.status });
+    };
+  });
+});
+console.log(
+  `F frozen history stays (0.0.106): frozen-held=${afterF.frozenStatus === 'achieved' && !!afterF.frozenAt} post-cadence-reset=${afterF.newStatus === 'seed'} | OK=${afterF.frozenStatus === 'achieved' && !!afterF.frozenAt && afterF.newStatus === 'seed'}`,
 );
 
 await browser.close();

@@ -1,5 +1,5 @@
 import { CheckIn, Tree, TreeNode } from '../../core/db/schema';
-import { cadenceOf, isScheduledOn, nextScheduledAfter } from '../../core/cadence';
+import { cadenceOf, frozenBeforeCadence, isScheduledOn, nextScheduledAfter } from '../../core/cadence';
 import { ritualKind } from '../../core/harvest';
 import { dayOf, isPast } from '../../core/time';
 
@@ -150,18 +150,23 @@ export function senderoStepIds(
       if (!n.parentId) continue;
       childrenOf.set(n.parentId, [...(childrenOf.get(n.parentId) ?? []), n]);
     }
-    const sweep = (parentId: string) => {
+    const sweep = (parentId: string, root: TreeNode) => {
       for (const child of childrenOf.get(parentId) ?? []) {
         if (ids.has(child.id)) continue;
+        // «La historia se queda» (0.0.106): a bloom frozen before the
+        // cadence KEEPS its month mark — the ritual sweep never erases it,
+        // so painting it is stable history, not vanishing history. Its
+        // subtree belongs to the same old story.
+        if (child.status === 'achieved' && child.achievedAt && frozenBeforeCadence(child.achievedAt, root)) continue;
         ids.add(child.id);
-        sweep(child.id);
+        sweep(child.id, root);
       }
     };
     for (const node of nodes) {
       // ONE law with the fruit-minting guard (core/harvest.ts bearsNoFruit)
       // — the month grid and the jar must never disagree about rituals.
       const kind = ritualKind(node);
-      if (kind === 'path') sweep(node.id);
+      if (kind === 'path') sweep(node.id, node);
       else if (kind === 'leaf') ids.add(node.id);
     }
   }
@@ -294,6 +299,9 @@ export function caminitos(
       if (!isScheduledOn(cadence, today)) continue;
       const steps = nodes
         .filter((n) => n.parentId === parent.id)
+        // Frozen pre-cadence blooms are history, not today's walk — a stone
+        // that reads «done» every morning forever would be a daily lie.
+        .filter((n) => !(n.status === 'achieved' && n.achievedAt && frozenBeforeCadence(n.achievedAt, parent)))
         .sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1));
       if (!steps.length) continue;
       const next = steps.find((s) => s.status === 'seed' || s.status === 'growing');

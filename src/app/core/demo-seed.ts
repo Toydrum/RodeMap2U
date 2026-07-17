@@ -1,4 +1,4 @@
-import { CheckIn, Settings, TimerSession, Tree, TreeNode } from './db/schema';
+import { CheckIn, Harvest, Preserve, Settings, TimerSession, Tree, TreeNode, harvestIdFor } from './db/schema';
 import { dayOf } from './time';
 
 /**
@@ -29,6 +29,10 @@ export const DEMO_TREES: Tree[] = [
   { ...base('demo-health', 30), name: 'Cuidarme', accent: 'rose', order: 20, currentNodeId: null, archivedAt: null },
   { ...base('demo-work', 20), name: 'Proyecto personal', accent: 'sky', order: 30, currentNodeId: null, archivedAt: null },
   { ...base('demo-seedling', 10), name: 'Idea nueva', accent: 'clay', order: 40, currentNodeId: null, archivedAt: null },
+  // A CLOSED chapter (archived — never shows in the meadow): it feeds the
+  // showcase elixir, and the backfill mints its fruits like any lived-in
+  // device (fruit survives archive — «nada se gasta»).
+  { ...base('demo-huerto', 60), name: 'Mi huerto de verano', accent: 'sand', order: 50, currentNodeId: null, archivedAt: now - 6 * day },
 ];
 
 function node(
@@ -71,28 +75,139 @@ export const DEMO_NODES: TreeNode[] = [
     trigger: 'Cuando me sirva el café de la mañana',
   }),
   node('demo-g-weekend', 'demo-guitar', 'demo-g-daily', 'Sesión larga los sábados', 'seed', 20, { origin: 'branch' }),
-  node('demo-g-first-song', 'demo-guitar', 'demo-g-chords', 'Mi primera canción completa', 'growing', 10),
+  node('demo-g-first-song', 'demo-guitar', 'demo-g-chords', 'Mi primera canción completa', 'growing', 10, {
+    updatedAt: now - 0.3 * day, // freshest — leads the destination shortcuts
+    estimateMin: 30, // «brújula del tiempo» fixture
+  }),
   node('demo-g-record', 'demo-guitar', 'demo-g-first-song', 'Grabarme y escucharme', 'seed', 10, {
     priority: 'shade', // «a la sombra» fixture — yields the ambient turn
+    estimateMin: 10,
+  }),
+  // «La espiral» fixture (0.0.104): a single-act ritual leaf — wears the
+  // star-dust spiral on the canvas and turns in «Las espirales de hoy».
+  node('demo-g-tune', 'demo-guitar', 'demo-g-root', 'Afinarla un minutito', 'seed', 40, {
+    repeats: 'daily',
+    repeatsDaily: true,
+    repeatsSetAt: now - 4 * day,
   }),
 
   // Health tree — gentler, smaller
   node('demo-h-root', 'demo-health', null, 'Sentirme mejor', 'growing', 10),
-  node('demo-h-walk', 'demo-health', 'demo-h-root', 'Caminar 3 veces por semana', 'growing', 10, { targetDate: yesterday }),
+  node('demo-h-walk', 'demo-health', 'demo-h-root', 'Caminar 3 veces por semana', 'growing', 10, {
+    targetDate: yesterday,
+    updatedAt: now - 1.8 * day,
+  }),
   node('demo-h-sleep', 'demo-health', 'demo-h-root', 'Dormir antes de las 12', 'resting', 20),
   node('demo-h-water', 'demo-health', 'demo-h-walk', 'Llevar botella de agua', 'achieved', 10),
+  // «Las piedritas» fixture (0.0.103): a classic sendero — the almanaque
+  // walks it as «el caminito de hoy»; the first stone bloomed TODAY (post-
+  // cadence, so the sweep resets it tomorrow — live status = done today).
+  node('demo-h-ritual', 'demo-health', 'demo-h-root', 'Mi ritual de la mañana', 'growing', 30, {
+    flow: 'steps',
+    repeats: 'daily',
+    repeatsDaily: true,
+    repeatsSetAt: now - 5 * day,
+    updatedAt: now - 0.6 * day,
+  }),
+  node('demo-h-r1', 'demo-health', 'demo-h-ritual', 'Tomar un vaso de agua', 'achieved', 10, { achievedAt: now }),
+  node('demo-h-r2', 'demo-health', 'demo-h-ritual', 'Abrir la ventana un momento', 'seed', 20),
+  node('demo-h-r3', 'demo-health', 'demo-h-ritual', 'Escribir una línea de cómo amanezco', 'seed', 30),
 
   // Work tree — young, with one branch asleep long enough to appear
   // in the trail's "Ramas dormidas" section (dormant = 30+ quiet days).
-  node('demo-w-root', 'demo-work', null, 'Lanzar mi proyecto', 'seed', 10),
+  // NOTE: no second trigger fixture here on purpose — a fresher twig would
+  // outrank demo-g-mini's and change Ahora's showcased suggestion (it broke
+  // verify-ahora/priority when tried in 0.0.106).
+  node('demo-w-root', 'demo-work', null, 'Lanzar mi proyecto', 'seed', 10, {
+    updatedAt: now - 1.2 * day,
+  }),
   node('demo-w-idea', 'demo-work', 'demo-w-root', 'Aterrizar la idea en una página', 'growing', 10, {
     createdAt: now - 45 * day,
     updatedAt: now - 45 * day,
     priority: 'sunlit', // «a pleno sol» fixture — standing light, below twigs
   }),
+  // Two bloomed pasitos — their fruits live SEALED in the showcase jam
+  // (DEMO_PRESERVES), so the demo pantry has an alacena from minute one.
+  node('demo-w-name', 'demo-work', 'demo-w-root', 'Elegir el nombre', 'achieved', 20, { achievedAt: now - 8 * day }),
+  node('demo-w-domain', 'demo-work', 'demo-w-root', 'Apartar el dominio', 'achieved', 30, { achievedAt: now - 8 * day }),
 
-  // Single-branch baby tree (sapling rendering check)
+  // Single-branch baby tree (sapling rendering check). Deliberately the ONE
+  // fruitless tree — verify-undo archives it without tripping the elixir.
   node('demo-s-root', 'demo-seedling', null, 'Explorar esta idea', 'seed', 10),
+
+  // The closed chapter behind the elixir (archived tree — meadow never
+  // shows it; the register and the brindis still savor its fruits).
+  node('demo-o-root', 'demo-huerto', null, 'Cuidar mi huerto', 'growing', 10),
+  node('demo-o-tomates', 'demo-huerto', 'demo-o-root', 'Cosechar los primeros jitomates', 'achieved', 10, { achievedAt: now - 9 * day }),
+  node('demo-o-macetas', 'demo-huerto', 'demo-o-root', 'Armar las macetas', 'achieved', 20, { achievedAt: now - 20 * day }),
+];
+
+/**
+ * The showcase conservería (0.0.106 «el escaparate»): one sealed jam with a
+ * premio, one promised jar mid-fill, one farewell elixir. Backfill mints the
+ * FRESH fruits (it skips ids that already exist and never sets homes), so
+ * only the HOMED rows are seeded here — same deterministic 'h:'+nodeId ids.
+ */
+function fruit(
+  nodeId: string,
+  treeId: string,
+  treeName: string,
+  accent: Tree['accent'],
+  title: string,
+  harvestedAt: number,
+  preserveId: string,
+): Harvest {
+  return { ...base(harvestIdFor(nodeId), 8), nodeId, treeId, treeName, accent, title, harvestedAt, preserveId };
+}
+
+export const DEMO_HARVESTS: Harvest[] = [
+  fruit('demo-w-name', 'demo-work', 'Proyecto personal', 'sky', 'Elegir el nombre', now - 8 * day, 'demo-jam-1'),
+  fruit('demo-w-domain', 'demo-work', 'Proyecto personal', 'sky', 'Apartar el dominio', now - 8 * day, 'demo-jam-1'),
+  fruit('demo-h-water', 'demo-health', 'Cuidarme', 'rose', 'Llevar botella de agua', now - 3 * day, 'demo-promise-1'),
+];
+
+export const DEMO_PRESERVES: Preserve[] = [
+  {
+    ...base('demo-jam-1', 4),
+    kind: 'mermelada',
+    name: 'Mermelada de los primeros pasos',
+    madeAt: now - 4 * day,
+    accent: 'sky',
+    tint: '#79a8cf',
+    tintEdge: '#527ea5',
+    size: 'frasquito',
+    premio: 'una tarde de películas, sin culpa',
+    savedFor: null,
+    openedAt: null,
+    sealedAt: now - 4 * day,
+  },
+  {
+    ...base('demo-promise-1', 2),
+    kind: 'mermelada',
+    name: 'Para celebrar mi proyecto',
+    madeAt: now - 2 * day,
+    accent: null,
+    tint: '#b9a3d4',
+    tintEdge: '#8f7ab0',
+    size: 'frasco',
+    premio: 'un libro nuevo, elegido sin prisa',
+    savedFor: null,
+    openedAt: null,
+    plannedAt: now - 2 * day,
+    sealedAt: null,
+  },
+  {
+    ...base('demo-elixir-1', 6),
+    kind: 'elixir',
+    name: 'Mi huerto de verano',
+    madeAt: now - 6 * day,
+    accent: 'sand',
+    tint: '#d9b26a',
+    tintEdge: '#b78f4a',
+    openedAt: null,
+    carry: 'que cuidar algo vivo también me cuida a mí',
+    treeId: 'demo-huerto',
+  },
 ];
 
 export const DEMO_CHECKINS: CheckIn[] = [

@@ -19,7 +19,9 @@
 
         @if (lastNote(); as letter) {
           <div class="past-note">
-            <span class="from">🍂 {{ i18n.t().checkIn.pastNote }} — {{ lastNoteDate() }}</span>
+<!-- 💌 = notita (emoji law): 🍂 means «a date passed» everywhere else — the
+     most delicate sign in the system must never touch the past-self letter. -->
+            <span class="from">💌 {{ i18n.t().checkIn.pastNote }} — {{ lastNoteDate() }}</span>
             <p class="words">«{{ letter.note }}»</p>
           </div>
         }

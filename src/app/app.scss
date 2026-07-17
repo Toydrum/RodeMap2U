@@ -51,8 +51,13 @@ main {
 .toast {
   position: fixed;
   bottom: calc(88px + env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
+  /* Inset centering: left:50% capped shrink-to-fit at ~50vw and crushed the
+     message to one word per line on phones — never center a fixed toast with
+     a transform. */
+  left: 1rem;
+  right: 1rem;
+  width: fit-content;
+  margin-inline: auto;
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -63,19 +68,23 @@ main {
 
   .msg {
     font-size: 0.92rem;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .small {
     min-height: 40px;
     padding: 0.35rem 0.9rem;
     font-size: 0.85rem;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 }
 
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(10px);
+    transform: translateY(10px);
   }
 }
 

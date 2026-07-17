@@ -7,7 +7,7 @@ import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
-import { isPast } from '../../core/time';
+import { dayOf, isPast, today } from '../../core/time';
 import { Cadence, cadenceOf } from '../../core/cadence';
 import { ritualKind } from '../../core/harvest';
 import { CadencePicker } from './cadence-picker';
@@ -338,8 +338,32 @@ export class NodeDetail {
     await this.setCadence(this.cadence() ? null : 'daily');
   }
 
+  /** «La historia se queda» (0.0.106): giving a rhythm to a leaf that
+   *  bloomed on an EARLIER day would leave a flower reading «done today»
+   *  forever — waking it (re-seed, fruit kept) is part of the choice, so
+   *  the door asks first. Same-day blooms are the ritual's first period. */
+  protected readonly confirmingWake = signal<Cadence | null>(null);
+
   protected async setCadence(c: Cadence | null): Promise<void> {
-    await this.nodes.update(this.node(), { repeats: c, repeatsDaily: c != null });
+    const n = this.node();
+    const needsWake =
+      c != null &&
+      !cadenceOf(n) &&
+      n.flow !== 'steps' &&
+      n.status === 'achieved' &&
+      n.achievedAt != null &&
+      dayOf(n.achievedAt) < today();
+    if (needsWake) {
+      this.confirmingWake.set(c);
+      return;
+    }
+    await this.nodes.setCadence(n, c);
+  }
+
+  protected async confirmWake(): Promise<void> {
+    const c = this.confirmingWake();
+    this.confirmingWake.set(null);
+    if (c) await this.nodes.setCadence(this.node(), c, true);
   }
 
   protected async moveStep(child: TreeNode, dir: -1 | 1): Promise<void> {

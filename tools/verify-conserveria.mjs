@@ -78,13 +78,13 @@ ok(
 );
 
 // B — sendero stone: act burst only, never the harvest layer.
-await page.evaluate(async () => {
+const senderoTitleB = await page.evaluate(async () => {
   const open = indexedDB.open('roadmap2u');
   const db = await new Promise((res, rej) => {
     open.onsuccess = () => res(open.result);
     open.onerror = rej;
   });
-  await new Promise((res, rej) => {
+  const title = await new Promise((res, rej) => {
     const tx = db.transaction('nodes', 'readwrite');
     const os = tx.objectStore('nodes');
     const all = os.getAll();
@@ -95,10 +95,13 @@ await page.evaluate(async () => {
         if (!r.parentId) continue;
         byParent.set(r.parentId, [...(byParent.get(r.parentId) ?? []), r]);
       }
+      // Skip parents that are already rituals — the 0.0.106 demo seed ships
+      // its own caminito, and this probe needs a sendero of its OWN.
       const parent = rows.find(
         (r) =>
           (byParent.get(r.id) ?? []).length >= 2 &&
-          (r.status === 'seed' || r.status === 'growing'),
+          (r.status === 'seed' || r.status === 'growing') &&
+          !r.repeatsDaily && r.repeats == null,
       );
       if (!parent) throw new Error('no live parent with 2+ children in demo');
       parent.flow = 'steps';
@@ -109,15 +112,17 @@ await page.evaluate(async () => {
         child.achievedAt = null;
         os.put(child);
       }
-      tx.oncomplete = () => res();
+      tx.oncomplete = () => res(parent.title);
     };
     all.onerror = rej;
   });
   db.close();
+  return title;
 });
 await page.goto(`${BASE}/almanaque`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
-await page.locator('.alm-stone.next').click();
+// Scope to OUR caminito — the demo seed walks its own since 0.0.106.
+await page.locator('.caminito', { hasText: senderoTitleB }).locator('.alm-stone.next').click();
 await page.waitForTimeout(300);
 const burstB = await page.locator('.bloom-burst').count();
 const skyB = await page.locator('.petal-fall').count();
@@ -391,8 +396,14 @@ await page.waitForTimeout(300);
 // Q (0.0.95 — INVERTED): a memory jar (no premio) NOW opens to a gentle SAVOR
 // — it was stuck (no open, no remove). No «Te lo ganaste», no empty «»; it
 // empties and moves to «Las disfrutadas».
-await page.locator('.jam-shelf-jar').last().click(); // oldest = J's memory jar
+await page.locator('.alacena .jam-shelf-jar').last().click(); // oldest = J's memory jar
 await page.waitForTimeout(400);
+// 0.0.106: the demo alacena ships demo-jam-1 (older AND premio'd) — if the
+// oldest jar wears a premio chip, J's memory jar sits just before it.
+if (await page.locator('.jar-panel .premio-chip').count()) {
+  await page.locator('.alacena .jam-shelf-jar').nth(-2).click();
+  await page.waitForTimeout(400);
+}
 const qOpenBtn = await page.locator('.open-jam-btn').count();
 const qNoChip = (await page.locator('.jar-panel .premio-chip').count()) === 0;
 await page.locator('.open-jam-btn').click();
@@ -414,7 +425,7 @@ await page.waitForTimeout(300);
 
 // M — the claiming ceremony: openedAt stamps, the rain falls in the jam's
 // tint, «Te lo ganaste» speaks, and Deshacer re-closes.
-await page.locator('.jam-shelf-jar').first().click(); // newest = L's premio jar
+await page.locator('.alacena .jam-shelf-jar').first().click(); // newest = L's premio jar
 await page.waitForTimeout(400);
 const premioChip = await page.locator('.premio-chip').count();
 await page.locator('.open-jam-btn').click();
@@ -460,7 +471,7 @@ ok(
 await page.emulateMedia({ reducedMotion: 'reduce' });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(800);
-await page.locator('.jam-shelf-jar').first().click();
+await page.locator('.alacena .jam-shelf-jar').first().click();
 await page.waitForTimeout(400);
 await page.locator('.open-jam-btn').click();
 await page.waitForTimeout(600);
@@ -488,7 +499,9 @@ const enjoyedJars = await page.locator('.disfrutadas .jam-shelf-jar').count();
 const enjoyedLiquid = await page.locator('.disfrutadas .jam-liquid').count();
 ok(
   'S disfrutadas fold by default, open on toggle, jars empty + off the alacena',
-  alacenaJars === 0 && foldedJars === 0 && enjoyedJars === 2 && enjoyedLiquid === 0,
+  // alacena === 1: the 0.0.106 demo seed ships demo-jam-1 (sealed, never
+  // opened by this probe) — both PROBE jars must still leave the alacena.
+  alacenaJars === 1 && foldedJars === 0 && enjoyedJars === 2 && enjoyedLiquid === 0,
   `alacena=${alacenaJars} folded=${foldedJars} open=${enjoyedJars} liquid=${enjoyedLiquid}`,
 );
 
@@ -823,7 +836,7 @@ await page.waitForTimeout(3200);
 await page.locator('.toast button', { hasText: '✕' }).click().catch(() => {}); // dismiss made toast
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
-await page.locator('.jam-shelf-jar', { hasText: '' }).first().click();
+await page.locator('.alacena .jam-shelf-jar').first().click();
 await page.waitForTimeout(400);
 const premioChipY = await page.locator('.premio-chip').count();
 await page.locator('.open-jam-btn').click();

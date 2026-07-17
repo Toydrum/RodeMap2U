@@ -4,10 +4,12 @@
 
   <!-- Header floats over the sky -->
   <header class="head container">
-    <span class="brand">
+<!-- The brand is the standing door back to /ahora (0.0.106 — the home had
+     ZERO walk-up doors once its tab became the Conservería). -->
+    <a routerLink="/ahora" class="brand" [title]="i18n.t().nav.ahoraDoor" [attr.aria-label]="i18n.t().nav.ahoraDoor">
       <img src="icons/logo.svg" alt="" width="34" height="34">
       <h1>{{ i18n.t().forest.title }}</h1>
-    </span>
+    </a>
     <span class="head-actions">
       @if (trees.active().length) {
         <button

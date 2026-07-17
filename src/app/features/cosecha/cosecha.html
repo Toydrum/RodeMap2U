@@ -1,6 +1,7 @@
 <div class="container page" (keydown.escape)="onEscape()">
   <header class="head">
     <button type="button" class="btn btn-ghost" (click)="goBack()">← {{ i18n.t().common.back }}</button>
+    <a routerLink="/ahora" class="btn btn-ghost ahora-door" [title]="i18n.t().nav.ahoraDoor">🧭 {{ i18n.t().nav.ahora }}</a>
   </header>
 
   <div class="hero">

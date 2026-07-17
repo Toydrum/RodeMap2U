@@ -36,9 +36,10 @@ async function centers(p) {
     [...document.querySelectorAll('.outline-rail .line')].map((r) => parseInt(r.style.paddingLeft)),
   );
   const hasDepth = new Set(indents).size >= 3;
-  // Small tree (8 ≤ 12): everything arrives expanded — no ▸ anywhere.
+  // Small tree (9 ≤ 12): everything arrives expanded — no ▸ anywhere.
+  // (9 rows since 0.0.106: the demo guitar carries the spiral leaf demo-g-tune.)
   const anyFolded = await page.locator('.outline-rail .tri', { hasText: '▸' }).count();
-  console.log(`A rail: rows=${rows} pin=${pinned} depth-levels=${new Set(indents).size} small-tree-expanded=${anyFolded === 0} | OK=${rows === 8 && pinned && hasDepth && anyFolded === 0}`);
+  console.log(`A rail: rows=${rows} pin=${pinned} depth-levels=${new Set(indents).size} small-tree-expanded=${anyFolded === 0} | OK=${rows === 9 && pinned && hasDepth && anyFolded === 0}`);
 
   // B — first tap locates (focus moves, no sheet)
   const row = page.locator('.outline-rail .row', { hasText: 'Grabarme y escucharme' });

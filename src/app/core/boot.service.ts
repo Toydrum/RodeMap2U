@@ -79,6 +79,10 @@ export class BootService {
     await this.nodes.saveMany(demo.DEMO_NODES);
     await this.checkins.saveMany(demo.DEMO_CHECKINS);
     await this.sessions.saveMany(demo.DEMO_SESSIONS);
+    // The showcase conservería (0.0.106): HOMED fruits + their jars land
+    // BEFORE the backfill (it skips existing ids, so homes survive).
+    await this.harvests.saveMany(demo.DEMO_HARVESTS);
+    await this.preserves.saveMany(demo.DEMO_PRESERVES);
     await this.settings.patch(demo.DEMO_SETTINGS_PATCH);
   }
 }

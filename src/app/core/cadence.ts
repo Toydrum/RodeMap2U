@@ -50,6 +50,16 @@ export function shouldReset(c: Cadence, achievedAt: number, today: string): bool
   return dayOf(achievedAt) < lastScheduledOnOrBefore(c, today);
 }
 
+/** «La historia se queda» (0.0.106): a bloom stamped BEFORE the day the
+ *  cadence was set is FROZEN HISTORY — the sweep never resets it, the month
+ *  keeps its mark, the caminito walks only what came after. Day-boundary on
+ *  purpose: a bloom from the conversion day itself belongs to the ritual's
+ *  first period (it resets next period, the natural «hice esto hoy, quiero
+ *  repetirlo» flow). Legacy rituals lack repeatsSetAt ≡ nothing frozen. */
+export function frozenBeforeCadence(achievedAt: number, ritual: TreeNode): boolean {
+  return ritual.repeatsSetAt != null && dayOf(achievedAt) < dayOf(ritual.repeatsSetAt);
+}
+
 /** The next scheduled day strictly after today — for the gentle rest line
  *  («vuelve el jueves»). 'daily'/'weekly' rituals never rest. */
 export function nextScheduledAfter(c: Cadence, today: string): string | null {

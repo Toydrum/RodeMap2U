@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TreeNode } from './db/schema';
 import {
   cadenceOf,
+  frozenBeforeCadence,
   isScheduledOn,
   lastScheduledOnOrBefore,
   nextScheduledAfter,
@@ -98,6 +99,23 @@ describe('shouldReset — the sweep clock', () => {
   });
   it('tue-only walk-ahead: a Monday bloom resets Tuesday morning (no special cases)', () => {
     expect(shouldReset(['tue'], atNoon(MON), '2026-07-14')).toBe(true);
+  });
+});
+
+describe('frozenBeforeCadence — «la historia se queda» (0.0.106)', () => {
+  it('a bloom from an EARLIER day than the cadence is frozen history', () => {
+    const ritual = node({ repeats: 'daily', repeatsSetAt: atNoon(THU) });
+    expect(frozenBeforeCadence(atNoon('2026-07-03'), ritual)).toBe(true);
+  });
+  it('a bloom from the conversion day itself belongs to the first period', () => {
+    const ritual = node({ repeats: 'daily', repeatsSetAt: atNoon(THU) });
+    expect(frozenBeforeCadence(atNoon(THU), ritual)).toBe(false);
+  });
+  it('legacy rituals (no stamp) freeze nothing — pre-v11 behavior intact', () => {
+    const legacy = node({ repeatsDaily: true });
+    expect(frozenBeforeCadence(atNoon('2026-07-03'), legacy)).toBe(false);
+    const cleared = node({ repeats: 'daily', repeatsSetAt: null });
+    expect(frozenBeforeCadence(atNoon('2026-07-03'), cleared)).toBe(false);
   });
 });
 

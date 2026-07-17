@@ -44,6 +44,10 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    // The brand is an <a> now — the door home reads as the title, not a link.
+    text-decoration: none;
+    color: inherit;
+    border-radius: 12px;
 
     img {
       display: block;

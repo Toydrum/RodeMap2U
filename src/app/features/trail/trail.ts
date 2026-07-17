@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CheckinsRepo } from '../../core/repos/checkins.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
@@ -36,6 +36,7 @@ const DORMANT_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 /** "Tus huellas" — the quiet trail of past check-ins. Just for looking. */
 @Component({
   selector: 'app-trail',
+  imports: [RouterLink],
   templateUrl: './trail.html',
   styleUrl: './trail.scss',
 })

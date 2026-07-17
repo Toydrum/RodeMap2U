@@ -1,5 +1,5 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { NodesRepo } from '../../core/repos/nodes.repo';
@@ -50,7 +50,7 @@ interface CellGlyph {
  */
 @Component({
   selector: 'app-almanaque',
-  imports: [FlowerGlyph, SpiralGlyph, DateReview, HintChip, SheetDirective, CadencePicker],
+  imports: [RouterLink, FlowerGlyph, SpiralGlyph, DateReview, HintChip, SheetDirective, CadencePicker],
   templateUrl: './almanaque.html',
   styleUrl: './almanaque.scss',
 })

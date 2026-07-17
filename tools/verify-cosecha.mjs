@@ -147,9 +147,16 @@ await page.waitForTimeout(800);
 await page.locator('.status-row .chip.pick', { hasText: 'Florecida' }).click();
 await page.waitForTimeout(200);
 const burstB = await page.locator('.bloom-burst').count();
-const toastB = ((await page.locator('.toast .msg').textContent().catch(() => '')) ?? '').includes('floreció');
+// With a pending promise jar in the demo (0.0.106), the storage offer
+// REPLACES the plain bloom toast (the 0.0.65 replace rule) — both voices
+// celebrate the same bloom, either is correct here.
+const toastBText = (await page.locator('.toast .msg').textContent().catch(() => '')) ?? '';
+const toastB = toastBText.includes('floreció') || toastBText.includes('guardas');
 const afterB = await harvestCount();
-await page.waitForTimeout(5200); // let the bloom toast breathe out
+// Let the bloom toast AND the queued «¿La guardas en tu frasco…?» offer
+// breathe out — the 0.0.106 demo seed ships a pending promise jar, so every
+// bloom now queues the storage offer behind the celebration (by design).
+await page.waitForTimeout(12500);
 await page.locator('.status-row .chip.pick', { hasText: 'Creciendo' }).click();
 await page.waitForTimeout(400);
 const toastReopen = await page.locator('.toast').count();
@@ -161,13 +168,13 @@ ok(
 );
 
 // E — sendero stones: the burst celebrates the ACT, the pantry stays out.
-await page.evaluate(async () => {
+const senderoTitleE = await page.evaluate(async () => {
   const open = indexedDB.open('roadmap2u');
   const db = await new Promise((res, rej) => {
     open.onsuccess = () => res(open.result);
     open.onerror = rej;
   });
-  await new Promise((res, rej) => {
+  const title = await new Promise((res, rej) => {
     const tx = db.transaction('nodes', 'readwrite');
     const os = tx.objectStore('nodes');
     const all = os.getAll();
@@ -178,10 +185,13 @@ await page.evaluate(async () => {
         if (!r.parentId) continue;
         byParent.set(r.parentId, [...(byParent.get(r.parentId) ?? []), r]);
       }
+      // Skip parents that are already rituals — the 0.0.106 demo seed ships
+      // its own caminito; this probe builds a sendero of its OWN.
       const parent = rows.find(
         (r) =>
           (byParent.get(r.id) ?? []).length >= 2 &&
-          (r.status === 'seed' || r.status === 'growing'),
+          (r.status === 'seed' || r.status === 'growing') &&
+          !r.repeatsDaily && r.repeats == null,
       );
       if (!parent) throw new Error('no live parent with 2+ children in demo');
       parent.flow = 'steps';
@@ -192,16 +202,18 @@ await page.evaluate(async () => {
         child.achievedAt = null;
         os.put(child);
       }
-      tx.oncomplete = () => res();
+      tx.oncomplete = () => res(parent.title);
     };
     all.onerror = rej;
   });
   db.close();
+  return title;
 });
 await page.goto(`${BASE}/almanaque`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
 const beforeStone = await harvestCount();
-await page.locator('.alm-stone.next').click();
+// Scope to OUR caminito — the demo seed walks its own since 0.0.106.
+await page.locator('.caminito', { hasText: senderoTitleE }).locator('.alm-stone.next').click();
 await page.waitForTimeout(200);
 const burstE = await page.locator('.bloom-burst').count();
 const toastE = ((await page.locator('.toast .msg').textContent().catch(() => '')) ?? '').includes('floreció');

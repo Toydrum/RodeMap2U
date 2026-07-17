@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
 import { PreservesRepo } from '../../core/repos/preserves.repo';
@@ -52,6 +52,7 @@ interface JamShelfItem {
 @Component({
   selector: 'app-cosecha',
   imports: [
+    RouterLink,
     FruitGlyph,
     MeadowJar,
     JamJar,
@@ -305,7 +306,8 @@ export class CosechaPage {
     this.claiming.set(null);
     this.toast.show(
       {
-        message: this.i18n.t().cosecha.openedToast,
+        // A farewell toast is a BRINDIS, not an opened jam — same undo window.
+        message: isElixir(preserve) ? this.i18n.t().cosecha.brindadoToast : this.i18n.t().cosecha.openedToast,
         actionLabel: this.i18n.t().common.undo,
         action: () => void this.conserveria.reclose(preserve),
       },
