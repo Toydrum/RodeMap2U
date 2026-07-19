@@ -76,9 +76,9 @@ console.log(`B inside: chip="${chipB?.trim()}" no-⏳=${focusHidden} no-🗃=${a
 // C — co-gardening write: plant a branch; it lands in HIS cloud copy.
 await page.locator('header.bar button', { hasText: 'Plantar' }).click();
 await page.locator('#root-title').fill('Timbre nuevo');
+// Planting closes its own sheet since 0.0.110 — no «Listo» to click.
 await page.locator('form.sheet button[type=submit]').click();
 await page.waitForTimeout(900);
-await page.locator('form.sheet button', { hasText: 'Listo' }).click();
 const cloudRecords = await idbAll('roadmap2u-mockcloud', 'records');
 const planted = cloudRecords.find(
   (r) => r.ownerId === 'mock-child' && r.store === 'nodes' && r.record?.title === 'Timbre nuevo',

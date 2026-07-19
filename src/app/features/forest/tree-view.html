@@ -102,7 +102,6 @@
             <div class="field">
               <label for="root-title">{{ i18n.t().node.titleLabel }}</label>
               <input
-                #plantInput
                 id="root-title"
                 type="text"
                 [value]="newTitle()"
@@ -155,8 +154,10 @@
             <p class="planted-flash">🌱 {{ i18n.plural(plantedCount(), i18n.t().tree.plantedCount) }}</p>
           }
           <div class="row">
+<!-- Always «Cancelar»: committing closes the sheet itself (0.0.110),
+     so «Listo» became unreachable — the ghost is the pre-commit exit only. -->
             <button type="button" class="btn btn-ghost" (click)="closePlanting()">
-              {{ plantedCount() ? i18n.t().common.done : i18n.t().common.cancel }}
+              {{ i18n.t().common.cancel }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="sowMode() ? !sowText().trim() : !newTitle().trim()">
               {{ sowMode() ? i18n.t().sow.sowCta : i18n.t().tree.plant }}

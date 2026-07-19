@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { inputEl, inputValue } from '../../shared/ui/dom';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { HintChip } from '../../shared/ui/hint-chip';
@@ -123,7 +123,6 @@ export class TreeViewPage {
   /** "Varios a la vez": one line = one branch; indent = child of the line above. */
   protected readonly sowMode = signal(false);
   protected readonly sowText = signal('');
-  private readonly plantInput = viewChild<ElementRef<HTMLInputElement>>('plantInput');
   private readonly toast = inject(ToastService);
   private readonly focus = inject(FocusSessionService);
   /** First branch planted this sheet session — the burst invitation's door. */
@@ -218,7 +217,10 @@ export class TreeViewPage {
   /** «El ritmo» at plant time (0.0.103): null = una vez (default). */
   protected readonly plantCadence = signal<Cadence | null>(null);
 
-  /** The sheet stays open: name, Enter, name, Enter — the tree grows behind it. */
+  /** Planting is Enter-shaped (0.0.110, owner ask — the old v32 stay-open
+   *  «name, Enter, name, Enter» law is RETIRED): one title, one commit, and
+   *  the sheet closes so the new branch is the next thing you see. Planting
+   *  several at once is exactly what «Varios a la vez» (sow) is for. */
   protected async plant(): Promise<void> {
     const tree = this.tree();
     const target = this.planting();
@@ -232,7 +234,7 @@ export class TreeViewPage {
     this.burstFirstId ??= node.id;
     this.newTitle.set('');
     this.plantedCount.update((c) => c + 1);
-    this.plantInput()?.nativeElement.focus();
+    this.closePlanting();
   }
 
   /** Brain-dump planting: every line sows a branch; leading tabs (or pairs
