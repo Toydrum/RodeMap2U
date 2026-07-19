@@ -124,7 +124,8 @@ export class NodeDetail {
   );
   protected readonly datePassed = computed(() => {
     const date = this.node().targetDate;
-    return date !== null && isPast(date) && this.node().status !== 'achieved' && this.node().status !== 'branched';
+    // A ritual's date is dead data (0.0.108) — no 🍂 while a cadence is set.
+    return date !== null && isPast(date) && !this.cadence() && this.node().status !== 'achieved' && this.node().status !== 'branched';
   });
   protected readonly focusMinutes = computed(() => this.sessions.totalMinutesFor(this.node().id));
   protected readonly isCurrent = computed(() => this.tree().currentNodeId === this.node().id);

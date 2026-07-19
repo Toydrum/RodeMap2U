@@ -34,7 +34,7 @@ export class ConserveriaService {
    * transaction. Members are re-read live (never captured rows — stale rev
    * loses LWW) and already-preserved fruits are skipped (idempotence).
    * The vessel is a seal-time snapshot (jarSizeFor over the REAL member
-   * count); premio/savedFor are the user's own words, stored verbatim.
+   * count); premio is the user's own words, stored verbatim.
    * Returns the sealed jar, or null if nothing was left to seal.
    */
   async seal(
@@ -44,7 +44,6 @@ export class ConserveriaService {
       tint: string;
       tintEdge: string;
       premio?: string | null;
-      savedFor?: string | null;
     },
   ): Promise<Preserve | null> {
     const members = memberIds
@@ -63,7 +62,8 @@ export class ConserveriaService {
       tintEdge: jar.tintEdge,
       size: jarSizeFor(members.length),
       premio,
-      savedFor: premio ? jar.savedFor?.trim() || null : null,
+      // Severed input (0.0.108) — see promise() below.
+      savedFor: null,
       openedAt: null,
     };
     // stamp() BEFORE the write — raw multi-store puts don't stamp for you
@@ -169,7 +169,6 @@ export class ConserveriaService {
     name: string;
     size: JarVessel;
     premio: string;
-    savedFor?: string | null;
     tint: string;
     tintEdge: string;
   }): Promise<Preserve> {
@@ -185,7 +184,9 @@ export class ConserveriaService {
       tintEdge: fields.tintEdge,
       size: fields.size,
       premio: premio || null,
-      savedFor: premio ? fields.savedFor?.trim() || null : null,
+      // savedFor was severed from every input (0.0.108) — new jars never
+      // carry one; the schema field stays (additive law, legacy data reads).
+      savedFor: null,
       openedAt: null,
       plannedAt: now,
       sealedAt: null,
@@ -220,9 +221,11 @@ export class ConserveriaService {
     return { jar, fruit: placed, filled };
   }
 
-  /** Edit a pending goal jar's words (name/premio/savedFor) — editable while
-   *  it fills, never after seal. premio never blanks (a promise IS its
-   *  reward); savedFor is optional. */
+  /** Edit a pending goal jar's words (name/premio) — editable while it
+   *  fills, never after seal. premio never blanks (a promise IS its reward).
+   *  savedFor was SEVERED from every input (0.0.108) but legacy data must
+   *  survive edits: an UNPASSED savedFor keeps the jar's own (passing it
+   *  used to blank it on every rename — and that wipe traveled by sync). */
   async editPromise(
     preserveId: string,
     fields: { name?: string; premio?: string; savedFor?: string },
@@ -233,7 +236,7 @@ export class ConserveriaService {
       ...jar,
       name: fields.name?.trim() || jar.name,
       premio: fields.premio?.trim() || jar.premio,
-      savedFor: fields.savedFor?.trim() || null,
+      savedFor: fields.savedFor !== undefined ? fields.savedFor.trim() || null : (jar.savedFor ?? null),
     });
   }
 

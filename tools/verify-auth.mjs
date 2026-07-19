@@ -119,7 +119,7 @@ await stage('Una llave para tu bosque').waitFor();
 await page.locator('button', { hasText: 'Quiero una llave nueva' }).click();
 await stage('Crear mi cuenta').waitFor();
 await page.fill('.auth-form input[autocomplete="username"]', 'brisa');
-await page.fill('.auth-form input[autocomplete="name"]', 'Brisa');
+// displayName severed from signup (0.0.108) — the field is gone.
 await page.fill('.auth-form input[type="email"]', 'brisa@demo.bosque');
 const pwFields = page.locator('.auth-form input[type="password"]');
 await pwFields.nth(0).fill('Bosque123');
@@ -130,7 +130,8 @@ await page.fill('.code-input', '123456');
 await page.locator('.auth-form button[type=submit]').click();
 await stage('Tu cuenta').waitFor({ timeout: 8000 });
 const whoB = await page.locator('.who-name').textContent();
-console.log(`B sign-up + code: who=${whoB?.trim()} | OK=${whoB?.trim() === 'Brisa'}`);
+// 0.0.108: no displayName at signup — the profile falls back to the username.
+console.log(`B sign-up + code: who=${whoB?.trim()} | OK=${whoB?.trim() === 'brisa'}`);
 await page.locator('button', { hasText: 'Cerrar sesión' }).click();
 await stage('Una llave para tu bosque').waitFor();
 

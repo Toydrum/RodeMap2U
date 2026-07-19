@@ -111,13 +111,16 @@ export class CognitoAuthProvider implements AuthProvider {
   }): Promise<AuthNext> {
     const auth = await this.lib();
     try {
+      // displayName severed from signup (0.0.108): Cognito rejects EMPTY
+      // attribute values, so `name` travels only when there is one.
+      const name = input.displayName.trim();
       const result = await auth.signUp({
         username: input.username.trim(),
         password: input.password,
         options: {
           userAttributes: {
             email: input.email.trim(),
-            name: input.displayName.trim(),
+            ...(name ? { name } : {}),
           },
         },
       });

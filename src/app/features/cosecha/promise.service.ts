@@ -66,7 +66,6 @@ export class PromiseService {
     name: string;
     size: JarVessel;
     premio: string;
-    savedFor?: string | null;
   }): Promise<Preserve | null> {
     if (this.atLimit()) return Promise.resolve(null);
     return this.conserveria.promise({

@@ -359,7 +359,7 @@
       <form class="sheet card" appSheet (sheetClose)="creating.set(false)" (click)="$event.stopPropagation()" (submit)="$event.preventDefault(); create()">
         <h2>{{ i18n.t().forest.newTree }}</h2>
         <div class="field">
-          <label for="tree-name">{{ i18n.t().forest.treeNamePlaceholder }}</label>
+          <label for="tree-name">{{ i18n.t().forest.treeNameLabel }}</label>
           <input
             id="tree-name"
             type="text"

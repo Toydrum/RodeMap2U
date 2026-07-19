@@ -70,7 +70,7 @@ await page.locator('button', { hasText: 'Cerrar sesión' }).click();
 await page.locator('h1', { hasText: 'Una llave' }).waitFor();
 await page.locator('button', { hasText: 'Quiero una llave nueva' }).click();
 await page.fill('.auth-form input[autocomplete="username"]', 'lupe');
-await page.fill('.auth-form input[autocomplete="name"]', 'Lupe');
+// displayName severed from signup (0.0.108) — the field is gone.
 await page.fill('.auth-form input[type="email"]', 'lupe@demo.bosque');
 const pw = page.locator('.auth-form input[type="password"]');
 await pw.nth(0).fill('Bosque123');
@@ -88,13 +88,13 @@ const outgoing = await page.locator('.amigos-group', { hasText: 'Enviadas' }).lo
 const okC1 = outgoing.some((n) => n.includes('Ámbar'));
 await signInAs('ambar', 'Bosque123');
 await openAmigos();
-await page.locator('.amigos-row', { hasText: 'Lupe' }).locator('button', { hasText: 'Aceptar' }).click();
+await page.locator('.amigos-row', { hasText: 'lupe' }).locator('button', { hasText: 'Aceptar' }).click();
 await page.waitForTimeout(1200);
 const ambarFriends = await page
   .locator('.amigos-group', { hasText: 'Tus amistades' })
   .locator('.amigos-name')
   .allTextContents();
-const okC2 = ambarFriends.some((n) => n.includes('Lupe'));
+const okC2 = ambarFriends.some((n) => n.includes('lupe'));
 console.log(`C request arc: outgoing=${okC1} accepted=${okC2} friends=[${ambarFriends.join('|')}] | OK=${okC1 && okC2}`);
 
 // D — silent decline: Lupe requests Val; Val declines; Lupe's outgoing empties.
@@ -105,7 +105,7 @@ await page.locator('.amigos-redeem button[type=submit]').click();
 await page.waitForTimeout(1200);
 await signInAs('val', 'Bosque123');
 await openAmigos();
-await page.locator('.amigos-row', { hasText: 'Lupe' }).locator('button', { hasText: 'Ahora no' }).click();
+await page.locator('.amigos-row', { hasText: 'lupe' }).locator('button', { hasText: 'Ahora no' }).click();
 await page.waitForTimeout(1200);
 await signInAs('lupe', 'Bosque123');
 await openAmigos();

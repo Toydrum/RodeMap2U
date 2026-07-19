@@ -89,7 +89,6 @@ export class FamiliaCard {
   }
 
   protected readonly newUsername = signal('');
-  protected readonly newDisplayName = signal('');
   protected readonly renameValue = signal('');
   protected readonly acceptCode = signal('');
 
@@ -119,16 +118,15 @@ export class FamiliaCard {
 
   protected openCreate(): void {
     this.newUsername.set('');
-    this.newDisplayName.set('');
     this.openSheet({ kind: 'create' });
   }
 
   protected async submitCreate(): Promise<void> {
     const epoch = this.sheetEpoch;
-    const result = await this.fam.createChild(
-      this.newUsername().trim(),
-      this.newDisplayName().trim(),
-    );
+    // ONE field since 0.0.108: the username (the key the child will type) is
+    // also the display name at birth — the guardian renames any time.
+    const u = this.newUsername().trim();
+    const result = await this.fam.createChild(u, u);
     if (result) this.setSheetLater(epoch, { kind: 'created', ...result });
   }
 

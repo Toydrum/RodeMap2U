@@ -118,21 +118,7 @@ import { EnvasarScene } from './envasar-scene';
                 [placeholder]="i18n.t().cosecha.premioPlaceholder"
               />
             </div>
-            @if (premio().trim()) {
-              <div class="field saved-for-field">
-                <label for="jam-saved-for">{{ i18n.t().cosecha.savedForLabel }}</label>
-                <input
-                  id="jam-saved-for"
-                  type="text"
-                  maxlength="120"
-                  [value]="savedFor()"
-                  (input)="savedFor.set(inputValue($event))"
-                  [placeholder]="i18n.t().cosecha.savedForPlaceholder"
-                />
-              </div>
-            }
-
-            <div class="row-actions">
+<div class="row-actions">
               <button type="button" class="btn btn-ghost" (click)="beat.set(1)">← {{ i18n.t().common.back }}</button>
               <button type="button" class="btn btn-primary seal-btn" [disabled]="sealing()" (click)="seal()">
                 {{ i18n.t().cosecha.saveShelf }}
@@ -258,8 +244,7 @@ import { EnvasarScene } from './envasar-scene';
       margin-bottom: 0.5rem;
     }
 
-    .premio-field,
-    .saved-for-field {
+    .premio-field {
       margin-top: 0.7rem;
 
       label {
@@ -285,7 +270,6 @@ export class MermeladaSheet {
   protected readonly picked = signal<ReadonlySet<string>>(new Set());
   protected readonly jarName = signal('');
   protected readonly premio = signal('');
-  protected readonly savedFor = signal('');
   protected readonly sealing = signal(false);
   protected readonly stirring = signal(false);
 
@@ -389,7 +373,6 @@ export class MermeladaSheet {
         tint: t.tint,
         tintEdge: t.tintEdge,
         premio: this.premio(),
-        savedFor: this.savedFor(),
       });
       if (jar) this.sealed.emit(jar);
       else this.closed.emit();

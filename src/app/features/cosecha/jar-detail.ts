@@ -71,7 +71,6 @@ export class JarDetail {
   protected readonly editOpen = signal(false);
   protected readonly editName = signal('');
   protected readonly editPremio = signal('');
-  protected readonly editSavedFor = signal('');
 
   private rowOf(harvest: Harvest): MemberRow {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
@@ -164,15 +163,15 @@ export class JarDetail {
     const p = this.preserve();
     this.editName.set(p.name);
     this.editPremio.set(p.premio ?? '');
-    this.editSavedFor.set(p.savedFor ?? '');
     this.editOpen.set(true);
   }
 
   protected saveEdit(): void {
+    // savedFor deliberately unpassed (0.0.108) — editPromise preserves a
+    // legacy value when the field doesn't travel.
     void this.promise.edit(this.preserve().id, {
       name: this.editName(),
       premio: this.editPremio(),
-      savedFor: this.editSavedFor(),
     });
     this.editOpen.set(false);
   }

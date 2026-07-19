@@ -85,14 +85,8 @@
                 (input)="newUsername.set(inputValue($event))"
               />
             </label>
-            <label class="field">
-              <span>{{ i18n.t().familia.displayNameLabel }}</span>
-              <input
-                type="text"
-                [value]="newDisplayName()"
-                (input)="newDisplayName.set(inputValue($event))"
-              />
-            </label>
+<!-- ONE name since 0.0.108: the username doubles as the display name at
+     birth; «Cambiarle el nombre» in the child sheet covers the rest. -->
             @if (errorText()) {
               <p class="error-line" role="alert">{{ errorText() }}</p>
             }

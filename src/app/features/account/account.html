@@ -90,15 +90,8 @@
               (input)="username.set(inputValue($event))"
             />
           </label>
-          <label class="field">
-            <span>{{ i18n.t().account.displayName }}</span>
-            <input
-              type="text"
-              autocomplete="name"
-              [value]="displayName()"
-              (input)="displayName.set(inputValue($event))"
-            />
-          </label>
+<!-- displayName severed from signup (0.0.108) — the profile already falls
+     back to the username; one less field at the front door. -->
           <label class="field">
             <span>{{ i18n.t().account.email }}</span>
             <input

@@ -47,7 +47,6 @@ export class AccountPage {
   protected readonly password = signal('');
   protected readonly password2 = signal('');
   protected readonly email = signal('');
-  protected readonly displayName = signal('');
   protected readonly code = signal('');
 
   /** Client-side-only complaint (password mismatch) — not an auth error. */
@@ -104,7 +103,8 @@ export class AccountPage {
       username: this.username().trim(),
       password: this.password(),
       email: this.email().trim(),
-      displayName: this.displayName().trim(),
+      // Severed from signup (0.0.108): providers fall back to the username.
+      displayName: '',
     });
     if (result === 'confirmSignUp') this.step.set('confirmCode');
     else if (result === 'done') this.afterAuth();

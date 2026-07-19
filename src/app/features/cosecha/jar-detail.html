@@ -100,25 +100,21 @@
         [attr.aria-label]="i18n.t().cosecha.premioLabel"
         [placeholder]="i18n.t().cosecha.premioPlaceholder"
       />
-      <input
-        class="edit-savedfor-input"
-        type="text"
-        maxlength="120"
-        [value]="editSavedFor()"
-        (input)="editSavedFor.set(inputValue($event))"
-        [attr.aria-label]="i18n.t().cosecha.savedForLabel"
-        [placeholder]="i18n.t().cosecha.savedForPlaceholder"
-      />
     </div>
   } @else {
     <!-- ONE reward vocabulary for both jar families (0.0.94). The premio chip
-         only shows with a premio; the OPEN door shows for EVERY sealed jar
-         (0.0.95 — memory jars, no premio, were stuck: no open, no remove). -->
-    @if (preserve().premio) {
+         only shows with a premio AND when it differs from the name — since
+         0.0.108 a promise jar is NAMED by its premio, so the chip would just
+         re-quote the header (the 🎀 already lives on the jar art). The OPEN
+         door shows for EVERY sealed jar (0.0.95 — memory jars were stuck). -->
+    @if (preserve().premio && preserve().premio !== preserve().name) {
       <p class="premio-chip">{{ premioReward() }}</p>
-      @if (preserve().savedFor && !preserve().openedAt) {
-        <p class="saved-for-line">{{ savedForLine() }}</p>
-      }
+    }
+    <!-- savedFor was severed from every input (0.0.108); this read-only line
+         stays for legacy jars that carry one — own condition, never nested
+         under the premio chip's. -->
+    @if (preserve().savedFor && !preserve().openedAt) {
+      <p class="saved-for-line">{{ savedForLine() }}</p>
     }
     @if (!pending()) {
       @if (preserve().openedAt) {

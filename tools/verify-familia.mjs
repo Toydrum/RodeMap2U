@@ -47,11 +47,10 @@ console.log(`A seeded family: minors=[${minorNames.join(', ')}] | OK=${okA}`);
 // B — create a child; the temp password is revealed once.
 await page.locator('button', { hasText: 'Crear cuenta de peque' }).click();
 await sheetTitle('Una cuenta para tu peque').waitFor();
+// ONE field since 0.0.108: the username doubles as the display name.
 await page.fill('.familia-sheet input[autocapitalize="none"]', 'luna');
-const nameInputs = page.locator('.familia-sheet .field input');
-await nameInputs.nth(1).fill('Luna');
 await page.locator('.familia-sheet button[type=submit]').click();
-await sheetTitle('La cuenta de Luna está lista').waitFor({ timeout: 8000 });
+await sheetTitle('La cuenta de luna está lista').waitFor({ timeout: 8000 });
 const tempLuna = (await page.locator('.temp-password').textContent())?.trim() ?? '';
 console.log(`B create child: temp="${tempLuna}" | OK=${/^Brote\d{4}$/.test(tempLuna)}`);
 await page.locator('.familia-sheet button', { hasText: 'Listo' }).click();
@@ -88,10 +87,10 @@ await page.waitForTimeout(900);
 await page.locator('.familia-sheet button', { hasText: 'Cerrar' }).click();
 
 // E — reset Luna's password → NEW temp ≠ old.
-await page.locator('.fam-open', { hasText: 'Luna' }).click();
-await sheetTitle('Luna').waitFor();
+await page.locator('.fam-open', { hasText: 'luna' }).click();
+await sheetTitle('luna').waitFor();
 await page.locator('button', { hasText: 'Nueva contraseña temporal' }).click();
-await sheetTitle('Contraseña nueva para Luna').waitFor({ timeout: 8000 });
+await sheetTitle('Contraseña nueva para luna').waitFor({ timeout: 8000 });
 const tempLuna2 = (await page.locator('.temp-password').textContent())?.trim() ?? '';
 const okE = /^Brote\d{4}$/.test(tempLuna2) && tempLuna2 !== tempLuna;
 console.log(`E reset password: "${tempLuna2}" (old "${tempLuna}") | OK=${okE}`);
@@ -168,12 +167,12 @@ await page.locator('.familia-sheet button', { hasText: 'Cerrar' }).click();
 // I — export-first delete of Luna: a download fires BEFORE the purge.
 let downloaded = '';
 page.on('download', (d) => (downloaded = d.suggestedFilename()));
-await page.locator('.fam-open', { hasText: 'Luna' }).click();
+await page.locator('.fam-open', { hasText: 'luna' }).click();
 await page.locator('button', { hasText: 'Borrar su cuenta' }).click();
-await sheetTitle('¿Borrar la cuenta de Luna?').waitFor();
+await sheetTitle('¿Borrar la cuenta de luna?').waitFor();
 await page.locator('button', { hasText: 'Sí, borrar su cuenta' }).click();
 await page.waitForTimeout(1800);
-const lunaGone = !(await page.locator('.familia .fam-open .fam-name').allTextContents()).includes('Luna');
+const lunaGone = !(await page.locator('.familia .fam-open .fam-name').allTextContents()).includes('luna');
 console.log(`I export-first delete: download="${downloaded}" gone=${lunaGone} | OK=${downloaded.includes('luna') && lunaGone}`);
 
 // J — Luna's login is truly gone.

@@ -235,10 +235,9 @@ export const EN: Dict = {
     },
     premioLabel: 'What will you gift yourself when you open it?',
     premioPlaceholder: '"a marathon of my show", "a free afternoon, guilt-free"…',
-    savedForLabel: 'What are you saving it for?',
-    savedForPlaceholder: '"for when the semester ends"…',
-    premioChip: '🎀 Holds a treat: "{premio}"',
     premioReward: '🎀 Your treat: "{premio}"',
+    // savedFor was severed from every input (0.0.108) — this read-only line
+    // stays for legacy jars that already carry an intention.
     savedForLine: "You're saving it {savedFor}",
     openJam: 'Open the jam',
     openConfirmTitle: 'Open "{name}"',
@@ -304,6 +303,7 @@ export const EN: Dict = {
       title: 'Promise a jar',
       beat1Title: 'What will you give yourself?',
       beat1Hint: 'Write it as a gift to you. You\'ll open it once the jar fills.',
+      nameHint: "Your words become the jar's name.",
       beat2Title: 'How big does this reward feel?',
       beat2Hint: 'You decide. The bigger the gift, the bigger the jar you\'ll fill.',
       capFrasquito: 'Little jar · fills with 2 fruits',
@@ -316,7 +316,6 @@ export const EN: Dict = {
         one: 'Has {count} fruit · holds {cap}',
         many: 'Has {count} fruits · holds {cap}',
       },
-      premioAtFill: '🎀 When it fills: "{premio}"',
       addFruit: 'Store a fruit here',
       addHint: 'Tap a fresh fruit to store it in this jar.',
       noFresh: 'You have no fresh fruits to store right now.',
@@ -369,7 +368,8 @@ export const EN: Dict = {
     plantFirst: 'Plant my first tree',
     newTree: 'Plant a tree',
     branches: { one: '{count} branch', many: '{count} branches' },
-    treeNamePlaceholder: 'Tree name (e.g. "Learn guitar")',
+    treeNameLabel: "What's your tree's name?",
+    treeNamePlaceholder: 'e.g. "Learn guitar"',
     firstSproutHint: 'It will be born with its first little branch of the same name — rename it anytime.',
     accentLabel: 'Color',
     checkinCta: 'Find myself in this enchanted forest',
@@ -871,7 +871,7 @@ export const EN: Dict = {
       {
         icon: '🫙',
         title: 'The preserving house',
-        body: "When a branch blooms, the app celebrates big: petals rain across the whole screen, a little card shows the fruit you earned, and the fruit falls from the tree down to its roots. Fruits gather in your harvest, in the Preserves tab 🫙 (below). There you can MAKE JAM: pick fruits one by one (one is plenty) — they simmer right there on the same screen, stir if you like — then jar it. The vessel picks itself by your batch — 1 or 2 fruits: a little jar; up to 5: a jar; 6 or more: a grand jar, a mighty jam — and the pot never carries a counter: the rule lives here, not on your work. When jarring you can write it a TREAT in your own words (\"a marathon of my show\", \"a free afternoon, guilt-free\"): when you open it, the app says it back — \"You earned this\" — with your fruits as witnesses; the jar empties (you ate the jam) but stays with you forever, with its name and memories inside. Nothing is ever spent: your fruits and your register stay whole. A jar with no treat can be opened too, just to savor its memories. You can also do it the OTHER WAY: \"Promise a jar\" creates an empty jar with its treat written up front, and you fill it with the fruits of your tasks. You pick the size by how big the gift feels — a little jar fills with 2 fruits, a jar with 5, a grand jar with 8 — and the bigger the treat, the more fruits it gathers. When you fill it, that achievement is yours: YOU make the jam (the pot simmers your fruits and you jar it), it doesn't appear made on its own. When a branch blooms, the app offers to store it in your jar with one tap; you can also store or take out fruits by hand from The preserving house. You can keep up to three promised jars at once, and let any of them go whenever you like (its fruits return to your harvest). And when you archive a tree that bore fruit (closing a chapter of your life), the app distills an ELIXIR 🍶: you write what you carry from that chapter, and it's kept in \"The farewells\"; whenever you like, you drink it as a closing toast — \"This you carry\" — savoring all that tree gave you. Your history (the enjoyed ones, the farewells, and past register months) rests folded under its ▸ arrows — one tap opens it; nothing is ever lost. You can also brew a tea: two or three fruits savored sip by sip, leaving no record. A ritual's spirals and little steps bear no fruit (their celebration is the turning and the walk — a daily fruit would be a counter in costume); the whole ritual, when its season closes, does.",
+        body: "When a branch blooms, the app celebrates big: petals rain across the whole screen, a little card shows the fruit you earned, and the fruit falls from the tree down to its roots. Fruits gather in your harvest, in the Preserves tab 🫙 (below). There you can MAKE JAM: pick fruits one by one (one is plenty) — they simmer right there on the same screen, stir if you like — then jar it. The vessel picks itself by your batch — 1 or 2 fruits: a little jar; up to 5: a jar; 6 or more: a grand jar, a mighty jam — and the pot never carries a counter: the rule lives here, not on your work. When jarring you can write it a TREAT in your own words (\"a marathon of my show\", \"a free afternoon, guilt-free\"): when you open it, the app says it back — \"You earned this\" — with your fruits as witnesses; the jar empties (you ate the jam) but stays with you forever, with its name and memories inside. Nothing is ever spent: your fruits and your register stay whole. A jar with no treat can be opened too, just to savor its memories. You can also do it the OTHER WAY: \"Promise a jar\" creates an empty jar with its treat written up front — your words are also the jar's name — and you fill it with the fruits of your tasks. You pick the size by how big the gift feels — a little jar fills with 2 fruits, a jar with 5, a grand jar with 8 — and the bigger the treat, the more fruits it gathers. When you fill it, that achievement is yours: YOU make the jam (the pot simmers your fruits and you jar it), it doesn't appear made on its own. When a branch blooms, the app offers to store it in your jar with one tap; you can also store or take out fruits by hand from The preserving house. You can keep up to three promised jars at once, and let any of them go whenever you like (its fruits return to your harvest). And when you archive a tree that bore fruit (closing a chapter of your life), the app distills an ELIXIR 🍶: you write what you carry from that chapter, and it's kept in \"The farewells\"; whenever you like, you drink it as a closing toast — \"This you carry\" — savoring all that tree gave you. Your history (the enjoyed ones, the farewells, and past register months) rests folded under its ▸ arrows — one tap opens it; nothing is ever lost. You can also brew a tea: two or three fruits savored sip by sip, leaving no record. A ritual's spirals and little steps bear no fruit (their celebration is the turning and the walk — a daily fruit would be a counter in costume); the whole ritual, when its season closes, does.",
       },
       {
         icon: '🍂',

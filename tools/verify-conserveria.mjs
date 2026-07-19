@@ -366,7 +366,8 @@ await page.waitForTimeout(400);
 const vesselLineL = ((await page.locator('.vessel-line').textContent().catch(() => '')) ?? '').trim();
 await page.locator('.premio-field input').fill('ver un capítulo extra');
 await page.waitForTimeout(200);
-const savedForVisible = await page.locator('.saved-for-field').count();
+// savedFor was severed from every input (0.0.108) — assert its ABSENCE.
+const savedForGone = (await page.locator('.saved-for-field').count()) === 0;
 await page.locator('.seal-btn').click();
 await page.waitForTimeout(900);
 const jarL = await page.evaluate(async () => {
@@ -383,10 +384,10 @@ const jarL = await page.evaluate(async () => {
 });
 const ribbon = await page.locator('.jam-ribbon').count();
 ok(
-  'L premio seal: frasquito + ribbon + fields',
-  vesselLineL.includes('frasquito') && savedForVisible === 1 &&
+  'L premio seal: frasquito + ribbon + fields (savedFor input gone, 0.0.108)',
+  vesselLineL.includes('frasquito') && savedForGone &&
     jarL?.size === 'frasquito' && jarL?.premio === 'ver un capítulo extra' && !jarL?.openedAt && ribbon >= 1,
-  `vessel="${vesselLineL.slice(0, 34)}" size=${jarL?.size} ribbon=${ribbon}`,
+  `vessel="${vesselLineL.slice(0, 34)}" size=${jarL?.size} savedForGone=${savedForGone} ribbon=${ribbon}`,
 );
 // Put the SEAL toast away before the ceremony — its protected Deshacer
 // (unseal) would otherwise still own the slot when M's Deshacer clicks.
@@ -690,24 +691,21 @@ const readJars = () =>
 await seedFresh(3, 'u');
 await page.goto(`${BASE}/cosecha`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
+// ONE screen since 0.0.108: premio + vessel + Prometer (the premio IS the name).
 await page.locator('.promise-door').click();
 await page.waitForTimeout(300);
 await page.fill('#promise-premio', 'un café tranquilo');
-await page.locator('.premise-next').click();
-await page.waitForTimeout(200);
 await page.locator('.vessel-chip').nth(0).click(); // frasquito
-await page.locator('.premise-next').click();
-await page.waitForTimeout(200);
-await page.fill('#promise-name', 'Meta chica');
 await page.locator('.create-btn').click();
 await page.waitForTimeout(600);
 let jarsT = await readJars();
-const promiseT = jarsT.find((j) => j.name === 'Meta chica');
+const promiseT = jarsT.find((j) => j.name === 'un café tranquilo');
 const fillT = ((await page.locator('.fill-line').textContent().catch(() => '')) ?? '').trim();
 ok(
-  'T wizard creates an empty pending jar (plannedAt, sealedAt null, size, premio)',
+  'T wizard creates an empty pending jar (plannedAt, sealedAt null, size, name===premio)',
   !!promiseT && promiseT.plannedAt != null && promiseT.sealedAt == null &&
-    promiseT.size === 'frasquito' && promiseT.premio === 'un café tranquilo' && promiseT.members === 0,
+    promiseT.size === 'frasquito' && promiseT.premio === 'un café tranquilo' &&
+    promiseT.name === promiseT.premio && promiseT.members === 0,
   `jar=${JSON.stringify(promiseT ?? {}).slice(0, 90)}`,
 );
 ok('T2 the fill line shows 0 · caben 2 on the detail', /0/.test(fillT) && /2/.test(fillT), `"${fillT}"`);
@@ -718,7 +716,7 @@ await page.waitForTimeout(250);
 await page.locator('.add-pick', { hasText: 'Fruta u 1' }).click();
 await page.waitForTimeout(600);
 let jarsU = await readJars();
-const promiseU = jarsU.find((j) => j.name === 'Meta chica');
+const promiseU = jarsU.find((j) => j.name === 'un café tranquilo');
 const fillU = ((await page.locator('.fill-line').textContent().catch(() => '')) ?? '').trim();
 // pot tray must NOT offer a placed (promised) fruit
 await page.locator('.jam-door').click();
@@ -735,7 +733,7 @@ ok(
 // re-placeable: take it back out (tray stays open — many fresh remain)
 await page.locator('.remove-fruit-btn').first().click();
 await page.waitForTimeout(500);
-const promiseUback = (await readJars()).find((j) => j.name === 'Meta chica');
+const promiseUback = (await readJars()).find((j) => j.name === 'un café tranquilo');
 ok('U2 a placed fruit is re-placeable while pending', promiseUback.members === 0, `members=${promiseUback.members}`);
 
 // V — filling NEVER seals (0.0.96): it fills, celebrates, and offers «Hacer
@@ -744,7 +742,7 @@ await page.locator('.add-pick', { hasText: 'Fruta u 1' }).click();
 await page.waitForTimeout(500);
 await page.locator('.add-pick', { hasText: 'Fruta u 2' }).click(); // 2nd fruit → capacity 2 → FULL (not sealed)
 await page.waitForTimeout(700);
-const fullV = (await readJars()).find((j) => j.name === 'Meta chica');
+const fullV = (await readJars()).find((j) => j.name === 'un café tranquilo');
 const makeBtn = await page.locator('.make-jam-btn').count();
 ok(
   'V filling fills but does NOT seal; offers «Hacer mermelada»',
@@ -759,7 +757,7 @@ await page.locator('.make-sheet .make-btn').click(); // Envasar
 await page.waitForTimeout(700);
 const pourScene = await page.locator('.make-sheet app-envasar-scene').count();
 await page.waitForTimeout(2600); // the pour settles → made → seal
-const madeV = (await readJars()).find((j) => j.name === 'Meta chica');
+const madeV = (await readJars()).find((j) => j.name === 'un café tranquilo');
 ok(
   'V2 Hacer mermelada: pour scene plays, then seals (premio kept)',
   pourScene >= 1 && madeV.sealedAt != null && madeV.members === 2 && madeV.premio === 'un café tranquilo',
@@ -768,7 +766,7 @@ ok(
 // V3 — Deshacer un-makes → full pending again (all fruits kept).
 await page.locator('.toast button', { hasText: 'Deshacer' }).click();
 await page.waitForTimeout(700);
-const unmadeV = (await readJars()).find((j) => j.name === 'Meta chica');
+const unmadeV = (await readJars()).find((j) => j.name === 'un café tranquilo');
 ok(
   'V3 Deshacer un-makes → full pending again (fruits kept)',
   unmadeV.sealedAt == null && unmadeV.members === 2,
@@ -786,7 +784,7 @@ await page.waitForTimeout(300);
 await page.locator('.confirm button', { hasText: 'Soltarlo' }).click();
 await page.waitForTimeout(600);
 const jarsW = await readJars();
-const goneW = !jarsW.find((j) => j.name === 'Meta chica');
+const goneW = !jarsW.find((j) => j.name === 'un café tranquilo');
 const freedW = await page.evaluate(async () => {
   const open = indexedDB.open('roadmap2u');
   const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
@@ -806,10 +804,7 @@ await page.waitForTimeout(400);
 await page.locator('.promise-door').click();
 await page.waitForTimeout(300);
 await page.fill('#promise-premio', 'un premio X');
-await page.locator('.premise-next').click();
 await page.locator('.vessel-chip').nth(0).click();
-await page.locator('.premise-next').click();
-await page.fill('#promise-name', 'Meta X');
 await page.locator('.create-btn').click();
 await page.waitForTimeout(600);
 const shelfText = ((await page.locator('.pending-shelf').textContent().catch(() => '')) ?? '').trim();
@@ -820,8 +815,10 @@ ok(
   `shelfHasCount=${/le caben|lleva/.test(shelfText)} detailFill=${detailFill}`,
 );
 
-// Y — fill Meta X (frasquito, 2), MAKE the jam (0.0.96), then open it via the
-// existing ceremony.
+// Y — fill «un premio X» (frasquito, 2), MAKE the jam (0.0.96), then open it
+// via the existing ceremony. Since 0.0.108 name===premio, so the detail's
+// premio CHIP hides (it would just re-quote the header) — the ceremony still
+// speaks the premio verbatim, and that is the assertion that matters.
 await page.locator('.add-fruit-btn').click(); // open the tray once
 await page.waitForTimeout(250);
 await page.locator('.add-pick', { hasText: 'Fruta x 1' }).click();
@@ -844,11 +841,12 @@ await page.waitForTimeout(400);
 await page.locator('.sheet button', { hasText: 'Abrir' }).click();
 await page.waitForTimeout(500);
 const earnedY = await page.locator('.sheet', { hasText: 'Te lo ganaste' }).count();
+const premioSaidY = await page.locator('.sheet', { hasText: 'un premio X' }).count();
 const rainY = await page.locator('.petal-fall .fall-petal').count();
 ok(
-  'Y a sealed goal jar opens via the existing ceremony (rain + «Te lo ganaste»)',
-  premioChipY >= 1 && earnedY >= 1 && rainY >= 1,
-  `premioChip=${premioChipY} earned=${earnedY} rain=${rainY}`,
+  'Y sealed goal jar: chip hidden (name===premio), ceremony speaks the premio + rain',
+  premioChipY === 0 && earnedY >= 1 && premioSaidY >= 1 && rainY >= 1,
+  `premioChip=${premioChipY} earned=${earnedY} said=${premioSaidY} rain=${rainY}`,
 );
 await page.locator('.sheet button', { hasText: 'A disfrutarlo' }).click().catch(() => {});
 await page.waitForTimeout(400);
@@ -861,13 +859,10 @@ await page.waitForTimeout(400);
 await page.locator('.promise-door').click();
 await page.waitForTimeout(300);
 await page.fill('#promise-premio', 'un premio Z');
-await page.locator('.premise-next').click();
 await page.locator('.vessel-chip').nth(1).click(); // frasco, capacity 5
-await page.locator('.premise-next').click();
-await page.fill('#promise-name', 'Meta Z');
 await page.locator('.create-btn').click();
 await page.waitForTimeout(500);
-const jarZ = (await readJars()).find((j) => j.name === 'Meta Z');
+const jarZ = (await readJars()).find((j) => j.name === 'un premio Z');
 // simulate a sync merge: place all 5 fruits directly (never through place())
 await page.evaluate(async ({ ids, jarId }) => {
   const open = indexedDB.open('roadmap2u');
@@ -884,8 +879,8 @@ await page.evaluate(async ({ ids, jarId }) => {
 }, { ids: zFresh, jarId: jarZ.id });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
-const zJar = (await readJars()).find((j) => j.name === 'Meta Z');
-await page.locator('.pending-jar').first().click(); // Meta Z (only pending jar left)
+const zJar = (await readJars()).find((j) => j.name === 'un premio Z');
+await page.locator('.pending-jar').first().click(); // «un premio Z» (only pending jar left)
 await page.waitForTimeout(300);
 const zMakeBtn = await page.locator('.make-jam-btn').count();
 const zNoToast = (await page.locator('.toast', { hasText: 'Se llenó' }).count()) === 0;
@@ -923,10 +918,7 @@ ok(
 await page.locator('.promise-door').click();
 await page.waitForTimeout(300);
 await page.fill('#promise-premio', 'un premio AB');
-await page.locator('.premise-next').click();
 await page.locator('.vessel-chip').nth(1).click();
-await page.locator('.premise-next').click();
-await page.fill('#promise-name', 'Meta AB');
 await page.locator('.create-btn').click();
 await page.waitForTimeout(600);
 // the wizard auto-opens the new jar's detail — the pending panel is already up

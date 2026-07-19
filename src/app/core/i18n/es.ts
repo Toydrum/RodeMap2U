@@ -237,10 +237,9 @@ export const ES = {
     },
     premioLabel: '¿Qué te vas a regalar al abrirla?',
     premioPlaceholder: '«un maratón de mi serie», «una tarde libre, sin culpa»…',
-    savedForLabel: '¿Para cuándo la guardas?',
-    savedForPlaceholder: '«para cuando termine el semestre»…',
-    premioChip: '🎀 Guarda un premio: «{premio}»',
     premioReward: '🎀 Tu premio: «{premio}»',
+    // savedFor fue retirado de todos los inputs (0.0.108) — esta línea de
+    // lectura queda para frascos viejos que ya guardaban una intención.
     savedForLine: 'La guardas {savedFor}',
     openJam: 'Abrir la mermelada',
     openConfirmTitle: 'Abrir «{name}»',
@@ -306,6 +305,7 @@ export const ES = {
       title: 'Prometer un frasco',
       beat1Title: '¿Qué te vas a regalar?',
       beat1Hint: 'Escríbelo como un regalo para ti. Lo abrirás cuando el frasco se llene.',
+      nameHint: 'Tus palabras serán el nombre del frasco.',
       beat2Title: '¿Qué tan grande se siente este premio?',
       beat2Hint: 'Tú decides. Mientras más grande el regalo, más grande el frasco que vas a llenar.',
       capFrasquito: 'Frasquito · se llena con 2 frutas',
@@ -318,7 +318,6 @@ export const ES = {
         one: 'Lleva {count} fruta · le caben {cap}',
         many: 'Lleva {count} frutas · le caben {cap}',
       },
-      premioAtFill: '🎀 Al llenarlo: «{premio}»',
       addFruit: 'Guardar una fruta aquí',
       addHint: 'Toca una fruta fresca para guardarla en este frasco.',
       noFresh: 'Ahora mismo no tienes frutas frescas para guardar.',
@@ -371,7 +370,8 @@ export const ES = {
     plantFirst: 'Plantar mi primer árbol',
     newTree: 'Plantar un árbol',
     branches: { one: '{count} rama', many: '{count} ramas' },
-    treeNamePlaceholder: 'Nombre del árbol (p. ej. "Aprender guitarra")',
+    treeNameLabel: '¿Cómo se llama tu árbol?',
+    treeNamePlaceholder: 'p. ej. «Aprender guitarra»',
     firstSproutHint: 'Nacerá con su primera ramita del mismo nombre — renómbrala cuando quieras.',
     accentLabel: 'Color',
     checkinCta: 'Buscarme en este bosque encantado',
@@ -873,7 +873,7 @@ export const ES = {
       {
         icon: '🫙',
         title: 'La conservería',
-        body: 'Cuando una rama florece, la app lo celebra en grande: llueven pétalos por toda la pantalla, sale una tarjetita con la fruta que ganaste, y en el árbol cae la fruta hasta sus raíces. Las frutas se juntan en tu cosecha, en la pestaña Conservería 🫙 (abajo). Ahí puedes HACER MERMELADA: eliges frutas una por una (con una alcanza) y se van cociendo a fuego lento en la misma pantalla —puedes remover si quieres—, luego envasas. La vasija se elige sola según tu tanda — 1 o 2 frutas: frasquito; hasta 5: frasco; 6 o más: frascote, una mermelada poderosa — y la olla nunca lleva contador: la regla vive aquí, no en tu trabajo. Al envasar puedes escribirle un PREMIO con tus palabras («un maratón de mi serie», «una tarde libre, sin culpa»): cuando la abras, la app te lo dice de vuelta — «Te lo ganaste» — con tus frutas como testigos; el tarro se vacía (te comiste la mermelada) pero se queda contigo para siempre, con su nombre y sus memorias adentro. Nada se gasta jamás: tus frutas y tu registro siguen completos. Un frasco sin premio también se puede abrir, solo para saborear sus memorias. También puedes hacerlo al REVÉS: «Prometer un frasco» crea un frasco vacío con su premio ya escrito, y lo vas llenando con las frutas de tus tareas. Tú eliges el tamaño según lo grande que se sienta el regalo — frasquito se llena con 2 frutas, frasco con 5, frascote con 8 — y mientras más grande el premio, más frutas junta. Cuando lo llenas, ese logro es tuyo: TÚ haces la mermelada (la olla hierve tus frutas y envasas), no aparece hecha sola. Cuando una rama florece, la app te ofrece guardarla en tu frasco de un toque; también puedes guardarlas o sacarlas a mano desde La conservería. Puedes tener hasta tres frascos prometidos a la vez, y soltar cualquiera cuando quieras (sus frutas vuelven a tu cosecha). Y cuando archivas un árbol que dio fruto (cierras un capítulo de tu vida), la app destila un ELIXIR 🍶: le escribes qué te llevas de ese capítulo y se guarda en «Las despedidas»; cuando quieras, lo bebes como un brindis de cierre — «Esto te lo llevas» — saboreando todo lo que ese árbol te dejó. Tu historia (las disfrutadas, las despedidas y los meses pasados del registro) descansa plegadita bajo sus flechitas ▸ — un toque la abre; nada se pierde jamás. También puedes preparar un té: dos o tres frutas saboreadas sorbo a sorbo, sin dejar registro. Las espirales y los pasitos de un ritual no dan fruta (su celebración es girar y caminar — una fruta diaria sería un contador disfrazado); el ritual entero, cuando cierra su temporada, sí.',
+        body: 'Cuando una rama florece, la app lo celebra en grande: llueven pétalos por toda la pantalla, sale una tarjetita con la fruta que ganaste, y en el árbol cae la fruta hasta sus raíces. Las frutas se juntan en tu cosecha, en la pestaña Conservería 🫙 (abajo). Ahí puedes HACER MERMELADA: eliges frutas una por una (con una alcanza) y se van cociendo a fuego lento en la misma pantalla —puedes remover si quieres—, luego envasas. La vasija se elige sola según tu tanda — 1 o 2 frutas: frasquito; hasta 5: frasco; 6 o más: frascote, una mermelada poderosa — y la olla nunca lleva contador: la regla vive aquí, no en tu trabajo. Al envasar puedes escribirle un PREMIO con tus palabras («un maratón de mi serie», «una tarde libre, sin culpa»): cuando la abras, la app te lo dice de vuelta — «Te lo ganaste» — con tus frutas como testigos; el tarro se vacía (te comiste la mermelada) pero se queda contigo para siempre, con su nombre y sus memorias adentro. Nada se gasta jamás: tus frutas y tu registro siguen completos. Un frasco sin premio también se puede abrir, solo para saborear sus memorias. También puedes hacerlo al REVÉS: «Prometer un frasco» crea un frasco vacío con su premio ya escrito — tus palabras son también el nombre del frasco — y lo vas llenando con las frutas de tus tareas. Tú eliges el tamaño según lo grande que se sienta el regalo — frasquito se llena con 2 frutas, frasco con 5, frascote con 8 — y mientras más grande el premio, más frutas junta. Cuando lo llenas, ese logro es tuyo: TÚ haces la mermelada (la olla hierve tus frutas y envasas), no aparece hecha sola. Cuando una rama florece, la app te ofrece guardarla en tu frasco de un toque; también puedes guardarlas o sacarlas a mano desde La conservería. Puedes tener hasta tres frascos prometidos a la vez, y soltar cualquiera cuando quieras (sus frutas vuelven a tu cosecha). Y cuando archivas un árbol que dio fruto (cierras un capítulo de tu vida), la app destila un ELIXIR 🍶: le escribes qué te llevas de ese capítulo y se guarda en «Las despedidas»; cuando quieras, lo bebes como un brindis de cierre — «Esto te lo llevas» — saboreando todo lo que ese árbol te dejó. Tu historia (las disfrutadas, las despedidas y los meses pasados del registro) descansa plegadita bajo sus flechitas ▸ — un toque la abre; nada se pierde jamás. También puedes preparar un té: dos o tres frutas saboreadas sorbo a sorbo, sin dejar registro. Las espirales y los pasitos de un ritual no dan fruta (su celebración es girar y caminar — una fruta diaria sería un contador disfrazado); el ritual entero, cuando cierra su temporada, sí.',
       },
       {
         icon: '🍂',

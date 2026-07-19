@@ -45,13 +45,17 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
   });
 
   /** Nodes whose gentle date has passed and is still unhandled — sunlit
-   *  conversations first, then oldest date, deterministic tail. */
+   *  conversations first, then oldest date, deterministic tail. A RITUAL's
+   *  date is dead data (the almanac ignores it while a cadence is set), so
+   *  the 🍂 banners must not advocate for it either (0.0.108) — the date
+   *  persists silently and its conversation returns if the rhythm clears. */
   readonly needsDateReview = computed(() =>
     this.visible()
       .filter(
         (n) =>
           n.targetDate !== null &&
           isPast(n.targetDate) &&
+          cadenceOf(n) == null &&
           n.status !== 'achieved' &&
           n.status !== 'branched',
       )

@@ -89,17 +89,23 @@
       </div>
     }
 
-    <!-- Gentle date -->
-    <div class="field">
-      <label for="nd-date">{{ i18n.t().node.dateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
-      <input id="nd-date" type="date" [value]="node().targetDate ?? ''" (change)="setDate(inputValue($event))">
-      <span class="hint">{{ i18n.t().node.dateHint }}</span>
-    </div>
+    <!-- Gentle date. A ritual has no gentle date — the almanac ignores it
+         while a cadence is set (dead data), so the field falls silent too
+         (0.0.108). The value PERSISTS untouched (estimate-rancio precedent:
+         persists silently, never advertises) and reappears if the rhythm is
+         ever cleared. -->
+    @if (!cadence()) {
+      <div class="field">
+        <label for="nd-date">{{ i18n.t().node.dateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+        <input id="nd-date" type="date" [value]="node().targetDate ?? ''" (change)="setDate(inputValue($event))">
+        <span class="hint">{{ i18n.t().node.dateHint }}</span>
+      </div>
 
-    @if (datePassed()) {
-      <button type="button" class="date-passed" (click)="branching.set(true)">
-        🍂 {{ i18n.t().node.datePassedNudge }} <strong>→</strong>
-      </button>
+      @if (datePassed()) {
+        <button type="button" class="date-passed" (click)="branching.set(true)">
+          🍂 {{ i18n.t().node.datePassedNudge }} <strong>→</strong>
+        </button>
+      }
     }
 
     <!-- «Más detalles»: the optional planning tools fold away so the sheet's
