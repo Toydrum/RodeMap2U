@@ -110,6 +110,12 @@ export const ES = {
     reasonCaminito: 'Un ritual de hoy te espera 🌀 — a tu ritmo, sin prisa',
     shadeAside: 'Anda a la sombra — solo si te llama ⛱️',
   },
+  reminders: {
+    withPhrase: '🧶 «{trigger}» — «{title}» te espera',
+    plain: '🔔 «{title}» te espera',
+    body: 'Tu propio plan, a tu propia hora.',
+    action: 'Verla',
+  },
   whispers: {
     q1: '¿Dónde sientes que estás ahorita?',
     q2: '¿En qué anda tu cabeza?',
@@ -406,10 +412,10 @@ export const ES = {
     branched: 'Ramificada',
   },
   statusHint: {
-    seed: 'Una idea esperando su momento',
-    growing: 'En movimiento',
+    seed: 'Una idea esperando su momento — todavía no la empiezas',
+    growing: 'Ya está en marcha: la estás trabajando, a tu ritmo — pásala aquí al dar el primer paso',
     resting: 'Pausa a propósito — descansar también es parte',
-    achieved: 'Floreció 🌸',
+    achieved: 'Lo lograste — su flor y su fruta ya son tuyas 🌸',
     branched: 'De aquí nacieron nuevos caminos',
   },
   light: {
@@ -475,7 +481,11 @@ export const ES = {
     estimateSizes: { min: 'min', hour1: '1 hora', day1: '1 día', week1: '1 semana' },
     triggerLabel: 'Ramita cuando-entonces',
     triggerPlaceholder: 'Cuando me sirva el café de la mañana…',
-    triggerHint: 'Tu propio plan «cuando pase X, toco esta rama». Ahora te lo recordará — jamás con alarmas.',
+    triggerHint:
+      'Escribe un momento de tu vida. Ese momento se vuelve tu disparador: al vivirlo, te acuerdas solo — y Ahora te repite tu frase para refrescar el plan.',
+    remindLabel: '¿Te lo recuerdo a una hora?',
+    remindHint:
+      'Sonará silencito a esa hora, una vez al día, con tus propias palabras — mientras la app esté abierta, aunque sea de fondo.',
     lightLabel: '¿Cuánta luz le toca?',
     lightExplainer: 'Tu forma de priorizar: lo que está a pleno sol se sugiere primero; lo que está a la sombra espera sin pena.',
     steps: 'Pasitos',
@@ -843,7 +853,7 @@ export const ES = {
       {
         icon: '🧶',
         title: 'Ahora — tu hilo',
-        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Si quieres, elige hasta tres «ramas de hoy» 🌅 — mañana se sueltan solas, sin arrastres ni cuentas. Y si a una rama le escribes su «cuando-entonces» 🧶 («cuando me sirva el café…»), Ahora te lo recordará con tus propias palabras — jamás con alarmas. Las ramas que pusiste «a pleno sol» ☀️ también le importan a Ahora: van justo después de tus ramas de hoy y tus cuando-entonces — tu ahora explícito siempre manda sobre la luz. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña — y si te vas a pasear por la app, se va contigo en su perchita flotante. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
+        body: 'La app abre en Ahora: tu hilo. Ella recuerda por ti dónde ibas —la rama que tocaste, cuánto estuviste— y te ofrece UN pasito, nunca una lista, siempre diciéndote por qué. Si ese no te llama, «Otra idea» te muestra otro camino con calma, y tu bosque completo sigue a un toque. La puerta más chiquita es «Tocarla 2 minutitos»: empieza ahí mismo y nadie te corta — si te quedas más, mejor. Si quieres, elige hasta tres «ramas de hoy» 🌅 — mañana se sueltan solas, sin arrastres ni cuentas. Y si a una rama le escribes su «cuando-entonces» 🧶 («cuando me sirva el café…»), ese momento de tu vida se vuelve tu disparador y Ahora te repite tu frase con tus propias palabras. ¿Quieres además una campanita 🔔? Ponle hora en su hojita y te lo recuerda una vez al día, silencito y con tu frase — funciona mientras la app esté abierta, aunque sea de fondo. Las ramas que pusiste «a pleno sol» ☀️ también le importan a Ahora: van justo después de tus ramas de hoy y tus cuando-entonces — tu ahora explícito siempre manda sobre la luz. Durante tu sesión un pajarito se posa contigo: no mide nada, no apura nada, solo acompaña — y si te vas a pasear por la app, se va contigo en su perchita flotante. Y cuando tu tiempo plantado se acerca, el anillo entibia su color y el pajarito voltea a verte — sin sonidos, sin sustos.',
       },
       {
         icon: '🌳',

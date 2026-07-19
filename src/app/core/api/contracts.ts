@@ -126,7 +126,7 @@ export interface FriendsResponse {
  * detail 'stripped' — friends and minor→guardian: note→'', trigger→null,
  *                     targetDate→null, priority→null, estimateMin→null,
  *                     repeatsDaily→absent, repeats→absent,
- *                     repeatsSetAt→absent (attention
+ *                     repeatsSetAt→absent, remindAt→absent (attention
  *                     allocation and routines are intimate — «la luz» and a
  *                     weekday pattern travel only to guardians), stripped
  *                     SERVER-side. Both exclude archived and tombstoned

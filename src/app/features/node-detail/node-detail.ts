@@ -13,6 +13,7 @@ import { ritualKind } from '../../core/harvest';
 import { CadencePicker } from './cadence-picker';
 import { SpiralGlyph } from '../forest/spiral';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
+import { RemindersService } from '../../core/reminders.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
 import { HarvestSkyService } from '../../shared/ui/harvest-sky';
 import { flowerFor, fruitFor } from '../forest/flora';
@@ -54,6 +55,7 @@ export class NodeDetail {
   private readonly burst = inject(BloomBurstService);
   private readonly sky = inject(HarvestSkyService);
   private readonly promise = inject(PromiseService);
+  private readonly reminders = inject(RemindersService);
 
   protected readonly statuses = SELECTABLE_STATUSES;
   protected readonly lights = LIGHTS;
@@ -161,6 +163,15 @@ export class NodeDetail {
 
   protected async setDate(value: string): Promise<void> {
     await this.nodes.update(this.node(), { targetDate: value || null });
+  }
+
+  /** «La campanita» (0.0.111): the hour is the opt-in gesture — ask for the
+   *  notification permission right here (in-app toasts work regardless). */
+  protected async setRemindAt(value: string): Promise<void> {
+    const remindAt = value.trim() || null;
+    if (remindAt === (this.node().remindAt ?? null)) return;
+    await this.nodes.update(this.node(), { remindAt });
+    if (remindAt) await this.reminders.ensurePermission();
   }
 
   protected async setTrigger(value: string): Promise<void> {

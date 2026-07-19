@@ -4,7 +4,15 @@
  * SCHEMA_VERSION: shape of the data (export envelope + migration pipeline).
  * DB_VERSION: IndexedDB structure (stores/indexes) — versioned separately.
  */
-/** v11: additive TreeNode.repeatsSetAt («la historia se queda» 0.0.106):
+/** v12: additive TreeNode.remindAt («la campanita» 0.0.111, owner + psych
+ *  override of the no-reminders law): an optional 'HH:MM' local time-of-day.
+ *  The reminder re-speaks the USER'S OWN cuando-entonces phrase (or the
+ *  branch title) once per day at that hour — the app still decides nothing.
+ *  Silent notification/toast, ≤60 min late-grace, live branches only,
+ *  ritual weekday cadences respected, fired-marker is DEVICE state (meta,
+ *  never synced). STRIPPED on non-guardian visits like trigger. No
+ *  migration pass; DB_VERSION stays 3.
+ *  v11: additive TreeNode.repeatsSetAt («la historia se queda» 0.0.106):
  *  stamped when a branch FIRST gains a cadence (kept when the rhythm merely
  *  changes kind; cleared with the cadence). Blooms from BEFORE that day are
  *  FROZEN HISTORY — the ritual sweep never resets them and the month keeps
@@ -50,7 +58,7 @@
  *  ordered path of pasitos).
  *  v2: additive TreeNode.trigger (optional — absent on old records ≡ null;
  *  no migration pass needed) + Settings.todayIntentions (merge-over-defaults). */
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 export const DB_VERSION = 3;
 /**
  * NAMING NOTE (2026-07-06): the app was renamed RodeMap2U → RoadMap2U and the
@@ -190,6 +198,12 @@ export interface TreeNode extends SyncBase {
    *  cadence; absent on legacy rituals ≡ nothing frozen. As intimate as
    *  `repeats` — STRIPPED on non-guardian visits. */
   repeatsSetAt?: number | null;
+  /** «La campanita» (0.0.111, v12): optional 'HH:MM' local reminder hour.
+   *  Re-speaks the user's OWN trigger phrase (or the title) once a day —
+   *  the plan and the hour are both the user's; the app decides nothing.
+   *  As intimate as `trigger` — STRIPPED on non-guardian visits. Guardians
+   *  may set it (the psychologist use case). Absent ≡ null = no reminder. */
+  remindAt?: string | null;
   /** «La luz» (see NodePriority). Optional: records born before v4 lack it
    *  (undefined ≡ null ≡ steady). Never initialized on plant/branch — absent
    *  is the forever-default; `null` clears an earlier choice. */

@@ -280,3 +280,31 @@
   width: 100%;
   margin-top: 0.3rem;
 }
+
+/* «La campanita» (0.0.111) — the reminder hour beside the cuando-entonces */
+.remind-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+
+  label {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .remind-input {
+    width: auto;
+  }
+
+  .remind-clear {
+    min-height: 34px;
+    padding: 0.2rem 0.55rem;
+  }
+}
+
+.remind-hint {
+  display: block;
+  margin-top: 0.25rem;
+}

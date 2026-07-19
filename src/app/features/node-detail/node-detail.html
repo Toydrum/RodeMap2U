@@ -108,27 +108,58 @@
       }
     }
 
-    <!-- «Más detalles»: the optional planning tools fold away so the sheet's
-         default view stays calm and the ACTIONS rise above the fold. The
-         chevron remembers if either field already holds something. -->
-    <button
-      type="button"
-      class="btn btn-ghost more-toggle"
-      (click)="moreOpen.set(!moreOpen())"
-      [attr.aria-expanded]="moreOpen()"
-    >
-      {{ moreOpen() ? '▾' : '▸' }} {{ i18n.t().node.moreDetails }}
-      @if (!moreOpen() && ((node().estimateMin && estimateEditable()) || node().trigger)) {
-        <span class="more-marks">
-          @if (node().estimateMin && estimateEditable()) { <span>🕐</span> }
-          @if (node().trigger) { <span>🧶</span> }
-        </span>
+    <!-- If-then twig: ALWAYS visible since 0.0.111 (it lived behind «Más
+         detalles» and the owner couldn't find it — the buried-door lesson
+         of 0.0.103). The user's own plan, re-presented in Ahora; free text
+         never parsed. «La campanita» rides beside it: an OPTIONAL hour that
+         re-speaks the phrase once a day — the plan and the hour are both
+         the user's, the app decides nothing. -->
+    <div class="field trigger-field">
+      <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
+      <input
+        id="nd-trigger"
+        type="text"
+        [value]="node().trigger ?? ''"
+        (change)="setTrigger(inputValue($event))"
+        [placeholder]="i18n.t().node.triggerPlaceholder"
+        maxlength="120"
+      >
+      <span class="hint">{{ i18n.t().node.triggerHint }}</span>
+      <div class="remind-row">
+        <label for="nd-remind">🔔 {{ i18n.t().node.remindLabel }}</label>
+        <input
+          id="nd-remind"
+          class="remind-input"
+          type="time"
+          [value]="node().remindAt ?? ''"
+          (change)="setRemindAt(inputValue($event))"
+        >
+        @if (node().remindAt) {
+          <button type="button" class="btn btn-ghost remind-clear" (click)="setRemindAt('')">✕</button>
+        }
+      </div>
+      @if (node().remindAt) {
+        <span class="hint remind-hint">{{ i18n.t().node.remindHint }}</span>
       }
-    </button>
-    @if (moreOpen()) {
-      <!-- «Brújula del tiempo»: the user's own size guess — optional, with
-           «ni idea» as a first-class answer. Dato, no calificación. -->
-      @if (estimateEditable()) {
+    </div>
+
+    <!-- «Más detalles»: the estimate folds away so the sheet's default view
+         stays calm and the ACTIONS rise above the fold. -->
+    @if (estimateEditable()) {
+      <button
+        type="button"
+        class="btn btn-ghost more-toggle"
+        (click)="moreOpen.set(!moreOpen())"
+        [attr.aria-expanded]="moreOpen()"
+      >
+        {{ moreOpen() ? '▾' : '▸' }} {{ i18n.t().node.moreDetails }}
+        @if (!moreOpen() && node().estimateMin) {
+          <span class="more-marks"><span>🕐</span></span>
+        }
+      </button>
+      @if (moreOpen()) {
+        <!-- «Brújula del tiempo»: the user's own size guess — optional, with
+             «ni idea» as a first-class answer. Dato, no calificación. -->
         <div class="field">
           <label>🕐 {{ i18n.t().node.estimateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
           <div class="status-row" role="group" [attr.aria-label]="i18n.t().node.estimateLabel">
@@ -145,20 +176,6 @@
           </div>
         </div>
       }
-
-      <!-- If-then twig: the user's own plan, re-presented in Ahora — never scheduled -->
-      <div class="field">
-        <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
-        <input
-          id="nd-trigger"
-          type="text"
-          [value]="node().trigger ?? ''"
-          (change)="setTrigger(inputValue($event))"
-          [placeholder]="i18n.t().node.triggerPlaceholder"
-          maxlength="120"
-        >
-        <span class="hint">{{ i18n.t().node.triggerHint }}</span>
-      </div>
     }
 
     <!-- Note -->

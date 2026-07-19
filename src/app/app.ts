@@ -7,6 +7,7 @@ import { ThemeService } from './core/theme/theme.service';
 import { MotionService } from './core/motion.service';
 import { UpdateService } from './core/update.service';
 import { AccompanimentService } from './core/accompaniment.service';
+import { RemindersService } from './core/reminders.service';
 import { FocusSessionService } from './core/focus-session.service';
 import { RitualsService } from './core/rituals.service';
 import { BackupReminderService } from './core/backup-reminder.service';
@@ -58,6 +59,7 @@ export class App {
     inject(MotionService);
     inject(UpdateService).init();
     inject(AccompanimentService).init(); // gentle whisper rhythm (opt-in)
+    inject(RemindersService).init(); // «la campanita»: per-branch reminder hours (opt-in per branch)
     inject(RitualsService); // «rituales»: quiet period-flip reset effect
     inject(BackupReminderService); // «tu bosque, a salvo»: ~30-day gentle copy offer
   }

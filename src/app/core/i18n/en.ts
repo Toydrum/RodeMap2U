@@ -108,6 +108,12 @@ export const EN: Dict = {
     reasonCaminito: "A ritual of today awaits 🌀 — at your pace, no rush",
     shadeAside: 'It sits in the shade — only if it calls you ⛱️',
   },
+  reminders: {
+    withPhrase: '🧶 "{trigger}" — "{title}" is waiting for you',
+    plain: '🔔 "{title}" is waiting for you',
+    body: 'Your own plan, at your own hour.',
+    action: 'See it',
+  },
   whispers: {
     q1: 'Where do you feel you are right now?',
     q2: 'What is on your mind?',
@@ -404,10 +410,10 @@ export const EN: Dict = {
     branched: 'Branched',
   },
   statusHint: {
-    seed: 'An idea waiting for its moment',
-    growing: 'In motion',
+    seed: "An idea waiting for its moment — you haven't started it yet",
+    growing: "It's underway: you're working on it, at your own pace — move it here when you take the first step",
     resting: 'Paused on purpose — resting is part of it too',
-    achieved: 'It bloomed 🌸',
+    achieved: 'You did it — its flower and its fruit are yours 🌸',
     branched: 'New paths were born here',
   },
   light: {
@@ -473,7 +479,11 @@ export const EN: Dict = {
     estimateSizes: { min: 'min', hour1: '1 hour', day1: '1 day', week1: '1 week' },
     triggerLabel: 'When-then twig',
     triggerPlaceholder: 'When I pour my morning coffee…',
-    triggerHint: 'Your own "when X happens, I touch this branch" plan. Now will remind you — never with alarms.',
+    triggerHint:
+      'Write a moment of your life. That moment becomes your cue: when you live it, you remember on your own — and Now repeats your phrase to keep the plan fresh.',
+    remindLabel: 'Want a reminder at an hour?',
+    remindHint:
+      'It will chime quietly at that hour, once a day, in your own words — while the app is open somewhere, even in the background.',
     lightLabel: 'How much light does it get?',
     lightExplainer: 'Your way to prioritize: whatever stands in full sun gets suggested first; whatever rests in the shade waits, guilt-free.',
     steps: 'Small steps',
@@ -841,7 +851,7 @@ export const EN: Dict = {
       {
         icon: '🧶',
         title: 'Now — your thread',
-        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. If you like, choose up to three "branches for today" 🌅 — tomorrow they let go on their own, no carryover, no counts. And if you write a branch its "when-then" 🧶 ("when I pour my coffee…"), Now will remind you in your own words — never with alarms. The branches you set "in full sun" ☀️ matter to Now too: they come right after your branches for today and your when-thens — your explicit now always outranks the standing light. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company — and if you wander around the app, it travels with you on its little floating perch. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
+        body: 'The app opens in Now: your thread. It remembers for you where you were headed — the branch you touched, how long you stayed — and offers ONE little step, never a list, always telling you why. If that one does not call to you, "Another idea" calmly shows a different path, and your whole forest stays one tap away. The smallest door is "Touch it for 2 little minutes": it starts right there and nobody cuts you off — staying longer is always welcome. If you like, choose up to three "branches for today" 🌅 — tomorrow they let go on their own, no carryover, no counts. And if you write a branch its "when-then" 🧶 ("when I pour my coffee…"), that moment of your life becomes your cue and Now repeats your phrase in your own words. Want a little bell 🔔 too? Give it an hour in its sheet and it reminds you once a day, quietly and in your words — it works while the app is open somewhere, even in the background. The branches you set "in full sun" ☀️ matter to Now too: they come right after your branches for today and your when-thens — your explicit now always outranks the standing light. During your session a little bird perches with you: it measures nothing, hurries nothing, it just keeps you company — and if you wander around the app, it travels with you on its little floating perch. And when your planted time draws near, the ring warms its color and the bird turns to look at you — no sounds, no jolts.',
       },
       {
         icon: '🌳',

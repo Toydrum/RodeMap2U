@@ -39,7 +39,7 @@ await page.locator('.confirm button', { hasText: 'Que vuelva a crecer' }).click(
 await page.waitForTimeout(500);
 const hint = (await page.locator('.hint-line').textContent()).trim();
 const k3 = await knots();
-console.log(`B quiet revert: affordance=${revertVisible === 1} hint="${hint}" knots=${k3} | OK=${revertVisible === 1 && k3 === k0 && hint.includes('En movimiento')}`);
+console.log(`B quiet revert: affordance=${revertVisible === 1} hint="${hint}" knots=${k3} | OK=${revertVisible === 1 && k3 === k0 && hint.includes('en marcha')}`);
 
 // C — a rooted transformation never offers revert (demo-g-daily's child is growing)
 await page.goto(`${BASE}/tree/demo-guitar?seed=demo&node=demo-g-daily`, { waitUntil: 'networkidle' });

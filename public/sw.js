@@ -8,7 +8,10 @@ importScripts('./ngsw-worker.js');
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = new URL('./check-in', self.registration.scope).href;
+  // A reminder («la campanita», 0.0.111) carries its branch's deep link;
+  // the whisper question keeps landing on the check-in.
+  const path = event.notification.data && event.notification.data.url ? event.notification.data.url : './check-in';
+  const target = new URL(path, self.registration.scope).href;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       // Prefer the window the user was last in, not whichever enumerates

@@ -162,6 +162,7 @@ describe('getForest — permissions matrix', () => {
     expect(first.repeatsDaily ?? undefined).toBeUndefined();
     expect(first.repeats ?? undefined).toBeUndefined(); // routines are intimate (0.0.103)
     expect(first.repeatsSetAt ?? undefined).toBeUndefined(); // freeze boundary travels with the cadence (0.0.106)
+    expect(first.remindAt ?? undefined).toBeUndefined(); // reminder hours are as intimate as the trigger (0.0.111)
     expect(first.priority).toBeNull(); // «la luz» is private — never travels to friends
   });
 
