@@ -68,9 +68,9 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true });
     .fill('Elegir canciones\n\tLa balada\n\tLa movida\nEnsayar juntos\nGrabar demo\nCompartirlo');
   await page.locator('form.sheet button[type=submit]').click();
   await page.waitForTimeout(700);
-  const flash = (await page.locator('.planted-flash').textContent()).trim();
-  await page.locator('form.sheet .btn-ghost').click(); // "Listo" closes the sheet
-  await page.waitForTimeout(500);
+  // Sembrar CLOSES the sheet itself (0.0.109) — the tree is the next thing
+  // you see, and the ≥6 burst invitation fires from that same close.
+  const sheetGone = (await page.locator('form.sheet').count()) === 0;
   const toast = (await page.locator('.toast .msg').textContent().catch(() => '')).trim();
   const invited = toast.includes('crecemos');
 
@@ -109,7 +109,7 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true });
     struct.ensayarUnderRoot &&
     struct.orderOk;
   console.log(
-    `B sow: flash="${flash}" nodes=${struct?.count} nesting=${struct?.baladaUnderElegir && struct?.movidaUnderElegir} sibling-order=${struct?.orderOk} burst-invite=${invited} | OK=${okB && invited}`,
+    `B sow: sheet-closed=${sheetGone} nodes=${struct?.count} nesting=${struct?.baladaUnderElegir && struct?.movidaUnderElegir} sibling-order=${struct?.orderOk} burst-invite=${invited} | OK=${okB && sheetGone && invited}`,
   );
 
   // The invitation's "2 minutitos" starts a session in place.

@@ -269,6 +269,12 @@ export class TreeViewPage {
     }
     this.sowText.set('');
     this.plantedCount.update((c) => c + count);
+    // Sowing is ONE gesture (paste the plan, press Sembrar) — close the sheet
+    // so the freshly-sprouted branches are the very next thing you see
+    // (0.0.109, owner ask). The one-by-one plant sheet still stays open
+    // (name, Enter, name, Enter — the v32 law). closePlanting() runs AFTER
+    // the count update so the ≥6 burst invitation still fires.
+    this.closePlanting();
   }
 
   /** Tab indents inside the sowing box instead of walking focus away. */
