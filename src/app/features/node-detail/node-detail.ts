@@ -13,6 +13,7 @@ import { ritualKind } from '../../core/harvest';
 import { treeComplete } from '../../core/heart';
 import { CadencePicker } from './cadence-picker';
 import { SpiralGlyph } from '../forest/spiral';
+import { HeartwoodGlyph } from '../forest/heartwood';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
 import { RemindersService } from '../../core/reminders.service';
 import { BloomBurstService } from '../../shared/ui/bloom-burst';
@@ -36,7 +37,7 @@ const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '�
 
 @Component({
   selector: 'app-node-detail',
-  imports: [BranchFlow, CadencePicker, SpiralGlyph, SheetDirective, ConfirmSheet],
+  imports: [BranchFlow, CadencePicker, SpiralGlyph, HeartwoodGlyph, SheetDirective, ConfirmSheet],
   templateUrl: './node-detail.html',
   styleUrl: './node-detail.scss',
 })

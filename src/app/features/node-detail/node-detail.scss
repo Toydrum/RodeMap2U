@@ -312,6 +312,13 @@
 /* «El corazón del árbol» (0.0.112) */
 .heart-chip {
   font-weight: 700;
+
+  .chip-heartwood {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin-right: 0.3rem;
+  }
 }
 
 .heart-line {

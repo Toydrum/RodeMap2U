@@ -4,6 +4,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { NodePriority, Tree, TreeNode, lightRank } from '../../core/db/schema';
 import { ritualKind } from '../../core/harvest';
 import { SpiralGlyph } from './spiral';
+import { HeartwoodGlyph } from './heartwood';
 
 interface OutlineRow {
   node: TreeNode;
@@ -28,7 +29,7 @@ const AUTO_COLLAPSE_AT = 12;
  */
 @Component({
   selector: 'app-tree-outline',
-  imports: [SpiralGlyph],
+  imports: [SpiralGlyph, HeartwoodGlyph],
   template: `
     <div class="head">
       <h2>{{ i18n.t().tree.outlineTitle }}</h2>
@@ -79,7 +80,9 @@ const AUTO_COLLAPSE_AT = 12;
             (click)="onRow(row)"
           >
             @if (isHeart(row.node)) {
-              <span class="heart-mark" aria-hidden="true">🌳</span>
+              <svg class="heart-mark" viewBox="-14 -14 28 28" aria-hidden="true">
+                <g appHeartwood [tint]="'var(--accent-' + tree().accent + ')'" [scale]="0.95" />
+              </svg>
             } @else {
               <span class="status-dot" [class]="'status-dot ' + row.node.status"></span>
             }
@@ -239,7 +242,9 @@ const AUTO_COLLAPSE_AT = 12;
       }
 
       .heart-mark {
-        font-size: 0.8rem;
+        flex: none;
+        width: 17px;
+        height: 17px;
       }
 
       .sun-badge {

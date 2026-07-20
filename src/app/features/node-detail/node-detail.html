@@ -7,7 +7,12 @@
          the whole-tree door. -->
     <div class="top-row">
       @if (containerHeart()) {
-        <span class="chip heart-chip">🌳 {{ i18n.t().node.heartChip }}</span>
+        <span class="chip heart-chip">
+          <svg class="chip-heartwood" viewBox="-14 -14 28 28" aria-hidden="true">
+            <g appHeartwood [tint]="'var(--accent-' + tree().accent + ')'" [scale]="0.95" />
+          </svg>
+          {{ i18n.t().node.heartChip }}
+        </span>
       } @else {
         <span class="chip status-chip">
           <span class="status-dot" [class]="'status-dot ' + node().status"></span>

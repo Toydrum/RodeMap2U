@@ -97,7 +97,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 
 1. Toca **"+ Plantar un árbol"** (arriba a la derecha).
 2. Escríbele un nombre y elige su color.
-3. Guarda. Tu árbol aparece plantado en la pradera — **y nace con su corazón 🌳**: el nodo donde nombraste tu logro. El corazón no es una tarea: es el centro del que salen tus primeras ramitas, y **cuando todas florecen, la app te ofrece florecer el árbol entero** (con su fruta grande). Renómbralo en su hoja y el árbol entero se renombra. Mientras el corazón está solo (sin ramitas), sí cuenta como tu meta pelona: Ahora te la sugiere y te ayuda a desmenuzarla en pasitos.
+3. Guarda. Tu árbol aparece plantado en la pradera — **y nace con su corazón**: los anillos en el centro del tronco, el nodo donde nombraste tu logro. El corazón no es una tarea: es el centro del que salen tus primeras ramitas, y **cuando todas florecen, la app te ofrece florecer el árbol entero** (con su fruta grande). Renómbralo en su hoja y el árbol entero se renombra. Mientras el corazón está solo (sin ramitas), sí cuenta como tu meta pelona: Ahora te la sugiere y te ayuda a desmenuzarla en pasitos.
 
 > 🌾 **¿Pradera vacía y no sabes por dónde empezar?** Junto al botón te esperan tres **retoños de ejemplo** (🎒 La escuela · 🏡 Mi casa · 🚀 Un proyecto): tócalos y se plantan con un par de ramitas ya puestas — **son tuyos**: renómbralo todo, poda lo que sobre. Y si prefieres el lienzo limpio, **"Prefiero empezar en blanco"** los despide para siempre.
 
