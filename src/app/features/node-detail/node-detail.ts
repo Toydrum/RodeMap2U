@@ -199,10 +199,11 @@ export class NodeDetail {
 
   protected heartLine(): string {
     const { done, total } = this.heartStats();
-    return this.i18n.fill(this.i18n.plural(total, this.i18n.t().node.heartLine), {
-      done,
-      total,
-    });
+    // Pick the pair by hand: i18n.plural() consumes unknown placeholders
+    // (it fills {count} and blanks the rest) — {done}/{total} must reach
+    // fill() intact.
+    const pair = this.i18n.t().node.heartLine;
+    return this.i18n.fill(total === 1 ? pair.one : pair.many, { done, total });
   }
 
   /** Both doors land here: the last-bloom toast and the permanent button.

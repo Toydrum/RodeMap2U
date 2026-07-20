@@ -61,7 +61,7 @@ const addStep = await page.locator('.add-step').count();
 ok(
   'C slim heart sheet: chip + derived line + pasitos, no task machinery',
   heartChip === 1 && picker === 0 && dateField === 0 && repeats === 0 && archiveBtn === 0 && focusBtn === 0 &&
-    /ramitas?/.test(heartLine) && addStep === 1,
+    /\d+ de \d+ ramitas?/.test(heartLine) && addStep === 1,
   `chip=${heartChip} picker=${picker} date=${dateField} repeats=${repeats} 🗃=${archiveBtn} ⏳=${focusBtn} line="${heartLine}" addStep=${addStep}`,
 );
 await page.keyboard.press('Escape');
