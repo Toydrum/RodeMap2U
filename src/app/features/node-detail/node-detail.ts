@@ -6,7 +6,7 @@ import { NodesRepo } from '../../core/repos/nodes.repo';
 import { TreesRepo } from '../../core/repos/trees.repo';
 import { SessionsRepo } from '../../core/repos/sessions.repo';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
-import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
+import { ESTIMATE_CHOICES, EstimateMin, Harvest, LIGHT_ICONS, LightChoice, NodePriority, NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { dayOf, isPast, today } from '../../core/time';
 import { Cadence, cadenceOf } from '../../core/cadence';
 import { ritualKind } from '../../core/harvest';
@@ -29,11 +29,8 @@ import { PromiseService } from '../cosecha/promise.service';
 // reads as the branch's natural arc; resting is the aside, not a stage.
 const SELECTABLE_STATUSES: NodeStatus[] = ['seed', 'growing', 'achieved', 'resting'];
 
-/** UI positions of the «luz» picker — 'steady' is the unstored default. */
-export type LightChoice = 'sunlit' | 'steady' | 'shade';
+// LightChoice + LIGHT_ICONS live in schema.ts (shared with the tablita).
 const LIGHTS: LightChoice[] = ['sunlit', 'steady', 'shade'];
-// ⛱️ matches the canvas parasol; 🌳 was colliding with «ver mi bosque».
-const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '🌿', shade: '⛱️' };
 
 @Component({
   selector: 'app-node-detail',
@@ -213,7 +210,11 @@ export class NodeDetail {
    *  fruit mints, the sky rains, the base flowers, the meadow gains one. */
   protected async bloomWholeTree(): Promise<void> {
     const heart = this.nodes.heartOf(this.tree().id);
-    if (!heart || heart.status === 'achieved') return;
+    // Mirror of treeComplete's guards (branched has ONE exit: revertBranch)
+    // — and never inside someone else's forest (closing a chapter is the
+    // OWNER's act; a visitor's tap would also skip the fruit forever).
+    if (this.visiting) return;
+    if (!heart || heart.status === 'achieved' || heart.status === 'branched') return;
     const prev = heart.status;
     const bloomed = await this.nodes.setStatus(heart, 'achieved');
     this.celebrateBloom(bloomed, null);
@@ -224,7 +225,7 @@ export class NodeDetail {
         action: () => {
           // Re-read the live record (LWW law); reopening clears achievedAt —
           // the fruit STAYS in the pantry (nada se gasta).
-          const fresh = this.nodes.byId().get(heart.id) as TreeNode | undefined;
+          const fresh = this.nodes.byId().get(heart.id);
           if (fresh) void this.nodes.setStatus(fresh, prev);
         },
       },
@@ -244,6 +245,11 @@ export class NodeDetail {
         message: this.i18n.fill(this.i18n.t().tree.bloomAsk, { tree: this.tree().name }),
         actionLabel: this.i18n.t().tree.bloomAction,
         action: () => void this.bloomWholeTree(),
+        // Deliberately NOT `yields` (0.0.115): the door OWNS this rare,
+        // culminating moment — the caller's own bloom toast and the jar ask
+        // arrive right behind it and would displace a yielding door (D1).
+        // Nothing undoable races it, and the heart's sheet keeps a
+        // permanent door for whoever misses the toast.
       },
       12_000,
     );
@@ -330,6 +336,7 @@ export class NodeDetail {
           message: this.i18n.fill(this.i18n.t().cosecha.promise.storeAsk, { name: jar.name }),
           actionLabel: this.i18n.t().cosecha.promise.storeAction,
           action: () => void this.promise.placeAndCelebrate(fruit.id, jar.id),
+          yields: true, // an offer — the jar keeps accepting from la cosecha
         },
         UNDO_MS,
       );
@@ -339,6 +346,7 @@ export class NodeDetail {
           message: this.i18n.t().cosecha.promise.storeChoose,
           actionLabel: this.i18n.t().cosecha.promise.storeChooseAction,
           action: () => this.promise.requestPlacement(fruit),
+          yields: true, // an offer — the jar keeps accepting from la cosecha
         },
         UNDO_MS,
       );

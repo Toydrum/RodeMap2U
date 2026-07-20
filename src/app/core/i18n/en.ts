@@ -4,7 +4,6 @@ import { Dict } from './es';
 export const EN: Dict = {
   app: {
     name: 'RoadMap2U',
-    tagline: 'Your route grows with you',
     memoryOnly: 'This device could not open its storage: your forest lives only in this session and will be lost on reload. Close other tabs and reload to retry.',
   },
   finder: {
@@ -211,8 +210,6 @@ export const EN: Dict = {
   cosecha: {
     title: 'The preserving house',
     subtitle: 'Every branch that blooms leaves its fruit in the jar. Nothing is spent; everything is kept.',
-    jarLabel: 'The harvest',
-    jarAria: 'The harvest jar — the fruit of your bloomed branches',
     empty: 'The jar waits, unhurried. When a branch blooms, its fruit will drop in here on its own.',
     emptyHint: 'When you mark a branch as bloomed, its fruit will appear here.',
     monthTitle: 'The {month} harvest',
@@ -487,6 +484,7 @@ export const EN: Dict = {
     remindLabel: 'Want a reminder at an hour?',
     remindHint:
       'It will chime quietly at that hour, once a day, in your own words — while the app is open somewhere, even in the background.',
+    remindClear: 'Remove the reminder',
     lightLabel: 'How much light does it get?',
     lightExplainer: 'Your way to prioritize: whatever stands in full sun gets suggested first; whatever rests in the shade waits, guilt-free.',
     steps: 'Small steps',
@@ -512,7 +510,6 @@ export const EN: Dict = {
     nextStepAction: 'Next step?',
     moveUp: 'Move up',
     moveDown: 'Move down',
-    branchHere: 'Sprout new little branches',
     branchChip: 'Branch out…',
     branchHereHint: 'Different paths can grow from here — in triumph or in rest.',
     datePassedNudge: "This date has passed — and you are still here. Let's start from here",
@@ -644,7 +641,6 @@ export const EN: Dict = {
     mockResetConfirmTitle: 'Reset the practice cloud?',
     mockResetConfirmBody: 'You will be signed out and the demo family starts over from scratch. Your local trees are untouched.',
     mockResetConfirmGo: 'Yes, reset',
-    about: 'About',
     aboutText: 'Made with care for minds that grow in spirals, not straight lines.',
     updatesTitle: 'Updates',
     checkNow: 'Check for updates now',
@@ -922,6 +918,7 @@ export const EN: Dict = {
     light: { sunlit: 'in full sun', shade: 'in the shade' },
     nodeLabel: '{title} — {status}',
     withChildren: { one: '{count} branch', many: '{count} branches' },
+    heart: "the tree's heart",
     feelingGroup: "How's your inner weather?",
   },
 };

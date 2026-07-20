@@ -14,7 +14,6 @@ import { SwUpdate } from '@angular/service-worker';
 import { AccompanimentService } from '../../core/accompaniment.service';
 import { Lang, MotionPref, TextSize, ThemeName, Tree } from '../../core/db/schema';
 import { APP_VERSION } from '../../core/version';
-import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { AuthService } from '../../core/auth/auth.service';
 import { APP_CONFIG } from '../../core/config';
 import { resetMockCloud } from '../../core/api/mock-cloud';
@@ -25,7 +24,7 @@ import { FamilyService } from '../../core/family.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink, SheetDirective, FamiliaCard, AmigosCard, ConfirmSheet, Switch],
+  imports: [RouterLink, FamiliaCard, AmigosCard, ConfirmSheet, Switch],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })

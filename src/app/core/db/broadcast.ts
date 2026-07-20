@@ -10,6 +10,11 @@ import { StoreName } from './idb';
 export interface DbChangeMessage {
   store: StoreName;
   ids: string[];
+  /** «El reset» (0.0.115): an import-replace restored OLDER revs on disk —
+   *  sibling tabs must reload the store wholesale, SKIPPING the LWW guard
+   *  (which would correctly-but-wrongly reject the restored copies and then
+   *  re-persist exactly what the user reverted). */
+  reset?: boolean;
 }
 
 const CHANNEL_NAME = 'roadmap2u-db';

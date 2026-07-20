@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, input, output } from '@angular/core';
 import { Preserve } from '../../core/db/schema';
+import { MotionService } from '../../core/motion.service';
 import { JamJar } from '../forest/jam-jar';
 
 /**
@@ -118,11 +119,13 @@ export class EnvasarScene implements OnInit, OnDestroy {
   /** Fires when the pour settles (cap on, bow tied). */
   readonly done = output<void>();
 
+  private readonly motion = inject(MotionService);
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    const reduced = !!document.querySelector('.reduce-motion');
-    this.timer = setTimeout(() => this.done.emit(), reduced ? 250 : 2400);
+    // The service, not a DOM sniff (0.0.115 P5): the old querySelector
+    // depended on the backstop class having been stamped already.
+    this.timer = setTimeout(() => this.done.emit(), this.motion.reduced() ? 250 : 2400);
   }
 
   ngOnDestroy(): void {

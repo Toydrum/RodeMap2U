@@ -9,8 +9,11 @@ import { CheckinsRepo } from './repos/checkins.repo';
 import { FocusSessionService } from './focus-session.service';
 import { ToastService } from '../shared/ui/toast.service';
 import { today } from './time';
-import { hash } from '../features/forest/tree-layout';
-import { Suggestion, suggestionPool } from '../features/ahora/suggest';
+import { hash } from './hash';
+// Type-only: the VALUE (suggestionPool) arrives via dynamic import inside
+// pickTiny (0.0.115 bundle) — core must not drag the ahora ranker into the
+// initial chunk for a whisper that fires hours later, if ever.
+import type { Suggestion } from '../features/ahora/suggest';
 
 /**
  * Whispers: the accompaniment rhythm, in TWO gentle beats.
@@ -63,7 +66,12 @@ export class AccompanimentService {
   /** ?whisper=now test override shortens the second beat. */
   private testMode = false;
 
+  private started = false;
+
   init(): void {
+    // Idempotent (0.0.115 P2) — same law as RemindersService.init.
+    if (this.started) return;
+    this.started = true;
     setInterval(() => void this.check(), CHECK_EVERY_MS);
     // If the question arrived as a notification, the offer waits for the return.
     document.addEventListener('visibilitychange', () => {
@@ -168,10 +176,10 @@ export class AccompanimentService {
 
   private scheduleTiny(delayMs: number): void {
     if (this.tinyTimer) clearTimeout(this.tinyTimer);
-    this.tinyTimer = setTimeout(() => this.deliverTiny(), delayMs);
+    this.tinyTimer = setTimeout(() => void this.deliverTiny(), delayMs);
   }
 
-  private deliverTiny(): void {
+  private async deliverTiny(): Promise<void> {
     if (this.pendingTinyAt === null) return;
     if (Date.now() - this.pendingTinyAt > TINY_OFFER_MAX_AGE_MS) {
       this.pendingTinyAt = null;
@@ -186,7 +194,7 @@ export class AccompanimentService {
       this.scheduleTiny(this.testMode ? 3_000 : 15_000); // let the ritual finish first
       return;
     }
-    const tiny = this.pickTiny();
+    const tiny = await this.pickTiny();
     this.pendingTinyAt = null;
     if (!tiny) return;
     const t = this.i18n.t().whispers;
@@ -202,7 +210,8 @@ export class AccompanimentService {
 
   /** The smallest-feeling candidate: the first LEAF in the ranked pool
    *  (pasitos are concrete micro-actions by design); else the ranked best. */
-  private pickTiny(): Suggestion | null {
+  private async pickTiny(): Promise<Suggestion | null> {
+    const { suggestionPool } = await import('../features/ahora/suggest');
     const intentions = this.settings.settings().todayIntentions;
     const todayIds = intentions && intentions.date === today() ? intentions.nodeIds : [];
     const pool = suggestionPool(

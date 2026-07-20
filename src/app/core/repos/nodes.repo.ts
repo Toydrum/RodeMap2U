@@ -60,6 +60,11 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
           n.targetDate !== null &&
           isPast(n.targetDate) &&
           cadenceOf(n) == null &&
+          // A container HEART's date is invisible on its slim sheet (0.0.112)
+          // — three banners advocating for a field the user can't see or edit
+          // is the 0.0.108 wound again. The date persists silently; the
+          // conversation returns if the heart ever goes bare again.
+          !(n.parentId === null && this.heartOf(n.treeId)?.id === n.id && this.childrenOf(n).length > 0) &&
           n.status !== 'achieved' &&
           n.status !== 'branched',
       )

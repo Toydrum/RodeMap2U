@@ -37,7 +37,7 @@ export class BootService {
       this.settings.load(),
     ]);
 
-    onDbChange(({ store, ids }) => {
+    onDbChange(({ store, ids, reset }) => {
       // Settings travel too — lastCheckInAt/todayIntentions/lastWhisperAt
       // are behavioral, and a tab that can't see them re-routes to a
       // check-in already done and whispers on its own clock.
@@ -53,7 +53,10 @@ export class BootService {
         : store === 'harvests' ? this.harvests
         : store === 'preserves' ? this.preserves
         : null;
-      void repo?.refreshFromDisk(ids);
+      // reset = an import-replace put OLDER revs on disk: reload wholesale
+      // (load() replaces memory), never through the LWW guard (0.0.115 A1).
+      if (reset) void repo?.load();
+      else void repo?.refreshFromDisk(ids);
     });
 
     await this.maybeSeedDemo();

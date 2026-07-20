@@ -6,7 +6,6 @@
 export const ES = {
   app: {
     name: 'RoadMap2U',
-    tagline: 'Tu ruta crece contigo',
     memoryOnly: 'Este dispositivo no pudo abrir su almacenamiento: tu bosque vive solo en esta sesión y se perderá al recargar. Cierra otras pestañas y recarga para reintentar.',
   },
   finder: {
@@ -213,8 +212,6 @@ export const ES = {
   cosecha: {
     title: 'La conservería',
     subtitle: 'Cada rama que florece deja su fruta en el frasco. Nada se gasta; todo se conserva.',
-    jarLabel: 'La cosecha',
-    jarAria: 'El frasco de la cosecha — las frutas de tus ramas florecidas',
     empty: 'El frasco espera sin prisa. Cuando una rama florezca, su fruta caerá aquí solita.',
     emptyHint: 'Cuando marques una rama como florecida, su fruta aparecerá aquí.',
     monthTitle: 'La cosecha de {month}',
@@ -489,6 +486,7 @@ export const ES = {
     remindLabel: '¿Te lo recuerdo a una hora?',
     remindHint:
       'Sonará silencito a esa hora, una vez al día, con tus propias palabras — mientras la app esté abierta, aunque sea de fondo.',
+    remindClear: 'Quitar el recordatorio',
     lightLabel: '¿Cuánta luz le toca?',
     lightExplainer: 'Tu forma de priorizar: lo que está a pleno sol se sugiere primero; lo que está a la sombra espera sin pena.',
     steps: 'Pasitos',
@@ -514,7 +512,6 @@ export const ES = {
     nextStepAction: '¿Siguiente paso?',
     moveUp: 'Subir',
     moveDown: 'Bajar',
-    branchHere: 'Brotar ramitas nuevas',
     branchChip: 'Ramificar…',
     branchHereHint: 'Desde aquí pueden crecer caminos distintos — en el triunfo o en la pausa.',
     datePassedNudge: 'Esta fecha ya pasó — y tú sigues aquí. Partamos de aquí',
@@ -646,7 +643,6 @@ export const ES = {
     mockResetConfirmTitle: '¿Reiniciar la nube de prueba?',
     mockResetConfirmBody: 'Se cierra tu sesión y la familia demo vuelve a empezar de cero. Tus árboles locales no se tocan.',
     mockResetConfirmGo: 'Sí, reiniciar',
-    about: 'Acerca de',
     aboutText: 'Hecho con cariño para mentes que crecen en espiral, no en línea recta.',
     updatesTitle: 'Actualizaciones',
     checkNow: 'Buscar actualización ahora',
@@ -924,6 +920,7 @@ export const ES = {
     light: { sunlit: 'a pleno sol', shade: 'a la sombra' },
     nodeLabel: '{title} — {status}',
     withChildren: { one: '{count} rama', many: '{count} ramas' },
+    heart: 'el corazón del árbol',
     feelingGroup: '¿Cómo está tu clima interno?',
   },
 };

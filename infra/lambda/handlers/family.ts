@@ -27,11 +27,13 @@ import {
   RecordItem,
   TransactWriteCommand,
   UpdateCommand,
+  bumpBadAttempt,
   composite,
   deleteItem,
   getItem,
   putItem,
   queryPrefix,
+  readRateCount,
 } from '../db';
 import { friendCode, tempPassword } from '../codes';
 import { profileView } from './me';
@@ -293,9 +295,18 @@ export async function createFamilyInvite(ctx: Ctx, body: FamilyInviteRequest): P
 export async function acceptFamilyInvite(ctx: Ctx, body: { code?: string }): Promise<FamilyLinkView> {
   const code = body.code?.trim().toUpperCase().replace(/-/g, '');
   if (!code) throw new ApiError('VALIDATION');
+  // Same guessing brake as friend codes (0.0.115 S1 — this door had none):
+  // 5 bad redemptions per rolling hour, shared bucket with friend attempts.
+  if ((await readRateCount(ctx.deps, ctx.callerId)) >= LIMITS.codeAttemptsPerHour) {
+    throw new ApiError('RATE_LIMITED');
+  }
+  const badAttempt = async (errorCode: 'CODE_INVALID' | 'CODE_EXPIRED'): Promise<never> => {
+    await bumpBadAttempt(ctx.deps, ctx.callerId);
+    throw new ApiError(errorCode);
+  };
   const invite = await getItem<CodeItem>(ctx.deps, K.codeG(code));
-  if (!invite) throw new ApiError('CODE_INVALID');
-  if (invite.expiresAt <= ctx.deps.now()) throw new ApiError('CODE_EXPIRED');
+  if (!invite) return badAttempt('CODE_INVALID');
+  if (invite.expiresAt <= ctx.deps.now()) return badAttempt('CODE_EXPIRED');
 
   const now = ctx.deps.now();
   if (invite.kind === 'coGuardian') {

@@ -136,6 +136,12 @@ export class ConserveriaService {
     tint: string;
     tintEdge: string;
   }): Promise<Preserve> {
+    // Idempotent per LIVE tree (0.0.115 B5): archiving from two tabs in the
+    // same breath used to distill TWO farewell elixirs for one goodbye.
+    const existing = [...this.preserves.byId().values()].find(
+      (p) => p.kind === 'elixir' && p.treeId === fields.treeId && !p.deletedAt,
+    );
+    if (existing) return existing;
     const now = Date.now();
     const carry = fields.carry.trim();
     const preserve: Preserve = {
@@ -280,6 +286,12 @@ export class ConserveriaService {
   async makeJam(preserveId: string, sealTint: SealTint): Promise<Preserve | null> {
     const jar = this.preserves.byId().get(preserveId);
     if (!jar || jar.deletedAt || jar.sealedAt || jar.plannedAt == null) return null;
+    // Never seal AIR (0.0.115 B3): a cross-tab unplace between the button
+    // render and this commit could empty the jar — a jam needs ≥1 fruit.
+    const hasFruit = [...this.harvests.byId().values()].some(
+      (h) => h.preserveId === jar.id && !h.deletedAt,
+    );
+    if (!hasFruit) return null;
     const now = Date.now();
     return this.preserves.save({
       ...jar,

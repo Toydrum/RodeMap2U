@@ -11,31 +11,38 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
 import { BootService } from './core/boot.service';
 import { APP_CONFIG } from './core/config';
-import { AUTH_PROVIDER } from './core/auth/auth-provider';
+import { AUTH_PROVIDER, AuthProvider } from './core/auth/auth-provider';
 import { AuthService } from './core/auth/auth.service';
-import { CognitoAuthProvider } from './core/auth/cognito-auth.provider';
-import { MockAuthProvider } from './core/auth/mock-auth.provider';
-import { API_CLIENT } from './core/api/api-client';
-import { HttpApi } from './core/api/http-api';
-import { MockApi } from './core/api/mock-api';
+import { API_CLIENT, ApiClient } from './core/api/api-client';
+import { lazySeam } from './core/lazy-seam';
 import { SyncService } from './core/sync/sync.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideAppInitializer(() => inject(BootService).init()),
-    // The mock→AWS flip lives in core/config.ts; both real adapters stay
-    // dormant (and amplify stays a lazy chunk) until backend === 'aws'.
+    // The mock→AWS flip lives in core/config.ts. BOTH adapter pairs are lazy
+    // chunks now (0.0.115 bundle): only the chosen side ever downloads, and
+    // even that stays off the first paint — every seam method is async, so
+    // lazySeam simply awaits the chunk on the first call.
     {
       provide: AUTH_PROVIDER,
-      useFactory: () =>
-        APP_CONFIG.backend === 'aws' ? new CognitoAuthProvider() : new MockAuthProvider(),
+      useFactory: (): AuthProvider =>
+        APP_CONFIG.backend === 'aws'
+          ? lazySeam(() =>
+              import('./core/auth/cognito-auth.provider').then((m) => new m.CognitoAuthProvider()),
+            )
+          : lazySeam(() =>
+              import('./core/auth/mock-auth.provider').then((m) => new m.MockAuthProvider()),
+            ),
     },
     {
       provide: API_CLIENT,
-      useFactory: () => {
+      useFactory: (): ApiClient => {
         const auth = inject(AUTH_PROVIDER);
-        return APP_CONFIG.backend === 'aws' ? new HttpApi(auth) : new MockApi(auth);
+        return APP_CONFIG.backend === 'aws'
+          ? lazySeam(() => import('./core/api/http-api').then((m) => new m.HttpApi(auth)))
+          : lazySeam(() => import('./core/api/mock-api').then((m) => new m.MockApi(auth)));
       },
     },
     // Parallel to BootService.init(): one meta read, no network — fail-open.

@@ -16,14 +16,15 @@ import {
   K,
   ProfileItem,
   PutCommand,
-  RateItem,
   TransactWriteCommand,
   UpdateCommand,
+  bumpBadAttempt,
   composite,
   deleteItem,
   getItem,
   putItem,
   queryPrefix,
+  readRateCount,
 } from '../db';
 import { friendCode } from '../codes';
 
@@ -113,35 +114,16 @@ export async function rotateFriendCode(ctx: Ctx): Promise<CodeGrant> {
   return mintFriendCode(ctx);
 }
 
-/** Code-guessing brake: 5 BAD redemptions per rolling hour → RATE_LIMITED.
- *  Read-first, bump-on-failure — successful redemptions never count. */
-async function readRateCount(ctx: Ctx): Promise<number> {
-  const bucket = Math.floor(ctx.deps.now() / 3_600_000);
-  const item = await getItem<RateItem>(ctx.deps, K.rate(ctx.callerId, bucket));
-  return item?.count ?? 0;
-}
-
-async function bumpBadAttempt(ctx: Ctx): Promise<void> {
-  const bucket = Math.floor(ctx.deps.now() / 3_600_000);
-  await ctx.deps.ddb.send(
-    new UpdateCommand({
-      TableName: ctx.deps.table,
-      Key: K.rate(ctx.callerId, bucket),
-      UpdateExpression: 'ADD #c :one SET #ttl = :ttl',
-      ExpressionAttributeNames: { '#c': 'count', '#ttl': 'ttl' },
-      ExpressionAttributeValues: { ':one': 1, ':ttl': Math.ceil(ctx.deps.now() / 1000) + 7200 },
-    }),
-  );
-}
+// The code-guessing brake moved to db.ts (0.0.115) — family invites share it.
 
 export async function createFriendRequest(ctx: Ctx, body: { code?: string }): Promise<FriendRequestView> {
   requireSocial(ctx);
   const code = body.code?.trim().toUpperCase().replace(/-/g, '');
   if (!code) throw new ApiError('VALIDATION', 'code required');
 
-  if ((await readRateCount(ctx)) >= LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
+  if ((await readRateCount(ctx.deps, ctx.callerId)) >= LIMITS.codeAttemptsPerHour) throw new ApiError('RATE_LIMITED');
   const badAttempt = async (errorCode: ApiErrorCode, message?: string): Promise<never> => {
-    await bumpBadAttempt(ctx);
+    await bumpBadAttempt(ctx.deps, ctx.callerId);
     throw new ApiError(errorCode, message);
   };
 

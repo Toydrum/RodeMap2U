@@ -235,6 +235,24 @@ export async function putMany<T>(store: StoreName, values: T[]): Promise<void> {
 /** Atomic writes ACROSS stores in ONE transaction — the conservería seal
  *  (a batch row + its members' home-stamps must land together or not at
  *  all). The multi-store transaction precedent is the legacy-copy loop. */
+/** «El reemplazo» (0.0.115 audit M1): wipe + rewrite several stores in ONE
+ *  readwrite transaction — an import must never be able to die between the
+ *  clear and the puts (separate transactions left an EMPTY disk if a later
+ *  putMany failed: quota, closed DB, tab crash). */
+export async function replaceAll(
+  entries: { store: StoreName; rows: unknown[] }[],
+): Promise<void> {
+  if (!entries.length) return;
+  const db = await openDb();
+  const tx = db.transaction(entries.map((e) => e.store), 'readwrite');
+  for (const entry of entries) {
+    const os = tx.objectStore(entry.store);
+    os.clear();
+    for (const row of entry.rows) os.put(row);
+  }
+  return txDone(tx);
+}
+
 export async function putAcross(
   entries: { store: StoreName; rows: unknown[] }[],
 ): Promise<void> {

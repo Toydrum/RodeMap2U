@@ -172,7 +172,11 @@ export class HttpApi implements ApiClient {
         });
       } catch {
         // fetch TypeError is the truth about the network, onLine only a hint.
-        if (retries < BACKOFF_MS.length) {
+        // But a dropped connection can arrive AFTER the server committed the
+        // write (committed-then-drop) — so only idempotent requests retry
+        // (0.0.115 M3): a replayed createChild would answer USERNAME_TAKEN
+        // without ever showing the temp password of a child that DOES exist.
+        if (retryOn5xx && retries < BACKOFF_MS.length) {
           await wait(BACKOFF_MS[retries]);
           retries += 1;
           continue;

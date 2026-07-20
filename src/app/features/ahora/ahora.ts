@@ -94,7 +94,7 @@ export class AhoraPage {
   protected readonly sessionNode = computed<TreeNode | null>(() => {
     const id = this.focus.active()?.nodeId;
     if (!id) return null;
-    return (this.nodes.byId().get(id) as TreeNode | undefined) ?? null;
+    return (this.nodes.byId().get(id)) ?? null;
   });
 
   protected readonly birdState = this.focus.birdState;

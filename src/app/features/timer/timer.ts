@@ -83,7 +83,7 @@ export class TimerPage {
 
   protected readonly linkedNode = computed<TreeNode | null>(() => {
     const id = this.focus.active()?.nodeId ?? this.pickedNodeId();
-    return id ? ((this.nodes.byId().get(id) as TreeNode | undefined) ?? null) : null;
+    return id ? ((this.nodes.byId().get(id)) ?? null) : null;
   });
 
   protected readonly birdState = this.focus.birdState;

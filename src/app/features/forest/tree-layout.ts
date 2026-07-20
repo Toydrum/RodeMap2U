@@ -1,4 +1,8 @@
 import { TreeNode } from '../../core/db/schema';
+// hash moved to core/hash.ts (0.0.115) — re-exported so every flora caller
+// keeps its historical import path (layout, jitter, species, tints…).
+import { hash } from '../../core/hash';
+export { hash };
 
 /**
  * Pure tree layout: leaf-slot layered algorithm with deterministic organic
@@ -51,16 +55,6 @@ const TIGHT = 0.62;
 const CROWN_LIFT = 26;
 /** Segment height of an ordered-steps chain — short links, one filling limb. */
 const CHAIN_H = 46;
-
-/** Small deterministic string hash (FNV-1a flavored). */
-export function hash(text: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) {
-    h ^= text.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
 
 export function layoutTree(
   roots: TreeNode[],

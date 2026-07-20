@@ -182,22 +182,54 @@ export async function queryPrefix<T>(
 ): Promise<T[]> {
   const pkName = opts?.index ? `${opts.index}pk` : 'pk';
   const skName = opts?.index ? `${opts.index}sk` : 'sk';
+  // '' = whole partition (deleteChild's purge). REAL DynamoDB rejects an
+  // empty string inside begins_with (0.0.115 S2) — the in-memory double
+  // accepted it, so the bug only fired in the cloud: pk-only query instead.
   const condition = opts?.after
     ? `#pk = :pk AND #sk > :after`
-    : `#pk = :pk AND begins_with(#sk, :prefix)`;
+    : skPrefix
+      ? `#pk = :pk AND begins_with(#sk, :prefix)`
+      : `#pk = :pk`;
+  const skUsed = Boolean(opts?.after) || Boolean(skPrefix);
   const out = await deps.ddb.send(
     new QueryCommand({
       TableName: deps.table,
       IndexName: opts?.index,
       KeyConditionExpression: condition,
-      ExpressionAttributeNames: { '#pk': pkName, '#sk': skName },
+      ExpressionAttributeNames: skUsed ? { '#pk': pkName, '#sk': skName } : { '#pk': pkName },
       ExpressionAttributeValues: opts?.after
         ? { ':pk': pk, ':after': opts.after }
-        : { ':pk': pk, ':prefix': skPrefix },
+        : skPrefix
+          ? { ':pk': pk, ':prefix': skPrefix }
+          : { ':pk': pk },
       Limit: opts?.limit,
     }),
   );
   return (out.Items ?? []) as T[];
+}
+
+/** Code-guessing brake, shared by EVERY code redemption (friend requests +
+ *  family invites — 0.0.115 S1 closed the family gap): 5 bad redemptions per
+ *  rolling hour → RATE_LIMITED. Read-first, bump-on-failure — successful
+ *  redemptions never count. One shared bucket per user: a guesser can't get
+ *  5 friend guesses AND 5 family guesses. */
+export async function readRateCount(deps: Deps, userId: string): Promise<number> {
+  const bucket = Math.floor(deps.now() / 3_600_000);
+  const item = await getItem<RateItem>(deps, K.rate(userId, bucket));
+  return item?.count ?? 0;
+}
+
+export async function bumpBadAttempt(deps: Deps, userId: string): Promise<void> {
+  const bucket = Math.floor(deps.now() / 3_600_000);
+  await deps.ddb.send(
+    new UpdateCommand({
+      TableName: deps.table,
+      Key: K.rate(userId, bucket),
+      UpdateExpression: 'ADD #c :one SET #ttl = :ttl',
+      ExpressionAttributeNames: { '#c': 'count', '#ttl': 'ttl' },
+      ExpressionAttributeValues: { ':one': 1, ':ttl': Math.ceil(deps.now() / 1000) + 7200 },
+    }),
+  );
 }
 
 export { BatchWriteCommand, DeleteCommand, GetCommand, PutCommand, QueryCommand, TransactWriteCommand, UpdateCommand };

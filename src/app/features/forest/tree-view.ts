@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { inputEl, inputValue } from '../../shared/ui/dom';
 import { ConfirmSheet } from '../../shared/ui/confirm-sheet';
 import { HintChip } from '../../shared/ui/hint-chip';
@@ -82,7 +83,9 @@ export class TreeViewPage {
   private readonly pendingLocateId = signal(this.route.snapshot.queryParamMap.get('locate'));
 
   constructor() {
-    this.route.queryParamMap.subscribe((params) => {
+    // takeUntilDestroyed (0.0.115 P1): route-scoped observables usually die
+    // with the page, but a leaked subscription costs nothing to rule out.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const id = params.get('node');
       if (id) this.pendingOpenId.set(id);
       const locate = params.get('locate');
@@ -92,7 +95,7 @@ export class TreeViewPage {
       const pendingId = this.pendingLocateId();
       const canvas = this.canvas();
       if (!pendingId || !canvas) return;
-      const node = this.nodes.byId().get(pendingId) as TreeNode | undefined;
+      const node = this.nodes.byId().get(pendingId);
       if (!node || node.treeId !== this.id() || node.archivedAt || node.deletedAt) return;
       this.pendingLocateId.set(null);
       // After the one-time fitTree framing settles, pan to the branch.
@@ -103,7 +106,7 @@ export class TreeViewPage {
     effect(() => {
       const pendingId = this.pendingOpenId();
       if (!pendingId || !this.canEdit()) return;
-      const node = this.nodes.byId().get(pendingId) as TreeNode | undefined;
+      const node = this.nodes.byId().get(pendingId);
       // Archived/tombstoned nodes aren't on the canvas — a stale deep link
       // must not open a sheet whose writes land on an invisible record.
       if (!node || node.treeId !== this.id() || node.archivedAt || node.deletedAt) return;
@@ -174,7 +177,7 @@ export class TreeViewPage {
   protected readonly liveOpenNode = computed(() => {
     const open = this.openNode();
     if (!open) return null;
-    const live = this.nodes.byId().get(open.id) as TreeNode | undefined;
+    const live = this.nodes.byId().get(open.id);
     return live && !live.archivedAt && !live.deletedAt ? live : null;
   });
 
@@ -230,7 +233,10 @@ export class TreeViewPage {
     // the HEART — one trunk from here on («+ Plantar aquí» used to mint a
     // NEW root/trunk every time). Fallback null: a tree whose roots were
     // all archived grows a new heart. Legacy multi-root keeps rendering.
-    const parentId = target.parent?.id ?? this.nodes.heartOf(tree.id)?.id ?? null;
+    // The parent is RE-READ at commit (0.0.115 M5): the sheet's snapshot
+    // can outlive the branch — archived or pruned in another tab while the
+    // title was being typed — and a ramita must never hang from a ghost.
+    const parentId = this.liveParentId(target.parent, tree.id);
     const node = await this.nodes.plant(tree.id, parentId, {
       title,
       repeats: this.plantCadence() ?? undefined,
@@ -262,8 +268,9 @@ export class TreeViewPage {
     const stack: { depth: number; node: TreeNode }[] = [];
     let count = 0;
     // Depth-0 lines hang from the heart too (0.0.112) — the sown plan is
-    // the goal's first ramitas, not a row of new trunks.
-    const baseParentId = target.parent?.id ?? this.nodes.heartOf(tree.id)?.id ?? null;
+    // the goal's first ramitas, not a row of new trunks. Same commit-time
+    // re-read as plant() (0.0.115 M5).
+    const baseParentId = this.liveParentId(target.parent, tree.id);
     for (const line of lines) {
       while (stack.length && stack[stack.length - 1].depth >= line.depth) stack.pop();
       const parentId = stack.length ? stack[stack.length - 1].node.id : baseParentId;
@@ -274,17 +281,28 @@ export class TreeViewPage {
     }
     const fresh = this.tree();
     if (fresh && !fresh.currentNodeId && this.burstFirstId) {
-      const first = this.nodes.byId().get(this.burstFirstId) as TreeNode | undefined;
+      const first = this.nodes.byId().get(this.burstFirstId);
       if (first) await this.trees.setCurrentNode(fresh, first.id);
     }
     this.sowText.set('');
     this.plantedCount.update((c) => c + count);
     // Sowing is ONE gesture (paste the plan, press Sembrar) — close the sheet
     // so the freshly-sprouted branches are the very next thing you see
-    // (0.0.109, owner ask). The one-by-one plant sheet still stays open
-    // (name, Enter, name, Enter — the v32 law). closePlanting() runs AFTER
-    // the count update so the ≥6 burst invitation still fires.
+    // (0.0.109, owner ask; since 0.0.110 plant() closes too). closePlanting()
+    // runs AFTER the count update so the ≥6 burst invitation still fires.
     this.closePlanting();
+  }
+
+  /** The commit-time parent: the sheet's captured branch only counts if it
+   *  is still ALIVE (not archived, not pruned — cross-tab edits happen while
+   *  the sheet is open); otherwise the heart adopts the planting, and a
+   *  heartless tree grows a new trunk. */
+  private liveParentId(captured: TreeNode | null, treeId: string): string | null {
+    if (captured) {
+      const fresh = this.nodes.byId().get(captured.id);
+      if (fresh && !fresh.archivedAt && !fresh.deletedAt) return fresh.id;
+    }
+    return this.nodes.heartOf(treeId)?.id ?? null;
   }
 
   /** Tab indents inside the sowing box instead of walking focus away. */

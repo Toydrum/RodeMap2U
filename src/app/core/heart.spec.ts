@@ -88,6 +88,14 @@ describe('treeComplete — «cuando las ramitas estén completas»', () => {
   it('no descendants = not complete (a bare heart never offers closure)', () => {
     expect(treeComplete(heart, byParent([]))).toBe(false);
   });
+  it('a BRANCHED heart never offers — revertBranch is the only exit (0.0.115)', () => {
+    const branched = node('h', { status: 'branched', branchedAt: 1 });
+    expect(treeComplete(branched, byParent([node('a', { parentId: 'h', status: 'achieved', achievedAt: 1 })]))).toBe(false);
+  });
+  it("the heart's OWN cadence blocks — the sweep would un-bloom the tree overnight (0.0.115)", () => {
+    const ritualHeart = node('h', { repeats: 'daily' });
+    expect(treeComplete(ritualHeart, byParent([node('a', { parentId: 'h', status: 'achieved', achievedAt: 1 })]))).toBe(false);
+  });
   it('an already-bloomed heart never re-offers', () => {
     const bloomed = node('h', { status: 'achieved', achievedAt: 1 });
     expect(treeComplete(bloomed, byParent([node('a', { parentId: 'h', status: 'achieved', achievedAt: 1 })]))).toBe(false);

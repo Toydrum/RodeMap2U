@@ -18,9 +18,15 @@ import { addDays, dayOf, mondayOf, weekdayOf } from './time';
 export type Cadence = 'daily' | 'weekly' | Weekday[];
 
 /** The one reader: explicit `repeats` wins (null = cleared); otherwise the
- *  legacy daily boolean. Returns null for «no rhythm». */
+ *  legacy daily boolean. Returns null for «no rhythm». An EMPTY weekday
+ *  list normalizes to null (0.0.115 B2): `[]` is truthy — it used to
+ *  classify as a ritual (fruit suppressed) that reset daily through the
+ *  "unreachable" fallback. The UI can't produce it; sync/import could. */
 export function cadenceOf(n: TreeNode): Cadence | null {
-  if (n.repeats !== undefined) return n.repeats;
+  if (n.repeats !== undefined) {
+    if (Array.isArray(n.repeats) && n.repeats.length === 0) return null;
+    return n.repeats;
+  }
   return n.repeatsDaily ? 'daily' : null;
 }
 

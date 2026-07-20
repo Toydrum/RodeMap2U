@@ -316,6 +316,13 @@ export interface Preserve extends SyncBase {
   treeId?: string | null;
 }
 
+/** UI positions of the «luz» picker — 'steady' is the unstored default. */
+export type LightChoice = 'sunlit' | 'steady' | 'shade';
+
+/** The one light-emoji vocabulary (node sheet, tablita — never re-copied).
+ *  ⛱️ matches the canvas parasol; 🌳 belongs to the forest alone (emoji law). */
+export const LIGHT_ICONS: Record<LightChoice, string> = { sunlit: '☀️', steady: '🌿', shade: '⛱️' };
+
 /** Emotional weather — closed tokens, no numeric scale, no valence judgment. */
 export type Feeling = 'sunny' | 'calm' | 'foggy' | 'heavy' | 'stormy';
 

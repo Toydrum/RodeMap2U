@@ -528,6 +528,11 @@ export class TreeCanvas {
       status: t.status[point.node.status],
     });
     if (children) label += `, ${this.i18n.plural(children, t.a11y.withChildren)}`;
+    // A container heart ANNOUNCES itself (0.0.115 P8): sighted users see the
+    // rings glyph; the screen reader deserves the same landmark.
+    if (children && this.nodes.heartOf(point.node.treeId)?.id === point.node.id) {
+      label += `, ${t.a11y.heart}`;
+    }
     const light = this.lightOf(point);
     if (light !== 'steady') label += `, ${t.a11y.light[light]}`;
     return label;

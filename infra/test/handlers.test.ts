@@ -19,7 +19,7 @@ import { Ctx } from '../lambda/authz';
 import { Deps, K, LinkItem, ProfileItem, RecordItem } from '../lambda/db';
 import { getForest } from '../lambda/handlers/forests';
 import { pushSync } from '../lambda/handlers/sync';
-import { createChild, deleteFamilyLink } from '../lambda/handlers/family';
+import { acceptFamilyInvite, createChild, deleteFamilyLink } from '../lambda/handlers/family';
 import { createFriendRequest } from '../lambda/handlers/friends';
 
 const NOW = 1_800_000_000_000;
@@ -244,6 +244,27 @@ describe('family', () => {
     ddbMock.on(GetCommand).resolves({ Item: leaving });
     ddbMock.on(QueryCommand).resolves({ Items: [leaving, staying] });
     await expect(deleteFamilyLink(ctxOf(profile('rocio')), 'rocio~nico')).resolves.toBeUndefined();
+  });
+
+  // Family invites share the friend-code guessing brake (0.0.115 S1 —
+  // this door used to have none): same bucket, same 5-per-hour law.
+  it('a bad family code counts as a bad attempt and CODE_INVALID answers', async () => {
+    ddbMock.on(GetCommand).resolves({}); // rate row absent + code not found
+    ddbMock.on(UpdateCommand).resolves({});
+    await expect(
+      acceptFamilyInvite(ctxOf(profile('rocio')), { code: 'WRONGONE' }),
+    ).rejects.toMatchObject({ code: 'CODE_INVALID' });
+    expect(ddbMock.commandCalls(UpdateCommand).length).toBe(1); // the bump
+  });
+
+  it('the family attempt after 5 bad redemptions is RATE_LIMITED', async () => {
+    const rateKey = K.rate('rocio', Math.floor(NOW / 3_600_000));
+    ddbMock
+      .on(GetCommand, { TableName: 'roadmap', Key: { pk: rateKey.pk, sk: rateKey.sk } })
+      .resolves({ Item: { ...rateKey, count: 5, ttl: 0 } });
+    await expect(
+      acceptFamilyInvite(ctxOf(profile('rocio')), { code: 'WRONGONE' }),
+    ).rejects.toMatchObject({ code: 'RATE_LIMITED' });
   });
 });
 

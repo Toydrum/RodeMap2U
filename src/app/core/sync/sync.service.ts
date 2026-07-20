@@ -325,10 +325,21 @@ export class SyncService {
         retry.push({ store: entry.store, record: stamped });
       }
       if (retry.length) {
-        await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: retry });
+        // A retry can be out-revved AGAIN by a concurrent device (0.0.115
+        // B1): leave those ids DIRTY instead of settling them — the normal
+        // push loop re-stamps on its next pass, so restore-wins converges
+        // instead of silently losing the restored copy.
+        const second = await this.api.pushSync({ schemaVersion: SCHEMA_VERSION, records: retry });
+        const stillRejected = new Set(second.rejected.map((r) => r.id));
+        this.settleDirty(retry.filter((r) => !stillRejected.has(r.record.id)));
+        for (const r of retry) {
+          if (!stillRejected.has(r.record.id)) continue;
+          const set = this.dirtyIds.get(r.store) ?? new Set<string>();
+          set.add(r.record.id);
+          this.dirtyIds.set(r.store, set);
+        }
       }
       this.settleDirty(chunk);
-      this.settleDirty(retry);
     }
     this.watermark = captureAt;
   }
@@ -347,6 +358,12 @@ export class SyncService {
   private gather<T extends SyncBase>(store: SyncStore, repo: RecordsRepo<T>): SyncRecord[] {
     const out: SyncRecord[] = [];
     const dirty = this.dirtyIds.get(store);
+    // Dirty ids with no record left (an import-replace removed them) can
+    // never be pushed and never settle — drop them here (0.0.115 B4: they
+    // accumulated in sync.state forever, one batch per import).
+    if (dirty) {
+      for (const id of dirty) if (!repo.byId().has(id)) dirty.delete(id);
+    }
     for (const record of repo.byId().values()) {
       if (record.updatedAt > this.watermark || dirty?.has(record.id)) {
         out.push({

@@ -85,5 +85,8 @@
 <app-harvest-sky-host />
 
 <!-- «¿En cuál frasco?»: the goal-jar placement picker, offered from the bloom
-     toast when more than one promise is filling. -->
-<app-placement-picker />
+     toast when more than one promise is filling. @defer (0.0.115 bundle):
+     the sheet + jar art stay out of the shell until a placement is asked. -->
+@defer (when promise.placementRequest() !== null) {
+  <app-placement-picker />
+}

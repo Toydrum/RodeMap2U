@@ -98,7 +98,9 @@ export async function handleEvent(
     if (!found) throw new ApiError('NOT_FOUND');
 
     const ctx = await resolveCaller(d, sub);
-    const params = { ...found.params, ...(event.queryStringParameters ?? {}) } as Record<string, string>;
+    // PATH params spread LAST (0.0.115 S1): a crafted `?userId=` used to
+    // shadow the path's own `{userId}` before the handler ever saw it.
+    const params = { ...(event.queryStringParameters ?? {}), ...found.params } as Record<string, string>;
     const result = await found.route.handler(ctx, params, parseJsonBody(event.body));
     return ok(result, found.route.status ?? 200);
   } catch (error) {

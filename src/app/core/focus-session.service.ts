@@ -131,11 +131,20 @@ export class FocusSessionService {
   async start(nodeId: string | null, minutes: number): Promise<void> {
     if (this.state()) return; // one session at a time
     // …in ANY tab: the repo is the cross-tab truth. Adopt instead of
-    // creating a second running row.
+    // creating a second running row — but only INSIDE the adopt window
+    // (0.0.115 M4): a days-old running row synced in from a dead device
+    // used to be adopted here with days of elapsed; close it honestly at
+    // its planted end (the adoptOrphan rule) and start fresh.
     const elsewhere = this.sessions.running();
     if (elsewhere) {
-      this.adoptRow(elsewhere);
-      return;
+      if (Date.now() - elsewhere.startedAt <= ADOPT_WINDOW_MS) {
+        this.adoptRow(elsewhere);
+        return;
+      }
+      await this.sessions.save({
+        ...elsewhere,
+        endedAt: Math.min(Date.now(), elsewhere.startedAt + elsewhere.plannedMinutes * 60_000),
+      });
     }
     const row = await this.sessions.start(nodeId, minutes);
     this.celebrated = false;
@@ -217,10 +226,11 @@ export class FocusSessionService {
     const lo = Math.min(estimate, realMin);
     const hi = Math.max(estimate, realMin);
     if (hi < lo * 2 || hi - lo < 5) return;
-    // A beat AFTER the caller's momentum toast: that one carries the action
-    // and owns the slot; the curiosity line waits its turn in the queue.
+    // A beat AFTER the caller's momentum toast: that one owns the slot and
+    // the curiosity line waits its turn — enqueue() (never show()) so a
+    // PLAIN momentum toast isn't flashed away either (0.0.115 M4).
     setTimeout(() => {
-      this.toast.show({
+      this.toast.enqueue({
         message: this.i18n.fill(this.i18n.t().timer.timeCompassLine, {
           est: String(estimate),
           real: String(realMin),

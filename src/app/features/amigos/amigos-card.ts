@@ -13,7 +13,6 @@ import {
   FriendView,
   FriendsResponse,
 } from '../../core/api/contracts';
-import { SheetDirective } from '../../shared/ui/sheet.directive';
 import { ToastService } from '../../shared/ui/toast.service';
 
 /**
@@ -25,7 +24,7 @@ import { ToastService } from '../../shared/ui/toast.service';
  */
 @Component({
   selector: 'app-amigos-card',
-  imports: [SheetDirective, ConfirmSheet],
+  imports: [ConfirmSheet],
   templateUrl: './amigos-card.html',
   styleUrl: './amigos-card.scss',
 })

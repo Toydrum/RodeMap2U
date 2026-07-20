@@ -74,8 +74,19 @@ export class AlmanaquePage {
       this.destroyRef.onDestroy(() => mq.removeEventListener('change', onChange));
     }
     // ?day=YYYY-MM-DD deep link (reserved for the future week strip too).
+    // Round-trip validated (0.0.115 M6): the shape regex alone let
+    // «2026-99-99» open a phantom panel over a month that never shows it.
+    // A real day from ANOTHER month also pins the calendar to that month —
+    // otherwise the panel talks about a day the grid isn't showing.
     const day = this.route.snapshot.queryParamMap.get('day');
-    if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) this.openDate.set(day);
+    if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      const [y, m, d] = day.split('-').map(Number);
+      const date = new Date(y, m - 1, d, 12);
+      if (date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d) {
+        this.openDate.set(day);
+        if (day.slice(0, 7) !== today().slice(0, 7)) this.view.set({ y, m });
+      }
+    }
   }
   protected readonly trees = inject(TreesRepo);
   private readonly nodes = inject(NodesRepo);
@@ -171,7 +182,9 @@ export class AlmanaquePage {
     const anchor = (ev?.currentTarget as Element) ?? null;
     if (this.bloomingStone) return;
     const live = this.nodes.byId().get(step.id);
-    if (!live || live.deletedAt || live.status === 'achieved') return;
+    // archivedAt too (0.0.115 B1): a stone archived in another tab while
+    // this list was on screen must not bloom into an invisible drawer.
+    if (!live || live.deletedAt || live.archivedAt || live.status === 'achieved') return;
     this.bloomingStone = true;
     const prevStatus = live.status;
     try {
@@ -291,11 +304,15 @@ export class AlmanaquePage {
   protected prevMonth(): void {
     const { y, m } = this.viewYM();
     this.view.set(m === 1 ? { y: y - 1, m: 12 } : { y, m: m - 1 });
+    // The day panel closes when its month scrolls away (0.0.115 B2) —
+    // an open panel narrating a day the grid no longer shows disorients.
+    this.openDate.set(null);
   }
 
   protected nextMonth(): void {
     const { y, m } = this.viewYM();
     this.view.set(m === 12 ? { y: y + 1, m: 1 } : { y, m: m + 1 });
+    this.openDate.set(null);
   }
 
   protected backToToday(): void {

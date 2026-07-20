@@ -10,7 +10,7 @@ import {
   Tree,
   TreeNode,
 } from '../db/schema';
-import { clear, getAll, putMany } from '../db/idb';
+import { getAll, replaceAll } from '../db/idb';
 import { broadcastChange } from '../db/broadcast';
 import { SyncService } from '../sync/sync.service';
 import { TreesRepo } from './trees.repo';
@@ -113,33 +113,29 @@ export class BackupService {
     // at DB open against envelope.data before writing.)
 
     // Records the import REMOVES must also be announced, or a second tab's
-    // in-memory copy resurrects them on its next save.
+    // in-memory copy resurrects them on its next save. From byId() — not
+    // all() — so TOMBSTONES count too (0.0.115 B7: a tombstone absent from
+    // the backup used to linger in the sibling's memory and re-sync).
     const removedIds = {
-      trees: this.trees.all().map((r) => r.id),
-      nodes: this.nodes.all().map((r) => r.id),
-      checkins: this.checkins.all().map((r) => r.id),
-      sessions: this.sessions.all().map((r) => r.id),
-      harvests: this.harvests.all().map((r) => r.id),
-      preserves: this.preserves.all().map((r) => r.id),
+      trees: [...this.trees.byId().keys()],
+      nodes: [...this.nodes.byId().keys()],
+      checkins: [...this.checkins.byId().keys()],
+      sessions: [...this.sessions.byId().keys()],
+      harvests: [...this.harvests.byId().keys()],
+      preserves: [...this.preserves.byId().keys()],
     };
 
     await this.download('roadmap2u-pre-import');
 
-    await Promise.all([
-      clear('trees'),
-      clear('nodes'),
-      clear('checkins'),
-      clear('sessions'),
-      clear('harvests'),
-      clear('preserves'),
-    ]);
-    await Promise.all([
-      putMany('trees', trees),
-      putMany('nodes', nodes),
-      putMany('checkins', checkins),
-      putMany('sessions', sessions),
-      putMany('harvests', harvests),
-      putMany('preserves', preserves),
+    // ONE transaction for the whole wipe+rewrite — a failure anywhere rolls
+    // the entire import back instead of leaving an empty disk (0.0.115 M1).
+    await replaceAll([
+      { store: 'trees', rows: trees },
+      { store: 'nodes', rows: nodes },
+      { store: 'checkins', rows: checkins },
+      { store: 'sessions', rows: sessions },
+      { store: 'harvests', rows: harvests },
+      { store: 'preserves', rows: preserves },
     ]);
 
     this.trees.resetTo(trees);
@@ -171,12 +167,17 @@ export class BackupService {
     const union = (kept: { id: string }[], removed: string[]) => [
       ...new Set([...removed, ...kept.map((r) => r.id)]),
     ];
-    broadcastChange({ store: 'trees', ids: union(trees, removedIds.trees) });
-    broadcastChange({ store: 'nodes', ids: union(nodes, removedIds.nodes) });
-    broadcastChange({ store: 'checkins', ids: union(checkins, removedIds.checkins) });
-    broadcastChange({ store: 'sessions', ids: union(sessions, removedIds.sessions) });
-    broadcastChange({ store: 'harvests', ids: union(harvests, removedIds.harvests) });
-    broadcastChange({ store: 'preserves', ids: union(preserves, removedIds.preserves) });
+    // reset:true — the restored records carry OLDER revs than the live
+    // copies, so sibling tabs must reload wholesale instead of letting the
+    // LWW guard in applyExternal reject the restoration (0.0.115 audit A1:
+    // the sibling tab used to keep the pre-import forest and could re-push
+    // exactly what the user reverted).
+    broadcastChange({ store: 'trees', ids: union(trees, removedIds.trees), reset: true });
+    broadcastChange({ store: 'nodes', ids: union(nodes, removedIds.nodes), reset: true });
+    broadcastChange({ store: 'checkins', ids: union(checkins, removedIds.checkins), reset: true });
+    broadcastChange({ store: 'sessions', ids: union(sessions, removedIds.sessions), reset: true });
+    broadcastChange({ store: 'harvests', ids: union(harvests, removedIds.harvests), reset: true });
+    broadcastChange({ store: 'preserves', ids: union(preserves, removedIds.preserves), reset: true });
 
     // An explicit restore must WIN over the cloud — without this, the next
     // pull silently resurrects whatever the backup rolled back (cloud revs

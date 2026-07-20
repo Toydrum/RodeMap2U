@@ -17,6 +17,7 @@ import { PerchBody } from './shared/ui/perch-body';
 import { BloomBurstHost } from './shared/ui/bloom-burst';
 import { HarvestSkyHost } from './shared/ui/harvest-sky';
 import { PlacementPicker } from './features/cosecha/placement-picker';
+import { PromiseService } from './features/cosecha/promise.service';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +29,8 @@ export class App {
   protected readonly i18n = inject(I18nService);
   protected readonly toast = inject(ToastService);
   protected readonly focus = inject(FocusSessionService); // adopts open sessions + owns the 🌸 cue from boot
+  /** Drives the placement-picker @defer — the sheet loads on first request. */
+  protected readonly promise = inject(PromiseService);
   private readonly router = inject(Router);
 
   private readonly url = toSignal(this.router.events.pipe(map(() => this.router.url)), {

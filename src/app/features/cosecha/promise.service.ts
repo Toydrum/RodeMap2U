@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Harvest, JarVessel, Preserve } from '../../core/db/schema';
 import { ConserveriaService, SealTint } from '../../core/conserveria.service';
 import { HarvestsRepo } from '../../core/repos/harvests.repo';
@@ -43,6 +43,20 @@ export class PromiseService {
   /** A fresh fruit awaiting a jar choice — set by the bloom toast when >1 jar
    *  is pending; a cross-page picker host (mounted in App) reads it. */
   readonly placementRequest = signal<Harvest | null>(null);
+
+  constructor() {
+    // The picker dissolves when its REASON dissolves (0.0.115 B4): jars all
+    // released in another tab, or the fruit placed/tombstoned elsewhere,
+    // used to leave a cross-page sheet with nothing true left to offer.
+    effect(() => {
+      const fruit = this.placementRequest();
+      if (!fruit) return;
+      const live = this.harvests.byId().get(fruit.id);
+      if (!this.pending().length || !live || live.deletedAt || live.preserveId) {
+        this.placementRequest.set(null);
+      }
+    });
+  }
   requestPlacement(h: Harvest): void {
     this.placementRequest.set(h);
   }

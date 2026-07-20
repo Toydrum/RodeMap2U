@@ -68,6 +68,13 @@ export function treeComplete(
   childrenOf: (n: TreeNode) => TreeNode[],
 ): boolean {
   if (heart.status === 'achieved') return false;
+  // A BRANCHED heart transformed — revertBranch is the ONLY exit from
+  // branched (offering the bloom here was an illegal hand-exit that also
+  // erased the golden knot from the month). And the heart's OWN cadence
+  // blocks like any descendant's: a ritual breathes in cycles, and the
+  // sweep would silently un-bloom the whole tree overnight (audit 0.0.115).
+  if (heart.status === 'branched') return false;
+  if (cadenceOf(heart) != null) return false;
   let any = false;
   const stack = [...childrenOf(heart)];
   const seen = new Set<string>();

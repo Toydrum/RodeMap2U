@@ -42,11 +42,18 @@ export class RemindersService {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
-  /** nodeId → 'YYYY-MM-DD' of the last fire on THIS device. */
+  /** nodeId → 'YYYY-MM-DD' of the last fire on THIS device. Re-read from
+   *  the meta row on EVERY check (0.0.115 M2): two tabs each hold their own
+   *  timer — a stale in-memory map fired the same reminder twice a day. */
   private fired = new Map<string, string>();
-  private loaded = false;
+
+  private started = false;
 
   init(): void {
+    // Idempotent (0.0.115 P2): a second caller must not stack a second
+    // interval — double timers means double chimes forever.
+    if (this.started) return;
+    this.started = true;
     setInterval(() => void this.check(), CHECK_EVERY_MS);
     // Late-fire on open: the boot check catches an hour that passed while
     // the app was closed (within the grace window).
@@ -66,11 +73,13 @@ export class RemindersService {
   }
 
   private async loadFired(): Promise<void> {
-    if (this.loaded) return;
-    this.loaded = true;
     try {
       const row = await get<{ key: string; days?: Record<string, string> }>('meta', FIRED_KEY);
-      for (const [id, day] of Object.entries(row?.days ?? {})) this.fired.set(id, day);
+      for (const [id, day] of Object.entries(row?.days ?? {})) {
+        // Disk marks MERGE over memory (another tab may have fired first);
+        // memory keeps marks the disk write hasn't landed yet.
+        if (!this.fired.has(id)) this.fired.set(id, day);
+      }
     } catch {
       /* storage unavailable — in-memory dedup still holds this session */
     }
@@ -78,9 +87,12 @@ export class RemindersService {
 
   private async persistFired(): Promise<void> {
     try {
-      // Only today's marks travel to disk — yesterday's are spent anyway.
+      // MERGE with the disk row (never clobber a sibling tab's marks), and
+      // only today's marks travel — yesterday's are spent anyway.
       const day = today();
+      const row = await get<{ key: string; days?: Record<string, string> }>('meta', FIRED_KEY);
       const days: Record<string, string> = {};
+      for (const [id, d] of Object.entries(row?.days ?? {})) if (d === day) days[id] = d;
       for (const [id, d] of this.fired) if (d === day) days[id] = d;
       await put('meta', { key: FIRED_KEY, days });
     } catch {
@@ -148,12 +160,17 @@ export class RemindersService {
   }
 }
 
-/** Epoch-ms of today's 'HH:MM' (local), or null for a malformed value. */
+/** Epoch-ms of today's 'HH:MM' (local), or null for a malformed value.
+ *  Range-checked (0.0.115 B3): '25:30' passed the regex and setHours rolled
+ *  it to TOMORROW — the reminder never rang and never marked, silently. */
 function todayAt(hhmm: string): number | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm);
   if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
   const d = new Date();
-  d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+  d.setHours(h, min, 0, 0);
   return d.getTime();
 }
 

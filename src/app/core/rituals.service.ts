@@ -27,9 +27,28 @@ export class RitualsService {
   constructor() {
     effect(() => {
       const day = today(); // reactive: boot + midnight flip
-      untracked(() => void this.sweep(day));
+      // …and on node changes too (0.0.115 B5): a stale bloom arriving by
+      // SYNC mid-morning used to read «done today» until the next midnight.
+      // The sweep is idempotent within the period, so re-running on writes
+      // is safe — the debounce keeps bulk pulls to one pass, and the
+      // sweep's own resets settle on the second (no-op) run.
+      this.nodes.visible();
+      untracked(() => {
+        // Boot (and the midnight flip) sweep IMMEDIATELY — the battery and
+        // the almanaque rely on the dawn being clean right after load.
+        if (!this.sweptOnce) {
+          this.sweptOnce = true;
+          void this.sweep(day);
+          return;
+        }
+        if (this.sweepTimer) clearTimeout(this.sweepTimer);
+        this.sweepTimer = setTimeout(() => void this.sweep(today()), 1_500);
+      });
     });
   }
+
+  private sweptOnce = false;
+  private sweepTimer: ReturnType<typeof setTimeout> | null = null;
 
   private async sweep(day: string): Promise<void> {
     // nodes.visible() only knows node-level archives — archiving a TREE

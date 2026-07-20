@@ -44,7 +44,7 @@
       @if (heartStats().total > 0) {
         <p class="heart-line">{{ heartLine() }}</p>
       }
-      @if (heartComplete()) {
+      @if (heartComplete() && !visiting) {
         <button type="button" class="btn btn-primary heart-bloom-door" (click)="bloomWholeTree()">
           {{ i18n.t().node.heartDoor }}
         </button>
@@ -163,7 +163,12 @@
           (change)="setRemindAt(inputValue($event))"
         >
         @if (node().remindAt) {
-          <button type="button" class="btn btn-ghost remind-clear" (click)="setRemindAt('')">✕</button>
+          <button
+            type="button"
+            class="btn btn-ghost remind-clear"
+            [attr.aria-label]="i18n.t().node.remindClear"
+            (click)="setRemindAt('')"
+          >✕</button>
         }
       </div>
       @if (node().remindAt) {

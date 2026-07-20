@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { NodesRepo } from '../../core/repos/nodes.repo';
-import { NodePriority, Tree, TreeNode, lightRank } from '../../core/db/schema';
+import { LIGHT_ICONS, NodePriority, Tree, TreeNode, lightRank } from '../../core/db/schema';
 import { ritualKind } from '../../core/harvest';
 import { SpiralGlyph } from './spiral';
 import { HeartwoodGlyph } from './heartwood';
@@ -409,8 +409,9 @@ export class TreeOutline {
   }
 
   protected lightIcon(node: TreeNode): string {
-    const light = this.lightOf(node);
-    return light === 'sunlit' ? '☀️' : light === 'shade' ? '🌳' : '🌿';
+    // Shared vocabulary (0.0.115 M7): this hand-copied map still said 🌳
+    // for shade — the forest's glyph on a parasol (emoji-law violation).
+    return LIGHT_ICONS[this.lightOf(node)];
   }
 
   /** ritmo → sol → sombra → ritmo. Writes through NodesRepo.update — on a

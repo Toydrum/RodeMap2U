@@ -129,14 +129,6 @@
     fill: color-mix(in srgb, var(--status-growing) 58%, #b3c178);
   }
 
-  &.blossom .blossom-petal {
-    fill: color-mix(in srgb, var(--status-achieved) 72%, white);
-  }
-
-  &.blossom .blossom-heart {
-    fill: var(--status-branched);
-  }
-
   &.is-new {
     animation: leaf-pop 0.5s ease-out 0.45s both;
   }

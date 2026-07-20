@@ -12,7 +12,7 @@ this file is HOW to stand it up and wire it.
 |---|---|---|
 | Client auth (Cognito adapter, `/account` ritual) | ✅ shipped 0.0.48, dormant | **Stage 1 below — possible TODAY** with just a user pool (paste 3 strings) |
 | Client API transport (`http-api.ts`, all 26 ops) | ✅ shipped 0.0.48, dormant | Stage 2 — needs the deployed API |
-| Backend (Cognito pool + DynamoDB + Lambda router + HTTP API) | ✅ **implemented in `infra/`** (CDK; `cdk synth` + 16 vitest green), awaiting an AWS account | `cd infra && npx cdk deploy` → paste the 4 outputs (§3) |
+| Backend (Cognito pool + DynamoDB + Lambda router + HTTP API) | ✅ **implemented in `infra/`** (CDK; `cdk synth` + 18 vitest green) — **moving to its own repo**: see [`backend-extraction.md`](./backend-extraction.md) | `npx cdk deploy` in the backend repo → paste the 4 outputs (§3) |
 | Mandatory login (`requireAuth`) | wired, inert | §4 — flip ONLY after the «conectar mi bosque» phase ships |
 
 The entire flip lives in **`src/app/core/config.ts`**. No other file changes.
@@ -36,6 +36,9 @@ export const APP_CONFIG = Object.freeze({
 
 - `app.config.ts` picks the adapters ONCE at boot from `APP_CONFIG.backend`:
   `MockAuthProvider`/`MockApi` (mock) vs `CognitoAuthProvider`/`HttpApi` (aws).
+  Since 0.0.115 BOTH pairs sit behind `lazySeam` (`core/lazy-seam.ts`): only
+  the chosen side's chunk ever downloads, and even that stays off the first
+  paint (every seam method is async; calls await the chunk).
 - `cognito-auth.provider.ts` is the only file that touches `aws-amplify`, and
   only via dynamic `import()` — the SDK stays a lazy chunk. **Gate after every
   build:** `main-*.js` must NOT match `cognito-idp|amazonaws\.com`.
@@ -133,14 +136,19 @@ Notes for this stage:
 ## 3. Stage 2 — connect the API (`infra/` is ready to deploy)
 
 The client transport is already complete (`core/api/http-api.ts`: bearer
-idToken, one 401 forceRefresh retry, 250 ms/1 s backoff, offline fast-fail),
-and the backend is **implemented in `infra/`** (CDK app + router Lambda that
-imports `contracts.ts` directly — one source of truth; verified without AWS by
-`npm test` (16 vitest incl. route↔API_PATHS parity, LWW, LAST_GUARDIAN, code
-expiry, strip-vs-full) and `npx cdk synth`). The preferred path:
+idToken, one 401 forceRefresh retry — retries only GETs and sync pushes on
+5xx/network (rev-LWW makes those replayable; a replayed `createChild` would
+not be) — offline fast-fail), and the backend is **implemented in `infra/`**
+(CDK app + router Lambda that imports `contracts.ts` — one source of truth;
+verified without AWS by `npm test` (18 vitest incl. route↔API_PATHS parity,
+LWW, LAST_GUARDIAN, code expiry + rate brake, strip-vs-full) and
+`npx cdk synth`). It is being extracted to its own repository — the vendored
+contract, drift test and repo layout live in
+[`backend-extraction.md`](./backend-extraction.md). The deploy itself is
+unchanged, just run in that repo:
 
 ```bash
-cd infra
+# in the roadmap2u-backend repo
 npm ci
 npx cdk bootstrap   # once per AWS account+region
 npx cdk deploy      # prints ConfigRegion / ConfigUserPoolId / ConfigUserPoolClientId / ConfigApiBaseUrl
@@ -173,6 +181,9 @@ fresh one and re-create the test users. What the stack contains (spec in
    ```
    Missing CORS is the #1 "it works in mock but not on AWS" failure — the
    browser blocks the response and `http-api.ts` reports `offline`.
+   **Production stack: drop the localhost origins** (audit 0.0.115) — keep
+   them only on a staging stack (`backend-extraction.md` §5 suggests a CDK
+   context flag).
 
 If you ever rebuild the backend by hand instead of deploying `infra/`, treat
 contract §5–§7 as the acceptance spec and run the mock (`mock-api.ts`)
@@ -210,6 +221,7 @@ push. Local forests were never touched. Notes:
 | Password policy | `src/app/core/auth/auth-types.ts` (`PASSWORD_POLICY`) |
 | Every endpoint, shape, error code, cap | `src/app/core/api/contracts.ts` (normative) |
 | Permissions matrix, DynamoDB design, Lambda authz | `docs/backend-contract.md` |
+| Backend repo split: vendored contract, drift test, security decisions | `docs/backend-extraction.md` |
 | Reference backend behavior (executable) | `src/app/core/api/mock-api.ts` + `mock-auth.provider.ts` |
 | Auth UX flows the pool must satisfy | `src/app/features/account/account.ts` (step machine) |
 | Mock-path regression battery | `tools/verify-auth.mjs` (mock-only; see §2.3 for the real-pool smoke) |

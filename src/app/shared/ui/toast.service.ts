@@ -37,7 +37,15 @@ export class ToastService {
       return;
     }
     if (cur?.yields && !toast.sticky) {
-      // A gentle offer steps aside and rejoins the back of the line.
+      // A gentle offer steps aside — but never for ANOTHER offer (0.0.115):
+      // when two offers share one breath (the whole-tree door + the jar ask
+      // at the last bloom), the second waits its turn and the moment keeps
+      // its order. Undos and plain lines still displace as before.
+      if (toast.yields) {
+        this.queue.push({ toast, durationMs });
+        return;
+      }
+      // …and rejoins the back of the line.
       this.queue.push({ toast: cur, durationMs: 0 });
       this.display(toast, durationMs);
       return;
@@ -45,9 +53,34 @@ export class ToastService {
     if (cur?.actionLabel && !cur.sticky) {
       // An undo in flight: the newcomer waits its turn.
       if (this.queue.length >= 4) {
-        const drop = this.queue.findIndex((q) => !q.toast.actionLabel && !q.toast.sticky);
-        this.queue.splice(drop === -1 ? 0 : drop, 1);
+        // Make room WITHOUT breaking a promise (0.0.115 M2): drop the
+        // NEWEST plain line (informational toasts replace each other
+        // anyway) — never an undo, never the sticky offer. If the whole
+        // line carries promises, a plain newcomer is the one that steps
+        // back, and a promised newcomer simply lengthens the line.
+        let drop = -1;
+        for (let i = this.queue.length - 1; i >= 0; i--) {
+          const t = this.queue[i].toast;
+          if (!t.actionLabel && !t.sticky) {
+            drop = i;
+            break;
+          }
+        }
+        if (drop !== -1) this.queue.splice(drop, 1);
+        else if (!toast.actionLabel && !toast.sticky) return;
       }
+      this.queue.push({ toast, durationMs });
+      return;
+    }
+    this.display(toast, durationMs);
+  }
+
+  /** Wait BEHIND whatever is showing instead of replacing it — for quiet
+   *  follow-ups (the time compass line) that must never flash away the
+   *  moment they ride on (0.0.115 M4: an 80 ms defer used to erase a plain
+   *  «bien hecho» almost instantly). */
+  enqueue(toast: Toast, durationMs = 5000): void {
+    if (this.current()) {
       this.queue.push({ toast, durationMs });
       return;
     }
