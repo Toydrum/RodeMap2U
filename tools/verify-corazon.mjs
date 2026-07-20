@@ -47,6 +47,16 @@ const nodesB = await getAll('nodes');
 const planted = nodesB.find((n) => n.title === 'Ramita nueva');
 ok('B plants under the heart', planted?.parentId === 'demo-w-root', `parentId=${planted?.parentId}`);
 
+// C0 — the container heart wears its heartwood rings ON the canvas
+// (0.0.114); the bare seedling heart keeps ordinary glyphs.
+await page.goto(`${BASE}/tree/demo-guitar`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1000);
+const canvasRings = await page.locator('svg.canvas .heart-glyph').count();
+await page.goto(`${BASE}/tree/demo-seedling`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+const bareRings = await page.locator('svg.canvas .heart-glyph').count();
+ok('C0 heartwood on the canvas (container only)', canvasRings === 1 && bareRings === 0, `container=${canvasRings} bare=${bareRings}`);
+
 // C — the heart's sheet is slim. Open it via deep link.
 await page.goto(`${BASE}/tree/demo-guitar?node=demo-g-root`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);

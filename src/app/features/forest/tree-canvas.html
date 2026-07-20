@@ -190,11 +190,18 @@
           <circle class="here-halo" r="19" fill="none" />
         }
 
-        <!-- Status glyph. A pending RITUAL (0.0.104) shows the spiral with
+        <!-- Status glyph. The container HEART (0.0.114) wears its heartwood
+             rings — the goal's center on the trunk, same sign as its chip;
+             an achieved heart blooms into the flower instead (the whole-tree
+             celebration). A pending RITUAL (0.0.104) shows the spiral with
              star dust instead of its seed/capullo — «esta rama respira en
              ciclos»; the same symbol you walk in the almanaque. Achieved/
              resting/branched keep their ordinary glyphs. -->
-        @if (isRitual(point.node) && (point.node.status === 'seed' || point.node.status === 'growing')) {
+        @if (isContainerHeart(point.node) && point.node.status !== 'achieved') {
+          <g class="glyph heart-glyph">
+            <g appHeartwood [tint]="'var(--accent-' + tree().accent + ')'" [scale]="1.15" />
+          </g>
+        } @else if (isRitual(point.node) && (point.node.status === 'seed' || point.node.status === 'growing')) {
           <g class="glyph ritual-spiral">
             <g appSpiral [tint]="species().petalEdge" [scale]="1.2" />
           </g>

@@ -14,6 +14,7 @@ import { RouterLink } from '@angular/router';
 import { NodeStatus, Tree, TreeNode } from '../../core/db/schema';
 import { bearsNoFruit, ritualKind } from '../../core/harvest';
 import { SpiralGlyph } from './spiral';
+import { HeartwoodGlyph } from './heartwood';
 import { NodesRepo } from '../../core/repos/nodes.repo';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MotionService } from '../../core/motion.service';
@@ -91,7 +92,7 @@ interface EdgeView {
  */
 @Component({
   selector: 'app-tree-canvas',
-  imports: [FlowerGlyph, FruitGlyph, SpiralGlyph, PerchBody, RouterLink],
+  imports: [FlowerGlyph, FruitGlyph, SpiralGlyph, HeartwoodGlyph, PerchBody, RouterLink],
   templateUrl: './tree-canvas.html',
   styleUrl: './tree-canvas.scss',
   // Closes the little note letter when tapping anywhere else (never preventDefault).
@@ -388,6 +389,15 @@ export class TreeCanvas {
   /** «La espiral» (0.0.104): a ritual (lone leaf OR sendero parent) wears
    *  the spiral+star-dust glyph while pending — the SAME symbol walked in
    *  the almanaque. One predicate with the fruit law (harvest.ts). */
+  /** «El corazón en el tronco» (0.0.114): the container heart wears its
+   *  heartwood rings ON the tree — the same sign as its chip and the
+   *  tablita heading. A BARE heart keeps ordinary glyphs (it is the goal
+   *  itself), and an ACHIEVED heart blooms into the species flower (the
+   *  whole-tree celebration outranks the rings). */
+  protected isContainerHeart(node: TreeNode): boolean {
+    return this.nodes.heartOf(node.treeId)?.id === node.id && this.nodes.childrenOf(node).length > 0;
+  }
+
   protected isRitual(node: TreeNode): boolean {
     return ritualKind(node) !== null;
   }
