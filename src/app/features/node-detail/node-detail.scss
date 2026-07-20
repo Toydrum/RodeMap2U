@@ -308,3 +308,19 @@
   display: block;
   margin-top: 0.25rem;
 }
+
+/* «El corazón del árbol» (0.0.112) */
+.heart-chip {
+  font-weight: 700;
+}
+
+.heart-line {
+  margin: 0.15rem 0 0.5rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.heart-bloom-door {
+  margin: 0.2rem 0 0.6rem;
+  width: 100%;
+}

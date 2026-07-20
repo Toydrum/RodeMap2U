@@ -1,4 +1,5 @@
 import { Tree, TreeNode } from '../../core/db/schema';
+import { heartOf, isRoot } from '../../core/heart';
 
 /**
  * «Buscar una rama» — a small utilitarian finder (COGA: help users find
@@ -35,12 +36,18 @@ export function findMatches(
   const hits: FinderHit[] = [];
   for (const tree of trees) {
     if (hits.length >= CAP) break;
-    if (foldText(tree.name).includes(q)) {
+    const treeMatched = foldText(tree.name).includes(q);
+    if (treeMatched) {
       hits.push({ treeId: tree.id, treeName: tree.name, nodeId: null, title: tree.name });
     }
-    for (const node of nodesOf(tree.id)) {
+    const live = nodesOf(tree.id).filter((n) => !n.archivedAt && !n.deletedAt);
+    const heart = heartOf(live.filter(isRoot));
+    for (const node of live) {
       if (hits.length >= CAP) break;
-      if (node.archivedAt || node.deletedAt) continue;
+      // «El corazón del árbol» (0.0.112): when the tree itself already hit,
+      // its heart is the SAME door — re-emitting it doubled the result
+      // («trabajo» used to appear as tree AND as its homonymous branch).
+      if (treeMatched && heart && node.id === heart.id) continue;
       if (foldText(node.title).includes(q)) {
         hits.push({ treeId: tree.id, treeName: tree.name, nodeId: node.id, title: node.title });
       }

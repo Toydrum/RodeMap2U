@@ -10,6 +10,7 @@ import { ESTIMATE_CHOICES, EstimateMin, Harvest, NodePriority, NodeStatus, Tree,
 import { dayOf, isPast, today } from '../../core/time';
 import { Cadence, cadenceOf } from '../../core/cadence';
 import { ritualKind } from '../../core/harvest';
+import { treeComplete } from '../../core/heart';
 import { CadencePicker } from './cadence-picker';
 import { SpiralGlyph } from '../forest/spiral';
 import { ToastService, UNDO_MS } from '../../shared/ui/toast.service';
@@ -154,7 +155,96 @@ export class NodeDetail {
     const trimmed = title.trim();
     if (trimmed && trimmed !== this.node().title) {
       await this.nodes.update(this.node(), { title: trimmed });
+      // «El corazón ES el nombre del árbol» (0.0.112): renaming the heart
+      // renames the tree — TreesRepo.rename finally has its caller.
+      if (this.isHeart() && trimmed !== this.tree().name) {
+        await this.trees.rename(this.tree(), trimmed);
+      }
     }
+  }
+
+  /* ---------------------------------------- «el corazón del árbol» (0.0.112) */
+
+  /** The tree's heart: its first visible root — the node born with the
+   *  tree. A heart with ramitas is the goal's CENTER, not a task. */
+  protected readonly isHeart = computed(() => this.nodes.heartOf(this.tree().id)?.id === this.node().id);
+
+  /** The SLIM sheet applies to the CONTAINER heart only (≥1 ramita): a BARE
+   *  heart is still the goal itself — full task sheet, pickable, bloomable
+   *  (otherwise a one-node tree could never bloom at all). */
+  protected readonly containerHeart = computed(() => this.isHeart() && this.children().length > 0);
+
+  /** done/total over ALL visible descendants (recursive — must agree with
+   *  treeComplete, or «5 de 5» could show without the door). */
+  protected readonly heartStats = computed(() => {
+    let done = 0;
+    let total = 0;
+    const stack = [...this.nodes.childrenOf(this.node())];
+    const seen = new Set<string>();
+    while (stack.length) {
+      const n = stack.pop()!;
+      if (seen.has(n.id)) continue;
+      seen.add(n.id);
+      total++;
+      if (n.status === 'achieved' || n.status === 'branched') done++;
+      stack.push(...this.nodes.childrenOf(n));
+    }
+    return { done, total };
+  });
+
+  protected readonly heartComplete = computed(() => {
+    const heart = this.nodes.heartOf(this.tree().id);
+    return !!heart && heart.id === this.node().id && treeComplete(heart, (n) => this.nodes.childrenOf(n));
+  });
+
+  protected heartLine(): string {
+    const { done, total } = this.heartStats();
+    return this.i18n.fill(this.i18n.plural(total, this.i18n.t().node.heartLine), {
+      done,
+      total,
+    });
+  }
+
+  /** Both doors land here: the last-bloom toast and the permanent button.
+   *  The heart blooms ONLY this way (owner decision — no status picker on
+   *  the center); everything built downstream fires on its own: the tree's
+   *  fruit mints, the sky rains, the base flowers, the meadow gains one. */
+  protected async bloomWholeTree(): Promise<void> {
+    const heart = this.nodes.heartOf(this.tree().id);
+    if (!heart || heart.status === 'achieved') return;
+    const prev = heart.status;
+    const bloomed = await this.nodes.setStatus(heart, 'achieved');
+    this.celebrateBloom(bloomed, null);
+    this.toast.show(
+      {
+        message: this.i18n.fill(this.i18n.t().tree.bloomedWhole, { tree: this.tree().name }),
+        actionLabel: this.i18n.t().common.undo,
+        action: () => {
+          // Re-read the live record (LWW law); reopening clears achievedAt —
+          // the fruit STAYS in the pantry (nada se gasta).
+          const fresh = this.nodes.byId().get(heart.id) as TreeNode | undefined;
+          if (fresh) void this.nodes.setStatus(fresh, prev);
+        },
+      },
+      UNDO_MS,
+    );
+  }
+
+  /** The offered door (never automatic — the 0.0.96 lesson): when the bloom
+   *  that just landed completed the whole tree, ONE toast invites the close. */
+  private maybeOfferTreeBloom(): void {
+    if (this.visiting) return;
+    const heart = this.nodes.heartOf(this.tree().id);
+    if (!heart || heart.id === this.node().id) return;
+    if (!treeComplete(heart, (n) => this.nodes.childrenOf(n))) return;
+    this.toast.show(
+      {
+        message: this.i18n.fill(this.i18n.t().tree.bloomAsk, { tree: this.tree().name }),
+        actionLabel: this.i18n.t().tree.bloomAction,
+        action: () => void this.bloomWholeTree(),
+      },
+      12_000,
+    );
   }
 
   protected async setNote(note: string): Promise<void> {
@@ -217,6 +307,9 @@ export class NodeDetail {
           this.offerToStore(minted);
         }
       });
+      // «El corazón del árbol» (0.0.112): if this bloom completed every
+      // ramita, offer — never perform — the whole-tree bloom.
+      this.maybeOfferTreeBloom();
     }
   }
 

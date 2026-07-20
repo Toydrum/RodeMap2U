@@ -97,7 +97,7 @@ El bosque es tu pantalla principal. **Cada árbol es un área de tu vida**: un p
 
 1. Toca **"+ Plantar un árbol"** (arriba a la derecha).
 2. Escríbele un nombre y elige su color.
-3. Guarda. Tu árbol aparece plantado en la pradera — **y nace ya con su primera ramita del mismo nombre**: una sola pregunta y ya hay algo vivo que tocar (aparece de inmediato en las sugerencias de Ahora). Si quieres que esa raíz se llame distinto, la renombras cuando quieras en su hoja.
+3. Guarda. Tu árbol aparece plantado en la pradera — **y nace con su corazón 🌳**: el nodo donde nombraste tu logro. El corazón no es una tarea: es el centro del que salen tus primeras ramitas, y **cuando todas florecen, la app te ofrece florecer el árbol entero** (con su fruta grande). Renómbralo en su hoja y el árbol entero se renombra. Mientras el corazón está solo (sin ramitas), sí cuenta como tu meta pelona: Ahora te la sugiere y te ayuda a desmenuzarla en pasitos.
 
 > 🌾 **¿Pradera vacía y no sabes por dónde empezar?** Junto al botón te esperan tres **retoños de ejemplo** (🎒 La escuela · 🏡 Mi casa · 🚀 Un proyecto): tócalos y se plantan con un par de ramitas ya puestas — **son tuyos**: renómbralo todo, poda lo que sobre. Y si prefieres el lienzo limpio, **"Prefiero empezar en blanco"** los despide para siempre.
 
@@ -165,7 +165,7 @@ Y sobre la forma del árbol: las copas con muchas ramas ya no se estiran a lo an
 Hay tres formas, todas equivalentes:
 
 - **Botón "+" flotante**: toca una rama y aparece un botón verde **+** encima. Tócalo y planta una rama hija justo ahí.
-- **"+ Plantar aquí"** (arriba a la derecha): planta una rama nueva desde la raíz del árbol.
+- **"+ Plantar aquí"** (arriba a la derecha): planta una ramita nueva del corazón del árbol.
 - **Pasitos** (dentro del detalle de una rama): la vía rápida para varios seguidos.
 - **Varios a la vez** (en la hoja de plantar): para quienes ya traen el plan completo. Se abre una cajita donde **cada línea siembra una ramita**; sangra una línea con **Tab** (o dos espacios) y esa ramita cuelga de la línea de arriba. También puedes **pegar una lista entera** — el árbol brota de golpe. Y si sembraste un buen puñado, al cerrar la hoja la app te invita, una sola vez y sin insistir: *"Tu árbol se ve listo — ¿le crecemos una ramita? 🌱"* con su puerta de 2 minutitos.
 

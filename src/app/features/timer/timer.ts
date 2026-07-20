@@ -63,8 +63,13 @@ export class TimerPage {
     );
     const out: NodeChoice[] = [];
     for (const tree of this.trees.active()) {
+      // «El corazón del árbol» (0.0.112): the heart with ramitas is the
+      // goal's center, not a focusable task — its ramitas are. A bare
+      // heart stays pickable (a one-tree forest must not empty the picker).
+      const heart = this.nodes.heartOf(tree.id);
       const picks = (this.nodes.byTree().get(tree.id) ?? [])
         .filter((n) => n.status === 'growing' || n.status === 'seed')
+        .filter((n) => !(heart && n.id === heart.id && this.nodes.childrenOf(n).length > 0))
         .sort((a, b) => lightRank(a) - lightRank(b) || b.updatedAt - a.updatedAt)
         .slice(0, 4);
       for (const node of picks) {

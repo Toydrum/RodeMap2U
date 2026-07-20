@@ -38,18 +38,27 @@ console.log(`A sheet picker: seeded-sun=${sunSelected.includes('selected')} set-
 await page.keyboard.press('Escape');
 
 // ── B: default state — «A su ritmo» selected, no badge ─────────────────────
-await page.locator('app-tree-outline .row', { hasText: 'Lanzar mi proyecto' }).click();
-await page.locator('app-tree-outline .row', { hasText: 'Lanzar mi proyecto' }).click();
+// 0.0.112: 'Lanzar mi proyecto' is a container HEART now (heading row, no
+// light) — a plain CHILD carries the default-state assertion instead.
+await page.goto(`${BASE}/tree/demo-health`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1200);
+await page.locator('.tree-outline-toggle').click();
+await page.locator('app-tree-outline .row', { hasText: 'Caminar 3 veces' }).click();
+await page.locator('app-tree-outline .row', { hasText: 'Caminar 3 veces' }).click();
 await page.locator('.light-row').waitFor({ timeout: 6000 });
 const steadySelected = await sheetChip('A su ritmo').getAttribute('class');
 await page.keyboard.press('Escape');
 await page.waitForTimeout(400);
+await page.locator('.tree-outline-toggle').click();
+await page.waitForTimeout(300);
 const rootBadges = await page
-  .locator('app-tree-outline .row', { hasText: 'Lanzar mi proyecto' })
+  .locator('app-tree-outline .row', { hasText: 'Caminar 3 veces' })
   .locator('.sun-badge')
   .count();
 const okB = steadySelected.includes('selected') && rootBadges === 0;
 console.log(`B default: steady-selected=${steadySelected.includes('selected')} unbadged=${rootBadges === 0} | OK=${okB}`);
+await page.goto(`${BASE}/tree/demo-work`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(1200);
 
 // ── C: trigger still outranks sunlit (bias, not tyranny) ───────────────────
 await page.goto(`${BASE}/ahora`, { waitUntil: 'networkidle' });

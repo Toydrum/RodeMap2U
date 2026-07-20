@@ -56,6 +56,14 @@ describe('finder', () => {
     expect(treeHit[0].nodeId).toBeNull();
   });
 
+  it('a matched tree does not re-emit its heart (0.0.112 — one door, not two)', () => {
+    const t = tree('t1', 'trabajo');
+    const heart = node('h1', 't1', 'trabajo');
+    const extra = node('n2', 't1', 'trabajo extra');
+    const hits = findMatches('trabajo', [t], () => [heart, extra]);
+    expect(hits.map((h) => h.nodeId)).toEqual([null, 'n2']); // tree door + real branch, no twin
+  });
+
   it('skips archived branches and caps the list at 12', () => {
     const t = tree('t1', 'Bosque');
     const nodes = Array.from({ length: 20 }, (_, i) => node(`n${i}`, 't1', `rama ${i}`, i === 0 ? 99 : null));

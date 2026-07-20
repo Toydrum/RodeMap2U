@@ -446,6 +446,9 @@ export const EN: Dict = {
     archiveTitle: 'Move “{name}” to the archive?',
     archiveBody: 'Your tree will rest out of sight, with all its branches and its story. Nothing is deleted — you can return it to the forest from Settings anytime.',
     archiveCta: 'Let it rest',
+    bloomAsk: 'Every little branch of "{tree}" has bloomed 🌸',
+    bloomAction: 'Bloom the whole tree 🌳',
+    bloomedWhole: '"{tree}" bloomed whole 🌳🌸 — its fruit is in your harvest',
     archivedToast: '“{name}” is resting in the archive 🗃',
     emptyTree: 'This tree is waiting for its first branch 🌱',
     focusLink: 'Focus session on this tree',
@@ -498,6 +501,13 @@ export const EN: Dict = {
     wakeRitualTitle: '"{title}" has bloomed once already',
     wakeRitualBody: 'Its fruit stays safe in your harvest. To turn as a ritual, it dawns clean from today — ready to bloom each time.',
     wakeRitualCta: 'Wake the ritual',
+    heartChip: "The tree's heart",
+    heartHint: 'This is where you named your goal. Its first little branches grow from here — when they all bloom, the whole tree blooms.',
+    heartLine: {
+      one: '{done} of {total} little branch has bloomed',
+      many: '{done} of {total} little branches have bloomed',
+    },
+    heartDoor: 'Bloom the whole tree 🌸',
     nextStepTag: 'next',
     nextStepAction: 'Next step?',
     moveUp: 'Move up',
@@ -866,7 +876,7 @@ export const EN: Dict = {
       {
         icon: '🌱',
         title: 'Planting',
-        body: 'Every tree is born with its first little branch (same name — rename it anytime): planting an area of your life is ONE single question. Then, tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants from the root. Already have the whole plan in your head? In the planting sheet, "Several at once" opens a little box where every line sows a branch (indent = child branch) — paste your whole list and the tree sprouts at once. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then. Does the goal feel huge with no clear start? Its sheet holds 🔪 "Crumble this goal": three little compass questions, and each answer of YOURS sprouts as a pasito — all skippable. And any branch can be marked 🌀 "It repeats" (a routine, a ritual): when planting you choose "Once" or "It repeats" — every day, only certain days (Monday and Thursday…), or once a week whichever day you like. A repeating branch wears a SPIRAL with star dust on your tree — the sign that it breathes in cycles. Today\'s spirals live in the Almanac, next to the little path — and right there you can sow a new one with the ＋ button.',
+        body: 'Every tree is born with its HEART 🌳: the node where you named your goal (rename it and the whole tree renames). The heart is not a task — it is the center your first little branches grow from, and when ALL of them bloom, the app offers to bloom the whole tree (with its big fruit). Tap a branch and a green + button appears above it: tap it to plant a child branch right there. The "+ Plant here" button up top plants a new little branch of the heart. Already have the whole plan in your head? In the planting sheet, "Several at once" opens a little box where every line sows a branch (indent = child branch) — paste your whole list and the tree sprouts at once. And inside each branch\'s sheet live the Small steps: tiny concrete steps that are also drawn on the tree, each with a 🌸 button to bloom them in one tap. Do they go in order (step 1, step 2…)? Mark "Do these go in order?" and that branch draws as a little path that blooms step by step — the step you are on says "next", and Now offers it with its first-and-then. Does the goal feel huge with no clear start? Its sheet holds 🔪 "Crumble this goal": three little compass questions, and each answer of YOURS sprouts as a pasito — all skippable. And any branch can be marked 🌀 "It repeats" (a routine, a ritual): when planting you choose "Once" or "It repeats" — every day, only certain days (Monday and Thursday…), or once a week whichever day you like. A repeating branch wears a SPIRAL with star dust on your tree — the sign that it breathes in cycles. Today\'s spirals live in the Almanac, next to the little path — and right there you can sow a new one with the ＋ button.',
       },
       {
         icon: '🗓',

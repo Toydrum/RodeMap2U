@@ -55,7 +55,7 @@ const siteA = await page.evaluate(async () => {
   db.close();
   const pick = rows.find(
     (r) =>
-      !r.deletedAt && !r.archivedAt && !r.repeatsDaily &&
+      !r.deletedAt && !r.archivedAt && !r.repeatsDaily && r.parentId !== null &&
       (r.status === 'seed' || r.status === 'growing'),
   );
   return { treeId: pick.treeId, nodeId: pick.id };
@@ -298,7 +298,7 @@ const siteC = await page.evaluate(async () => {
   };
   const pick = rows.find(
     (r) =>
-      !r.deletedAt && !r.archivedAt && !r.repeatsDaily &&
+      !r.deletedAt && !r.archivedAt && !r.repeatsDaily && r.parentId !== null &&
       (r.status === 'seed' || r.status === 'growing') && !underDaily(r),
   );
   return { treeId: pick.treeId, nodeId: pick.id };

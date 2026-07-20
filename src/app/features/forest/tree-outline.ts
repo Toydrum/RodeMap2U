@@ -68,17 +68,25 @@ const AUTO_COLLAPSE_AT = 12;
           } @else {
             <span class="tri spacer" aria-hidden="true">•</span>
           }
+<!-- «El corazón del árbol» (0.0.112): the heart row reads as a tappable
+     HEADING (🌳, no status-dot noise, no light button) — the tablita is a
+     map, so locating/opening still works. Legacy extra roots stay normal. -->
           <button
             type="button"
             class="row"
             [class.active]="focusedId() === row.node.id"
+            [class.heart]="isHeart(row.node)"
             (click)="onRow(row)"
           >
-            <span class="status-dot" [class]="'status-dot ' + row.node.status"></span>
+            @if (isHeart(row.node)) {
+              <span class="heart-mark" aria-hidden="true">🌳</span>
+            } @else {
+              <span class="status-dot" [class]="'status-dot ' + row.node.status"></span>
+            }
             @if (row.index !== null) {
               <span class="idx">{{ row.index }}.</span>
             }
-            <span class="name" [class.done]="row.node.status === 'achieved'">{{ row.node.title }}</span>
+            <span class="name" [class.done]="!isHeart(row.node) && row.node.status === 'achieved'">{{ row.node.title }}</span>
             @if (isRitual(row.node)) {
               <svg class="spiral-mark" viewBox="-14 -14 28 28" aria-hidden="true">
                 <g appSpiral [animated]="false" [scale]="0.9" />
@@ -94,7 +102,7 @@ const AUTO_COLLAPSE_AT = 12;
               <span class="pin" aria-hidden="true">📍</span>
             }
           </button>
-          @if (lightLens() && isLive(row.node)) {
+          @if (lightLens() && isLive(row.node) && !isHeart(row.node)) {
             <button
               type="button"
               class="light-cycle"
@@ -223,6 +231,15 @@ const AUTO_COLLAPSE_AT = 12;
       .hidden-count {
         color: var(--text-faint);
         font-size: 0.74rem;
+      }
+
+      /* «El corazón del árbol» (0.0.112) — a tappable heading, not a task */
+      &.heart .name {
+        font-weight: 700;
+      }
+
+      .heart-mark {
+        font-size: 0.8rem;
       }
 
       .sun-badge {
@@ -360,6 +377,11 @@ export class TreeOutline {
   });
 
   // ── «la luz» helpers ───────────────────────────────────────────────────
+
+  /** The tree's heart (first visible root) reads as a heading, not a task. */
+  protected isHeart(node: TreeNode): boolean {
+    return this.nodes.heartOf(this.tree().id)?.id === node.id;
+  }
 
   protected isLive(node: TreeNode): boolean {
     return node.status === 'seed' || node.status === 'growing';

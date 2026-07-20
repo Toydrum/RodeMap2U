@@ -448,6 +448,9 @@ export const ES = {
     archiveTitle: '¿Guardar «{name}» en el archivo?',
     archiveBody: 'Tu árbol descansará fuera de la vista, con todas sus ramas y su historia. Nada se borra — puedes devolverlo al bosque desde Ajustes cuando quieras.',
     archiveCta: 'Que descanse',
+    bloomAsk: 'Cada ramita de «{tree}» ya floreció 🌸',
+    bloomAction: 'Florece el árbol entero 🌳',
+    bloomedWhole: '«{tree}» floreció entero 🌳🌸 — su fruta ya está en tu cosecha',
     archivedToast: '«{name}» descansa en el archivo 🗃',
     emptyTree: 'Este árbol espera su primera rama 🌱',
     focusLink: 'Sesión de enfoque en este árbol',
@@ -500,6 +503,13 @@ export const ES = {
     wakeRitualTitle: '«{title}» ya floreció una vez',
     wakeRitualBody: 'Su fruta queda guardada en tu cosecha. Para girar como ritual, amanece limpia desde hoy — lista para florecer cada vez.',
     wakeRitualCta: 'Despertar el ritual',
+    heartChip: 'El corazón del árbol',
+    heartHint: 'Aquí nombraste tu logro. Sus primeras ramitas salen de él — cuando todas florezcan, el árbol florece entero.',
+    heartLine: {
+      one: 'Floreció {done} de {total} ramita',
+      many: 'Florecieron {done} de {total} ramitas',
+    },
+    heartDoor: 'Florece el árbol entero 🌸',
     nextStepTag: 'siguiente',
     nextStepAction: '¿Siguiente paso?',
     moveUp: 'Subir',
@@ -868,7 +878,7 @@ export const ES = {
       {
         icon: '🌱',
         title: 'Plantar',
-        body: 'Cada árbol nace ya con su primera ramita (del mismo nombre — renómbrala cuando quieras): plantar un área de tu vida es UNA sola pregunta. Luego, toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta desde la raíz. ¿Ya traes el plan completo en la cabeza? En la hoja de plantar, «Varios a la vez» abre una cajita donde cada línea siembra una ramita (con sangría = ramita hija) — pega tu lista entera y el árbol brota de golpe. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego. ¿La meta se siente enorme y no sabes por dónde empezar? En su hoja vive 🔪 «Desmenuzar esta meta»: tres preguntitas de brújula y cada respuesta TUYA brota como pasito — todas se pueden saltar. Y cualquier rama puede marcarse 🌀 «Se repite» (una rutina, un ritual): al plantarla eliges «Una vez» o «Se repite» — cada día, solo ciertos días (lunes y jueves…), o una vez por semana el día que tú quieras. Una rama que se repite lleva una ESPIRAL con polvito de estrella en tu árbol — la señal de que respira en ciclos. Las espirales de hoy viven en el Almanaque, junto al caminito — y ahí mismo puedes sembrar una nueva con el botón ＋.',
+        body: 'Cada árbol nace con su CORAZÓN 🌳: el nodo donde nombraste tu logro (renómbralo y el árbol entero se renombra). El corazón no es una tarea — es el centro del que salen tus primeras ramitas, y cuando TODAS florecen, la app te ofrece florecer el árbol entero (con su fruta grande). Toca una rama y aparece un botón verde + encima: tócalo y planta una rama hija justo ahí. El botón "+ Plantar aquí" de arriba planta una ramita nueva del corazón. ¿Ya traes el plan completo en la cabeza? En la hoja de plantar, «Varios a la vez» abre una cajita donde cada línea siembra una ramita (con sangría = ramita hija) — pega tu lista entera y el árbol brota de golpe. Y dentro del detalle de cada rama están los Pasitos: pasos chiquitos y concretos que también se dibujan en el árbol, con su botón 🌸 para florecerlos de un toque. ¿Van en orden (paso 1, paso 2…)? Márcalo con «¿Van en orden?» y esa rama se dibuja como un caminito que va floreciendo paso a paso — el paso donde vas dice «siguiente», y Ahora te lo ofrece con su primero-y-luego. ¿La meta se siente enorme y no sabes por dónde empezar? En su hoja vive 🔪 «Desmenuzar esta meta»: tres preguntitas de brújula y cada respuesta TUYA brota como pasito — todas se pueden saltar. Y cualquier rama puede marcarse 🌀 «Se repite» (una rutina, un ritual): al plantarla eliges «Una vez» o «Se repite» — cada día, solo ciertos días (lunes y jueves…), o una vez por semana el día que tú quieras. Una rama que se repite lleva una ESPIRAL con polvito de estrella en tu árbol — la señal de que respira en ciclos. Las espirales de hoy viven en el Almanaque, junto al caminito — y ahí mismo puedes sembrar una nueva con el botón ＋.',
       },
       {
         icon: '🗓',

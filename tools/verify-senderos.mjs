@@ -26,17 +26,29 @@ await page.waitForTimeout(400);
 const href = await page.evaluate(() => document.querySelector('.plot')?.getAttribute('href'));
 await page.goto(`${BASE}${href}`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(800);
-const center = await page.evaluate(() => {
-  const svg = document.querySelector('svg.canvas');
-  const rect = svg.getBoundingClientRect();
-  const t = (svg.querySelector(':scope > g').getAttribute('transform') ?? '').match(/translate\(([-\d.]+)\s+([-\d.]+)\)\s+scale\(([-\d.]+)\)/);
-  const [tx, ty, k] = t ? [Number(t[1]), Number(t[2]), Number(t[3])] : [0, 0, 1];
-  const g = svg.querySelector('g.node');
-  const nm = (g.getAttribute('transform') ?? '').match(/translate\(([-\d.]+)\s+([-\d.]+)\)/);
-  return { x: rect.left + Number(nm[1]) * k + tx, y: rect.top + Number(nm[2]) * k + ty };
+// «El corazón del árbol» (0.0.112): the heart is not a ritual — the sendero
+// lives on a RAMITA now. Plant it and open its sheet by deep link.
+await page.locator('button', { hasText: 'Plantar aquí' }).click();
+await page.waitForTimeout(350);
+await page.fill('#root-title', 'Rutina');
+await page.locator('form.sheet button[type=submit]').click();
+await page.waitForTimeout(600);
+const rutinaId = await page.evaluate(async () => {
+  const open = indexedDB.open('roadmap2u');
+  const db = await new Promise((res, rej) => { open.onsuccess = () => res(open.result); open.onerror = rej; });
+  const rows = await new Promise((res, rej) => {
+    const rq = db.transaction('nodes', 'readonly').objectStore('nodes').getAll();
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = rej;
+  });
+  db.close();
+  return rows.find((n) => n.title === 'Rutina')?.id ?? null;
 });
-await page.mouse.click(center.x, center.y);
-await page.waitForTimeout(450);
+const openRutina = async () => {
+  await page.goto(`${BASE}${href}?node=${rutinaId}`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
+};
+await openRutina();
 for (const t of ['Despertar', 'Desayunar', 'Vestirme']) {
   const input = page.locator('.add-step input');
   await input.fill(t);
@@ -60,7 +72,7 @@ for (let i = 0; i < 2; i++) {
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 // re-open: repeats persisted?
-await page.mouse.click(center.x, center.y);
+await openRutina();
 await page.waitForTimeout(450);
 const persisted = await page.locator('.repeats-toggle input').isChecked();
 console.log(`A repeats toggle: always-visible=${repeatsAlways === 1} picker=${pickerShown === 1} daily=${dailySelected === 1} persisted=${persisted} | OK=${repeatsAlways === 1 && pickerShown === 1 && dailySelected === 1 && persisted}`);
@@ -71,7 +83,7 @@ await page.waitForTimeout(300);
 // B — today's blooms survive a reload untouched…
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
-await page.mouse.click(center.x, center.y);
+await openRutina();
 await page.waitForTimeout(450);
 const stillToday = await page.locator('.steps .step-name.done').count();
 console.log(`B1 today's blooms survive boot: ${stillToday}/${bloomedToday} | OK=${stillToday === bloomedToday && bloomedToday === 2}`);
@@ -111,7 +123,7 @@ const backdated = await page.evaluate(async () => {
 });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1200); // boot sweep
-await page.mouse.click(center.x, center.y);
+await openRutina();
 await page.waitForTimeout(450);
 const doneAfter = await page.locator('.steps .step-name.done').count();
 const seeds = await page.locator('.steps .status-dot.seed').count();
@@ -149,7 +161,7 @@ await page.evaluate(async () => {
 });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
-await page.mouse.click(center.x, center.y);
+await openRutina();
 await page.waitForTimeout(450);
 const doneC = await page.locator('.steps .step-name.done').count();
 console.log(`C non-repeating never resets: done=${doneC} | OK=${doneC === 2}`);
@@ -239,7 +251,7 @@ await page.waitForTimeout(300);
 // rail closed when the leaf sheet opened, so toggle it back on)
 await page.locator('.tree-outline-toggle').click();
 await page.waitForTimeout(400);
-const pathRow = page.locator('.outline-rail .row', { hasText: 'Mañanas' }).first();
+const pathRow = page.locator('.outline-rail .row', { hasText: 'Rutina' }).first();
 await pathRow.click();
 await page.waitForTimeout(250);
 await pathRow.click();

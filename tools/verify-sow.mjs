@@ -85,13 +85,16 @@ const browser = await chromium.launch({ channel: 'msedge', headless: true });
           all.onsuccess = () => {
             const nodes = all.result;
             const byTitle = Object.fromEntries(nodes.map((n) => [n.title, n]));
+            const heart = nodes
+              .filter((n) => n.parentId === null)
+              .sort((a, b) => a.order - b.order || a.createdAt - b.createdAt)[0];
             res({
               count: nodes.length,
               baladaUnderElegir: byTitle['La balada']?.parentId === byTitle['Elegir canciones']?.id,
               movidaUnderElegir: byTitle['La movida']?.parentId === byTitle['Elegir canciones']?.id,
-              // Header "+ Plantar aquí" plants at ROOT level (null parent) —
-              // depth-0 lines inherit exactly the sheet's target.
-              ensayarUnderRoot: byTitle['Ensayar juntos']?.parentId === null,
+              // «El corazón del árbol» (0.0.112): depth-0 lines hang from
+              // the HEART (the first root), never as new trunks.
+              ensayarUnderRoot: byTitle['Ensayar juntos']?.parentId === heart?.id,
               orderOk:
                 (byTitle['Elegir canciones']?.order ?? 99) < (byTitle['Ensayar juntos']?.order ?? 0) &&
                 (byTitle['Ensayar juntos']?.order ?? 99) < (byTitle['Grabar demo']?.order ?? 0),

@@ -74,14 +74,17 @@ export class CheckInPage {
     if (!this.settings.settings().onboarded) this.step.set('welcome');
   }
 
-  /** Freshest live branches across the forest — shortcuts on the destination step. */
+  /** Freshest live branches across the forest — shortcuts on the destination
+   *  step. A container heart (0.0.112) is not a destination-task — its tree
+   *  ring entry already is the whole tree's door. */
   protected readonly candidates = computed(() => {
     const result: { treeName: string; accent: string; node: TreeNode }[] = [];
     for (const tree of this.trees.active()) {
+      const heart = this.nodes.heartOf(tree.id);
       for (const node of this.nodes.byTree().get(tree.id) ?? []) {
-        if (node.status === 'growing' || node.status === 'seed') {
-          result.push({ treeName: tree.name, accent: tree.accent, node });
-        }
+        if (node.status !== 'growing' && node.status !== 'seed') continue;
+        if (heart && node.id === heart.id && this.nodes.childrenOf(node).length > 0) continue;
+        result.push({ treeName: tree.name, accent: tree.accent, node });
       }
     }
     return result.sort((a, b) => b.node.updatedAt - a.node.updatedAt).slice(0, DESTINATION_BRANCHES);

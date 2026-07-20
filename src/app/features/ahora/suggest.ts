@@ -1,5 +1,6 @@
 import { CheckIn, TimerSession, Tree, TreeNode, lightRank } from '../../core/db/schema';
 import { cadenceOf, isScheduledOn } from '../../core/cadence';
+import { heartIds, isContainerHeart } from '../../core/heart';
 import { hash } from '../forest/tree-layout';
 
 /**
@@ -140,11 +141,20 @@ export function suggestionPool(
   const actionable = (n: TreeNode) => n.status === 'seed' || n.status === 'growing';
   const byFresh = (a: TreeNode, b: TreeNode) => b.updatedAt - a.updatedAt || a.id.localeCompare(b.id);
 
+  // «El corazón del árbol» (0.0.112): a heart WITH ramitas is a container,
+  // never a task — ambient buckets skip it. The user's EXPLICIT now
+  // (today's intentions, their own cuando-entonces) is never filtered (the
+  // shade precedent), and a BARE heart stays the goal itself (the
+  // first-pasito door and the regadera partition already treat it as big).
+  const hearts = heartIds(nodesByTree);
+  const containerHeart = (n: TreeNode) => isContainerHeart(n, hearts, childrenOf(n).length);
+
   const pool: Suggestion[] = [];
   const seen = new Set<string>();
   const add = (node: TreeNode, kind: SuggestKind, parent: TreeNode | null = null) => {
     const tree = treeById.get(node.treeId);
     if (!tree || seen.has(node.id) || !actionable(node)) return;
+    if (containerHeart(node) && kind !== 'today' && kind !== 'trigger') return;
     seen.add(node.id);
     pool.push({ node, tree, parent, kind });
   };

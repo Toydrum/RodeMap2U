@@ -2,12 +2,18 @@
   <section class="sheet card" appSheet (sheetClose)="closed.emit()" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="node().title">
     <div class="grabber" aria-hidden="true"></div>
 
-    <!-- Status + here -->
+    <!-- Status + here. The HEART (0.0.112) wears its own chip instead of a
+         task status — it is the goal's center, and it blooms only through
+         the whole-tree door. -->
     <div class="top-row">
-      <span class="chip status-chip">
-        <span class="status-dot" [class]="'status-dot ' + node().status"></span>
-        {{ i18n.t().status[node().status] }}
-      </span>
+      @if (containerHeart()) {
+        <span class="chip heart-chip">🌳 {{ i18n.t().node.heartChip }}</span>
+      } @else {
+        <span class="chip status-chip">
+          <span class="status-dot" [class]="'status-dot ' + node().status"></span>
+          {{ i18n.t().status[node().status] }}
+        </span>
+      }
       @if (isCurrent()) {
         <span class="chip here">📍 {{ i18n.t().tree.youAreHere }}</span>
       }
@@ -28,7 +34,22 @@
       <input id="nd-title" type="text" [value]="node().title" (change)="setTitle(inputValue($event))" maxlength="80">
     </div>
 
-    <p class="hint-line">{{ i18n.t().statusHint[node().status] }}</p>
+    @if (containerHeart()) {
+      <p class="hint-line">{{ i18n.t().node.heartHint }}</p>
+      @if (heartStats().total > 0) {
+        <p class="heart-line">{{ heartLine() }}</p>
+      }
+      @if (heartComplete()) {
+        <button type="button" class="btn btn-primary heart-bloom-door" (click)="bloomWholeTree()">
+          {{ i18n.t().node.heartDoor }}
+        </button>
+      }
+      @if (node().status === 'achieved') {
+        <p class="hint-line">{{ i18n.t().statusHint.achieved }}</p>
+      }
+    } @else {
+      <p class="hint-line">{{ i18n.t().statusHint[node().status] }}</p>
+    }
 
     <!-- Undo of an unrooted branching — only while the sprouts are still blank soil -->
     @if (node().status === 'branched' && revertable()) {
@@ -37,8 +58,9 @@
       </button>
     }
 
-    <!-- Status picker (branched is earned, not picked) -->
-    @if (node().status !== 'branched') {
+    <!-- Status picker (branched is earned, not picked; the heart has no
+         picker — it blooms only through the whole-tree door, 0.0.112) -->
+    @if (!containerHeart() && node().status !== 'branched') {
       <div class="status-row" role="group">
         @for (status of statuses; track status) {
           <button
@@ -65,7 +87,7 @@
 
     <!-- «La luz»: which branch the sun looks at first — orientation, never
          a demand. Only live branches hold light; the value is never required. -->
-    @if (node().status === 'seed' || node().status === 'growing') {
+    @if (!containerHeart() && (node().status === 'seed' || node().status === 'growing')) {
       <div class="field light-field">
         <label>☀️ {{ i18n.t().node.lightLabel }}</label>
         <!-- The explainer teaches ONCE: it folds away as soon as this branch
@@ -94,7 +116,7 @@
          (0.0.108). The value PERSISTS untouched (estimate-rancio precedent:
          persists silently, never advertises) and reappears if the rhythm is
          ever cleared. -->
-    @if (!cadence()) {
+    @if (!containerHeart() && !cadence()) {
       <div class="field">
         <label for="nd-date">{{ i18n.t().node.dateLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
         <input id="nd-date" type="date" [value]="node().targetDate ?? ''" (change)="setDate(inputValue($event))">
@@ -114,6 +136,7 @@
          never parsed. «La campanita» rides beside it: an OPTIONAL hour that
          re-speaks the phrase once a day — the plan and the hour are both
          the user's, the app decides nothing. -->
+    @if (!containerHeart()) {
     <div class="field trigger-field">
       <label for="nd-trigger">🧶 {{ i18n.t().node.triggerLabel }} <span class="hint">({{ i18n.t().common.optional }})</span></label>
       <input
@@ -142,10 +165,11 @@
         <span class="hint remind-hint">{{ i18n.t().node.remindHint }}</span>
       }
     </div>
+    }
 
     <!-- «Más detalles»: the estimate folds away so the sheet's default view
          stays calm and the ACTIONS rise above the fold. -->
-    @if (estimateEditable()) {
+    @if (!containerHeart() && estimateEditable()) {
       <button
         type="button"
         class="btn btn-ghost more-toggle"
@@ -186,15 +210,19 @@
 
     <!-- El ritmo (0.0.103): ANY branch can repeat — unburied from behind
          «¿van en orden?» + 2 pasitos. A lone branch = ritual leaf (dawns
-         clean itself); a steps parent = classic sendero. -->
-    <label class="flow-toggle repeats-toggle">
-      <input type="checkbox" [checked]="!!cadence()" (change)="toggleRepeats()">
-      🌀 {{ i18n.t().node.repeatsToggle }}
-    </label>
-    @if (cadence(); as c) {
-      <app-cadence-picker class="node-cadence" [value]="c" (changed)="setCadence($event)" />
-      <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
-      <p class="hint fruit-law-hint">{{ isRitualLeaf() ? i18n.t().node.ritualFruitLawLeaf : i18n.t().node.ritualFruitLawPath }}</p>
+         clean itself); a steps parent = classic sendero. The HEART doesn't
+         repeat (0.0.112 — the goal's center is not a routine); a legacy
+         cadence on a heart keeps its picker so it can be retired. -->
+    @if (!containerHeart() || cadence()) {
+      <label class="flow-toggle repeats-toggle">
+        <input type="checkbox" [checked]="!!cadence()" (change)="toggleRepeats()">
+        🌀 {{ i18n.t().node.repeatsToggle }}
+      </label>
+      @if (cadence(); as c) {
+        <app-cadence-picker class="node-cadence" [value]="c" (changed)="setCadence($event)" />
+        <p class="hint flow-hint">{{ i18n.t().node.repeatsHint }}</p>
+        <p class="hint fruit-law-hint">{{ isRitualLeaf() ? i18n.t().node.ritualFruitLawLeaf : i18n.t().node.ritualFruitLawPath }}</p>
+      }
     }
 
     <!-- Steps. A ritual LEAF is a small act that repeats — it doesn't
@@ -273,17 +301,24 @@
       }
     </p>
 
-    <!-- Actions (branching lives in the status row's golden chip) -->
+    <!-- Actions (branching lives in the status row's golden chip). The
+         HEART (0.0.112) keeps 📍 but loses ⏳ (its ramitas are the focusable
+         work) and 🗃 (closing chapters belongs to the TREE's own door, with
+         its despedida). -->
     <div class="actions">
       @if (!isCurrent()) {
         <button type="button" class="btn btn-soft" (click)="setHere()">📍 {{ i18n.t().node.setCurrent }}</button>
       }
-      @if (!visiting) {
+      @if (!visiting && !containerHeart()) {
         <button type="button" class="btn btn-soft" (click)="focusHere()">⏳ {{ i18n.t().node.focusHere }}</button>
       }
-      <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(true)">🗃 {{ i18n.t().node.archive }}</button>
+      @if (!containerHeart()) {
+        <button type="button" class="btn btn-ghost" (click)="confirmingArchive.set(true)">🗃 {{ i18n.t().node.archive }}</button>
+      }
     </div>
-    <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>
+    @if (!containerHeart()) {
+      <p class="hint archive-hint">{{ i18n.t().node.archiveHint }}</p>
+    }
   </section>
 </div>
 

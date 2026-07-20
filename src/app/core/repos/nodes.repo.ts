@@ -40,7 +40,11 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
       list.push(node);
       map.set(key, list);
     }
-    for (const list of map.values()) list.sort((a, b) => a.order - b.order);
+    // Stable tiebreak (0.0.112): order ties used to fall back to Map
+    // insertion order — two devices could derive a DIFFERENT first root
+    // (the heart). createdAt then id settles every sibling everywhere.
+    for (const list of map.values())
+      list.sort((a, b) => a.order - b.order || a.createdAt - b.createdAt || a.id.localeCompare(b.id));
     return map;
   });
 
@@ -73,6 +77,12 @@ export class NodesRepo extends RecordsRepo<TreeNode> {
 
   rootsOf(treeId: string): TreeNode[] {
     return this.childrenIndex().get(`root:${treeId}`) ?? [];
+  }
+
+  /** «El corazón del árbol» (0.0.112): the first visible root — the node
+   *  born with the tree. Visits inherit this via VisitNodesRepo. */
+  heartOf(treeId: string): TreeNode | null {
+    return this.rootsOf(treeId)[0] ?? null;
   }
 
   async plant(treeId: string, parentId: string | null, draft: NewNodeDraft): Promise<TreeNode> {

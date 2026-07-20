@@ -226,7 +226,12 @@ export class TreeViewPage {
     const target = this.planting();
     const title = this.newTitle().trim();
     if (!tree || !target || !title) return;
-    const node = await this.nodes.plant(tree.id, target.parent?.id ?? null, {
+    // «El corazón del árbol» (0.0.112): «+ Plantar aquí» grows a ramita of
+    // the HEART — one trunk from here on («+ Plantar aquí» used to mint a
+    // NEW root/trunk every time). Fallback null: a tree whose roots were
+    // all archived grows a new heart. Legacy multi-root keeps rendering.
+    const parentId = target.parent?.id ?? this.nodes.heartOf(tree.id)?.id ?? null;
+    const node = await this.nodes.plant(tree.id, parentId, {
       title,
       repeats: this.plantCadence() ?? undefined,
     });
@@ -256,10 +261,13 @@ export class TreeViewPage {
 
     const stack: { depth: number; node: TreeNode }[] = [];
     let count = 0;
+    // Depth-0 lines hang from the heart too (0.0.112) — the sown plan is
+    // the goal's first ramitas, not a row of new trunks.
+    const baseParentId = target.parent?.id ?? this.nodes.heartOf(tree.id)?.id ?? null;
     for (const line of lines) {
       while (stack.length && stack[stack.length - 1].depth >= line.depth) stack.pop();
-      const parent = stack.length ? stack[stack.length - 1].node : (target.parent ?? null);
-      const node = await this.nodes.plant(tree.id, parent?.id ?? null, { title: line.title });
+      const parentId = stack.length ? stack[stack.length - 1].node.id : baseParentId;
+      const node = await this.nodes.plant(tree.id, parentId, { title: line.title });
       this.burstFirstId ??= node.id;
       stack.push({ depth: line.depth, node });
       count++;
