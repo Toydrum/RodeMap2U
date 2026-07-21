@@ -40,7 +40,8 @@ npx http-server dist/roadmap2u/browser -p 8080 -P "http://localhost:8080?"
 
 The current GitHub Pages URL remains available during the origin-migration
 window. Its workflow is manual-only; AWS delivery is prepared but disabled
-until the repository variable `AWS_DEPLOY_ENABLED` is set to `true`.
+until the mutually exclusive repository gates are deliberately changed from
+`AWS_DEPLOY_ENABLED=false` and `AWS_ROLLBACK_ENABLED=false`.
 
 ### AWS frontend delivery
 
@@ -51,10 +52,13 @@ until the repository variable `AWS_DEPLOY_ENABLED` is set to `true`.
   (`dev → test → prod`); rollback accepts only a successful same-stage SHA.
 - Each GitHub Environment supplies `AWS_ACCOUNT_ID` and `AWS_ROLE_ARN`.
   Actions pins the expected account, uses OIDC, and keeps no
-  long-lived AWS access keys.
+  long-lived AWS access keys. The manual OIDC preflight verifies only the
+  assumed identity and performs no AWS mutation.
 - Deployment values come from `/roadmap2u/<stage>/*` in SSM. The generated
   config rejects missing or malformed Cognito/API values, an API URL containing
-  `/v1`, and a backend contract hash that differs from this checkout.
+  `/v1`, and a backend contract hash that differs from this checkout. Before
+  every publish, the workflow also proves that the active backend SHA has a
+  matching successful release marker in the target stage.
 - Assets publish before `index.html`; only mutable PWA entrypoints are
   invalidated. Mutable artifacts are retained by SHA plus `current` and
   `previous`, and successful release markers are written only after smoke.

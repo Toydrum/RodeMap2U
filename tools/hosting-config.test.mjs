@@ -70,6 +70,53 @@ test('AWS workflows are gated and use every backend SSM handoff parameter', () =
   }
 });
 
+test('deploy and rollback mutations are guarded by mutually exclusive repository gates', () => {
+  for (const path of [
+    '.github/workflows/deploy-aws-dev.yml',
+    '.github/workflows/promote-aws.yml',
+  ]) {
+    const workflow = read(path);
+    assert.match(workflow, /vars\.AWS_DEPLOY_ENABLED == 'true'/);
+    assert.match(workflow, /vars\.AWS_ROLLBACK_ENABLED == 'false'/);
+  }
+
+  const rollback = read('.github/workflows/rollback-aws.yml');
+  assert.match(rollback, /vars\.AWS_DEPLOY_ENABLED == 'false'/);
+  assert.match(rollback, /vars\.AWS_ROLLBACK_ENABLED == 'true'/);
+});
+
+test('the OIDC preflight is identity-only and never checks out or mutates AWS', () => {
+  const workflow = read('.github/workflows/oidc-preflight.yml');
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /contents:\s*read/);
+  assert.match(workflow, /id-token:\s*write/);
+  assert.match(workflow, /configure-aws-credentials@/);
+  assert.match(workflow, /aws sts get-caller-identity/);
+  assert.doesNotMatch(workflow, /actions\/checkout@/);
+  assert.doesNotMatch(workflow, /aws (?!sts get-caller-identity)/);
+});
+
+test('frontend publication proves the active backend release before build or upload', () => {
+  for (const path of [
+    '.github/workflows/deploy-aws-dev.yml',
+    '.github/workflows/promote-aws.yml',
+    '.github/workflows/rollback-aws.yml',
+  ]) {
+    const workflow = read(path);
+    assert.match(workflow, /backend-release-sha/);
+    assert.match(workflow, /backend-releases\/\$BACKEND_RELEASE_SHA/);
+    assert.match(workflow, /BACKEND_RELEASE_SHA.*\^\[0-9a-f\]\{40\}\$/s);
+    const markerPosition = workflow.indexOf('backend-releases/$BACKEND_RELEASE_SHA');
+    assert.ok(markerPosition >= 0, `${path} must validate a backend release marker`);
+    assert.ok(markerPosition < workflow.indexOf('npm run generate:config'));
+    assert.ok(markerPosition < workflow.indexOf('publish-aws-site.sh'));
+    assert.match(workflow, /GITHUB_STEP_SUMMARY/);
+    assert.match(workflow, /Backend SHA/);
+    assert.match(workflow, /Frontend SHA/);
+    assert.match(workflow, /Contract hash/);
+  }
+});
+
 test('every AWS workflow pins the account and validates STS before SSM or publication', () => {
   for (const path of [
     '.github/workflows/deploy-aws-dev.yml',

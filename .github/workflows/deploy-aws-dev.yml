@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' }}
+    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' && vars.AWS_ROLLBACK_ENABLED == 'false' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -70,6 +70,13 @@ jobs:
           get_parameter() {
             aws ssm get-parameter --name "$1" --query 'Parameter.Value' --output text
           }
+          BACKEND_RELEASE_SHA="$(get_parameter "/roadmap2u/${STAGE}/backend-release-sha")"
+          [[ "$BACKEND_RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo 'The active backend release is not an exact lowercase commit SHA.' >&2
+            exit 1
+          }
+          BACKEND_RELEASE_MARKER="$(get_parameter "/roadmap2u/${STAGE}/backend-releases/$BACKEND_RELEASE_SHA")"
+          test "$BACKEND_RELEASE_MARKER" = "$BACKEND_RELEASE_SHA"
           {
             echo "region=$(get_parameter "/roadmap2u/${STAGE}/region")"
             echo "user_pool_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-id")"
@@ -79,7 +86,21 @@ jobs:
             echo "distribution_id=$(get_parameter "/roadmap2u/${STAGE}/cloudfront-distribution-id")"
             echo "frontend_url=$(get_parameter "/roadmap2u/${STAGE}/frontend-url")"
             echo "contract_hash=$(get_parameter "/roadmap2u/${STAGE}/contract-hash")"
+            echo "backend_release_sha=$BACKEND_RELEASE_SHA"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Summarize the verified release pair
+        shell: bash
+        env:
+          BACKEND_RELEASE_SHA: ${{ steps.ssm.outputs.backend_release_sha }}
+          CONTRACT_HASH: ${{ steps.ssm.outputs.contract_hash }}
+        run: |
+          {
+            echo '### Verified release pair'
+            echo "- Backend SHA: \`$BACKEND_RELEASE_SHA\`"
+            echo "- Frontend SHA: \`$RELEASE_SHA\`"
+            echo "- Contract hash: \`$CONTRACT_HASH\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate the deployment target and CloudFront binding
         shell: bash

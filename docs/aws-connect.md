@@ -9,9 +9,11 @@ there is no manual output-copying step.
 ## Deployment state
 
 The workflows and validation gates are prepared, but AWS deployment remains
-disabled until the backend stack is deployed and the repository variable
-`AWS_DEPLOY_ENABLED` is explicitly set to `true`. No AWS resources are created
-by the frontend repository.
+disabled until the backend stack is deployed. Normal delivery requires exactly
+`AWS_DEPLOY_ENABLED=true` and `AWS_ROLLBACK_ENABLED=false`; rollback requires
+exactly the inverse. Both variables start as `false`, and every other
+combination prevents mutation. No infrastructure resources are created by the
+frontend repository.
 
 | Stage | Frontend | API | Region |
 |---|---|---|---|
@@ -37,6 +39,8 @@ Each backend stage publishes these values:
 /roadmap2u/<stage>/cloudfront-distribution-id
 /roadmap2u/<stage>/frontend-url
 /roadmap2u/<stage>/contract-hash
+/roadmap2u/<stage>/backend-releases/<40-character-sha>
+/roadmap2u/<stage>/backend-release-sha
 ```
 
 Successful frontend releases are recorded separately:
@@ -67,7 +71,8 @@ Byte-for-byte parity of the vendored backend files is a separate check; see
 
 Create GitHub Environments named `dev`, `test`, and `prod`. Configure:
 
-- Repository variable `AWS_DEPLOY_ENABLED=false` until cutover is approved.
+- Repository variables `AWS_DEPLOY_ENABLED=false` and
+  `AWS_ROLLBACK_ENABLED=false` until the corresponding operation is approved.
 - Environment variable `AWS_ACCOUNT_ID` in each stage with the exact 12-digit account.
 - Environment variable `AWS_ROLE_ARN` in each stage, pointing to
   `roadmap2u-<stage>-frontend-deploy`.
@@ -77,14 +82,17 @@ Actions exchanges GitHub's OIDC token for short-lived credentials. Every AWS
 workflow pins `allowed-account-ids`, checks `sts:GetCallerIdentity` before SSM
 or S3 access, and validates that the SSM bucket, URL, CloudFront distribution,
 alias, S3 origin, region, and Origin Access Control all belong to the selected
-stage.
+stage. Run `.github/workflows/oidc-preflight.yml` first for each environment;
+it obtains the OIDC session, calls only `sts:GetCallerIdentity`, and neither
+checks out code nor writes AWS state.
 
 ## Delivery flow
 
 1. `.github/workflows/ci.yml` runs configuration tests, Angular tests, a
    root-hosted production build, local PWA validation, and the initial-bundle
    provider-signature gate.
-2. A commit on `main` deploys that exact SHA to `dev` when the gate is enabled.
+2. A commit on `main` deploys that exact SHA to `dev` when the normal-delivery
+   gate pair is enabled.
 3. `.github/workflows/promote-aws.yml` accepts only an exact lowercase
    40-character SHA. `test` requires its successful `dev` marker; `prod`
    requires its successful `test` marker. The marker is checked before
@@ -92,7 +100,11 @@ stage.
 4. `.github/workflows/rollback-aws.yml` accepts only a SHA already marked
    successful in the same stage, then regenerates, rebuilds, validates, and
    republishes it.
-5. A release marker and current pointer are written only after the remote
+5. Before configuration generation or upload, each workflow reads
+   `/backend-release-sha`, validates its matching `/backend-releases/<sha>`
+   proof, and records the backend SHA, frontend SHA, and contract hash in the
+   Actions summary.
+6. A release marker and current pointer are written only after the remote
    frontend/API smoke passes.
 
 Publication uploads immutable assets first and the live `index.html` last.
@@ -128,7 +140,9 @@ legacy GitHub Pages origin. Enable AWS delivery only after the backend CI,
 CloudFront bindings, SSM handoff, CORS, and stage smokes are green. DNS cutover
 is an infrastructure operation in the backend repository.
 
-For application rollback, dispatch `rollback-aws.yml` with the stage and a
-same-stage successful SHA. For a broader infrastructure incident, leave the
-frontend release markers intact and follow the backend repository's rollback
-runbook; never replace generated configuration with hand-edited values.
+For application rollback, temporarily set `AWS_DEPLOY_ENABLED=false` and
+`AWS_ROLLBACK_ENABLED=true`, then dispatch `rollback-aws.yml` with the stage and
+a same-stage successful SHA. Restore both gates to `false` afterward. For a
+broader infrastructure incident, leave the frontend release markers intact and
+follow the backend repository's rollback runbook; never replace generated
+configuration with hand-edited values.
