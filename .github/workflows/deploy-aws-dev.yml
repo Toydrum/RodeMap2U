@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' }}
+    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' && vars.AWS_ROLLBACK_ENABLED == 'false' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -62,24 +62,23 @@ jobs:
           set -euo pipefail
           test "$(aws sts get-caller-identity --query Account --output text)" = "$AWS_ACCOUNT_ID"
 
-      - name: Read the backend handoff from SSM
+      - name: Read the immutable backend release manifest
         id: ssm
         shell: bash
+        run: bash tools/read-backend-release.sh
+
+      - name: Summarize the verified release pair
+        shell: bash
+        env:
+          BACKEND_RELEASE_SHA: ${{ steps.ssm.outputs.backend_release_sha }}
+          CONTRACT_HASH: ${{ steps.ssm.outputs.contract_hash }}
         run: |
-          set -euo pipefail
-          get_parameter() {
-            aws ssm get-parameter --name "$1" --query 'Parameter.Value' --output text
-          }
           {
-            echo "region=$(get_parameter "/roadmap2u/${STAGE}/region")"
-            echo "user_pool_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-id")"
-            echo "user_pool_client_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-client-id")"
-            echo "api_base_url=$(get_parameter "/roadmap2u/${STAGE}/api-base-url")"
-            echo "frontend_bucket=$(get_parameter "/roadmap2u/${STAGE}/frontend-bucket")"
-            echo "distribution_id=$(get_parameter "/roadmap2u/${STAGE}/cloudfront-distribution-id")"
-            echo "frontend_url=$(get_parameter "/roadmap2u/${STAGE}/frontend-url")"
-            echo "contract_hash=$(get_parameter "/roadmap2u/${STAGE}/contract-hash")"
-          } >> "$GITHUB_OUTPUT"
+            echo '### Verified release pair'
+            echo "- Backend SHA: \`$BACKEND_RELEASE_SHA\`"
+            echo "- Frontend SHA: \`$RELEASE_SHA\`"
+            echo "- Contract hash: \`$CONTRACT_HASH\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate the deployment target and CloudFront binding
         shell: bash
@@ -126,6 +125,18 @@ jobs:
             echo 'AWS provider signature leaked into the initial bundle.' >&2
             exit 1
           fi
+
+      - name: Revalidate the backend pointer before publication
+        shell: bash
+        env:
+          EXPECTED_BACKEND_RELEASE_SHA: ${{ steps.ssm.outputs.backend_release_sha }}
+        run: |
+          set -euo pipefail
+          CURRENT_BACKEND_RELEASE_SHA="$(aws ssm get-parameter \
+            --name "/roadmap2u/${STAGE}/backend-release-sha" \
+            --query 'Parameter.Value' \
+            --output text)"
+          test "$CURRENT_BACKEND_RELEASE_SHA" = "$EXPECTED_BACKEND_RELEASE_SHA"
 
       - name: Publish assets and versioned mutable entrypoints
         shell: bash
