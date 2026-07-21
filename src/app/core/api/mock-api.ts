@@ -43,6 +43,10 @@ import {
 
 const INVITE_TTL_MS = 72 * 3600 * 1000;
 
+export function assertSocialEnabled(user: Pick<MockUserRow, 'socialEnabled'>): void {
+  if (!user.socialEnabled) throw new ApiError('FORBIDDEN', 'social features are off');
+}
+
 /**
  * The executable contract spec: same interface, same permission rules, same
  * error codes the Lambdas must implement — running against the on-device
@@ -234,8 +238,7 @@ export class MockApi implements ApiClient {
     if (caller.accountType !== 'adult') throw new ApiError('FORBIDDEN');
     let minorId: string | null = null;
     if (req.kind === 'coGuardian') {
-      const link = await this.linkBetween(caller.userId, req.minorId);
-      if (!link) throw new ApiError('NOT_FOUND');
+      await this.requireCreatedLink(caller.userId, req.minorId);
       if ((await this.guardiansOf(req.minorId)).length >= LIMITS.maxGuardiansPerMinor) {
         throw new ApiError('LIMIT_EXCEEDED');
       }
@@ -278,7 +281,10 @@ export class MockApi implements ApiClient {
     if (invite.kind === 'coGuardian') {
       // Redeemer becomes a co-guardian (full admin) of the invite's minor.
       if (caller.accountType !== 'adult') throw new ApiError('FORBIDDEN');
-      const minorId = invite.minorId!;
+      const minorId = invite.minorId;
+      if (!minorId) return badAttempt('CODE_INVALID');
+      const issuerLink = await this.linkBetween(invite.userId, minorId);
+      if (issuerLink?.kind !== 'created') return badAttempt('CODE_INVALID');
       const minor = await mockGet<MockUserRow>('users', minorId);
       if (!minor) throw new ApiError('NOT_FOUND');
       if (await this.linkBetween(caller.userId, minorId)) {
@@ -471,6 +477,7 @@ export class MockApi implements ApiClient {
   async declineFriendRequest(requestId: string): Promise<void> {
     await simLatency('api.declineFriendRequest');
     const caller = await this.caller();
+    this.requireSocial(caller);
     const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
     if (!request || request.toId !== caller.userId) throw new ApiError('NOT_FOUND');
     await mockDelete('friendRequests', requestId);
@@ -479,6 +486,7 @@ export class MockApi implements ApiClient {
   async cancelFriendRequest(requestId: string): Promise<void> {
     await simLatency('api.cancelFriendRequest');
     const caller = await this.caller();
+    this.requireSocial(caller);
     const request = await mockGet<MockFriendRequestRow>('friendRequests', requestId);
     if (!request || request.fromId !== caller.userId) throw new ApiError('NOT_FOUND');
     await mockDelete('friendRequests', requestId);
@@ -487,6 +495,7 @@ export class MockApi implements ApiClient {
   async removeFriend(friendshipId: string): Promise<void> {
     await simLatency('api.removeFriend');
     const caller = await this.caller();
+    this.requireSocial(caller);
     await this.removeFriendshipAs(caller.userId, friendshipId);
   }
 
@@ -686,7 +695,7 @@ export class MockApi implements ApiClient {
   // ── friends internals ─────────────────────────────────────────────────────
 
   private requireSocial(user: MockUserRow): void {
-    if (!user.socialEnabled) throw new ApiError('FORBIDDEN', 'social features are off');
+    assertSocialEnabled(user);
   }
 
   private async friendshipBetween(a: string, b: string): Promise<MockFriendshipRow | null> {

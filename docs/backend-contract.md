@@ -1,8 +1,8 @@
 # RoadMap2U — Backend Contract (Cognito + API Gateway + Lambda + DynamoDB)
 
-**Normative types: [`src/app/core/api/contracts.ts`](../src/app/core/api/contracts.ts).** This document explains the semantics; the TypeScript file is the single source of shapes, paths, error codes and limits. Three implementations type against it: the on-device mock (`core/api/mock-api.ts` — the *executable spec*), the client transport (`core/api/http-api.ts`), and the Lambda router (`infra/`, when it lands). If a shape needs to change, change `contracts.ts` first and let the compiler surface every consequence.
+**Normative types: [`src/app/core/api/contracts.ts`](../src/app/core/api/contracts.ts).** This document explains the semantics; the TypeScript file is the single source of shapes, paths, error codes and limits. Three implementations type against it: the on-device mock (`core/api/mock-api.ts` — the *executable spec*), the client transport (`core/api/http-api.ts`), and the Lambda router in [`Toydrum/roadmap2u-backend`](https://github.com/Toydrum/roadmap2u-backend), which consumes a parity-checked vendored copy. If a shape needs to change, change `contracts.ts` first and let the compiler surface every consequence.
 
-Owner decisions baked in (2026-07-06): login becomes **mandatory at AWS go-live**; guardians can **edit/plant** in a linked minor's forest (co-gardening); **linking existing accounts** ships in v1; infra-as-code lives in this repo (`infra/`).
+Owner decisions baked in (2026-07-06): login becomes **mandatory at AWS go-live**; guardians can **edit/plant** in a linked minor's forest (co-gardening); **linking existing accounts** ships in v1; infrastructure-as-code lives in the separate backend repository.
 
 ---
 
@@ -17,10 +17,10 @@ Owner decisions baked in (2026-07-06): login becomes **mandatory at AWS go-live*
 
 ## 2. Identity — Cognito user pool
 
-Checklist (mirrored in `cognito-auth.provider.ts` header; `infra/` implements it):
+Checklist (mirrored in `cognito-auth.provider.ts`; the backend stack implements it):
 
 - Sign-in by **username** (3–20 `[a-z0-9_]`, unique). Email is an **optional, verifiable attribute** — adults have one, guardian-created minors have none (the guardian IS the recovery channel).
-- App client **without secret**; `ALLOW_USER_SRP_AUTH` (+ refresh). No Hosted UI, no OAuth flows (custom UI; GH Pages subpath makes redirects fragile).
+- App client **without secret**; `ALLOW_USER_SRP_AUTH` (+ refresh). No Hosted UI and no OAuth flows; the app uses its custom account UI and needs no redirect callback.
 - Verification & recovery by **CODE**, never emailed links.
 - Password policy = `PASSWORD_POLICY` in `auth-types.ts` (min 8, upper+lower+digit). Align the pool to the const.
 - Custom attribute `custom:accountType: 'adult' | 'minor'`, mutable, **written by the backend only** (PostConfirmation trigger for self-signups → `adult`; `AdminCreateUser` for minors → `minor`).
@@ -40,7 +40,7 @@ Friendship { friendshipId, userA, userB, createdAt }
 - **Link kinds.** `created` (guardian created this minor): full identity admin — rename, reset password, social toggle, export-first delete. `invited` (an existing account accepted a family invite): guardian gets forest view+**edit** and friend oversight, but NO identity admin (the account owns itself; either side can unlink).
 - Caps (`LIMITS`): ≤2 guardians per minor · ≤8 children per guardian · ≤50 friends · sync push ≤100 records · 5 bad code redemptions/hour.
 - **LAST_GUARDIAN rule:** the last active link on a `created` minor cannot be removed (an orphaned minor could never recover a password). The exit is export-first deletion.
-- **Invites** (`POST /family/invites`): `{kind:'coGuardian', minorId}` → another ADULT redeems and co-guards that minor; `{kind:'linkExisting'}` → any existing account redeems and becomes the issuer's `invited` minor-side link. Codes: 8 chars, 72 h, single-use. Consent = redemption.
+- **Invites** (`POST /family/invites`): `{kind:'coGuardian', minorId}` → another ADULT redeems and co-guards that minor; only a guardian whose `created` link is still active may issue or complete this delegation, so an `invited` guardian cannot escalate another adult. `{kind:'linkExisting'}` → any existing account redeems and becomes the issuer's `invited` minor-side link. Codes: 8 chars, 72 h, single-use. Consent = redemption.
 - **Friend codes** (`GET /friends/code`): 8 chars (Crockford base32, no vowels/lookalikes), 7-day expiry, multi-use until expiry/rotation; every redemption still requires an explicit accept. `POST /friends/code/rotate` invalidates immediately. Requests expire after 14 days; declines are silent.
 - **Guardian oversight:** guardians list/remove a minor's friendships and cancel their outgoing requests — but cannot INITIATE requests for the minor. The minor sees exactly what the guardian sees (no covert controls). Toggling `socialEnabled` off hides friend surfaces and blocks visits both ways but **destroys nothing**.
 
@@ -115,8 +115,8 @@ Access patterns: me = GetItem + two link queries · my minors = GSI1 · forest v
 | «familia» | /me UI, create-child, admin ops, both invite kinds | none (mock) |
 | «conectar mi bosque» | sync engine (watermark push over `onLocalWrite`, cursor pull into `applyExternal`), connect action | none (mock) |
 | «amigos y visitas» | friends UI, visit routes (route-scoped read-only repos), guardian co-gardening | none (mock) |
-| **AWS go-live** | `infra/`: `cdk deploy` → paste stack outputs into `core/config.ts` → `backend: 'aws'` → verify auth battery against the real pool → **flip `requireAuth: true`** (first mandatory sign-in adopts the local forest via the connect flow) | all of it |
+| **AWS go-live** | Deploy `Toydrum/roadmap2u-backend` → verify its SSM handoff → enable the frontend AWS gate → deploy `main` to `dev` and promote the exact successful SHA through `test` to `prod` → **flip `requireAuth: true`** only when local-forest adoption is ready | all of it |
 
-`infra/` (CDK, own workspace) **implements this contract** (2026-07-06): Cognito pool per §2, table per §6, HTTP API + JWT authorizer + one router Lambda per §5/§7 (`infra/lambda/router.ts` + `handlers/`), all importing `contracts.ts` via the `@app` tsconfig alias. Verified without AWS: `cd infra && npm test` (16 vitest — route↔API_PATHS parity, matrix denials, LWW pushes, LAST_GUARDIAN, code expiry, rate limit, strip-vs-full) and `npx cdk synth`. Deploy day: `npx cdk deploy` prints the `APP_CONFIG` outputs (runbook: [`aws-connect.md`](./aws-connect.md)).
+The separate backend repository **implements this contract** with Cognito per §2, the table in §6, an HTTP API + JWT authorizer, and the router/handlers for §5/§7. Its vendored contract is guarded by byte parity and by the normalized deployment digest described in [`backend-extraction.md`](./backend-extraction.md). Each deployed stage publishes frontend configuration to SSM; the frontend generates `APP_CONFIG` during CI/CD and never accepts hand-copied stack outputs.
 
-**The execution runbook lives in [`aws-connect.md`](./aws-connect.md)** — exact pool/app-client CLI commands, CORS requirements, the two-stage connect (identity alone works before the API exists), verification gates and rollback. This document is the WHAT; that one is the HOW.
+**The execution runbook lives in [`aws-connect.md`](./aws-connect.md)** — exact stage URLs, SSM handoff, GitHub variables, CORS boundaries, verification gates, promotion, cutover, and rollback. This document is the WHAT; that one is the HOW.

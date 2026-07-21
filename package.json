@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "generate:config": "node tools/generate-config.mjs --output src/app/core/generated-config.ts",
+    "test:config": "node --test tools/generate-config.test.mjs tools/hosting-config.test.mjs tools/smoke-frontend.test.mjs tools/validate-built-pwa.test.mjs tools/validate-deployment-target.test.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

@@ -1,0 +1,199 @@
+name: Promote frontend on AWS
+run-name: Promote ${{ inputs.source_sha }} to ${{ inputs.stage }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - test
+          - prod
+      source_sha:
+        description: Exact lowercase SHA successfully deployed to the prior stage
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: frontend-aws-${{ inputs.stage }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ inputs.stage }}
+      url: ${{ steps.ssm.outputs.frontend_url }}
+    env:
+      STAGE: ${{ inputs.stage }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      RELEASE_SHA: ${{ inputs.source_sha }}
+      AWS_REGION: us-east-1
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+    steps:
+      - name: Configure short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: roadmap2u-frontend-${{ inputs.stage }}-${{ github.run_id }}
+          aws-region: us-east-1
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Validate the assumed AWS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(aws sts get-caller-identity --query Account --output text)" = "$AWS_ACCOUNT_ID"
+
+      - name: Require a successful release marker in the prior stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo 'source_sha must be an exact lowercase 40-character commit SHA.' >&2
+            exit 1
+          }
+          if [[ "$STAGE" == test ]]; then
+            SOURCE_STAGE=dev
+          else
+            SOURCE_STAGE=test
+          fi
+          marker="$(aws ssm get-parameter \
+            --name "/roadmap2u/${SOURCE_STAGE}/frontend-releases/$SOURCE_SHA" \
+            --query 'Parameter.Value' \
+            --output text)"
+          test "$marker" = "$SOURCE_SHA"
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_sha }}
+          fetch-depth: 0
+
+      - name: Verify the exact checked-out source
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Read the backend handoff from SSM
+        id: ssm
+        shell: bash
+        run: |
+          set -euo pipefail
+          get_parameter() {
+            aws ssm get-parameter --name "$1" --query 'Parameter.Value' --output text
+          }
+          {
+            echo "region=$(get_parameter "/roadmap2u/${STAGE}/region")"
+            echo "user_pool_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-id")"
+            echo "user_pool_client_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-client-id")"
+            echo "api_base_url=$(get_parameter "/roadmap2u/${STAGE}/api-base-url")"
+            echo "frontend_bucket=$(get_parameter "/roadmap2u/${STAGE}/frontend-bucket")"
+            echo "distribution_id=$(get_parameter "/roadmap2u/${STAGE}/cloudfront-distribution-id")"
+            echo "frontend_url=$(get_parameter "/roadmap2u/${STAGE}/frontend-url")"
+            echo "contract_hash=$(get_parameter "/roadmap2u/${STAGE}/contract-hash")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate the deployment target and CloudFront binding
+        shell: bash
+        env:
+          ROADMAP2U_STAGE: ${{ inputs.stage }}
+          ROADMAP2U_AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          ROADMAP2U_FRONTEND_BUCKET: ${{ steps.ssm.outputs.frontend_bucket }}
+          ROADMAP2U_DISTRIBUTION_ID: ${{ steps.ssm.outputs.distribution_id }}
+          ROADMAP2U_FRONTEND_URL: ${{ steps.ssm.outputs.frontend_url }}
+          ROADMAP2U_API_BASE_URL: ${{ steps.ssm.outputs.api_base_url }}
+          ROADMAP2U_RELEASE_SHA: ${{ inputs.source_sha }}
+          SITE_BUCKET: ${{ steps.ssm.outputs.frontend_bucket }}
+          DISTRIBUTION_ID: ${{ steps.ssm.outputs.distribution_id }}
+          FRONTEND_URL: ${{ steps.ssm.outputs.frontend_url }}
+        run: |
+          set -euo pipefail
+          node tools/validate-deployment-target.mjs
+          bash tools/validate-aws-binding.sh
+
+      - name: Generate and validate the target config
+        env:
+          ROADMAP2U_STAGE: ${{ inputs.stage }}
+          ROADMAP2U_REGION: ${{ steps.ssm.outputs.region }}
+          ROADMAP2U_USER_POOL_ID: ${{ steps.ssm.outputs.user_pool_id }}
+          ROADMAP2U_USER_POOL_CLIENT_ID: ${{ steps.ssm.outputs.user_pool_client_id }}
+          ROADMAP2U_API_BASE_URL: ${{ steps.ssm.outputs.api_base_url }}
+          ROADMAP2U_CONTRACT_HASH: ${{ steps.ssm.outputs.contract_hash }}
+        run: npm run generate:config
+
+      - name: Test and build the promoted PWA
+        run: |
+          npm run test:config
+          npm test -- --watch=false
+          npm run build -- --base-href /
+
+      - name: Validate the built PWA
+        run: node tools/validate-built-pwa.mjs --build-dir dist/roadmap2u/browser
+
+      - name: Keep AWS adapters out of the initial bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -E -i 'cognito-idp|amazonaws[.]com|aws-amplify|Cognito' dist/roadmap2u/browser/main-*.js; then
+            echo 'AWS provider signature leaked into the initial bundle.' >&2
+            exit 1
+          fi
+
+      - name: Publish assets and versioned mutable entrypoints
+        shell: bash
+        env:
+          BUILD_DIR: dist/roadmap2u/browser
+          SITE_BUCKET: ${{ steps.ssm.outputs.frontend_bucket }}
+          DISTRIBUTION_ID: ${{ steps.ssm.outputs.distribution_id }}
+        run: bash tools/publish-aws-site.sh
+
+      - name: Smoke the promoted host and API boundary
+        shell: bash
+        env:
+          FRONTEND_URL: ${{ steps.ssm.outputs.frontend_url }}
+          DISTRIBUTION_ID: ${{ steps.ssm.outputs.distribution_id }}
+          API_BASE_URL: ${{ steps.ssm.outputs.api_base_url }}
+        run: |
+          set -euo pipefail
+          SMOKE_FRONTEND_URL="$FRONTEND_URL"
+          if [[ "$STAGE" == prod ]]; then
+            distribution_domain="$(aws cloudfront get-distribution \
+              --id "$DISTRIBUTION_ID" \
+              --query 'Distribution.DomainName' \
+              --output text)"
+            SMOKE_FRONTEND_URL="https://$distribution_domain"
+          fi
+          node tools/smoke-frontend.mjs \
+            --frontend-url "$SMOKE_FRONTEND_URL" \
+            --api-base-url "$API_BASE_URL" \
+            --cors-origin "$FRONTEND_URL"
+
+      - name: Record the successful promoted release
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws ssm put-parameter \
+            --name "/roadmap2u/${STAGE}/frontend-releases/$RELEASE_SHA" \
+            --type String \
+            --value "$RELEASE_SHA" \
+            --overwrite
+          aws ssm put-parameter \
+            --name "/roadmap2u/${STAGE}/frontend-release-sha" \
+            --type String \
+            --value "$RELEASE_SHA" \
+            --overwrite

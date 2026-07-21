@@ -25,9 +25,9 @@ npm install
 npm start          # dev server (SW disabled in dev)
 npm run build      # production build into dist/
 
-# Test the real PWA (service worker needs the subpath):
-mkdir -p /tmp/pwa/RoadMap2U && cp -r dist/roadmap2u/browser/* /tmp/pwa/RoadMap2U/
-npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RoadMap2U/
+# Test the real root-hosted PWA with SPA fallback:
+npx http-server dist/roadmap2u/browser -p 8080 -P "http://localhost:8080?"
+# → http://localhost:8080/
 ```
 
 ## Structure
@@ -38,7 +38,31 @@ npx http-server /tmp/pwa -p 8080   # → http://localhost:8080/RoadMap2U/
 - `src/app/features/` — check-in ritual, forest, tree canvas, node detail, branch flow, timer, settings
 - `plan/` — the original 2024 design notes this project grew from 🌳
 
-Deploys automatically to GitHub Pages on every push to `main`.
+The current GitHub Pages URL remains available during the origin-migration
+window. Its workflow is manual-only; AWS delivery is prepared but disabled
+until the repository variable `AWS_DEPLOY_ENABLED` is set to `true`.
+
+### AWS frontend delivery
+
+- Pull requests run config-contract tests, application tests, a root (`/`)
+  production build, and the initial-bundle gate.
+- A push to `main` deploys that exact SHA to `dev` when the AWS gate is
+  enabled. Manual promotion accepts only a successful prior-stage SHA
+  (`dev → test → prod`); rollback accepts only a successful same-stage SHA.
+- Each GitHub Environment supplies `AWS_ACCOUNT_ID` and `AWS_ROLE_ARN`.
+  Actions pins the expected account, uses OIDC, and keeps no
+  long-lived AWS access keys.
+- Deployment values come from `/roadmap2u/<stage>/*` in SSM. The generated
+  config rejects missing or malformed Cognito/API values, an API URL containing
+  `/v1`, and a backend contract hash that differs from this checkout.
+- Assets publish before `index.html`; only mutable PWA entrypoints are
+  invalidated. Mutable artifacts are retained by SHA plus `current` and
+  `previous`, and successful release markers are written only after smoke.
+
+The AWS backend and infrastructure live in
+[`Toydrum/roadmap2u-backend`](https://github.com/Toydrum/roadmap2u-backend).
+See [`docs/aws-connect.md`](docs/aws-connect.md) for SSM paths, stage URLs,
+GitHub variables, promotion, DNS transition, and rollback.
 
 ## For AI agents & new contributors
 

@@ -2,9 +2,9 @@ import { AccountType } from '../api/contracts';
 
 /**
  * Client-side auth vocabulary, shared by both adapters (mock + Cognito), the
- * AuthService facade and the /account UI. Angular-free on purpose — `infra/`
- * imports PASSWORD_POLICY so the real user pool is configured to the exact
- * same rules the mock and the UI already enforce.
+ * AuthService facade and the /account UI. Angular-free on purpose — the
+ * external backend vendors PASSWORD_POLICY so the real user pool follows the
+ * exact same rules the mock and UI enforce.
  */
 
 export interface AuthUser {

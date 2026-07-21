@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
  * The future mandatory-login gate — wired on every route except /account,
  * INERT until APP_CONFIG.requireAuth flips true at AWS go-live (owner
  * decision 2026-07-06). `volver` brings the user back where they were headed;
- * query params survive the GH Pages 404.html fallback.
+ * query params preserve the original root-hosted deep link.
  */
 export const authRequiredGate: CanActivateFn = (_route, state) => {
   if (!APP_CONFIG.requireAuth) return true;

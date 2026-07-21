@@ -3,9 +3,9 @@ import { CheckIn, ExportEnvelope, Harvest, Preserve, Tree, TreeNode, TimerSessio
 /**
  * THE backend contract — normative and single-source. Three implementations
  * type against it: `mock-api.ts` (the executable spec, on-device), `http-api.ts`
- * (fetch → API Gateway), and the `infra/` Lambda router (imports this file via
- * tsconfig path alias). If a shape changes here, all three follow or fail to
- * compile — that is the point.
+ * (fetch → API Gateway), and the external backend Lambda router (through a
+ * parity-checked vendored copy). If a shape changes here, all three follow or
+ * fail to compile — that is the point.
  *
  * Angular-free on purpose: Lambda code must be able to import it.
  * Human-readable companion: docs/backend-contract.md.

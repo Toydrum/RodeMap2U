@@ -1,227 +1,134 @@
-# Connecting RoadMap2U to AWS — the go-live runbook
+# Connecting RoadMap2U to AWS
 
-Audience: the agent (or human) who will flip the app from the on-device mock
-cloud to real AWS. Everything AWS-shaped in the client is already built and
-verified against the mock; **connecting is configuration, not coding**. Read
-[`backend-contract.md`](./backend-contract.md) for WHAT the backend must do;
-this file is HOW to stand it up and wire it.
+This is the frontend handoff for the serverless backend in
+[`Toydrum/roadmap2u-backend`](https://github.com/Toydrum/roadmap2u-backend).
+Infrastructure is owned and deployed from that repository. The frontend never
+stores AWS credentials and its deployed configuration is generated from SSM;
+there is no manual output-copying step.
 
-## 0. TL;DR
+## Deployment state
 
-| Piece | Status | What connecting takes |
-|---|---|---|
-| Client auth (Cognito adapter, `/account` ritual) | ✅ shipped 0.0.48, dormant | **Stage 1 below — possible TODAY** with just a user pool (paste 3 strings) |
-| Client API transport (`http-api.ts`, all 26 ops) | ✅ shipped 0.0.48, dormant | Stage 2 — needs the deployed API |
-| Backend (Cognito pool + DynamoDB + Lambda router + HTTP API) | ✅ **implemented in `infra/`** (CDK; `cdk synth` + 18 vitest green) — **moving to its own repo**: see [`backend-extraction.md`](./backend-extraction.md) | `npx cdk deploy` in the backend repo → paste the 4 outputs (§3) |
-| Mandatory login (`requireAuth`) | wired, inert | §4 — flip ONLY after the «conectar mi bosque» phase ships |
+The workflows and validation gates are prepared, but AWS deployment remains
+disabled until the backend stack is deployed and the repository variable
+`AWS_DEPLOY_ENABLED` is explicitly set to `true`. No AWS resources are created
+by the frontend repository.
 
-The entire flip lives in **`src/app/core/config.ts`**. No other file changes.
-The five values are **public identifiers, not secrets** — user pool ids and
-SPA client ids are safe to commit (the app client has no secret by design).
+| Stage | Frontend | API | Region |
+|---|---|---|---|
+| `dev` | `https://dev.roadmap2u.com` | `https://api.dev.roadmap2u.com` | `us-east-1` |
+| `test` | `https://test.roadmap2u.com` | `https://api.test.roadmap2u.com` | `us-east-1` |
+| `prod` | `https://roadmap2u.com` | `https://api.roadmap2u.com` | `us-east-1` |
 
-```ts
-export const APP_CONFIG = Object.freeze({
-  backend: 'aws',                          // ← the migration
-  requireAuth: false,                      // ← stays false until §4
-  aws: Object.freeze({
-    region: 'us-east-1',                   // your region
-    userPoolId: 'us-east-1_XXXXXXXXX',     // Stage 1
-    userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx', // Stage 1
-    apiBaseUrl: 'https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com', // Stage 2 — WITHOUT /v1 (http-api.ts appends it)
-  }),
-});
+The backend stack owns Cognito, API Gateway, Lambda, DynamoDB, the S3 frontend
+bucket, CloudFront, certificates, DNS integration, OIDC roles, and the SSM
+handoff. The frontend bucket name is deterministic:
+`roadmap2u-<stage>-<AWS_ACCOUNT_ID>`.
+
+## SSM handoff
+
+Each backend stage publishes these values:
+
+```text
+/roadmap2u/<stage>/region
+/roadmap2u/<stage>/user-pool-id
+/roadmap2u/<stage>/user-pool-client-id
+/roadmap2u/<stage>/api-base-url
+/roadmap2u/<stage>/frontend-bucket
+/roadmap2u/<stage>/cloudfront-distribution-id
+/roadmap2u/<stage>/frontend-url
+/roadmap2u/<stage>/contract-hash
 ```
 
-## 1. How the seam works (why this is safe)
+Successful frontend releases are recorded separately:
 
-- `app.config.ts` picks the adapters ONCE at boot from `APP_CONFIG.backend`:
-  `MockAuthProvider`/`MockApi` (mock) vs `CognitoAuthProvider`/`HttpApi` (aws).
-  Since 0.0.115 BOTH pairs sit behind `lazySeam` (`core/lazy-seam.ts`): only
-  the chosen side's chunk ever downloads, and even that stays off the first
-  paint (every seam method is async; calls await the chunk).
-- `cognito-auth.provider.ts` is the only file that touches `aws-amplify`, and
-  only via dynamic `import()` — the SDK stays a lazy chunk. **Gate after every
-  build:** `main-*.js` must NOT match `cognito-idp|amazonaws\.com`.
-- Boot never touches the network: `AuthService.hydrate()` reads one IndexedDB
-  meta key. Amplify loads on the first real auth action. Offline PWA behavior
-  is unchanged.
-- Signing in/out NEVER mutates local forest data (verify-auth asserts it).
-- No OAuth/Hosted UI anywhere → **no callback/redirect URLs to register**,
-  and the GitHub Pages `/RoadMap2U/` subpath + 404.html quirk is irrelevant.
-
-## 2. Stage 1 — connect identity (possible today)
-
-As of 0.0.48 no component calls the API yet (`/account` and Settings use only
-`AuthService`), so a user pool alone gives you the full account ritual against
-real Cognito: sign-up with real emailed codes, sign-in, the child
-temp-password challenge, recovery, delete.
-
-### 2.1 Create the user pool
-
-Console or CLI; the settings below are NORMATIVE (they mirror the checklist in
-`cognito-auth.provider.ts` — the client already assumes them):
-
-```bash
-aws cognito-idp create-user-pool \
-  --pool-name roadmap-users \
-  --policies "PasswordPolicy={MinimumLength=8,RequireUppercase=true,RequireLowercase=true,RequireNumbers=true,RequireSymbols=false}" \
-  --auto-verified-attributes email \
-  --account-recovery-setting "RecoveryMechanisms=[{Priority=1,Name=verified_email}]" \
-  --username-configuration CaseSensitive=false \
-  --verification-message-template "DefaultEmailOption=CONFIRM_WITH_CODE" \
-  --schema "Name=accountType,AttributeDataType=String,Mutable=true" \
-  --deletion-protection ACTIVE
+```text
+/roadmap2u/<stage>/frontend-releases/<40-character-sha>
+/roadmap2u/<stage>/frontend-release-sha
 ```
 
-Rules encoded there — do not deviate:
-- **Sign-in by username** (3–20 `[a-z0-9_]`); email is an optional, verifiable
-  attribute. Guardian-created minors will have NO email (their guardian is the
-  recovery channel — Stage 2 feature).
-- Password policy = `PASSWORD_POLICY` in `src/app/core/auth/auth-types.ts`
-  (min 8, upper+lower+digit, **no symbol requirement**). If you change one,
-  change both — the mock, the UI hint and the pool must agree.
-- Verification/recovery by **CODE**, never emailed links (`CONFIRM_WITH_CODE`).
-- `custom:accountType` exists but is **backend-written only** (PostConfirmation
-  trigger in Stage 2 sets `adult`; `AdminCreateUser` sets `minor`). The client
-  never writes it; without a trigger it's simply absent and the client
-  defaults the hint to `adult` — fine for Stage 1.
-- Deletion protection ON: the pool holds real users; losing it loses them.
+`tools/generate-config.mjs` reads the handoff through workflow environment
+variables and replaces `src/app/core/generated-config.ts` for that build. It
+rejects a wrong stage/host, anything outside `us-east-1`, an API URL containing
+`/v1`, malformed Cognito identifiers, and contract drift. The checked-in
+generated config remains the offline mock default.
 
-### 2.2 Create the app client
+The contract digest is stable across operating-system line endings. For each
+file below, in order, hash its UTF-8 relative path, NUL, CRLF-to-LF-normalized
+text, then NUL:
 
-```bash
-aws cognito-idp create-user-pool-client \
-  --user-pool-id <POOL_ID> \
-  --client-name roadmap-web \
-  --no-generate-secret \
-  --explicit-auth-flows ALLOW_USER_SRP_AUTH ALLOW_REFRESH_TOKEN_AUTH \
-  --prevent-user-existence-errors ENABLED \
-  --refresh-token-validity 30 \
-  --token-validity-units "RefreshToken=days"
-```
+1. `api/contracts.ts`
+2. `db/schema.ts`
+3. `auth/auth-types.ts`
 
-- **`--no-generate-secret` is mandatory** — a browser SPA cannot hold a
-  secret, and the amplify adapter doesn't send one.
-- `ALLOW_USER_SRP_AUTH` is the only sign-in flow the adapter uses. Do NOT
-  enable `USER_PASSWORD_AUTH` (weaker) or any OAuth flow.
-- `--prevent-user-existence-errors ENABLED`: unknown users answer as
-  `NotAuthorizedException` (no account-enumeration oracle — kid-safety
-  doctrine). The UI then shows the generic wrong-credentials copy; that is
-  intended.
+Byte-for-byte parity of the vendored backend files is a separate check; see
+[`backend-extraction.md`](./backend-extraction.md).
 
-### 2.3 Paste + flip + verify
+## GitHub configuration
 
-1. Edit `src/app/core/config.ts`: `region`, `userPoolId`, `userPoolClientId`,
-   `backend: 'aws'`. Leave `apiBaseUrl: ''` and `requireAuth: false`.
-2. `npx ng build` → confirm the lazy-chunk gate:
-   `Select-String dist/roadmap2u/browser/main-*.js -Pattern 'cognito-idp|amazonaws\.com'`
-   must return nothing.
-3. **Manual smoke against the real pool** (`tools/verify-auth.mjs` is
-   mock-only — the demo family and the `123456` code do not exist on AWS):
-   - Create an account from `/account` with a real inbox → the code arrives by
-     email → confirm → profile shows.
-   - Reload the app OFFLINE (DevTools → Network → Offline): still signed in
-     from the cached identity, zero network at boot.
-   - Sign out → local trees untouched (count them in Mi bosque before/after).
-   - Wrong password → calm copy, no console errors.
-4. Bump `core/version.ts`, commit, push, verify the live bundle hash.
+Create GitHub Environments named `dev`, `test`, and `prod`. Configure:
 
-Notes for this stage:
-- Cognito's default email sender is fine for testing (~50 mails/day). For
-  launch volume, wire Amazon SES into the pool (a Stage 2/infra concern).
-- Device clocks >5 min off fail SRP with `NotAuthorizedException`; the error
-  table maps it, but if a tester hits mysterious sign-in failures, check the
-  clock first.
+- Repository variable `AWS_DEPLOY_ENABLED=false` until cutover is approved.
+- Environment variable `AWS_ACCOUNT_ID` in each stage with the exact 12-digit account.
+- Environment variable `AWS_ROLE_ARN` in each stage, pointing to
+  `roadmap2u-<stage>-frontend-deploy`.
+- Required reviewers for `test`/`prod` as appropriate.
 
-## 3. Stage 2 — connect the API (`infra/` is ready to deploy)
+Actions exchanges GitHub's OIDC token for short-lived credentials. Every AWS
+workflow pins `allowed-account-ids`, checks `sts:GetCallerIdentity` before SSM
+or S3 access, and validates that the SSM bucket, URL, CloudFront distribution,
+alias, S3 origin, region, and Origin Access Control all belong to the selected
+stage.
 
-The client transport is already complete (`core/api/http-api.ts`: bearer
-idToken, one 401 forceRefresh retry — retries only GETs and sync pushes on
-5xx/network (rev-LWW makes those replayable; a replayed `createChild` would
-not be) — offline fast-fail), and the backend is **implemented in `infra/`**
-(CDK app + router Lambda that imports `contracts.ts` — one source of truth;
-verified without AWS by `npm test` (18 vitest incl. route↔API_PATHS parity,
-LWW, LAST_GUARDIAN, code expiry + rate brake, strip-vs-full) and
-`npx cdk synth`). It is being extracted to its own repository — the vendored
-contract, drift test and repo layout live in
-[`backend-extraction.md`](./backend-extraction.md). The deploy itself is
-unchanged, just run in that repo:
+## Delivery flow
 
-```bash
-# in the roadmap2u-backend repo
-npm ci
-npx cdk bootstrap   # once per AWS account+region
-npx cdk deploy      # prints ConfigRegion / ConfigUserPoolId / ConfigUserPoolClientId / ConfigApiBaseUrl
-```
+1. `.github/workflows/ci.yml` runs configuration tests, Angular tests, a
+   root-hosted production build, local PWA validation, and the initial-bundle
+   provider-signature gate.
+2. A commit on `main` deploys that exact SHA to `dev` when the gate is enabled.
+3. `.github/workflows/promote-aws.yml` accepts only an exact lowercase
+   40-character SHA. `test` requires its successful `dev` marker; `prod`
+   requires its successful `test` marker. The marker is checked before
+   checkout.
+4. `.github/workflows/rollback-aws.yml` accepts only a SHA already marked
+   successful in the same stage, then regenerates, rebuilds, validates, and
+   republishes it.
+5. A release marker and current pointer are written only after the remote
+   frontend/API smoke passes.
 
-Paste the four outputs into `APP_CONFIG.aws` (`apiBaseUrl` = the invoke URL
-**without** `/v1`), set `backend: 'aws'`, rebuild, smoke per §2.3. If the pool
-was already created by hand in Stage 1, either import it or let the stack own a
-fresh one and re-create the test users. What the stack contains (spec in
-`backend-contract.md`):
+Publication uploads immutable assets first and the live `index.html` last.
+Mutable PWA files are retained under the release SHA, `releases/current`, and
+`releases/previous`, in addition to S3 versioning. CloudFront invalidation is
+limited to mutable entrypoints.
 
-1. **DynamoDB** table `roadmap` (single-table, on-demand, TTL on `ttl`, GSI1 +
-   GSI2 — key schema in contract §6).
-2. **Router Lambda** implementing `RoadmapApi` (`src/app/core/api/contracts.ts`
-   is imported by the Lambda via tsconfig path alias — one source of truth) +
-   a PostConfirmation trigger writing the profile item and `custom:accountType`.
-3. **HTTP API** (API Gateway v2) with a **JWT authorizer**:
-   - issuer `https://cognito-idp.<region>.amazonaws.com/<poolId>`
-   - audience = the app client id (this validates **ID tokens** — the client
-     sends idToken, whose `aud` is the client id; access tokens would fail).
-   - Routes per `API_PATHS`, stage path `/v1` (http-api.ts calls
-     `${apiBaseUrl}/v1/...`).
-4. **CORS on the HTTP API** — the app calls cross-origin from GitHub Pages and
-   from dev servers:
-   ```
-   AllowOrigins:  https://toydrum.github.io, http://localhost:4200, http://localhost:8826
-   AllowMethods:  GET, POST, PATCH, DELETE
-   AllowHeaders:  authorization, content-type
-   MaxAge:        86400
-   ```
-   Missing CORS is the #1 "it works in mock but not on AWS" failure — the
-   browser blocks the response and `http-api.ts` reports `offline`.
-   **Production stack: drop the localhost origins** (audit 0.0.115) — keep
-   them only on a staging stack (`backend-extraction.md` §5 suggests a CDK
-   context flag).
+Before DNS cutover, the production smoke uses the distribution's
+`*.cloudfront.net` hostname while the GitHub Environment URL remains the
+canonical `https://roadmap2u.com`. Development and test smoke their canonical
+stage hosts.
 
-If you ever rebuild the backend by hand instead of deploying `infra/`, treat
-contract §5–§7 as the acceptance spec and run the mock (`mock-api.ts`)
-side-by-side as the reference implementation.
+## Backend and browser requirements
 
-## 4. Mandatory login (`requireAuth: true`)
+- Cognito uses username sign-in, a public SPA client without a secret,
+  `ALLOW_USER_SRP_AUTH`, code-based verification/recovery, and the password
+  policy in `auth-types.ts`.
+- The HTTP API validates Cognito ID tokens and exposes routes beneath `/v1`;
+  the SSM `api-base-url` never includes `/v1`.
+- Production CORS allows only `https://roadmap2u.com`. Dev and test allow
+  their canonical stage origin plus exactly `http://localhost:4200` and
+  `http://localhost:8826`. The legacy Pages origin is not an AWS production
+  origin.
+- `aws-amplify` remains behind the lazy authentication seam. The initial
+  `main-*.js` must not match, case-insensitively,
+  `cognito-idp|amazonaws.com|aws-amplify|Cognito`.
+- `/v1/me` without a token must return `401` with a JSON body.
 
-Owner decision 2026-07-06: login becomes mandatory at AWS go-live — but the
-flip has a hard prerequisite: the **«conectar mi bosque»** phase (local-forest
-→ account adoption + sync) must be shipped, otherwise existing users would be
-walled off from their own local data with no bridge. When flipping:
-- `authRequiredGate` (already on every route) starts redirecting guests to
-  `/account?volver=<url>`; after sign-in the user lands back where they were.
-- Test: open any deep link signed-out → ritual → sign in → returned to it.
-- Rollback is the same boolean.
+## Cutover and rollback
 
-## 5. Rollback (any stage)
+Keep `.github/workflows/deploy.yml` manual-only while users move from the
+legacy GitHub Pages origin. Enable AWS delivery only after the backend CI,
+CloudFront bindings, SSM handoff, CORS, and stage smokes are green. DNS cutover
+is an infrastructure operation in the backend repository.
 
-Set `backend: 'mock'` (and `requireAuth: false`) in `config.ts`, rebuild,
-push. Local forests were never touched. Notes:
-- Amplify's tokens live in localStorage under `CognitoIdentityServiceProvider.*`
-  keys — harmless residue; sign-out clears them if you care.
-- The cached identity (`auth.identity` meta key) may show a "signed in" user
-  whose account only exists on AWS; the mock treats it as stale and one
-  sign-out cleans it.
-- Real users created on Cognito keep existing (the pool is stateful; deletion
-  protection stays ON).
-
-## 6. Where each piece of truth lives
-
-| Question | File |
-|---|---|
-| The five config values + both flags | `src/app/core/config.ts` |
-| Pool settings the client assumes | `src/app/core/auth/cognito-auth.provider.ts` (header) + §2 here |
-| Password policy | `src/app/core/auth/auth-types.ts` (`PASSWORD_POLICY`) |
-| Every endpoint, shape, error code, cap | `src/app/core/api/contracts.ts` (normative) |
-| Permissions matrix, DynamoDB design, Lambda authz | `docs/backend-contract.md` |
-| Backend repo split: vendored contract, drift test, security decisions | `docs/backend-extraction.md` |
-| Reference backend behavior (executable) | `src/app/core/api/mock-api.ts` + `mock-auth.provider.ts` |
-| Auth UX flows the pool must satisfy | `src/app/features/account/account.ts` (step machine) |
-| Mock-path regression battery | `tools/verify-auth.mjs` (mock-only; see §2.3 for the real-pool smoke) |
+For application rollback, dispatch `rollback-aws.yml` with the stage and a
+same-stage successful SHA. For a broader infrastructure incident, leave the
+frontend release markers intact and follow the backend repository's rollback
+runbook; never replace generated configuration with hand-edited values.

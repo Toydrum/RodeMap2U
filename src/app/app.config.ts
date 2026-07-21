@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
       useFactory: (): AuthProvider =>
         APP_CONFIG.backend === 'aws'
           ? lazySeam(() =>
-              import('./core/auth/cognito-auth.provider').then((m) => new m.CognitoAuthProvider()),
+              import('./core/auth/cognito-auth.provider').then((m) => m.createAuthProvider()),
             )
           : lazySeam(() =>
               import('./core/auth/mock-auth.provider').then((m) => new m.MockAuthProvider()),
@@ -55,7 +55,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
     // sw.js wraps ngsw-worker.js (importScripts) and adds whisper-tap
-    // handling. MUST stay relative — the app lives under /RoadMap2U/.
+    // handling. It stays relative so the worker follows the deployed origin.
     provideServiceWorker('sw.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
