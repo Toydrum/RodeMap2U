@@ -10,13 +10,13 @@ import { APP_CONFIG } from '../config';
  * never pays for it, and boot never loads it (hydration reads a meta key).
  * The chunk loads on the first real auth/API call.
  *
- * ── User-pool creation checklist (infra/ implements EXACTLY this; the client
- *    below already assumes it) ────────────────────────────────────────────
+ * ── User-pool creation checklist (the separate backend stack implements this;
+ *    the client below already assumes it) ──────────────────────────────────
  *   · Sign-in by USERNAME; email is an optional, verifiable attribute
  *     (guardian-created minors have none — their guardian is recovery).
  *   · App client WITHOUT a client secret; ALLOW_USER_SRP_AUTH enabled.
- *     No Hosted UI, no OAuth flows (custom UI — immune to the GH Pages
- *     /RoadMap2U/ subpath + 404.html fallback).
+ *     No Hosted UI and no OAuth flows; the custom account UI needs no redirect
+ *     callback or hosting-path fallback.
  *   · Verification and recovery by CODE, never emailed links.
  *   · Password policy = PASSWORD_POLICY (auth-types.ts) — align the pool to
  *     the const, not the other way around.
@@ -76,7 +76,7 @@ export class CognitoAuthProvider implements AuthProvider {
             Cognito: {
               userPoolId: APP_CONFIG.aws.userPoolId,
               userPoolClientId: APP_CONFIG.aws.userPoolClientId,
-              loginWith: { username: true, email: true },
+              loginWith: { username: true },
             },
           },
         });
@@ -276,4 +276,9 @@ export class CognitoAuthProvider implements AuthProvider {
       issuedAt: Date.now(),
     };
   }
+}
+
+/** Generic lazy entrypoint keeps provider-specific symbols out of main.js. */
+export function createAuthProvider(): AuthProvider {
+  return new CognitoAuthProvider();
 }

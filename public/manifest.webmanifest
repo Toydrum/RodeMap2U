@@ -1,12 +1,12 @@
 {
-  "id": "/RoadMap2U/",
+  "id": "/",
   "name": "RoadMap2U",
   "short_name": "RoadMap2U",
   "description": "Un mapa de metas que crece como un árbol — hecho para mentes neurodivergentes.",
   "lang": "es",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "background_color": "#f5f2e8",
   "theme_color": "#f5f2e8",
   "icons": [

@@ -1,8 +1,8 @@
 /**
  * Custom service-worker wrapper: all of Angular's ngsw behavior (caching,
  * updates) plus one thing ngsw can't do — handling taps on the gentle
- * whisper notifications. Registered instead of ngsw-worker.js (relative
- * paths everywhere: the app lives under a subpath on GitHub Pages).
+ * whisper notifications. Registered instead of ngsw-worker.js; relative paths
+ * keep imports and notification deep links on the current deployment origin.
  */
 importScripts('./ngsw-worker.js');
 

@@ -1,25 +1,14 @@
+import { GENERATED_APP_CONFIG } from './generated-config';
+
+export { BACKEND_CONTRACT_SHA256, DEPLOY_STAGE } from './generated-config';
+
 /**
- * Backend wiring — the entire mock→AWS migration lives in this file.
+ * Backend wiring: the public APP_CONFIG shape is stable across local and AWS
+ * builds. Local development imports the tracked mock-safe generated config.
+ * AWS workflows validate the backend contract hash and replace that module in
+ * their ephemeral checkout from stage-specific SSM parameters before build.
  *
- * While `backend` is 'mock', auth and API run against the on-device simulated
- * cloud (`core/api/mock-cloud.ts`) and the app never touches the network.
- * Go-live day: deploy `infra/` (CDK stack outputs print these exact strings),
- * paste them below, flip `backend` to 'aws', bump the version, push.
- * STEP-BY-STEP RUNBOOK (incl. connecting identity alone, possible today):
- * docs/aws-connect.md.
- *
- * `requireAuth` stays false until AFTER the connect-my-forest flow ships
- * (owner decision 2026-07-06: login becomes mandatory at AWS go-live, not
- * while the backend is simulated). The gate itself is already wired on every
- * route — flipping this boolean activates it.
+ * `requireAuth` is false in local/dev and true in test/prod. Network access
+ * remains behind the API_CLIENT and AUTH_PROVIDER seams selected at boot.
  */
-export const APP_CONFIG = Object.freeze({
-  backend: 'mock' as 'mock' | 'aws',
-  requireAuth: false,
-  aws: Object.freeze({
-    region: '',
-    userPoolId: '',
-    userPoolClientId: '',
-    apiBaseUrl: '',
-  }),
-});
+export const APP_CONFIG = GENERATED_APP_CONFIG;
