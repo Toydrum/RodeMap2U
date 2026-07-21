@@ -40,7 +40,7 @@ jobs:
       AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
     steps:
       - name: Configure short-lived AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.1.1
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           role-session-name: roadmap2u-frontend-${{ inputs.stage }}-${{ github.run_id }}
@@ -72,7 +72,7 @@ jobs:
             --output text)"
           test "$marker" = "$SOURCE_SHA"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ inputs.source_sha }}
           fetch-depth: 0
@@ -81,13 +81,13 @@ jobs:
         shell: bash
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 26
           cache: npm
 
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Read the backend handoff from SSM
         id: ssm

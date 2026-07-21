@@ -128,7 +128,7 @@ test('promotion requires an exact SHA with a successful previous-stage release m
   assert.match(workflow, /SOURCE_STAGE=.*dev.*test/s);
   assert.match(workflow, /frontend-releases\/\$SOURCE_SHA/);
   assert.ok(
-    workflow.indexOf('frontend-releases/$SOURCE_SHA') < workflow.indexOf('actions/checkout@v6'),
+    workflow.indexOf('frontend-releases/$SOURCE_SHA') < workflow.indexOf('actions/checkout@'),
     'the prior-stage release marker must be checked before checkout',
   );
 });
@@ -150,10 +150,24 @@ test('deployment markers are written only after smoke and rollback requires a sa
   assert.match(rollback, /\^\[0-9a-f\]\{40\}\$/);
   assert.match(rollback, /roadmap2u\/\$\{STAGE\}\/frontend-releases\/\$RELEASE_SHA/);
   assert.ok(
-    rollback.indexOf('frontend-releases/$RELEASE_SHA') < rollback.indexOf('actions/checkout@v6'),
+    rollback.indexOf('frontend-releases/$RELEASE_SHA') < rollback.indexOf('actions/checkout@'),
     'the same-stage release marker must be checked before checkout',
   );
   assert.ok(rollback.indexOf('smoke-frontend.mjs') < rollback.indexOf('frontend-release-sha'));
+});
+
+test('workflows pin third-party actions and suppress dependency lifecycle scripts', () => {
+  for (const path of [
+    '.github/workflows/ci.yml',
+    '.github/workflows/deploy.yml',
+    '.github/workflows/deploy-aws-dev.yml',
+    '.github/workflows/promote-aws.yml',
+    '.github/workflows/rollback-aws.yml',
+  ]) {
+    const workflow = read(path);
+    assert.doesNotMatch(workflow, /uses:\s+\S+@v\d/);
+    assert.match(workflow, /npm ci --ignore-scripts --no-audit --no-fund/);
+  }
 });
 
 test('AWS builds reject every forbidden provider signature in the initial bundle', () => {
