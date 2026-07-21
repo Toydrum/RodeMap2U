@@ -49,67 +49,87 @@ test('the legacy Pages artifact receives its historical subpath scope only after
   }
 });
 
-test('AWS workflows are gated and use every backend SSM handoff parameter', () => {
+test('AWS workflows are gated and consume every field from an immutable backend manifest', () => {
   const workflows = [
     read('.github/workflows/deploy-aws-dev.yml'),
     read('.github/workflows/promote-aws.yml'),
     read('.github/workflows/rollback-aws.yml'),
   ].join('\n');
+  const reader = read('tools/read-backend-release.sh');
   assert.match(workflows, /AWS_DEPLOY_ENABLED/);
-  for (const suffix of [
+  assert.match(workflows, /read-backend-release\.sh/);
+  assert.match(reader, /backend-release-manifests\/\$BACKEND_RELEASE_SHA/);
+  for (const field of [
     'region',
-    'user-pool-id',
-    'user-pool-client-id',
-    'api-base-url',
-    'frontend-bucket',
-    'cloudfront-distribution-id',
-    'frontend-url',
-    'contract-hash',
+    'userPoolId',
+    'userPoolClientId',
+    'apiBaseUrl',
+    'frontendBucket',
+    'cloudFrontDistributionId',
+    'frontendUrl',
+    'contractHash',
   ]) {
-    assert.match(workflows, new RegExp(`/roadmap2u/\\$\\{STAGE\\}/${suffix}`));
+    assert.match(reader, new RegExp(`\\.${field}`));
   }
 });
 
 test('deploy and rollback mutations are guarded by mutually exclusive repository gates', () => {
-  for (const path of [
-    '.github/workflows/deploy-aws-dev.yml',
-    '.github/workflows/promote-aws.yml',
-  ]) {
-    const workflow = read(path);
-    assert.match(workflow, /vars\.AWS_DEPLOY_ENABLED == 'true'/);
-    assert.match(workflow, /vars\.AWS_ROLLBACK_ENABLED == 'false'/);
-  }
+  const dev = read('.github/workflows/deploy-aws-dev.yml');
+  assert.match(
+    dev,
+    /if: \$\{\{ vars\.AWS_DEPLOY_ENABLED == 'true' && vars\.AWS_ROLLBACK_ENABLED == 'false' && github\.ref == 'refs\/heads\/main' \}\}/,
+  );
+
+  const promotion = read('.github/workflows/promote-aws.yml');
+  assert.match(
+    promotion,
+    /if: \$\{\{ vars\.AWS_DEPLOY_ENABLED == 'true' && vars\.AWS_ROLLBACK_ENABLED == 'false' \}\}/,
+  );
 
   const rollback = read('.github/workflows/rollback-aws.yml');
-  assert.match(rollback, /vars\.AWS_DEPLOY_ENABLED == 'false'/);
-  assert.match(rollback, /vars\.AWS_ROLLBACK_ENABLED == 'true'/);
+  assert.match(
+    rollback,
+    /if: \$\{\{ vars\.AWS_DEPLOY_ENABLED == 'false' && vars\.AWS_ROLLBACK_ENABLED == 'true' \}\}/,
+  );
 });
 
 test('the OIDC preflight is identity-only and never checks out or mutates AWS', () => {
   const workflow = read('.github/workflows/oidc-preflight.yml');
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /contents:\s*read/);
   assert.match(workflow, /id-token:\s*write/);
   assert.match(workflow, /configure-aws-credentials@/);
   assert.match(workflow, /aws sts get-caller-identity/);
+  assert.doesNotMatch(workflow, /contents:/);
   assert.doesNotMatch(workflow, /actions\/checkout@/);
   assert.doesNotMatch(workflow, /aws (?!sts get-caller-identity)/);
+  assert.doesNotMatch(workflow, /uses:\s+\S+@v\d/);
 });
 
 test('frontend publication proves the active backend release before build or upload', () => {
+  const reader = read('tools/read-backend-release.sh');
+  assert.match(reader, /backend-release-sha/);
+  assert.match(reader, /backend-releases\/\$BACKEND_RELEASE_SHA/);
+  assert.match(reader, /backend-release-manifests\/\$BACKEND_RELEASE_SHA/);
+  assert.match(reader, /BACKEND_RELEASE_SHA.*\^\[0-9a-f\]\{40\}\$/s);
+  assert.match(reader, /test "\$BACKEND_RELEASE_MARKER" = "\$BACKEND_RELEASE_SHA"/);
+  assert.match(reader, /schemaVersion == 1/);
+  assert.match(reader, /\.backendReleaseSha == \$sha/);
+  assert.match(reader, /\.stage == \$stage/);
+
   for (const path of [
     '.github/workflows/deploy-aws-dev.yml',
     '.github/workflows/promote-aws.yml',
     '.github/workflows/rollback-aws.yml',
   ]) {
     const workflow = read(path);
-    assert.match(workflow, /backend-release-sha/);
-    assert.match(workflow, /backend-releases\/\$BACKEND_RELEASE_SHA/);
-    assert.match(workflow, /BACKEND_RELEASE_SHA.*\^\[0-9a-f\]\{40\}\$/s);
-    const markerPosition = workflow.indexOf('backend-releases/$BACKEND_RELEASE_SHA');
-    assert.ok(markerPosition >= 0, `${path} must validate a backend release marker`);
+    const markerPosition = workflow.indexOf('read-backend-release.sh');
+    assert.ok(markerPosition >= 0, `${path} must load a versioned backend release manifest`);
     assert.ok(markerPosition < workflow.indexOf('npm run generate:config'));
     assert.ok(markerPosition < workflow.indexOf('publish-aws-site.sh'));
+    assert.ok(
+      workflow.lastIndexOf('/backend-release-sha') > workflow.indexOf('npm run generate:config'),
+      `${path} must revalidate the backend pointer after building`,
+    );
     assert.match(workflow, /GITHUB_STEP_SUMMARY/);
     assert.match(workflow, /Backend SHA/);
     assert.match(workflow, /Frontend SHA/);
@@ -208,12 +228,15 @@ test('workflows pin third-party actions and suppress dependency lifecycle script
     '.github/workflows/ci.yml',
     '.github/workflows/deploy.yml',
     '.github/workflows/deploy-aws-dev.yml',
+    '.github/workflows/oidc-preflight.yml',
     '.github/workflows/promote-aws.yml',
     '.github/workflows/rollback-aws.yml',
   ]) {
     const workflow = read(path);
     assert.doesNotMatch(workflow, /uses:\s+\S+@v\d/);
-    assert.match(workflow, /npm ci --ignore-scripts --no-audit --no-fund/);
+    if (path !== '.github/workflows/oidc-preflight.yml') {
+      assert.match(workflow, /npm ci --ignore-scripts --no-audit --no-fund/);
+    }
   }
 });
 

@@ -89,32 +89,10 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Read the backend handoff from SSM
+      - name: Read the immutable backend release manifest
         id: ssm
         shell: bash
-        run: |
-          set -euo pipefail
-          get_parameter() {
-            aws ssm get-parameter --name "$1" --query 'Parameter.Value' --output text
-          }
-          BACKEND_RELEASE_SHA="$(get_parameter "/roadmap2u/${STAGE}/backend-release-sha")"
-          [[ "$BACKEND_RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-            echo 'The active backend release is not an exact lowercase commit SHA.' >&2
-            exit 1
-          }
-          BACKEND_RELEASE_MARKER="$(get_parameter "/roadmap2u/${STAGE}/backend-releases/$BACKEND_RELEASE_SHA")"
-          test "$BACKEND_RELEASE_MARKER" = "$BACKEND_RELEASE_SHA"
-          {
-            echo "region=$(get_parameter "/roadmap2u/${STAGE}/region")"
-            echo "user_pool_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-id")"
-            echo "user_pool_client_id=$(get_parameter "/roadmap2u/${STAGE}/user-pool-client-id")"
-            echo "api_base_url=$(get_parameter "/roadmap2u/${STAGE}/api-base-url")"
-            echo "frontend_bucket=$(get_parameter "/roadmap2u/${STAGE}/frontend-bucket")"
-            echo "distribution_id=$(get_parameter "/roadmap2u/${STAGE}/cloudfront-distribution-id")"
-            echo "frontend_url=$(get_parameter "/roadmap2u/${STAGE}/frontend-url")"
-            echo "contract_hash=$(get_parameter "/roadmap2u/${STAGE}/contract-hash")"
-            echo "backend_release_sha=$BACKEND_RELEASE_SHA"
-          } >> "$GITHUB_OUTPUT"
+        run: bash tools/read-backend-release.sh
 
       - name: Summarize the verified release pair
         shell: bash
@@ -174,6 +152,18 @@ jobs:
             echo 'AWS provider signature leaked into the initial bundle.' >&2
             exit 1
           fi
+
+      - name: Revalidate the backend pointer before publication
+        shell: bash
+        env:
+          EXPECTED_BACKEND_RELEASE_SHA: ${{ steps.ssm.outputs.backend_release_sha }}
+        run: |
+          set -euo pipefail
+          CURRENT_BACKEND_RELEASE_SHA="$(aws ssm get-parameter \
+            --name "/roadmap2u/${STAGE}/backend-release-sha" \
+            --query 'Parameter.Value' \
+            --output text)"
+          test "$CURRENT_BACKEND_RELEASE_SHA" = "$EXPECTED_BACKEND_RELEASE_SHA"
 
       - name: Publish assets and versioned mutable entrypoints
         shell: bash

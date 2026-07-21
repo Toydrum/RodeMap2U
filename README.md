@@ -57,8 +57,10 @@ until the mutually exclusive repository gates are deliberately changed from
 - Deployment values come from `/roadmap2u/<stage>/*` in SSM. The generated
   config rejects missing or malformed Cognito/API values, an API URL containing
   `/v1`, and a backend contract hash that differs from this checkout. Before
-  every publish, the workflow also proves that the active backend SHA has a
-  matching successful release marker in the target stage.
+  every publish, the workflow proves that the active backend SHA has a matching
+  successful release marker and consumes its immutable, SHA-versioned handoff
+  manifest. It rechecks the active pointer after the build to avoid publishing
+  across a backend release transition.
 - Assets publish before `index.html`; only mutable PWA entrypoints are
   invalidated. Mutable artifacts are retained by SHA plus `current` and
   `previous`, and successful release markers are written only after smoke.

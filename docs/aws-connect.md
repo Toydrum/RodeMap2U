@@ -40,8 +40,17 @@ Each backend stage publishes these values:
 /roadmap2u/<stage>/frontend-url
 /roadmap2u/<stage>/contract-hash
 /roadmap2u/<stage>/backend-releases/<40-character-sha>
+/roadmap2u/<stage>/backend-release-manifests/<40-character-sha>
 /roadmap2u/<stage>/backend-release-sha
 ```
+
+The individual handoff parameters remain useful for operators and diagnostics,
+but frontend publication reads configuration from the immutable release
+manifest selected by `backend-release-sha`. The manifest binds
+`schemaVersion`, `stage`, `backendReleaseSha`, and all eight handoff values in a
+single SSM value. The matching marker and manifest are written before the
+active pointer moves, so a frontend build cannot combine values from two
+backend releases.
 
 Successful frontend releases are recorded separately:
 
@@ -102,8 +111,10 @@ checks out code nor writes AWS state.
    republishes it.
 5. Before configuration generation or upload, each workflow reads
    `/backend-release-sha`, validates its matching `/backend-releases/<sha>`
-   proof, and records the backend SHA, frontend SHA, and contract hash in the
-   Actions summary.
+   proof and `/backend-release-manifests/<sha>` snapshot, and records the
+   backend SHA, frontend SHA, and contract hash in the Actions summary. The
+   backend pointer is checked again after the build and immediately before
+   publication.
 6. A release marker and current pointer are written only after the remote
    frontend/API smoke passes.
 
