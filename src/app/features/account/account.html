@@ -57,6 +57,9 @@
 
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -90,7 +93,7 @@
               (input)="username.set(inputValue($event))"
             />
           </label>
-<!-- displayName severed from signup (0.0.108) — the profile already falls
+          <!-- displayName severed from signup (0.0.108) — the profile already falls
      back to the username; one less field at the front door. -->
           <label class="field">
             <span>{{ i18n.t().account.email }}</span>
@@ -124,9 +127,15 @@
 
           @if (localError()) {
             <p class="error-line" role="alert">{{ localError() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -170,6 +179,9 @@
 
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -214,9 +226,15 @@
 
           @if (localError()) {
             <p class="error-line" role="alert">{{ localError() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -249,6 +267,9 @@
 
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -309,9 +330,15 @@
 
           @if (localError()) {
             <p class="error-line" role="alert">{{ localError() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
           @if (errorText()) {
             <p class="error-line" role="alert">{{ errorText() }}</p>
+            <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+              {{ i18n.t().account.reportBugCta }}
+            </a>
           }
 
           <button type="submit" class="btn btn-primary big" [disabled]="auth.busy()">
@@ -331,7 +358,11 @@
             <span class="who-name">{{ user.displayName || user.username }}</span>
             <span class="who-detail">&#64;{{ user.username }}</span>
             <span class="who-role">
-              {{ user.accountType === 'minor' ? i18n.t().account.roleMinor : i18n.t().account.roleAdult }}
+              {{
+                user.accountType === 'minor'
+                  ? i18n.t().account.roleMinor
+                  : i18n.t().account.roleAdult
+              }}
             </span>
           </div>
         }
@@ -362,12 +393,20 @@
             <p>{{ i18n.t().account.deleteBody }}</p>
             @if (errorText()) {
               <p class="error-line" role="alert">{{ errorText() }}</p>
+              <a class="error-report" [href]="bugReportUrl" target="_blank" rel="noopener">
+                {{ i18n.t().account.reportBugCta }}
+              </a>
             }
             <div class="danger-actions">
               <button type="button" class="btn btn-soft" (click)="confirmingDelete.set(false)">
                 {{ i18n.t().common.cancel }}
               </button>
-              <button type="button" class="btn btn-primary danger-cta" (click)="doDelete()" [disabled]="auth.busy()">
+              <button
+                type="button"
+                class="btn btn-primary danger-cta"
+                (click)="doDelete()"
+                [disabled]="auth.busy()"
+              >
                 {{ i18n.t().account.deleteConfirm }}
               </button>
             </div>

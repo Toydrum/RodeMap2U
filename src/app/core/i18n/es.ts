@@ -6,7 +6,8 @@
 export const ES = {
   app: {
     name: 'RoadMap2U',
-    memoryOnly: 'Este dispositivo no pudo abrir su almacenamiento: tu bosque vive solo en esta sesión y se perderá al recargar. Cierra otras pestañas y recarga para reintentar.',
+    memoryOnly:
+      'Este dispositivo no pudo abrir su almacenamiento: tu bosque vive solo en esta sesión y se perderá al recargar. Cierra otras pestañas y recarga para reintentar.',
   },
   finder: {
     title: 'Buscar en mi bosque',
@@ -15,10 +16,13 @@ export const ES = {
     hint: 'Escribe dos letras o más y te llevo a esa rama.',
   },
   hints: {
-    forest: 'Cada árbol es un área de tu vida. Tócalo para entrar; mantenlo presionado para acomodarlo.',
+    forest:
+      'Cada árbol es un área de tu vida. Tócalo para entrar; mantenlo presionado para acomodarlo.',
     tree: 'Tus metas viven en las puntas de las ramas. Toca una para verla; el «+» planta una nueva.',
-    ahora: 'Aquí te espera UNA sola idea a la vez — puedes pedir otra o simplemente mirar tu bosque.',
-    almanaque: 'Los días de tu bosque: lo que quiere florecer y lo que ya floreció. Solo para mirar — aquí nada apura.',
+    ahora:
+      'Aquí te espera UNA sola idea a la vez — puedes pedir otra o simplemente mirar tu bosque.',
+    almanaque:
+      'Los días de tu bosque: lo que quiere florecer y lo que ya floreció. Solo para mirar — aquí nada apura.',
     cosecha: 'Tu frasco de cosecha: cada rama que florece deja una fruta. Se llena a tu ritmo.',
     timer: 'Un tiempo suave con tu rama. Nada suena, nada corta: tú decides cuándo cerrar.',
     gotIt: 'Entendido',
@@ -26,13 +30,18 @@ export const ES = {
   },
   crumble: {
     firstTitle: '¿Cuál sería el primer pasito?',
-    firstBody: 'Esta meta aún no tiene pasitos. Si le pones nombre al primero (de dos minutitos), empezamos justo ahí.',
+    firstBody:
+      'Esta meta aún no tiene pasitos. Si le pones nombre al primero (de dos minutitos), empezamos justo ahí.',
     firstSkip: 'Empezar así nomás',
     firstGo: 'Plantar y empezar',
     cta: 'Desmenuzar esta meta',
     ctaHint: 'Tres preguntitas y tu meta se vuelve pasitos — con tus palabras.',
     title: 'Vamos a desmenuzarla',
-    questions: ['¿Cuál es la primera acción física? (abrir el cuaderno, ponerte los tenis…)', '¿Hay algo que se interpone? Nómbralo como pasito (buscar el cargador, pedir la clave…)', '¿Cuál sería la versión de dos minutitos?'],
+    questions: [
+      '¿Cuál es la primera acción física? (abrir el cuaderno, ponerte los tenis…)',
+      '¿Hay algo que se interpone? Nómbralo como pasito (buscar el cargador, pedir la clave…)',
+      '¿Cuál sería la versión de dos minutitos?',
+    ],
     placeholder: 'Con tus palabras…',
     stepHint: 'Si una pregunta no te dice nada, sáltala sin pena.',
     skip: 'Saltar',
@@ -88,8 +97,12 @@ export const ES = {
     seeForest: 'Ver mi bosque',
     sessionFollows: 'La sesión te sigue por toda la app — pasea tranquilo.',
     emptyTitle: 'Todavía no hay un hilo que retomar',
-    emptyBody: 'Cuando plantes algo o pases un ratito con tu bosque, aquí te esperará el camino de vuelta.',
-    todayMinutes: { one: 'Hoy estuviste {count} minutito con tu bosque 🌱', many: 'Hoy estuviste {count} minutitos con tu bosque 🌱' },
+    emptyBody:
+      'Cuando plantes algo o pases un ratito con tu bosque, aquí te esperará el camino de vuelta.',
+    todayMinutes: {
+      one: 'Hoy estuviste {count} minutito con tu bosque 🌱',
+      many: 'Hoy estuviste {count} minutitos con tu bosque 🌱',
+    },
     momentumAction: 'Un pasito más',
     bloomToast: '«{title}» floreció 🌸',
     bloomMore: '¿Otro pasito?',
@@ -124,20 +137,24 @@ export const ES = {
     body: 'Sin prisa — es solo una pregunta, no un pendiente.',
     answer: 'Contestar',
     settingsTitle: 'Susurros del bosque',
-    settingsHint: 'De vez en cuando, una pregunta suave: ¿cómo te sientes?, ¿en qué piensas? Jamás sobre trabajo, jamás con sonido, jamás en la noche. Viven mientras la app esté abierta, aunque sea de fondo.',
+    settingsHint:
+      'De vez en cuando, una pregunta suave: ¿cómo te sientes?, ¿en qué piensas? Jamás sobre trabajo, jamás con sonido, jamás en la noche. Viven mientras la app esté abierta, aunque sea de fondo.',
     rhythmLabel: 'Ritmo',
     rhythmOften: 'Seguido (~2 h)',
     rhythmSometimes: 'De vez en cuando (~4 h)',
     rhythmDaily: 'Una vez al día',
     rhythmSurprise: '🍃 Cuando el bosque quiera',
-    deniedHint: 'Tu navegador no dio permiso de notificaciones — los susurros vivirán solo dentro de la app.',
+    deniedHint:
+      'Tu navegador no dio permiso de notificaciones — los susurros vivirán solo dentro de la app.',
     tinyOffer: 'Si traes tantita pila: «{title}» — chiquito a propósito 🍃',
     tinyAction: '2 minutitos',
   },
   checkIn: {
     welcomeTitle: 'Este es tu bosque',
-    welcomeBody1: 'Cada área de tu vida puede ser un árbol: la escuela, un proyecto, la gente que quieres.',
-    welcomeBody2: 'Lo que quieras lograr crece como rama, y lo logrado florece. Aquí nada se vence ni se pierde: todo crece a tu ritmo.',
+    welcomeBody1:
+      'Cada área de tu vida puede ser un árbol: la escuela, un proyecto, la gente que quieres.',
+    welcomeBody2:
+      'Lo que quieras lograr crece como rama, y lo logrado florece. Aquí nada se vence ni se pierde: todo crece a tu ritmo.',
     welcomeStart: 'Empezar 🌱',
     title: '¿Dónde sientes que estás?',
     subtitle: 'No hay respuestas correctas. Solo tú, hoy.',
@@ -156,7 +173,8 @@ export const ES = {
     skipAll: 'Hoy no quiero responder',
     express: 'Me siento igual que la última vez',
     destinationTitle: '¿Por dónde andas hoy?',
-    destinationSubtitle: 'Toca la rama donde andas o el árbol que quieras visitar — o solo pasa a mirar.',
+    destinationSubtitle:
+      'Toca la rama donde andas o el árbol que quieras visitar — o solo pasa a mirar.',
     justForest: 'Solo mirar el bosque',
   },
   almanaque: {
@@ -175,7 +193,8 @@ export const ES = {
     piedritasEmpty: 'Si hay algo pequeñito que te gusta hacer seguido, aquí tiene su espiral.',
     piedritaAdd: 'Sembrar una espiral',
     piedritaSheetTitle: 'Sembrar una espiral',
-    piedritaSheetHint: 'Algo pequeño que me gusta repetir. Cada vez que le toca, amanece limpio — nadie cuenta los días.',
+    piedritaSheetHint:
+      'Algo pequeño que me gusta repetir. Cada vez que le toca, amanece limpio — nadie cuenta los días.',
     piedritaPlaceholder: 'Regar las plantas, tocar piano 5 min…',
     piedritaTree: '¿En qué árbol vive?',
     piedritaCreate: 'Sembrar',
@@ -193,7 +212,8 @@ export const ES = {
     whenWeek: 'la próxima semana',
     whenLater: 'más adelante',
     backToToday: 'Volver a hoy',
-    fallowLegend: 'Los días sin marcas son barbecho: tierra descansando. También así crece un bosque.',
+    fallowLegend:
+      'Los días sin marcas son barbecho: tierra descansando. También así crece un bosque.',
     legendBloom: 'floreció',
     legendBud: 'fecha amable',
     legendKnot: 'caminos nuevos',
@@ -216,7 +236,10 @@ export const ES = {
     emptyHint: 'Cuando marques una rama como florecida, su fruta aparecerá aquí.',
     monthTitle: 'La cosecha de {month}',
     harvestedOn: 'el {date}',
-    total: { one: '{count} fruta esperando en el frasco', many: '{count} frutas esperando en el frasco' },
+    total: {
+      one: '{count} fruta esperando en el frasco',
+      many: '{count} frutas esperando en el frasco',
+    },
     settingsLink: 'La conservería',
     settingsHint: 'Tus frutas, tus mermeladas y tu té — nada se gasta, todo se conserva',
     freshReady: 'El frasco está listo para la próxima cosecha.',
@@ -234,7 +257,10 @@ export const ES = {
     saveShelf: 'Guardar en la alacena',
     jamMadeToast: 'Tu mermelada ya está en la alacena 🫙',
     vesselLine: {
-      frasquito: { one: 'Tu fruta pide un frasquito — una joya.', many: 'Tus {count} frutas piden un frasquito — una joya.' },
+      frasquito: {
+        one: 'Tu fruta pide un frasquito — una joya.',
+        many: 'Tus {count} frutas piden un frasquito — una joya.',
+      },
       frasco: 'Tus {count} frutas piden un frasco.',
       frascote: 'Tus {count} frutas piden un frascote — una mermelada poderosa.',
     },
@@ -310,7 +336,8 @@ export const ES = {
       beat1Hint: 'Escríbelo como un regalo para ti. Lo abrirás cuando el frasco se llene.',
       nameHint: 'Tus palabras serán el nombre del frasco.',
       beat2Title: '¿Qué tan grande se siente este premio?',
-      beat2Hint: 'Tú decides. Mientras más grande el regalo, más grande el frasco que vas a llenar.',
+      beat2Hint:
+        'Tú decides. Mientras más grande el regalo, más grande el frasco que vas a llenar.',
       capFrasquito: 'Frasquito · se llena con 2 frutas',
       capFrasco: 'Frasco · se llena con 5 frutas',
       capFrascote: 'Frascote · se llena con 8 frutas',
@@ -346,7 +373,8 @@ export const ES = {
   },
   trail: {
     title: 'Tus huellas',
-    subtitle: 'El camino que has ido dejando, contado por ti. Solo para mirar — aquí nada se califica.',
+    subtitle:
+      'El camino que has ido dejando, contado por ti. Solo para mirar — aquí nada se califica.',
     empty: 'Aún no hay huellas por aquí.',
     emptyHint: 'Cada check-in dejará una: tu clima, dónde estabas y tu notita.',
     settingsLink: 'Tus huellas',
@@ -363,7 +391,8 @@ export const ES = {
     goneCheckin: 'La huella se fue con el viento 🍃',
     goneNote: 'La notita se soltó de su rama 🍃',
     dormantSection: 'Ramas dormidas',
-    dormantHint: 'Ramitas sin fecha que llevan una temporada quietecitas. Dormir también es crecer — despiértalas cuando tú quieras, o déjalas soñar.',
+    dormantHint:
+      'Ramitas sin fecha que llevan una temporada quietecitas. Dormir también es crecer — despiértalas cuando tú quieras, o déjalas soñar.',
     dormantSince: 'Duerme desde el {date}',
   },
   forest: {
@@ -379,7 +408,8 @@ export const ES = {
     accentLabel: 'Color',
     checkinCta: 'Buscarme en este bosque encantado',
     plotAria: 'Árbol «{name}» — ábrelo con Enter; acomódalo con las flechas',
-    plotHint: 'Mantén presionado y arrastra para acomodar tu bosque (o usa las flechas del teclado)',
+    plotHint:
+      'Mantén presionado y arrastra para acomodar tu bosque (o usa las flechas del teclado)',
     moveNeedsTwo: 'Tu árbol está solito — planta otro y podrás acomodarlos entre sí 🌱',
     prevClearing: 'Claro anterior',
     nextClearing: 'Siguiente claro',
@@ -410,7 +440,8 @@ export const ES = {
   },
   statusHint: {
     seed: 'Una idea esperando su momento — todavía no la empiezas',
-    growing: 'Ya está en marcha: la estás trabajando, a tu ritmo — pásala aquí al dar el primer paso',
+    growing:
+      'Ya está en marcha: la estás trabajando, a tu ritmo — pásala aquí al dar el primer paso',
     resting: 'Pausa a propósito — descansar también es parte',
     achieved: 'Lo lograste — su flor y su fruta ya son tuyas 🌸',
     branched: 'De aquí nacieron nuevos caminos',
@@ -437,13 +468,15 @@ export const ES = {
     outlineExpand: 'Abrir las sub-ramas de «{title}»',
     outlineCollapse: 'Cerrar las sub-ramas de «{title}»',
     lightLens: 'Ver por luz',
-    lightLensHint: 'Viendo por luz — el árbol no se mueve. Toca el iconito para cambiar la luz de una rama.',
+    lightLensHint:
+      'Viendo por luz — el árbol no se mueve. Toca el iconito para cambiar la luz de una rama.',
     lightCycle: 'Cambiar la luz de «{title}»',
     dateReviewBanner: 'Hay fechas que quieren platicar contigo',
     reviewNow: 'Verlas',
     archiveAction: 'Guardar árbol en el archivo',
     archiveTitle: '¿Guardar «{name}» en el archivo?',
-    archiveBody: 'Tu árbol descansará fuera de la vista, con todas sus ramas y su historia. Nada se borra — puedes devolverlo al bosque desde Ajustes cuando quieras.',
+    archiveBody:
+      'Tu árbol descansará fuera de la vista, con todas sus ramas y su historia. Nada se borra — puedes devolverlo al bosque desde Ajustes cuando quieras.',
     archiveCta: 'Que descanse',
     bloomAsk: 'Cada ramita de «{tree}» ya floreció 🌸',
     bloomAction: 'Florece el árbol entero 🌳',
@@ -463,7 +496,15 @@ export const ES = {
     weekly: 'Cada semana',
     weeklyHint: 'Una vez por semana, el día que tú quieras. La semana empieza en lunes.',
     weekdayLetters: { mon: 'L', tue: 'M', wed: 'X', thu: 'J', fri: 'V', sat: 'S', sun: 'D' },
-    weekdayNames: { mon: 'lunes', tue: 'martes', wed: 'miércoles', thu: 'jueves', fri: 'viernes', sat: 'sábado', sun: 'domingo' },
+    weekdayNames: {
+      mon: 'lunes',
+      tue: 'martes',
+      wed: 'miércoles',
+      thu: 'jueves',
+      fri: 'viernes',
+      sat: 'sábado',
+      sun: 'domingo',
+    },
   },
   node: {
     newTitle: 'Plantar una rama',
@@ -488,21 +529,27 @@ export const ES = {
       'Sonará silencito a esa hora, una vez al día, con tus propias palabras — mientras la app esté abierta, aunque sea de fondo.',
     remindClear: 'Quitar el recordatorio',
     lightLabel: '¿Cuánta luz le toca?',
-    lightExplainer: 'Tu forma de priorizar: lo que está a pleno sol se sugiere primero; lo que está a la sombra espera sin pena.',
+    lightExplainer:
+      'Tu forma de priorizar: lo que está a pleno sol se sugiere primero; lo que está a la sombra espera sin pena.',
     steps: 'Pasitos',
     addStep: 'Agregar un pasito',
     stepPlaceholder: 'Un pasito chiquito desde aquí…',
     flowToggle: '¿Van en orden?',
     flowHint: 'Paso 1, paso 2… La rama se dibuja como un caminito que va floreciendo contigo.',
     repeatsToggle: 'Se repite (un ritual)',
-    repeatsHint: 'Cada vez que le toca, amanece limpio para caminarse de nuevo. Nadie cuenta los días — hoy es hoy.',
-    ritualFruitLawLeaf: 'Una espiral no da fruta cada vez — su fiesta es girar. Cuando su temporada termine, su última flor sí dará una.',
-    ritualFruitLawPath: 'Los pasos de un ritual no dan fruta — su fiesta es el caminito. El ritual entero, cuando florece, sí.',
+    repeatsHint:
+      'Cada vez que le toca, amanece limpio para caminarse de nuevo. Nadie cuenta los días — hoy es hoy.',
+    ritualFruitLawLeaf:
+      'Una espiral no da fruta cada vez — su fiesta es girar. Cuando su temporada termine, su última flor sí dará una.',
+    ritualFruitLawPath:
+      'Los pasos de un ritual no dan fruta — su fiesta es el caminito. El ritual entero, cuando florece, sí.',
     wakeRitualTitle: '«{title}» ya floreció una vez',
-    wakeRitualBody: 'Su fruta queda guardada en tu cosecha. Para girar como ritual, amanece limpia desde hoy — lista para florecer cada vez.',
+    wakeRitualBody:
+      'Su fruta queda guardada en tu cosecha. Para girar como ritual, amanece limpia desde hoy — lista para florecer cada vez.',
     wakeRitualCta: 'Despertar el ritual',
     heartChip: 'El corazón del árbol',
-    heartHint: 'Aquí nombraste tu logro. Sus primeras ramitas salen de él — cuando todas florezcan, el árbol florece entero.',
+    heartHint:
+      'Aquí nombraste tu logro. Sus primeras ramitas salen de él — cuando todas florezcan, el árbol florece entero.',
     heartLine: {
       one: 'Floreció {done} de {total} ramita',
       many: 'Florecieron {done} de {total} ramitas',
@@ -521,14 +568,21 @@ export const ES = {
     archiveHint: 'Nada se borra. El archivo guarda lo que ya no quieres ver.',
     archiveNodeTitle: '¿Guardar «{title}» en el archivo?',
     archiveNodeBody: 'La rama descansará fuera de la vista, con todo lo que guarda. Nada se borra.',
-    archiveNodeChildren: { one: 'Se lleva consigo {count} ramita.', many: 'Se lleva consigo {count} ramitas.' },
+    archiveNodeChildren: {
+      one: 'Se lleva consigo {count} ramita.',
+      many: 'Se lleva consigo {count} ramitas.',
+    },
     archivedToast: '«{title}» descansa en el archivo 🗃',
     revertAction: 'La rama vuelve a crecer',
     revertTitle: '¿Recoger los caminitos de «{title}»?',
-    revertBody: 'Estos brotes siguen recién sembrados, sin nada escrito en ellos. Si los recoges, la rama vuelve a crecer como iba — sin fecha, a su ritmo.',
+    revertBody:
+      'Estos brotes siguen recién sembrados, sin nada escrito en ellos. Si los recoges, la rama vuelve a crecer como iba — sin fecha, a su ritmo.',
     revertCta: 'Que vuelva a crecer',
     revertedToast: 'La rama volvió a crecer 🌿',
-    focusMinutes: { one: '{count} minuto de enfoque aquí', many: '{count} minutos de enfoque aquí' },
+    focusMinutes: {
+      one: '{count} minuto de enfoque aquí',
+      many: '{count} minutos de enfoque aquí',
+    },
     plantedOn: 'Plantada el',
   },
   dateReview: {
@@ -604,9 +658,11 @@ export const ES = {
     bridgeLabel: 'El puente dorado',
     bridge2: '2 minutitos antes',
     bridge5: '5 minutitos antes',
-    bridgeHint: 'Cuánto antes de cumplirse tu tiempo el anillo entibia a dorado y el periquito voltea a verte — un avisito de luz para aterrizar suave, sin sonidos.',
+    bridgeHint:
+      'Cuánto antes de cumplirse tu tiempo el anillo entibia a dorado y el periquito voltea a verte — un avisito de luz para aterrizar suave, sin sonidos.',
     timeCompassLabel: 'Brújula del tiempo',
-    timeCompassHint: 'Tras una sesión en una rama con tamaño estimado, una línea de curiosidad compara lo pensado con lo real. Dato, jamás calificación — apagada de fábrica.',
+    timeCompassHint:
+      'Tras una sesión en una rama con tamaño estimado, una línea de curiosidad compara lo pensado con lo real. Dato, jamás calificación — apagada de fábrica.',
     minutes: 'min',
     data: 'Tus datos',
     dataHint:
@@ -621,6 +677,8 @@ export const ES = {
     backupNudgeGo: 'Descargar copia',
     importOk: 'Tu bosque llegó completo.',
     importError: 'Ese archivo no se pudo leer como respaldo.',
+    reportBugTitle: 'Reportar un problema',
+    reportBugHint: 'Para beta-testers y QA: manda pasos, evidencia y severidad.',
     archive: 'Archivo',
     archiveEmpty: 'El archivo está vacío.',
     restore: 'Devolver al bosque',
@@ -639,9 +697,11 @@ export const ES = {
     mockReset: 'Restablecer la nube de prueba',
     mockResetHint: 'Solo en modo ensayo: reinicia la familia demo (rocio, nico, val, ambar).',
     mockResetDone: 'La nube de prueba volvió a empezar 🌱',
-    mockResetBlocked: 'Casi: cierra las otras pestañas de la app y la nube de prueba se reiniciará sola.',
+    mockResetBlocked:
+      'Casi: cierra las otras pestañas de la app y la nube de prueba se reiniciará sola.',
     mockResetConfirmTitle: '¿Reiniciar la nube de prueba?',
-    mockResetConfirmBody: 'Se cierra tu sesión y la familia demo vuelve a empezar de cero. Tus árboles locales no se tocan.',
+    mockResetConfirmBody:
+      'Se cierra tu sesión y la familia demo vuelve a empezar de cero. Tus árboles locales no se tocan.',
     mockResetConfirmGo: 'Sí, reiniciar',
     aboutText: 'Hecho con cariño para mentes que crecen en espiral, no en línea recta.',
     updatesTitle: 'Actualizaciones',
@@ -650,7 +710,8 @@ export const ES = {
     upToDate: 'Ya tienes la última versión 🌿',
     updateFailed: 'No se pudo revisar — intenta cuando haya conexión.',
     repair: 'Reparación profunda',
-    repairHint: 'Reinstala la app y su caché desde cero. Tus árboles, notitas y ajustes NO se tocan.',
+    repairHint:
+      'Reinstala la app y su caché desde cero. Tus árboles, notitas y ajustes NO se tocan.',
   },
   account: {
     welcomeTitle: 'Una llave para tu bosque',
@@ -673,6 +734,7 @@ export const ES = {
     passwordRepeat: 'Repítela, para estar seguros',
     passwordHint: 'Al menos 8 caracteres, con mayúscula, minúscula y número.',
     passwordMismatch: 'Las contraseñas todavía no coinciden.',
+    reportBugCta: 'Reportar este problema al equipo QA',
     createCta: 'Crear mi cuenta',
     codeTitle: 'Te enviamos un código',
     codeBody: 'Llegó a {hint}. Escríbelo aquí para confirmar que eres tú.',
@@ -704,12 +766,16 @@ export const ES = {
       'Se borra la llave, no el bosque: tus árboles siguen viviendo en este dispositivo. Esta acción no se puede deshacer.',
     deleteConfirm: 'Sí, borrar mi cuenta',
     errors: {
+      invalidUsername:
+        'El nombre de usuario solo puede tener minúsculas, números y guion bajo; sin espacios. Por ejemplo: lynx_pardelle.',
+      invalidEmail: 'Escribe un correo válido para recibir tu código de confirmación.',
       wrongCredentials: 'Ese usuario y esa contraseña no se encontraron juntos.',
       userNotFound: 'No encontramos esa cuenta.',
       userExists: 'Ese nombre de usuario ya tiene dueño.',
       codeMismatch: 'Ese código no coincide. Revísalo con calma.',
       codeExpired: 'Ese código ya caducó — pide uno nuevo.',
-      passwordPolicy: 'La contraseña necesita al menos 8 caracteres, con mayúscula, minúscula y número.',
+      passwordPolicy:
+        'La contraseña necesita al menos 8 caracteres, con mayúscula, minúscula y número.',
       tooManyAttempts: 'Muchos intentos seguidos. Espera un ratito y vuelve a probar.',
       network: 'No hubo conexión. Tu bosque local sigue perfecto.',
       unknown: 'Algo no salió. Intenta de nuevo en un momento.',
@@ -780,7 +846,8 @@ export const ES = {
       VALIDATION: 'Revisa los datos: usuario de 3-20 letras/números y un nombre corto.',
       CONFLICT: 'Ese vínculo ya existe.',
       USERNAME_TAKEN: 'Ese nombre de usuario ya tiene dueño.',
-      LAST_GUARDIAN: 'Es su única persona cuidadora — antes invita a otro adulto o borra la cuenta con respaldo.',
+      LAST_GUARDIAN:
+        'Es su única persona cuidadora — antes invita a otro adulto o borra la cuenta con respaldo.',
       CODE_INVALID: 'Ese código no se encontró. Revísalo con calma.',
       CODE_EXPIRED: 'Ese código ya caducó — pide uno nuevo.',
       LIMIT_EXCEEDED: 'Se alcanzó el límite de vínculos por ahora.',
@@ -821,7 +888,8 @@ export const ES = {
     visitCta: 'Visitar',
     removeCta: 'Soltar',
     removeTitle: '¿Soltar la amistad con {name}?',
-    removeBody: 'El vínculo se suelta en silencio — sin avisos, sin dramas. Sus bosques quedan como están.',
+    removeBody:
+      'El vínculo se suelta en silencio — sin avisos, sin dramas. Sus bosques quedan como están.',
     removeConfirm: 'Sí, soltar',
     removeOk: 'El vínculo se soltó 🍃',
   },

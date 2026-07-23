@@ -6,7 +6,11 @@
   place-items: center;
   padding: 1.4rem;
   background:
-    radial-gradient(900px 420px at 50% 118%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 70%),
+    radial-gradient(
+      900px 420px at 50% 118%,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 70%
+    ),
     var(--bg);
 }
 
@@ -108,6 +112,16 @@
   color: var(--text);
   font-size: 0.9rem;
   margin: 0 0 0.9rem;
+}
+
+.error-report {
+  display: inline-block;
+  color: var(--primary);
+  font-size: 0.88rem;
+  font-weight: 800;
+  margin: -0.35rem 0 0.9rem;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
 }
 
 .demo-note {

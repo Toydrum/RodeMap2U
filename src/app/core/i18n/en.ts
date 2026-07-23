@@ -4,7 +4,8 @@ import { Dict } from './es';
 export const EN: Dict = {
   app: {
     name: 'RoadMap2U',
-    memoryOnly: 'This device could not open its storage: your forest lives only in this session and will be lost on reload. Close other tabs and reload to retry.',
+    memoryOnly:
+      'This device could not open its storage: your forest lives only in this session and will be lost on reload. Close other tabs and reload to retry.',
   },
   finder: {
     title: 'Search my forest',
@@ -16,7 +17,8 @@ export const EN: Dict = {
     forest: 'Each tree is an area of your life. Tap it to enter; press and hold to arrange it.',
     tree: 'Your goals live at the branch tips. Tap one to see it; the «+» plants a new one.',
     ahora: 'ONE idea at a time waits for you here — ask for another, or just watch your forest.',
-    almanaque: "Your forest's days: what wants to bloom and what already did. Just for looking — nothing here hurries.",
+    almanaque:
+      "Your forest's days: what wants to bloom and what already did. Just for looking — nothing here hurries.",
     cosecha: 'Your harvest jar: every branch that blooms leaves one fruit. It fills at your pace.',
     timer: 'Soft time with your branch. Nothing rings, nothing cuts off: you decide when to close.',
     gotIt: 'Got it',
@@ -24,13 +26,18 @@ export const EN: Dict = {
   },
   crumble: {
     firstTitle: 'What would the first pasito be?',
-    firstBody: 'This goal has no pasitos yet. Name the first one (two little minutes) and we start right there.',
+    firstBody:
+      'This goal has no pasitos yet. Name the first one (two little minutes) and we start right there.',
     firstSkip: 'Start as is',
     firstGo: 'Plant and start',
     cta: 'Crumble this goal',
     ctaHint: 'Three little questions and your goal becomes pasitos — in your words.',
     title: 'Let us crumble it',
-    questions: ['What is the first physical action? (open the notebook, put on your shoes…)', 'Is something in the way? Name it as a pasito (find the charger, ask for the key…)', 'What would the two-little-minutes version be?'],
+    questions: [
+      'What is the first physical action? (open the notebook, put on your shoes…)',
+      'Is something in the way? Name it as a pasito (find the charger, ask for the key…)',
+      'What would the two-little-minutes version be?',
+    ],
     placeholder: 'In your words…',
     stepHint: 'If a question says nothing to you, skip it — no guilt.',
     skip: 'Skip',
@@ -86,8 +93,12 @@ export const EN: Dict = {
     seeForest: 'See my forest',
     sessionFollows: 'The session follows you around the app — wander freely.',
     emptyTitle: 'No thread to pick up yet',
-    emptyBody: 'Once you plant something or spend a little while with your forest, the way back will be waiting here.',
-    todayMinutes: { one: 'You spent {count} little minute with your forest today 🌱', many: 'You spent {count} little minutes with your forest today 🌱' },
+    emptyBody:
+      'Once you plant something or spend a little while with your forest, the way back will be waiting here.',
+    todayMinutes: {
+      one: 'You spent {count} little minute with your forest today 🌱',
+      many: 'You spent {count} little minutes with your forest today 🌱',
+    },
     momentumAction: 'One more little step',
     bloomToast: '"{title}" bloomed 🌸',
     bloomMore: 'Another little step?',
@@ -95,16 +106,22 @@ export const EN: Dict = {
     todayKicker: 'Today',
     todayPick: '🌅 Choose my branches for today',
     todayPickTitle: 'What wants to grow today?',
-    todayPickHint: 'Up to three little branches. Tomorrow they let go on their own — no carryover, no counts.',
+    todayPickHint:
+      'Up to three little branches. Tomorrow they let go on their own — no carryover, no counts.',
     todayPickSave: 'That feels right',
     todayEditAria: 'Change my branches for today',
     reasonToday: 'You chose it for today 🌅',
     reasonLowEnergy: 'For a low-water day, one tiny pasito 💧',
     estimateHint: '~{size}, you said',
-    estimateSizes: { minutes: '{n} little minutes', hour: '1 little hour', day: '1 day', week: '1 week' },
+    estimateSizes: {
+      minutes: '{n} little minutes',
+      hour: '1 little hour',
+      day: '1 day',
+      week: '1 week',
+    },
     reasonTrigger: '🧶 "{trigger}"',
     reasonSunlit: 'You have it in full sun ☀️',
-    reasonCaminito: "A ritual of today awaits 🌀 — at your pace, no rush",
+    reasonCaminito: 'A ritual of today awaits 🌀 — at your pace, no rush',
     shadeAside: 'It sits in the shade — only if it calls you ⛱️',
   },
   reminders: {
@@ -122,20 +139,23 @@ export const EN: Dict = {
     body: 'No rush — it is just a question, not a to-do.',
     answer: 'Answer',
     settingsTitle: 'Forest whispers',
-    settingsHint: 'Every so often, a soft question: how do you feel? what is on your mind? Never about work, never with sound, never at night. They live while the app is open, even in the background.',
+    settingsHint:
+      'Every so often, a soft question: how do you feel? what is on your mind? Never about work, never with sound, never at night. They live while the app is open, even in the background.',
     rhythmLabel: 'Rhythm',
     rhythmOften: 'Often (~2 h)',
     rhythmSometimes: 'Every so often (~4 h)',
     rhythmDaily: 'Once a day',
     rhythmSurprise: '🍃 Whenever the forest feels like it',
-    deniedHint: 'Your browser did not grant notification permission — whispers will live inside the app only.',
+    deniedHint:
+      'Your browser did not grant notification permission — whispers will live inside the app only.',
     tinyOffer: 'If you have a little spark: "{title}" — tiny on purpose 🍃',
     tinyAction: '2 little minutes',
   },
   checkIn: {
     welcomeTitle: 'This is your forest',
     welcomeBody1: 'Each area of your life can be a tree: school, a project, the people you love.',
-    welcomeBody2: 'Whatever you want to achieve grows as a branch, and what you achieve blooms. Nothing here expires or gets lost: it all grows at your pace.',
+    welcomeBody2:
+      'Whatever you want to achieve grows as a branch, and what you achieve blooms. Nothing here expires or gets lost: it all grows at your pace.',
     welcomeStart: 'Begin 🌱',
     title: 'Where do you feel you are?',
     subtitle: 'There are no right answers. Just you, today.',
@@ -154,7 +174,8 @@ export const EN: Dict = {
     skipAll: "I don't want to answer today",
     express: 'I feel the same as last time',
     destinationTitle: 'Where are you today?',
-    destinationSubtitle: "Tap the branch you're on or the tree you want to visit — or just go look around.",
+    destinationSubtitle:
+      "Tap the branch you're on or the tree you want to visit — or just go look around.",
     justForest: 'Just look at the forest',
   },
   almanaque: {
@@ -167,13 +188,15 @@ export const EN: Dict = {
     youAreHere: 'You are here. Looking is enough.',
     todayPill: 'today',
     caminitoTitle: "Today's little path",
-    caminitoHint: 'You walk it at your own pace. Whatever is left unwalked wakes up clean tomorrow.',
+    caminitoHint:
+      'You walk it at your own pace. Whatever is left unwalked wakes up clean tomorrow.',
     piedritasTitle: "Today's spirals",
     piedritasHint: 'Each spiral turns at your own pace. Whatever is left wakes up clean tomorrow.',
     piedritasEmpty: "If there's something tiny you like doing often, it has its spiral here.",
     piedritaAdd: 'Sow a spiral',
     piedritaSheetTitle: 'Sow a spiral',
-    piedritaSheetHint: "Something small I like repeating. Each time its day comes, it wakes up clean — nobody counts the days.",
+    piedritaSheetHint:
+      'Something small I like repeating. Each time its day comes, it wakes up clean — nobody counts the days.',
     piedritaPlaceholder: 'Water the plants, play piano 5 min…',
     piedritaTree: 'Which tree does it live in?',
     piedritaCreate: 'Sow it',
@@ -191,7 +214,8 @@ export const EN: Dict = {
     whenWeek: 'next week',
     whenLater: 'further along',
     backToToday: 'Back to today',
-    fallowLegend: 'Days without marks are fallow ground: soil resting. A forest grows that way too.',
+    fallowLegend:
+      'Days without marks are fallow ground: soil resting. A forest grows that way too.',
     legendBloom: 'bloomed',
     legendBud: 'gentle date',
     legendKnot: 'new paths',
@@ -209,8 +233,10 @@ export const EN: Dict = {
   },
   cosecha: {
     title: 'The preserving house',
-    subtitle: 'Every branch that blooms leaves its fruit in the jar. Nothing is spent; everything is kept.',
-    empty: 'The jar waits, unhurried. When a branch blooms, its fruit will drop in here on its own.',
+    subtitle:
+      'Every branch that blooms leaves its fruit in the jar. Nothing is spent; everything is kept.',
+    empty:
+      'The jar waits, unhurried. When a branch blooms, its fruit will drop in here on its own.',
     emptyHint: 'When you mark a branch as bloomed, its fruit will appear here.',
     monthTitle: 'The {month} harvest',
     harvestedOn: 'on {date}',
@@ -232,7 +258,10 @@ export const EN: Dict = {
     saveShelf: 'Set it on the shelf',
     jamMadeToast: 'Your jam is on the shelf 🫙',
     vesselLine: {
-      frasquito: { one: 'Your fruit calls for a little jar — a gem.', many: 'Your {count} fruits call for a little jar — a gem.' },
+      frasquito: {
+        one: 'Your fruit calls for a little jar — a gem.',
+        many: 'Your {count} fruits call for a little jar — a gem.',
+      },
       frasco: 'Your {count} fruits call for a jar.',
       frascote: 'Your {count} fruits call for a grand jar — a mighty jam.',
     },
@@ -264,7 +293,7 @@ export const EN: Dict = {
     brindado: 'Toasted on {date}',
     elixir: {
       title: 'A farewell',
-      body: 'This tree bore its fruit and comes to an end. Close the chapter when you\'re ready.',
+      body: "This tree bore its fruit and comes to an end. Close the chapter when you're ready.",
       carryLabel: 'What do you carry from this chapter?',
       carryPlaceholder: '"I learned to keep going", "that I can finish"…',
       keep: 'Keep the farewell',
@@ -299,16 +328,16 @@ export const EN: Dict = {
       moras: 'Blackberries!',
     },
     fruitCardLine: 'From "{title}" — off to your jar',
-    pendingShelfTitle: 'What you\'re filling',
+    pendingShelfTitle: "What you're filling",
     promise: {
       door: 'Promise a jar',
       limitReached: 'Three jars are filling along with you — when one closes, another fits',
       title: 'Promise a jar',
       beat1Title: 'What will you give yourself?',
-      beat1Hint: 'Write it as a gift to you. You\'ll open it once the jar fills.',
+      beat1Hint: "Write it as a gift to you. You'll open it once the jar fills.",
       nameHint: "Your words become the jar's name.",
       beat2Title: 'How big does this reward feel?',
-      beat2Hint: 'You decide. The bigger the gift, the bigger the jar you\'ll fill.',
+      beat2Hint: "You decide. The bigger the gift, the bigger the jar you'll fill.",
       capFrasquito: 'Little jar · fills with 2 fruits',
       capFrasco: 'Jar · fills with 5 fruits',
       capFrascote: 'Big jar · fills with 8 fruits',
@@ -344,7 +373,8 @@ export const EN: Dict = {
   },
   trail: {
     title: 'Your footprints',
-    subtitle: 'The path you have been leaving, told by you. Just for looking — nothing is graded here.',
+    subtitle:
+      'The path you have been leaving, told by you. Just for looking — nothing is graded here.',
     empty: 'No footprints here yet.',
     emptyHint: 'Each check-in will leave one: your weather, where you were, and your little note.',
     settingsLink: 'Your footprints',
@@ -361,7 +391,8 @@ export const EN: Dict = {
     goneCheckin: 'The footprint drifted away with the wind 🍃',
     goneNote: 'The little note slipped off its branch 🍃',
     dormantSection: 'Sleeping branches',
-    dormantHint: 'Dateless little branches that have been still for a season. Sleeping is growing too — wake them whenever you want, or let them dream.',
+    dormantHint:
+      'Dateless little branches that have been still for a season. Sleeping is growing too — wake them whenever you want, or let them dream.',
     dormantSince: 'Asleep since {date}',
   },
   forest: {
@@ -373,7 +404,8 @@ export const EN: Dict = {
     branches: { one: '{count} branch', many: '{count} branches' },
     treeNameLabel: "What's your tree's name?",
     treeNamePlaceholder: 'e.g. "Learn guitar"',
-    firstSproutHint: 'It will be born with its first little branch of the same name — rename it anytime.',
+    firstSproutHint:
+      'It will be born with its first little branch of the same name — rename it anytime.',
     accentLabel: 'Color',
     checkinCta: 'Find myself in this enchanted forest',
     plotAria: 'Tree "{name}" — open with Enter; arrange with the arrow keys',
@@ -408,7 +440,8 @@ export const EN: Dict = {
   },
   statusHint: {
     seed: "An idea waiting for its moment — you haven't started it yet",
-    growing: "It's underway: you're working on it, at your own pace — move it here when you take the first step",
+    growing:
+      "It's underway: you're working on it, at your own pace — move it here when you take the first step",
     resting: 'Paused on purpose — resting is part of it too',
     achieved: 'You did it — its flower and its fruit are yours 🌸',
     branched: 'New paths were born here',
@@ -435,13 +468,15 @@ export const EN: Dict = {
     outlineExpand: 'Open the sub-branches of "{title}"',
     outlineCollapse: 'Close the sub-branches of "{title}"',
     lightLens: 'View by light',
-    lightLensHint: 'Viewing by light — your tree stays put. Tap the little icon to change a branch’s light.',
+    lightLensHint:
+      'Viewing by light — your tree stays put. Tap the little icon to change a branch’s light.',
     lightCycle: 'Change the light on "{title}"',
     dateReviewBanner: 'Some dates would like a word with you',
     reviewNow: 'See them',
     archiveAction: 'Move tree to the archive',
     archiveTitle: 'Move “{name}” to the archive?',
-    archiveBody: 'Your tree will rest out of sight, with all its branches and its story. Nothing is deleted — you can return it to the forest from Settings anytime.',
+    archiveBody:
+      'Your tree will rest out of sight, with all its branches and its story. Nothing is deleted — you can return it to the forest from Settings anytime.',
     archiveCta: 'Let it rest',
     bloomAsk: 'Every little branch of "{tree}" has bloomed 🌸',
     bloomAction: 'Bloom the whole tree 🌳',
@@ -461,7 +496,15 @@ export const EN: Dict = {
     weekly: 'Once a week',
     weeklyHint: 'Once a week, whichever day you like. The week starts on Monday.',
     weekdayLetters: { mon: 'M', tue: 'T', wed: 'W', thu: 'T', fri: 'F', sat: 'S', sun: 'S' },
-    weekdayNames: { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' },
+    weekdayNames: {
+      mon: 'Monday',
+      tue: 'Tuesday',
+      wed: 'Wednesday',
+      thu: 'Thursday',
+      fri: 'Friday',
+      sat: 'Saturday',
+      sun: 'Sunday',
+    },
   },
   node: {
     newTitle: 'Plant a branch',
@@ -486,21 +529,27 @@ export const EN: Dict = {
       'It will chime quietly at that hour, once a day, in your own words — while the app is open somewhere, even in the background.',
     remindClear: 'Remove the reminder',
     lightLabel: 'How much light does it get?',
-    lightExplainer: 'Your way to prioritize: whatever stands in full sun gets suggested first; whatever rests in the shade waits, guilt-free.',
+    lightExplainer:
+      'Your way to prioritize: whatever stands in full sun gets suggested first; whatever rests in the shade waits, guilt-free.',
     steps: 'Small steps',
     addStep: 'Add a small step',
     stepPlaceholder: 'One tiny step from here…',
     flowToggle: 'Do these go in order?',
     flowHint: 'Step 1, step 2… The branch draws as a little path that blooms along with you.',
     repeatsToggle: 'It repeats (a ritual)',
-    repeatsHint: 'Each time its day comes, it wakes up clean, ready to walk again. Nobody counts the days — today is today.',
-    ritualFruitLawLeaf: 'A spiral bears no fruit each time — the turning is its celebration. When its season ends, its last bloom will.',
-    ritualFruitLawPath: "A ritual's steps bear no fruit — the stone path is their celebration. The whole ritual, when it blooms, does.",
+    repeatsHint:
+      'Each time its day comes, it wakes up clean, ready to walk again. Nobody counts the days — today is today.',
+    ritualFruitLawLeaf:
+      'A spiral bears no fruit each time — the turning is its celebration. When its season ends, its last bloom will.',
+    ritualFruitLawPath:
+      "A ritual's steps bear no fruit — the stone path is their celebration. The whole ritual, when it blooms, does.",
     wakeRitualTitle: '"{title}" has bloomed once already',
-    wakeRitualBody: 'Its fruit stays safe in your harvest. To turn as a ritual, it dawns clean from today — ready to bloom each time.',
+    wakeRitualBody:
+      'Its fruit stays safe in your harvest. To turn as a ritual, it dawns clean from today — ready to bloom each time.',
     wakeRitualCta: 'Wake the ritual',
     heartChip: "The tree's heart",
-    heartHint: 'This is where you named your goal. Its first little branches grow from here — when they all bloom, the whole tree blooms.',
+    heartHint:
+      'This is where you named your goal. Its first little branches grow from here — when they all bloom, the whole tree blooms.',
     heartLine: {
       one: '{done} of {total} little branch has bloomed',
       many: '{done} of {total} little branches have bloomed',
@@ -518,12 +567,17 @@ export const EN: Dict = {
     archive: 'Move to archive',
     archiveHint: 'Nothing is deleted. The archive keeps what you no longer want to see.',
     archiveNodeTitle: 'Move "{title}" to the archive?',
-    archiveNodeBody: 'The branch will rest out of sight, with everything it holds. Nothing is deleted.',
-    archiveNodeChildren: { one: 'It takes {count} little branch with it.', many: 'It takes {count} little branches with it.' },
+    archiveNodeBody:
+      'The branch will rest out of sight, with everything it holds. Nothing is deleted.',
+    archiveNodeChildren: {
+      one: 'It takes {count} little branch with it.',
+      many: 'It takes {count} little branches with it.',
+    },
     archivedToast: '"{title}" is resting in the archive 🗃',
     revertAction: 'The branch grows on',
     revertTitle: 'Gather the little paths of "{title}"?',
-    revertBody: 'These sprouts are still freshly sown, with nothing written on them. If you gather them, the branch grows on as it was — dateless, at its own pace.',
+    revertBody:
+      'These sprouts are still freshly sown, with nothing written on them. If you gather them, the branch grows on as it was — dateless, at its own pace.',
     revertCta: 'Let it grow on',
     revertedToast: 'The branch grew on 🌿',
     focusMinutes: { one: '{count} focus minute here', many: '{count} focus minutes here' },
@@ -602,9 +656,11 @@ export const EN: Dict = {
     bridgeLabel: 'The golden bridge',
     bridge2: '2 little minutes before',
     bridge5: '5 little minutes before',
-    bridgeHint: 'How early the ring warms to gold and the parakeet turns to look at you — a little light cue to land softly, never a sound.',
+    bridgeHint:
+      'How early the ring warms to gold and the parakeet turns to look at you — a little light cue to land softly, never a sound.',
     timeCompassLabel: 'Time compass',
-    timeCompassHint: 'After a session on an estimated branch, one curiosity line compares your guess with the real time. A fact, never a grade — off by default.',
+    timeCompassHint:
+      'After a session on an estimated branch, one curiosity line compares your guess with the real time. A fact, never a grade — off by default.',
     minutes: 'min',
     data: 'Your data',
     dataHint:
@@ -619,6 +675,8 @@ export const EN: Dict = {
     backupNudgeGo: 'Download copy',
     importOk: 'Your forest arrived complete.',
     importError: "That file couldn't be read as a backup.",
+    reportBugTitle: 'Report a problem',
+    reportBugHint: 'For beta testers and QA: send steps, evidence and severity.',
     archive: 'Archive',
     archiveEmpty: 'The archive is empty.',
     restore: 'Return to the forest',
@@ -637,9 +695,11 @@ export const EN: Dict = {
     mockReset: 'Reset the practice cloud',
     mockResetHint: 'Rehearsal mode only: restarts the demo family (rocio, nico, val, ambar).',
     mockResetDone: 'The practice cloud started over 🌱',
-    mockResetBlocked: 'Almost: close the app’s other tabs and the practice cloud will restart on its own.',
+    mockResetBlocked:
+      'Almost: close the app’s other tabs and the practice cloud will restart on its own.',
     mockResetConfirmTitle: 'Reset the practice cloud?',
-    mockResetConfirmBody: 'You will be signed out and the demo family starts over from scratch. Your local trees are untouched.',
+    mockResetConfirmBody:
+      'You will be signed out and the demo family starts over from scratch. Your local trees are untouched.',
     mockResetConfirmGo: 'Yes, reset',
     aboutText: 'Made with care for minds that grow in spirals, not straight lines.',
     updatesTitle: 'Updates',
@@ -648,7 +708,8 @@ export const EN: Dict = {
     upToDate: 'You already have the latest version 🌿',
     updateFailed: 'Could not check — try again when online.',
     repair: 'Deep repair',
-    repairHint: 'Reinstalls the app and its cache from scratch. Your trees, notes and settings are NOT touched.',
+    repairHint:
+      'Reinstalls the app and its cache from scratch. Your trees, notes and settings are NOT touched.',
   },
   account: {
     welcomeTitle: 'A key for your forest',
@@ -671,6 +732,7 @@ export const EN: Dict = {
     passwordRepeat: 'Repeat it, just to be sure',
     passwordHint: 'At least 8 characters, with an uppercase, a lowercase and a number.',
     passwordMismatch: 'The passwords don’t match yet.',
+    reportBugCta: 'Report this problem to QA',
     createCta: 'Create my account',
     codeTitle: 'We sent you a code',
     codeBody: 'It went to {hint}. Type it here to confirm it’s you.',
@@ -702,12 +764,16 @@ export const EN: Dict = {
       'The key is deleted, not the forest: your trees keep living on this device. This action cannot be undone.',
     deleteConfirm: 'Yes, delete my account',
     errors: {
+      invalidUsername:
+        'Your username can only use lowercase letters, numbers and underscore; no spaces. For example: lynx_pardelle.',
+      invalidEmail: 'Enter a valid email so we can send your confirmation code.',
       wrongCredentials: 'That username and password were not found together.',
       userNotFound: 'We couldn’t find that account.',
       userExists: 'That username already has an owner.',
       codeMismatch: 'That code doesn’t match. Check it calmly.',
       codeExpired: 'That code has expired — request a new one.',
-      passwordPolicy: 'The password needs at least 8 characters, with an uppercase, a lowercase and a number.',
+      passwordPolicy:
+        'The password needs at least 8 characters, with an uppercase, a lowercase and a number.',
       tooManyAttempts: 'Too many tries in a row. Wait a little while and try again.',
       network: 'No connection. Your local forest is perfectly fine.',
       unknown: 'Something didn’t work. Try again in a moment.',
@@ -719,7 +785,8 @@ export const EN: Dict = {
     minorsTitle: 'You care for',
     disclosure:
       'Your family can see your forest and plant with you — and you can see theirs. Your feelings, your check-ins and your weather remain yours alone.',
-    emptyAdult: 'You aren’t caring for any forest yet. Create a kid’s account or share an invitation.',
+    emptyAdult:
+      'You aren’t caring for any forest yet. Create a kid’s account or share an invitation.',
     kindCreated: 'in your care',
     kindInvited: 'linked',
     createCta: 'Create a kid’s account',
@@ -741,7 +808,8 @@ export const EN: Dict = {
     exportOk: 'Backup downloaded ⬇',
     inviteCoCta: 'Invite another caring adult',
     inviteTitle: 'Invitation code',
-    inviteCoBody: 'Share it with the other adult. Once redeemed, you’ll care for this forest together.',
+    inviteCoBody:
+      'Share it with the other adult. Once redeemed, you’ll care for this forest together.',
     inviteLinkBody:
       'Share it with the person you want to link. When they accept, you’ll be able to see and tend their forest — their account stays their own.',
     inviteExpiry: 'Valid until {date}, single use.',
@@ -778,7 +846,8 @@ export const EN: Dict = {
       VALIDATION: 'Check the details: username of 3-20 letters/numbers and a short name.',
       CONFLICT: 'That link already exists.',
       USERNAME_TAKEN: 'That username already has an owner.',
-      LAST_GUARDIAN: 'They are their only caring person — invite another adult first, or delete the account with its backup.',
+      LAST_GUARDIAN:
+        'They are their only caring person — invite another adult first, or delete the account with its backup.',
       CODE_INVALID: 'That code wasn’t found. Check it calmly.',
       CODE_EXPIRED: 'That code has expired — ask for a new one.',
       LIMIT_EXCEEDED: 'The link limit has been reached for now.',
@@ -819,7 +888,8 @@ export const EN: Dict = {
     visitCta: 'Visit',
     removeCta: 'Release',
     removeTitle: 'Release the friendship with {name}?',
-    removeBody: 'The link lets go in silence — no notices, no drama. Both forests stay as they are.',
+    removeBody:
+      'The link lets go in silence — no notices, no drama. Both forests stay as they are.',
     removeConfirm: 'Yes, release',
     removeOk: 'The link was released 🍃',
   },
@@ -882,12 +952,12 @@ export const EN: Dict = {
       {
         icon: '🌾',
         title: 'The almanac',
-        body: 'A garden almanac lives in your forest (its wheat spike 🌾 is the middle tab at the bottom; also in Settings): your forest\'s days, just for looking. TODAY sits on top, where your rituals 🌀 turn: one with several steps appears as «today\'s little path» — stepping stones left to right; tap the one that says «next» and it blooms right there (with «Undo», like everything). Single-act rituals turn in «Today\'s spirals»: tap a spiral and it blooms — and the ＋ plants a new one without leaving. Whatever is left unwalked wakes up clean tomorrow — nobody keeps counts. And the flowers a branch earned BEFORE becoming a ritual stay on their day: history is never erased. Below, the month as little soil plots: buds where something wants to bloom, flowers 🌸 where something bloomed, golden knots where new paths sprouted, little paw prints 🐾 where you left a check-in. Days without marks are fallow ground — soil resting, never a to-do. If a gentle date passed, its bud stays on its day with a soft little leaf 🍂 (never red, never «overdue») and the usual conversation waits for you in TODAY. The almanac only LOOKS: it schedules nothing, alerts nothing, hurries nothing — to plant dates, each branch has its own in its sheet.',
+        body: "A garden almanac lives in your forest (its wheat spike 🌾 is the middle tab at the bottom; also in Settings): your forest's days, just for looking. TODAY sits on top, where your rituals 🌀 turn: one with several steps appears as «today's little path» — stepping stones left to right; tap the one that says «next» and it blooms right there (with «Undo», like everything). Single-act rituals turn in «Today's spirals»: tap a spiral and it blooms — and the ＋ plants a new one without leaving. Whatever is left unwalked wakes up clean tomorrow — nobody keeps counts. And the flowers a branch earned BEFORE becoming a ritual stay on their day: history is never erased. Below, the month as little soil plots: buds where something wants to bloom, flowers 🌸 where something bloomed, golden knots where new paths sprouted, little paw prints 🐾 where you left a check-in. Days without marks are fallow ground — soil resting, never a to-do. If a gentle date passed, its bud stays on its day with a soft little leaf 🍂 (never red, never «overdue») and the usual conversation waits for you in TODAY. The almanac only LOOKS: it schedules nothing, alerts nothing, hurries nothing — to plant dates, each branch has its own in its sheet.",
       },
       {
         icon: '🫙',
         title: 'The preserving house',
-        body: "When a branch blooms, the app celebrates big: petals rain across the whole screen, a little card shows the fruit you earned, and the fruit falls from the tree down to its roots. Fruits gather in your harvest, in the Preserves tab 🫙 (below). There you can MAKE JAM: pick fruits one by one (one is plenty) — they simmer right there on the same screen, stir if you like — then jar it. The vessel picks itself by your batch — 1 or 2 fruits: a little jar; up to 5: a jar; 6 or more: a grand jar, a mighty jam — and the pot never carries a counter: the rule lives here, not on your work. When jarring you can write it a TREAT in your own words (\"a marathon of my show\", \"a free afternoon, guilt-free\"): when you open it, the app says it back — \"You earned this\" — with your fruits as witnesses; the jar empties (you ate the jam) but stays with you forever, with its name and memories inside. Nothing is ever spent: your fruits and your register stay whole. A jar with no treat can be opened too, just to savor its memories. You can also do it the OTHER WAY: \"Promise a jar\" creates an empty jar with its treat written up front — your words are also the jar's name — and you fill it with the fruits of your tasks. You pick the size by how big the gift feels — a little jar fills with 2 fruits, a jar with 5, a grand jar with 8 — and the bigger the treat, the more fruits it gathers. When you fill it, that achievement is yours: YOU make the jam (the pot simmers your fruits and you jar it), it doesn't appear made on its own. When a branch blooms, the app offers to store it in your jar with one tap; you can also store or take out fruits by hand from The preserving house. You can keep up to three promised jars at once, and let any of them go whenever you like (its fruits return to your harvest). And when you archive a tree that bore fruit (closing a chapter of your life), the app distills an ELIXIR 🍶: you write what you carry from that chapter, and it's kept in \"The farewells\"; whenever you like, you drink it as a closing toast — \"This you carry\" — savoring all that tree gave you. Your history (the enjoyed ones, the farewells, and past register months) rests folded under its ▸ arrows — one tap opens it; nothing is ever lost. You can also brew a tea: two or three fruits savored sip by sip, leaving no record. A ritual's spirals and little steps bear no fruit (their celebration is the turning and the walk — a daily fruit would be a counter in costume); the whole ritual, when its season closes, does.",
+        body: 'When a branch blooms, the app celebrates big: petals rain across the whole screen, a little card shows the fruit you earned, and the fruit falls from the tree down to its roots. Fruits gather in your harvest, in the Preserves tab 🫙 (below). There you can MAKE JAM: pick fruits one by one (one is plenty) — they simmer right there on the same screen, stir if you like — then jar it. The vessel picks itself by your batch — 1 or 2 fruits: a little jar; up to 5: a jar; 6 or more: a grand jar, a mighty jam — and the pot never carries a counter: the rule lives here, not on your work. When jarring you can write it a TREAT in your own words ("a marathon of my show", "a free afternoon, guilt-free"): when you open it, the app says it back — "You earned this" — with your fruits as witnesses; the jar empties (you ate the jam) but stays with you forever, with its name and memories inside. Nothing is ever spent: your fruits and your register stay whole. A jar with no treat can be opened too, just to savor its memories. You can also do it the OTHER WAY: "Promise a jar" creates an empty jar with its treat written up front — your words are also the jar\'s name — and you fill it with the fruits of your tasks. You pick the size by how big the gift feels — a little jar fills with 2 fruits, a jar with 5, a grand jar with 8 — and the bigger the treat, the more fruits it gathers. When you fill it, that achievement is yours: YOU make the jam (the pot simmers your fruits and you jar it), it doesn\'t appear made on its own. When a branch blooms, the app offers to store it in your jar with one tap; you can also store or take out fruits by hand from The preserving house. You can keep up to three promised jars at once, and let any of them go whenever you like (its fruits return to your harvest). And when you archive a tree that bore fruit (closing a chapter of your life), the app distills an ELIXIR 🍶: you write what you carry from that chapter, and it\'s kept in "The farewells"; whenever you like, you drink it as a closing toast — "This you carry" — savoring all that tree gave you. Your history (the enjoyed ones, the farewells, and past register months) rests folded under its ▸ arrows — one tap opens it; nothing is ever lost. You can also brew a tea: two or three fruits savored sip by sip, leaving no record. A ritual\'s spirals and little steps bear no fruit (their celebration is the turning and the walk — a daily fruit would be a counter in costume); the whole ritual, when its season closes, does.',
       },
       {
         icon: '🍂',
