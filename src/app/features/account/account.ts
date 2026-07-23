@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { APP_CONFIG } from '../../core/config';
-import { PASSWORD_POLICY } from '../../core/auth/auth-types';
+import { PASSWORD_POLICY, USERNAME_PATTERN, passwordMeetsPolicy } from '../../core/auth/auth-types';
 
 type Step =
   | 'welcome'
@@ -15,6 +15,25 @@ type Step =
   | 'forgot'
   | 'forgotCode'
   | 'profile';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function normalizedUsername(username: string): string {
+  return username.trim().toLowerCase();
+}
+
+export function createAccountInputError(
+  username: string,
+  email: string,
+  password: string,
+  password2: string,
+): 'invalidUsername' | 'invalidEmail' | 'passwordPolicy' | 'passwordMismatch' | null {
+  if (!USERNAME_PATTERN.test(normalizedUsername(username))) return 'invalidUsername';
+  if (!EMAIL_PATTERN.test(email.trim())) return 'invalidEmail';
+  if (!passwordMeetsPolicy(password)) return 'passwordPolicy';
+  if (password !== password2) return 'passwordMismatch';
+  return null;
+}
 
 /**
  * The account ritual — same full-screen pattern as the check-in: one
@@ -33,6 +52,8 @@ export class AccountPage {
   protected readonly inputValue = inputValue;
   protected readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthService);
+  protected readonly bugReportUrl =
+    'https://docs.google.com/forms/d/e/1FAIpQLSelXiTkj1W9hKmgw1z_fLVFKy_a2bpWDFT8FdSABTLteHxmew/viewform';
   private readonly router = inject(Router);
 
   /** Where the auth gate was headed — internal paths only. */
@@ -94,13 +115,25 @@ export class AccountPage {
 
   protected async doCreate(): Promise<void> {
     this.notice.set('');
-    if (this.password() !== this.password2()) {
-      this.localError.set(this.i18n.t().account.passwordMismatch);
+    const inputError = createAccountInputError(
+      this.username(),
+      this.email(),
+      this.password(),
+      this.password2(),
+    );
+    if (inputError) {
+      this.localError.set(
+        inputError === 'passwordMismatch'
+          ? this.i18n.t().account.passwordMismatch
+          : this.i18n.t().account.errors[inputError],
+      );
       return;
     }
     this.localError.set('');
+    const username = normalizedUsername(this.username());
+    this.username.set(username);
     const result = await this.auth.signUp({
-      username: this.username().trim(),
+      username,
       password: this.password(),
       email: this.email().trim(),
       // Severed from signup (0.0.108): providers fall back to the username.

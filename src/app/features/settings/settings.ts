@@ -31,6 +31,8 @@ import { FamilyService } from '../../core/family.service';
 export class SettingsPage {
   protected readonly inputValue = inputValue;
   protected readonly version = APP_VERSION;
+  protected readonly bugReportUrl =
+    'https://docs.google.com/forms/d/e/1FAIpQLSelXiTkj1W9hKmgw1z_fLVFKy_a2bpWDFT8FdSABTLteHxmew/viewform';
   protected readonly checkingUpdate = signal(false);
   private readonly swUpdate = inject(SwUpdate);
   protected readonly i18n = inject(I18nService);
@@ -193,7 +195,11 @@ export class SettingsPage {
     const at = this.settings.settings().lastBackupAt;
     if (!at) return this.i18n.t().settings.noBackupYet;
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
-    const date = new Date(at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    const date = new Date(at).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
     return this.i18n.fill(this.i18n.t().settings.lastBackupLine, { date });
   }
 
